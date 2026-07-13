@@ -1,0 +1,8 @@
+#include "Generated.xcconfig"
+
+// Prod flavor overrides. Associate this file with a "Debug-prod"/"Release-prod"
+// build configuration in Xcode (see ENV_SETUP.md).
+APP_DISPLAY_NAME = Customer
+BUNDLE_ID_SUFFIX =
+// TODO: replace with the production iOS Google Maps SDK key.
+GOOGLE_MAPS_API_KEY = AIzaSyAlgz6GR3iQ-u0elel8OAnnGow0FlSMe2M

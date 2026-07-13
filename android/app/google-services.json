@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "113759761527",
+    "project_id": "mass-ride-delivery",
+    "storage_bucket": "mass-ride-delivery.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:113759761527:android:cecf20e5dbe123999a8272",
+        "android_client_info": {
+          "package_name": "com.massdrive.customer_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAzE6WaeXK9MsUGYsWnTxbbaZIKTkM-Lqc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:113759761527:android:cc76525248ec6de69a8272",
+        "android_client_info": {
+          "package_name": "com.massdrive.customer_app.dev"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAzE6WaeXK9MsUGYsWnTxbbaZIKTkM-Lqc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

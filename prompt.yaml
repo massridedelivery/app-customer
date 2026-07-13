@@ -1,0 +1,58 @@
+Implement:
+    steps:
+      - title: "แบ่งงาน"
+        message: "ช่วยแบ่งงานการพัฒนาออกเป็น 4 ส่วน"
+      - title: "phase 1: ตั้งค่าโปรเจกต์ & ระบบ Login"
+        message: |
+          """
+          กรุณาอ่านไฟล์ .cursorrules/rules.md และ .ai_context ก่อนเริ่มงาน
+          งานที่ต้องทำ:
+          - ทำระบบ otp register โดยไปใช่ api_service ที่ @lib/core/services/api_service.dart
+          - มี 2 เส้นที่ต้องทำ คือ 
+          POST /auth/otp/send
+              Request: {"phone": "+66...", "role": "customer" | "driver" | "restaurant"}
+              Response: {"status": "pending"}
+          POST /auth/otp/verify
+              Request: {"phone": "+66...", "code": "123456", "role": "customer" | "driver" | "restaurant", "full_name": "New User"}
+              Response: {"access_token": "...", "refresh_token": "...", "expires_in": 86400}
+          - สร้าง domain ที่ feautres/auth/domain/entities/phone_login_response.dart
+          - สร้าง abstract class ที่ feautres/auth/domain/usecases/phone_login_usecase.dart
+          - สร้าง repository ที่ feautres/auth/domain/repositories/phone_login_repository.dart
+          - สร้าง data source ที่ feautres/auth/data/datasources/phone_login_data_source.dart
+          - สร้าง usecase implementation ที่ feautres/auth/domain/usecases/phone_login_usecase_impl.dar
+          ข้อกำหนด:
+          - ทำเท่าที่กำหนดให้เสร็จก่อน 
+          - ห้ามทำเกินจากที่กำหนด และห้ามไปปรับแก้ไฟล์อื่น
+          - หยุดเมื่อเสร็จ
+          """
+      - title: "phase 2: Refactor Vehicle Selection Component"
+        message: |
+          """
+          สรุปขั้นตอนการ Refactor และตรรกะการทำงาน (Logic) ระหว่าง BookingScreen และ VehicleSelectionSheet:
+
+          1. การตั้งต้น (Initialization):
+             - เมื่อเปิดหน้า `BookingScreen`, ระบบจะเรียก `estimateFare` ใน `BookingController` ทันทีเพื่อคำนวณราคาตามจุดรับ-ส่ง
+             - ข้อมูลผลลัพธ์ (estimations) จะถูกเก็บไว้ใน `BookingState`
+
+          2. การไหลของข้อมูล (Data Flow):
+             - `BookingScreen` ส่งลิสต์ `estimations` จาก `BookingState` ไปยัง `VehicleSelectionSheet` ผ่าน constructor
+             - `VehicleSelectionSheet` สังเกต (watch) `VehicleSelectionController` เพื่อจัดการสถานะการเลือก UI (High-light)
+
+          3. ตรรกะการทำงานภายใน (Internal Logic):
+             - **Auto-Selection**: เมื่อข้อมูลมาครั้งแรก `VehicleSelectionSheet` จะเลือกรายการแรกให้อัตโนมัติผ่าน `addPostFrameCallback` โดยแจ้งทั้ง `VehicleSelectionController` (สำหรับ UI) และ `BookingController` (สำหรับเตรียมการจอง)
+             - **Vehicle Choice**: เมื่อผู้ใช้คลิกเลือกยานพาหนะ:
+                - `VehicleSelectionController` จะเปลี่ยน `selectedVehicleId` เพื่ออัปเดต UI (ขยายขนาดรูป/เปลี่ยนสีขอบ)
+                - ฟังก์ชัน `onVehicleSelected` จะถูกเรียกเพื่อแจ้ง `BookingController` ให้เก็บ `vehicleTypeId` ที่เลือกไว้
+             - **Icon Helper**: ย้ายตรรกะการเลือก path รูปภาพยานพาหนะไปไว้ใน `VehicleSelectionController` เพื่อให้ Widget เป็น Pure UI
+
+          4. การจอง (Booking Action):
+             - เมื่อผู้ใช้กดปุ่ม "เรียกมารับได้เลย":
+                - `BookingScreen` จะเรียก `dispatchRide` ใน `BookingController`
+                - ข้อมูลตำแหน่ง, ประเภทรถ และคูปอง จะถูกส่งไปยัง API
+                - หากสำเร็จ ระบบจะเปลี่ยนหน้าไปยัง `/live/:jobId`
+
+          โครงสร้างไฟล์ที่เกี่ยวข้อง:
+          - State: `lib/features/ride_booking/presentation/states/vehicle_selection_state.dart`
+          - Controller: `lib/features/ride_booking/presentation/controllers/vehicle_selection_controller.dart`
+          - UI: `lib/features/ride_booking/presentation/widgets/vehicle_selection_sheet.dart`
+          """

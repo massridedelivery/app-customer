@@ -1,0 +1,6 @@
+tags:
+  golden:
+    description: >-
+      Golden (visual regression) tests. Rendered pixels are platform-sensitive,
+      so regenerate baselines per platform with `flutter test --update-goldens`.
+      Exclude on cross-platform CI with `flutter test --exclude-tags golden`.

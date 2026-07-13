@@ -1,0 +1,8 @@
+{
+  "FLAVOR": "dev",
+  "APP_NAME": "Customer Dev",
+  "API_BASE_URL": "https://driver-api-dev.nutchaphut.dev",
+  "WS_BASE_URL": "wss://driver-api-dev.nutchaphut.dev/ws",
+  "GOOGLE_PLACES_KEY_ANDROID": "",
+  "GOOGLE_PLACES_KEY_IOS": ""
+}

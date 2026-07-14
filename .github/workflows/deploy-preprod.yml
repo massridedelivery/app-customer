@@ -5,7 +5,7 @@ name: Deploy to Google Play (Internal testing)
 on:
   workflow_dispatch:
   push:
-    branches: [master]
+    branches: [main, master]
 
 concurrency:
   group: deploy-preprod
@@ -65,12 +65,14 @@ jobs:
           PROD_ENV_JSON: ${{ secrets.PROD_ENV_JSON }}
         run: printf '%s' "$PROD_ENV_JSON" > env/prod.json
 
-      # versionCode = GitHub run number, so it always increases without manual bumping.
+      # versionCode = GitHub run number + 10 offset, so it always increases without
+      # manual bumping. The +10 clears versionCodes already used on Play by the old
+      # repo (max 2) and the first manual upload, avoiding "version code already used".
       # versionName still comes from pubspec.yaml.
       # --flavor prod is required now that dev/prod product flavors exist; it also
       # selects the prodRelease output path used by the upload step below.
       - name: Build App Bundle
-        run: flutter build appbundle --release --flavor prod --dart-define-from-file=env/prod.json --build-number=${{ github.run_number }}
+        run: flutter build appbundle --release --flavor prod --dart-define-from-file=env/prod.json --build-number=$((GITHUB_RUN_NUMBER + 10))
 
       - name: Upload to Play Internal testing
         uses: r0adkll/upload-google-play@v1

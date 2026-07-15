@@ -1,0 +1,81 @@
+name: Deploy to TestFlight (iOS)
+
+# Build a signed iOS release and upload it to TestFlight.
+#
+# Trigger is MANUAL only for now. Signing depends on external setup that must
+# exist first (see README "iOS" section):
+#   - the build machine's Apple account is a member of team Q7742Z74Q3
+#   - a fastlane match repo holds the Apple Distribution cert + App Store profile
+#   - an App Store Connect API key exists
+#   - the app record exists in App Store Connect
+# Once the secrets below are configured, uncomment the `push` block to deploy
+# automatically on merges to main.
+on:
+  workflow_dispatch:
+  # push:
+  #   branches: [main]
+
+concurrency:
+  group: deploy-ios
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    runs-on: macos-15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.41.6
+          channel: stable
+          cache: true
+
+      - name: Set up Ruby (for fastlane)
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+          working-directory: ios
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      # Generated sources (*.g.dart, *.freezed.dart) are gitignored, so they
+      # must be regenerated on a fresh checkout before the build can compile.
+      - name: Generate code (freezed / riverpod / json_serializable)
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      # env/prod.json is gitignored; recreate it from the secret so the build
+      # reads FLAVOR / API_BASE_URL / etc. via --dart-define-from-file.
+      - name: Create env/prod.json
+        env:
+          PROD_ENV_JSON: ${{ secrets.PROD_ENV_JSON }}
+        run: printf '%s' "$PROD_ENV_JSON" > env/prod.json
+
+      # --config-only compiles no binary; it writes the dart-defines, version
+      # name (from pubspec.yaml) and build number into ios/Flutter/Generated.xcconfig
+      # so the subsequent fastlane/gym archive picks them up.
+      # Build number = run number + 10, matching the Android pipeline's scheme.
+      - name: Configure iOS build (dart-defines + build number)
+        run: |
+          flutter build ios --config-only --release \
+            --dart-define-from-file=env/prod.json \
+            --build-number=$((GITHUB_RUN_NUMBER + 10))
+
+      - name: Install CocoaPods
+        working-directory: ios
+        run: bundle exec pod install
+
+      - name: Build & upload to TestFlight
+        working-directory: ios
+        env:
+          MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8_BASE64: ${{ secrets.ASC_KEY_P8_BASE64 }}
+        run: bundle exec fastlane beta

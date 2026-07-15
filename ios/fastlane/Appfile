@@ -1,0 +1,5 @@
+app_identifier("com.massdrive.customerApp")
+team_id("Q7742Z74Q3")
+
+# Authentication to App Store Connect is done via an API key (see Fastfile),
+# so apple_id / itc_team_id are not required here.

@@ -64,9 +64,9 @@ class RouterNotifier extends ChangeNotifier {
   bool _splashShown = false;
 
   /// Destination to restore once the splash gate releases: a deeplink that
-  /// arrived before the app was ready, or the screen the user was on when the
-  /// app resumed (the splash re-shows on every resume). Set silently from
-  /// redirect — no notifyListeners — and consumed exactly once.
+  /// arrived before the app was ready on cold start (or an auth change that
+  /// re-gated the splash). Set silently from redirect — no notifyListeners —
+  /// and consumed exactly once.
   String? pendingDeepLink;
 
   bool get splashShown => _splashShown;
@@ -133,9 +133,9 @@ final routerProvider = Provider<GoRouter>((ref) {
       // MANDATORY: If the splash hasn't been shown yet, stay on /splash.
       if (!splashShown) {
         if (!isSplash) {
-          // Keep the intended destination (a deeplink that just arrived, or
-          // the screen the user was on before the app resumed) so the splash
-          // can send them back there instead of dumping them on /main.
+          // Keep the intended destination (a deeplink that just arrived before
+          // the app was ready) so the splash can send them back there instead
+          // of dumping them on /main.
           if (!isAuthPath && !isOnboarding && state.uri.path.isNotEmpty) {
             notifier.pendingDeepLink = Uri(
               path: state.uri.path,

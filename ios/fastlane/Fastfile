@@ -1,0 +1,64 @@
+default_platform(:ios)
+
+APP_IDENTIFIER = "com.massdrive.customerApp"
+TEAM_ID        = "Q7742Z74Q3"
+SCHEME         = "Runner"
+# Profile name that `match(type: "appstore")` creates for this app id.
+PROFILE_NAME   = "match AppStore #{APP_IDENTIFIER}"
+
+platform :ios do
+  desc "Build the Runner scheme and upload it to TestFlight"
+  lane :beta do
+    # Creates a temporary keychain on CI and makes match import into it.
+    # No-op on a normal developer machine.
+    setup_ci
+
+    api_key = app_store_connect_api_key(
+      key_id: ENV["ASC_KEY_ID"],
+      issuer_id: ENV["ASC_ISSUER_ID"],
+      key_content: ENV["ASC_KEY_P8_BASE64"],
+      is_key_content_base64: true,
+      in_house: false,
+    )
+
+    # Pull the distribution cert + App Store provisioning profile from the
+    # match repo (read-only) into the keychain.
+    match(
+      type: "appstore",
+      readonly: true,
+      app_identifier: [APP_IDENTIFIER],
+      api_key: api_key,
+    )
+
+    # The project ships with automatic signing; force manual signing against
+    # the match-managed profile so the archive is reproducible on CI.
+    update_code_signing_settings(
+      use_automatic_signing: false,
+      path: "Runner.xcodeproj",
+      team_id: TEAM_ID,
+      bundle_identifier: APP_IDENTIFIER,
+      profile_name: PROFILE_NAME,
+      code_sign_identity: "Apple Distribution",
+    )
+
+    # Archive + export. The Dart/Flutter layer is compiled by the Xcode build
+    # phase; `flutter build ios --config-only` in CI has already written the
+    # dart-defines, version name and build number into Generated.xcconfig.
+    build_app(
+      workspace: "Runner.xcworkspace",
+      scheme: SCHEME,
+      configuration: "Release",
+      export_method: "app-store",
+      export_options: {
+        provisioningProfiles: {
+          APP_IDENTIFIER => PROFILE_NAME,
+        },
+      },
+    )
+
+    upload_to_testflight(
+      api_key: api_key,
+      skip_waiting_for_build_processing: true,
+    )
+  end
+end

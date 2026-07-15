@@ -1,0 +1,20 @@
+# fastlane match — stores signing certificates & provisioning profiles in a
+# separate PRIVATE git repo, encrypted with MATCH_PASSWORD.
+#
+# One-time bootstrap (run locally by someone who is a member of team
+# Q7742Z74Q3 and has an Apple Distribution cert, NOT on CI):
+#
+#   cd ios
+#   bundle exec fastlane match appstore
+#
+# That creates/uploads the distribution cert + App Store profile for
+# com.massdrive.customerApp into MATCH_GIT_URL. CI then fetches them read-only.
+
+git_url(ENV["MATCH_GIT_URL"])
+storage_mode("git")
+
+type("appstore")
+app_identifier(["com.massdrive.customerApp"])
+
+# CI must never create/regenerate certs — only consume them.
+readonly(true)

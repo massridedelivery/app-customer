@@ -6,6 +6,7 @@ import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 
 /// Returns a fixed HomeState and skips the real build() (geolocation, network,
 /// saved/recent loaders) so the screen renders deterministically.
@@ -88,5 +89,43 @@ void main() {
     await tester.pump();
 
     expect(find.text('ใช้งานล่าสุด'), findsNothing);
+  });
+
+  testWidgets('"เพิ่มที่อยู่" navigates to the /add-address route', (
+    tester,
+  ) async {
+    final router = GoRouter(
+      initialLocation: '/',
+      routes: [
+        GoRoute(path: '/', builder: (c, s) => const RideLandingScreen()),
+        GoRoute(
+          path: '/add-address',
+          builder: (c, s) =>
+              const Scaffold(body: Center(child: Text('ADD_ADDRESS_ROUTE'))),
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          homeControllerProvider.overrideWith(
+            () => _FakeHomeController(const HomeState()),
+          ),
+        ],
+        child: MaterialApp.router(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('th'),
+          routerConfig: router,
+        ),
+      ),
+    );
+    await tester.pump();
+
+    await tester.tap(find.text('เพิ่มที่อยู่'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('ADD_ADDRESS_ROUTE'), findsOneWidget);
   });
 }

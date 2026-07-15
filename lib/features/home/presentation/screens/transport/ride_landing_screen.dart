@@ -4,7 +4,6 @@ import 'package:customer_app/core/constants/app_icons.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/features/home/domain/models/place.dart';
 import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
-import 'package:customer_app/features/home/presentation/states/home_state.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -162,11 +161,15 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
                         ),
                       ),
                   InkWell(
-                    onTap: () {
+                    onTap: () async {
+                      // Open the address form directly (same flow as the Saved
+                      // Places screen); refresh the grid so a newly added place
+                      // shows up on return.
+                      await context.push('/add-address');
+                      if (!mounted) return;
                       ref
                           .read(homeControllerProvider.notifier)
-                          .startSelection(mode: RideSelectionMode.savePlace);
-                      context.push('/place-search');
+                          .refreshSavedPlaces();
                     },
                     child: _buildSavedPlaceItem(
                       AppLocalizations.of(context)!.addAddress,

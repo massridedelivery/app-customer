@@ -2,19 +2,35 @@ import 'package:customer_app/core/constants/app_assets.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_icons.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
+import 'package:customer_app/features/home/domain/models/place.dart';
 import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
-import 'package:customer_app/features/home/presentation/states/home_state.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-class RideLandingScreen extends ConsumerWidget {
+class RideLandingScreen extends ConsumerStatefulWidget {
   const RideLandingScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<RideLandingScreen> createState() => _RideLandingScreenState();
+}
+
+class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
+  // Recent list shows the first few by default; "see more" reveals the rest.
+  static const _recentCollapsedCount = 3;
+  bool _recentExpanded = false;
+
+  void _openDropoff(Place place) {
+    ref
+        .read(homeControllerProvider.notifier)
+        .setDropoffLocation(LatLng(place.lat, place.lng), place.name);
+    context.push('/booking');
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final homeState = ref.watch(homeControllerProvider);
     return Scaffold(
       backgroundColor: AppColors.semanticGrayNeutralFgWhite,
@@ -145,11 +161,15 @@ class RideLandingScreen extends ConsumerWidget {
                         ),
                       ),
                   InkWell(
-                    onTap: () {
+                    onTap: () async {
+                      // Open the address form directly (same flow as the Saved
+                      // Places screen); refresh the grid so a newly added place
+                      // shows up on return.
+                      await context.push('/add-address');
+                      if (!mounted) return;
                       ref
                           .read(homeControllerProvider.notifier)
-                          .startSelection(mode: RideSelectionMode.savePlace);
-                      context.push('/place-search');
+                          .refreshSavedPlaces();
                     },
                     child: _buildSavedPlaceItem(
                       AppLocalizations.of(context)!.addAddress,
@@ -164,53 +184,14 @@ class RideLandingScreen extends ConsumerWidget {
 
             const SizedBox(height: 32),
 
-            // 4. Recent List
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    AppLocalizations.of(context)!.recentUsage,
-                    style: AppTypography.heading5.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  _buildRecentItem(
-                    'แขวงจตุจักร เขตจตุจักร กรุงเทพมหานคร 10900 ประเทศไทย',
-                    Icons.history,
-                  ),
-                  const Divider(height: 32),
-                  _buildRecentItem(
-                    '42, Verve Rama 5, อำเภอเมืองนนทบุรี, นนทบุรี, 11000, ประเทศไทย',
-                    Icons.history,
-                  ),
-                  const Divider(height: 32),
-                  _buildRecentItem(
-                    'แขวงอนุสาวรีย์ เขตบางเขน กรุงเทพมหานคร 10220 ประเทศไทย',
-                    Icons.history,
-                  ),
-                  const SizedBox(height: 24),
-                  Center(
-                    child: TextButton.icon(
-                      onPressed: () {},
-                      icon: Text(
-                        AppLocalizations.of(context)!.seeMore,
-                        style: AppTypography.label1.copyWith(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      label: const Icon(
-                        Icons.keyboard_arrow_down,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                  ),
-                ],
+            // 4. Recent List — driven by homeState.recentPlaces
+            // (GET /api/customer/places/recent). Hidden entirely when empty so
+            // there's no dangling header while the endpoint returns nothing.
+            if (homeState.recentPlaces.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: _buildRecentList(homeState.recentPlaces),
               ),
-            ),
             const SizedBox(height: 40),
           ],
         ),
@@ -262,20 +243,79 @@ class RideLandingScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildRecentItem(String address, IconData icon) {
-    return Row(
+  Widget _buildRecentList(List<Place> places) {
+    final visible = _recentExpanded
+        ? places
+        : places.take(_recentCollapsedCount).toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, color: Colors.grey, size: 20),
-        const SizedBox(width: 16),
-        Expanded(
-          child: Text(
-            address,
-            style: AppTypography.body1.copyWith(color: Colors.black87),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
+        Text(
+          AppLocalizations.of(context)!.recentUsage,
+          style: AppTypography.heading5.copyWith(fontWeight: FontWeight.bold),
         ),
+        const SizedBox(height: 16),
+        for (var i = 0; i < visible.length; i++) ...[
+          if (i > 0) const Divider(height: 32),
+          _buildRecentItem(
+            visible[i].address?.isNotEmpty == true
+                ? visible[i].address!
+                : visible[i].name,
+            Icons.history,
+            onTap: () => _openDropoff(visible[i]),
+          ),
+        ],
+        if (places.length > _recentCollapsedCount) ...[
+          const SizedBox(height: 24),
+          Center(
+            child: TextButton.icon(
+              onPressed: () =>
+                  setState(() => _recentExpanded = !_recentExpanded),
+              icon: Text(
+                AppLocalizations.of(context)!.seeMore,
+                style: AppTypography.label1.copyWith(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              label: Icon(
+                _recentExpanded
+                    ? Icons.keyboard_arrow_up
+                    : Icons.keyboard_arrow_down,
+                color: AppColors.primary,
+              ),
+            ),
+          ),
+        ],
       ],
+    );
+  }
+
+  Widget _buildRecentItem(
+    String address,
+    IconData icon, {
+    VoidCallback? onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Row(
+          children: [
+            Icon(icon, color: Colors.grey, size: 20),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Text(
+                address,
+                style: AppTypography.body1.copyWith(color: Colors.black87),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

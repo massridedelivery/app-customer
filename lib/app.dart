@@ -14,28 +14,12 @@ class App extends ConsumerStatefulWidget {
   ConsumerState<App> createState() => _AppState();
 }
 
-class _AppState extends ConsumerState<App> with WidgetsBindingObserver {
+class _AppState extends ConsumerState<App> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
     // Wires FCM handlers and (when logged in) registers the device token.
     ref.read(pushNotificationServiceProvider).init();
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      // Reset splashShown when app comes back to foreground
-      // This ensures splash is shown on app reopen
-      ref.read(routerNotifierProvider).splashShown = false;
-    }
   }
 
   @override

@@ -24,24 +24,37 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
   Offset? _pickupPos;
   Offset? _dropoffPos;
   bool _isUpdatingCoords = false;
+  // Set when a camera callback arrives mid-update, so we re-run once more with
+  // the final camera instead of dropping the trailing onCameraIdle.
+  bool _coordsDirty = false;
   // Cached so the widget tree never collapses to a bare loading Scaffold.
   // During bookingAsync.isLoading the last known state keeps all widgets mounted,
   // preventing the RenderBox-not-laid-out crash in VehicleSelectionSheet/ListView.
   BookingState _lastKnownState = const BookingState();
 
   Future<void> _updateScreenPositions() async {
-    if (_mapController == null || _isUpdatingCoords || !mounted) return;
+    if (_mapController == null || !mounted) return;
+    // Coalesce bursts of onCameraMove/onCameraIdle callbacks: if an update is
+    // already running, flag it dirty so it re-runs once with the final camera
+    // position rather than dropping the trailing update and leaving overlays
+    // stuck at a mid-animation position.
+    if (_isUpdatingCoords) {
+      _coordsDirty = true;
+      return;
+    }
     _isUpdatingCoords = true;
     try {
-      final homeState = ref.read(homeControllerProvider);
-      final pickup = homeState.pickupLocation;
-      final dropoff = homeState.dropoffLocation;
+      do {
+        _coordsDirty = false;
+        final homeState = ref.read(homeControllerProvider);
+        final pickup = homeState.pickupLocation;
+        final dropoff = homeState.dropoffLocation;
 
-      final pixelRatio = MediaQuery.of(context).devicePixelRatio;
+        final pixelRatio = MediaQuery.of(context).devicePixelRatio;
 
-      if (pickup != null) {
-        final pickupScreen = await _mapController!.getScreenCoordinate(pickup);
-        if (mounted) {
+        if (pickup != null) {
+          final pickupScreen = await _mapController!.getScreenCoordinate(pickup);
+          if (!mounted) return;
           setState(() {
             _pickupPos = Offset(
               pickupScreen.x.toDouble() / pixelRatio,
@@ -49,12 +62,11 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
             );
           });
         }
-      }
-      if (dropoff != null) {
-        final dropoffScreen = await _mapController!.getScreenCoordinate(
-          dropoff,
-        );
-        if (mounted) {
+        if (dropoff != null) {
+          final dropoffScreen = await _mapController!.getScreenCoordinate(
+            dropoff,
+          );
+          if (!mounted) return;
           setState(() {
             _dropoffPos = Offset(
               dropoffScreen.x.toDouble() / pixelRatio,
@@ -62,12 +74,51 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
             );
           });
         }
-      }
+      } while (_coordsDirty && mounted);
     } catch (e) {
       debugPrint('Failed to get screen coords: $e');
     } finally {
       _isUpdatingCoords = false;
     }
+  }
+
+  /// Places an address bubble anchored to a marker. Sits above the marker by
+  /// default, but flips below it when there isn't room above (marker near the
+  /// top safe area) so the bubble never gets clipped by the status bar.
+  Widget _buildLocationOverlay({
+    required Offset pos,
+    required String label,
+    required Color labelColor,
+    required String address,
+  }) {
+    final media = MediaQuery.of(context);
+    final safeTop = media.padding.top;
+
+    // Rough max height of a two-line bubble — only used to decide the flip
+    // side, so an estimate is fine.
+    const estimatedHeight = 64.0;
+    const gapAbove = 45.0;
+    const gapBelow = 12.0;
+
+    final placeAbove = pos.dy - gapAbove - estimatedHeight > safeTop + 8;
+    final anchorTop = placeAbove ? pos.dy - gapAbove : pos.dy + gapBelow;
+
+    return Positioned(
+      left: pos.dx,
+      top: anchorTop,
+      child: FractionalTranslation(
+        // -1.0 = bubble sits above the anchor; 0.0 = below it.
+        translation: Offset(-0.5, placeAbove ? -1.0 : 0.0),
+        child: Container(
+          constraints: BoxConstraints(maxWidth: media.size.width * 0.6),
+          child: _LocationOverlay(
+            label: label,
+            labelColor: labelColor,
+            address: address,
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -162,41 +213,18 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
           // Dynamic Location Overlays
           if (pickup != null && dropoff != null) ...[
             if (_pickupPos != null)
-              Positioned(
-                left: _pickupPos!.dx,
-                top: _pickupPos!.dy - 45, // Position above pickup marker
-                child: FractionalTranslation(
-                  translation: const Offset(-0.5, -1.0),
-                  child: Container(
-                    constraints: BoxConstraints(
-                      maxWidth: MediaQuery.of(context).size.width * 0.6,
-                    ),
-                    child: _LocationOverlay(
-                      label: "1",
-                      labelColor: AppColors.foundationGreen500,
-                      address:
-                          pickupAddress ?? l10n.currentLocation,
-                    ),
-                  ),
-                ),
+              _buildLocationOverlay(
+                pos: _pickupPos!,
+                label: "1",
+                labelColor: AppColors.foundationGreen500,
+                address: pickupAddress ?? l10n.currentLocation,
               ),
             if (_dropoffPos != null) ...[
-              Positioned(
-                left: _dropoffPos!.dx,
-                top: _dropoffPos!.dy - 45, // Position above dropoff marker
-                child: FractionalTranslation(
-                  translation: const Offset(-0.5, -1.0),
-                  child: Container(
-                    constraints: BoxConstraints(
-                      maxWidth: MediaQuery.of(context).size.width * 0.6,
-                    ),
-                    child: _LocationOverlay(
-                      label: "2",
-                      labelColor: AppColors.foundationRed600,
-                      address: dropoffAddress ?? l10n.dropoffPoint,
-                    ),
-                  ),
-                ),
+              _buildLocationOverlay(
+                pos: _dropoffPos!,
+                label: "2",
+                labelColor: AppColors.foundationRed600,
+                address: dropoffAddress ?? l10n.dropoffPoint,
               ),
               // Duration & Distance tag attached to dropoff marker
               Positioned(

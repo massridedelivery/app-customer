@@ -90,7 +90,13 @@ class BookingMapWidget extends ConsumerWidget {
       myLocationEnabled: false,
       myLocationButtonEnabled: false,
       zoomControlsEnabled: true,
-      padding: const EdgeInsets.only(bottom: 300),
+      // Reserve the top safe area (+ room for the address bubbles) and the
+      // bottom sheet space so fit-to-bounds keeps both pins in the visible
+      // band and their bubbles never land under the status bar.
+      padding: EdgeInsets.only(
+        top: MediaQuery.of(context).padding.top + 96,
+        bottom: 300,
+      ),
       onMapCreated: (controller) {
         _fitMapToMarkers(controller, pickup, dropoff);
         if (onMapCreated != null) {

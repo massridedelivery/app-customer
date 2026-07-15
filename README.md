@@ -84,19 +84,54 @@ The workflow expects these repository secrets to be configured:
 | `PROD_ENV_JSON`            | Full contents of `env/prod.json`                     |
 | `PLAY_SERVICE_ACCOUNT_JSON`| Google Play service-account JSON (for the upload API)|
 
-### iOS (not yet in CI)
+### iOS → TestFlight
 
-iOS is currently **built locally only** and is **not** part of the pipeline. Signing is
-unresolved: the project is configured for Apple team `Q7742Z74Q3`
-(`ios/Runner.xcodeproj`), and the bundle id `com.massdrive.customerApp` must be
-registered to a team the build machine's Apple account belongs to.
+| Aspect   | Value                                                                    |
+| -------- | ------------------------------------------------------------------------ |
+| Workflow | [`.github/workflows/deploy-ios.yml`](.github/workflows/deploy-ios.yml)    |
+| Runner   | `macos-15`                                                               |
+| Signing  | [fastlane match](https://docs.fastlane.tools/actions/match/) (App Store) |
+| Bundle id| `com.massdrive.customerApp` (Apple team `Q7742Z74Q3`)                    |
+| Output   | Release build → **TestFlight**                                           |
 
-Local build (archive without signing, to verify the build compiles):
+> **Trigger is manual only** (`workflow_dispatch`) until the prerequisites below
+> are in place. Uncomment the `push` block in the workflow to auto-deploy on merges
+> to `main`.
+
+**Pipeline:** checkout → Flutter + Ruby → `pub get` → `build_runner` → write
+`env/prod.json` → `flutter build ios --config-only` (injects dart-defines +
+`build number = run number + 10`) → `pod install` → `fastlane beta`
+(match → manual signing → gym archive → `upload_to_testflight`).
+
+**Prerequisites (one-time, manual — cannot be done from CI):**
+
+1. Add the signing Apple account as a member of team `Q7742Z74Q3`.
+2. Create the app record for `com.massdrive.customerApp` in App Store Connect.
+3. Bootstrap a **private** match repo (run once by a team member with an
+   Apple Distribution cert): `cd ios && bundle exec fastlane match appstore`.
+4. Create an **App Store Connect API key** (Issuer ID, Key ID, `.p8`).
+5. Generate `ios/Gemfile.lock` locally (`cd ios && bundle install`) and commit it
+   for reproducible fastlane versions.
+
+**Required GitHub Secrets (iOS):**
+
+| Secret                          | Purpose                                                   |
+| ------------------------------- | --------------------------------------------------------- |
+| `MATCH_GIT_URL`                 | URL of the private match repo (certs/profiles)            |
+| `MATCH_PASSWORD`                | Passphrase that decrypts the match repo                   |
+| `MATCH_GIT_BASIC_AUTHORIZATION` | Base64 `user:token` to read the private match repo        |
+| `ASC_KEY_ID`                    | App Store Connect API key id                              |
+| `ASC_ISSUER_ID`                 | App Store Connect API issuer id                           |
+| `ASC_KEY_P8_BASE64`             | Base64 of the API key `.p8` file                          |
+| `PROD_ENV_JSON`                 | Contents of `env/prod.json` (shared with the Android job) |
+
+**Local build** (archive without signing, just to verify it compiles):
 
 ```bash
 flutter build ipa --no-codesign --dart-define-from-file=env/dev.json
 ```
 
-To produce a signed IPA / ship to TestFlight, resolve signing first (join team
-`Q7742Z74Q3`, or change the bundle id to one owned by your own team), then run
-`flutter build ipa --dart-define-from-file=env/dev.json`.
+> **Note:** iOS product flavors are not wired into the Xcode project yet
+> (`ios/Flutter/Dev.xcconfig` / `Prod.xcconfig` exist but aren't attached to build
+> configurations — see `ENV_SETUP.md`). The pipeline builds the plain `Runner`
+> scheme in `Release`, so there is no `--flavor` flag on iOS.

@@ -60,8 +60,23 @@ in Xcode (can't be scripted safely). `ios/Flutter/Dev.xcconfig` and
 In Xcode (`open ios/Runner.xcworkspace`):
 1. **Duplicate build configs**: Project → Info → Configurations → duplicate
    Debug/Release/Profile into `Debug-dev`, `Release-dev`, `Debug-prod`, … .
-2. **Assign xcconfig**: set each `-dev` config to `Flutter/Dev.xcconfig` and each
-   `-prod` config to `Flutter/Prod.xcconfig`.
+2. **Assign xcconfig**: set each build config to its matching per-config file so
+   CocoaPods (`#include? Pods-Runner.<type>.xcconfig` via `Debug`/`Release`
+   .xcconfig) + `Generated.xcconfig` + flavor overrides all resolve:
+
+   | build configuration | assign |
+   | --- | --- |
+   | `Debug-dev`   | `Flutter/Debug-dev.xcconfig` |
+   | `Release-dev` | `Flutter/Release-dev.xcconfig` |
+   | `Profile-dev` | `Flutter/Profile-dev.xcconfig` |
+   | `Debug-prod`   | `Flutter/Debug-prod.xcconfig` |
+   | `Release-prod` | `Flutter/Release-prod.xcconfig` |
+   | `Profile-prod` | `Flutter/Profile-prod.xcconfig` |
+
+   Each per-config file `#include`s the stock `Debug`/`Release` xcconfig (Pods +
+   Generated) then the flavor fragment (`Dev.xcconfig`/`Prod.xcconfig`). Do NOT
+   assign `Dev.xcconfig`/`Prod.xcconfig` directly — they no longer pull in Pods.
+   Profile reuses the Release Pods config, matching the stock Runner target.
 3. **Bundle id / name**: in Runner target Build Settings set
    `PRODUCT_BUNDLE_IDENTIFIER = com.massdrive.customerApp$(BUNDLE_ID_SUFFIX)`
    and `Info.plist` `CFBundleDisplayName = $(APP_DISPLAY_NAME)`.

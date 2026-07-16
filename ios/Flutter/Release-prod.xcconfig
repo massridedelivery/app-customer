@@ -1,0 +1,3 @@
+// Assign to the "Release-prod" build configuration in Xcode.
+#include "Release.xcconfig"
+#include "Prod.xcconfig"

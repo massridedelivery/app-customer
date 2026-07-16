@@ -1,4 +1,4 @@
-.PHONY: gen watch fix clean test test_cov analyze pre_pr run_dev run_prod run_ios_dev run_ios_prod build_apk_dev build_apk_prod build_ios_dev build_ios_prod
+.PHONY: gen watch fix clean clean_cache test test_cov analyze pre_pr run_dev run_prod run_ios_dev run_ios_prod build_apk_dev build_apk_prod build_ios_dev build_ios_prod
 
 # 🚀 สร้างไฟล์ที่จำเป็น (Freezed, Riverpod, JSON)
 gen:
@@ -21,6 +21,20 @@ clean:
 	@echo "🗑️ Cleaning project..."
 	flutter clean
 	flutter pub get
+
+# 💽 เคลียร์ dev cache ที่กินพื้นที่ (เวลาดิสก์เต็ม / No space left on device)
+# ลบเฉพาะ cache ที่ระบบสร้างใหม่ได้เอง — ไม่แตะ .pub-cache (จะได้ไม่ต้อง re-download deps ทุก project)
+clean_cache:
+	@echo "💽 Disk before:"; df -h /System/Volumes/Data | tail -1
+	@echo "🗑️  flutter clean (project build/)..."
+	-flutter clean
+	@echo "🗑️  Xcode DerivedData..."
+	-rm -rf ~/Library/Developer/Xcode/DerivedData/*
+	@echo "🗑️  unavailable simulators..."
+	-xcrun simctl delete unavailable
+	@echo "🗑️  CocoaPods + Gradle caches (re-download on next build)..."
+	-rm -rf ~/Library/Caches/CocoaPods ~/.gradle/caches
+	@echo "✅ Disk after:"; df -h /System/Volumes/Data | tail -1
 
 # 🔍 ตรวจสอบโค้ดว่ามี Error/Warning ตามกฎ Lint หรือไม่
 analyze:

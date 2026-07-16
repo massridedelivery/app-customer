@@ -1,0 +1,3 @@
+// Assign to the "Release-dev" build configuration in Xcode.
+#include "Release.xcconfig"
+#include "Dev.xcconfig"

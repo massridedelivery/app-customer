@@ -1,0 +1,5 @@
+// Assign to the "Profile-prod" build configuration in Xcode.
+// Profile shares the Release Pods config, matching the stock Runner target
+// (its Profile config uses Release.xcconfig as its base).
+#include "Release.xcconfig"
+#include "Prod.xcconfig"

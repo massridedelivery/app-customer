@@ -116,8 +116,19 @@ class ApiService {
 
   void _handleLogout() {
     _tokenStorage.clearTokens();
-    // Trigger the AuthController to reset its state, which will trigger the router redirect
-    _ref.read(authControllerProvider.notifier).logout();
+    // Reset auth state on a microtask. Calling AuthController.logout() straight
+    // from this interceptor re-enters ApiService's own provider (logout reads
+    // providers that transitively depend on ApiService) and throws
+    // CircularDependencyError; deferring runs it after the current chain unwinds
+    // so the router redirect still fires.
+    Future.microtask(() {
+      try {
+        _ref.read(authControllerProvider.notifier).logout();
+      } catch (_) {
+        // Tokens are already cleared above, so the router redirect still lands
+        // the user on login even if the controller can't be reached here.
+      }
+    });
   }
 
   Future<bool> _refreshToken() async {

@@ -96,21 +96,27 @@ class AuthController extends _$AuthController {
   }
 
   Future<void> logout() async {
-    // Drop this device's push token while the session token is still valid.
-    await ref.read(pushNotificationServiceProvider).unregisterOnLogout();
+    // Every side-effect below is best-effort and individually guarded: a
+    // failure (e.g. the push-token call throwing) must never abort the state
+    // reset. Previously an unguarded throw here left the app "authenticated"
+    // with no token — an infinite 401 loop.
     try {
-      final hasToken = ref.read(tokenStorageProvider).hasToken;
-      if (hasToken) {
+      // Drop this device's push token while the session token is still valid.
+      await ref.read(pushNotificationServiceProvider).unregisterOnLogout();
+    } catch (_) {}
+    try {
+      if (ref.read(tokenStorageProvider).hasToken) {
         await ref.read(profileRepositoryProvider).logout();
       }
-    } catch (e) {
-      // Suppress exception so local logout still completes
-    } finally {
+    } catch (_) {}
+    try {
       // Disconnect socket connection on logout
       ref.read(socketServiceProvider).disconnect();
-      await ref.read(tokenStorageProvider).clearTokens();
-      state = const AuthState(isAuthenticated: false, activeJobId: null);
-    }
+    } catch (_) {}
+
+    // Always land in a clean logged-out state so the router redirects to login.
+    await ref.read(tokenStorageProvider).clearTokens();
+    state = const AuthState(isAuthenticated: false, activeJobId: null);
   }
 
   void clearActiveJob() {

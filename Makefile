@@ -83,3 +83,12 @@ build_ios_dev:
 
 build_ios_prod:
 	flutter build ios --release --flavor prod --dart-define-from-file=env/prod.json
+
+# 🔢 bump build number (เลขหลัง + ใน version) +1 — ใช้ก่อน archive ขึ้น TestFlight
+bump:
+	@perl -i -pe 's/^(version:\s*\d+\.\d+\.\d+\+)(\d+)\s*$$/$$1 . ($$2 + 1) . "\n"/e' pubspec.yaml
+	@grep '^version:' pubspec.yaml
+
+# 🍏 build IPA dev พร้อมขึ้น TestFlight (App Store distribution)
+ipa_dev:
+	flutter build ipa --flavor dev --dart-define-from-file=env/dev.json --export-method app-store

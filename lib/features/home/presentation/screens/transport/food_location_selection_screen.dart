@@ -20,6 +20,8 @@ class FoodLocationSelectionScreen extends ConsumerStatefulWidget {
 class _FoodLocationSelectionScreenState
     extends ConsumerState<FoodLocationSelectionScreen> {
   GoogleMapController? _mapController;
+  // Guards the one-shot recenter below so we never fight the user's panning.
+  bool _centeredOnTarget = false;
 
   @override
   Widget build(BuildContext context) {
@@ -29,6 +31,22 @@ class _FoodLocationSelectionScreenState
       homeControllerProvider.select(
         (s) => s.foodLocation ?? s.currentLocation,
       ),
+    );
+
+    // GoogleMap.initialCameraPosition is only read once at creation, so when
+    // GPS resolves afterwards the camera stays on the fallback. Recenter once
+    // the moment the target first becomes available.
+    ref.listen(
+      homeControllerProvider.select((s) => s.foodLocation ?? s.currentLocation),
+      (prev, next) {
+        if (!_centeredOnTarget &&
+            next != null &&
+            prev != next &&
+            _mapController != null) {
+          _centeredOnTarget = true;
+          _mapController!.animateCamera(CameraUpdate.newLatLng(next));
+        }
+      },
     );
 
     // Listen to selection mode changes to pop back to FoodDeliveryScreen when confirmed

@@ -4,4 +4,4 @@
 // matching Pods config + Generated.xcconfig first. See ENV_SETUP.md.
 APP_DISPLAY_NAME = Customer Dev
 BUNDLE_ID_SUFFIX = .develop
-GOOGLE_MAPS_API_KEY = AIzaSyAlgz6GR3iQ-u0elel8OAnnGow0FlSMe2M
+GOOGLE_MAPS_API_KEY = AIzaSyBhrfrq9d3ngim_8JScYuBlnrIGBoltJMw

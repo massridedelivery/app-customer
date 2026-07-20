@@ -3,17 +3,17 @@
 <plist version="1.0">
 <dict>
 	<key>API_KEY</key>
-	<string>AIzaSyAFeK_-G3u7Q5h5069ECNMgKCXRvTtnfuw</string>
+	<string>AIzaSyAddF1WOGmc9IIkqr91Yjjv0eRxqv3IYj4</string>
 	<key>GCM_SENDER_ID</key>
-	<string>113759761527</string>
+	<string>1077451909824</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
 	<string>com.massdrive.customerApp</string>
 	<key>PROJECT_ID</key>
-	<string>mass-ride-delivery</string>
+	<string>prod-mass-ride-delivery</string>
 	<key>STORAGE_BUCKET</key>
-	<string>mass-ride-delivery.firebasestorage.app</string>
+	<string>prod-mass-ride-delivery.firebasestorage.app</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -25,6 +25,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:113759761527:ios:eb11933b768be9fc9a8272</string>
+	<string>1:1077451909824:ios:6cf8df5a38b2c60c02db25</string>
 </dict>
 </plist>

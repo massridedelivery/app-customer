@@ -7,6 +7,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+// Neutral slate palette shared with the rest of the auth flow (see otp_screen).
+// Kept as named constants so the values live in one place.
+const Color _kBg = Color(0xFFF8FAFC);
+const Color _kFieldFill = Color(0xFFF1F5F9);
+const Color _kTextPrimary = Color(0xFF0F172A);
+const Color _kTextSecondary = Color(0xFF64748B);
+const Color _kDisabledBg = Color(0xFFE2E8F0);
+const Color _kDisabledText = Color(0xFF94A3B8);
+
 class PhoneLoginScreen extends ConsumerStatefulWidget {
   const PhoneLoginScreen({super.key});
 
@@ -45,7 +54,6 @@ class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
       phone = '+66$phone';
     }
 
-    // Changed requestOtp to sendOtp
     final SendOtpResponse? response = await ref
         .read(authControllerProvider.notifier)
         .sendOtp(phone);
@@ -64,11 +72,14 @@ class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final authState = ref.watch(authControllerProvider);
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: _kBg,
       body: Stack(
         children: [
-          // Background Aura Accents (Subtle)
+          // Background aura accent (subtle brand tint).
           Positioned(
             bottom: -MediaQuery.of(context).size.width * 0.4,
             right: -MediaQuery.of(context).size.width * 0.4,
@@ -76,13 +87,13 @@ class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
               width: MediaQuery.of(context).size.width * 0.8,
               height: MediaQuery.of(context).size.width * 0.8,
               decoration: BoxDecoration(
-                color: const Color(0xFF1E3A8A).withValues(alpha: 0.03),
+                color: AppColors.primary.withValues(alpha: 0.03),
                 shape: BoxShape.circle,
               ),
             ),
           ),
 
-          // Top Bar
+          // Top bar
           Positioned(
             top: 0,
             left: 0,
@@ -93,20 +104,11 @@ class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
                   horizontal: 24,
                   vertical: 16,
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        Text(
-                          'MassMove',
-                          style: AppTypography.heading4.copyWith(
-                            color: AppColors.primary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                child: Text(
+                  'MassMove',
+                  style: AppTypography.heading4.copyWith(
+                    color: AppColors.primary,
+                  ),
                 ),
               ),
             ),
@@ -124,106 +126,51 @@ class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
                       children: [
                         const SizedBox(height: 12),
                         Text(
-                          AppLocalizations.of(context)!.enterNumber,
+                          l10n.enterNumber,
                           style: AppTypography.heading3.copyWith(
-                            color: const Color(0xFF0F172A),
+                            color: _kTextPrimary,
                           ),
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          AppLocalizations.of(context)!.phoneLoginSub,
+                          l10n.phoneLoginSub,
                           style: AppTypography.body1.copyWith(
-                            color: const Color(0xFF64748B),
+                            color: _kTextSecondary,
                             height: 1.5,
                           ),
                         ),
                         const SizedBox(height: 40),
 
-                        // Phone Input Section
-                        _buildLabel(AppLocalizations.of(context)!.phoneNumber),
+                        // Phone input section
+                        _buildLabel(l10n.phoneNumber),
                         Container(
                           decoration: BoxDecoration(
-                            color: const Color(0xFFF1F5F9),
+                            color: _kFieldFill,
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: _buildTextField(
-                                  controller: _phoneController,
-                                  hintText: '+66 999999999',
-                                  keyboardType: TextInputType.phone,
-                                ),
-                              ),
-                            ],
+                          child: _buildTextField(
+                            controller: _phoneController,
+                            hintText: '+66 999999999',
+                            keyboardType: TextInputType.phone,
                           ),
                         ),
 
                         const SizedBox(height: 32),
 
-                        // Continue Button
-                        ref.watch(authControllerProvider).isLoading
-                            ? const Center(child: CircularProgressIndicator())
-                            : GestureDetector(
-                                onTap: _isValidPhone ? _requestOtp : null,
-                                child: Container(
-                                  width: double.infinity,
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 14,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    gradient: _isValidPhone
-                                        ? const LinearGradient(
-                                            begin: Alignment.topLeft,
-                                            end: Alignment.bottomRight,
-                                            colors: [
-                                              AppColors.primary,
-                                              AppColors.secondaryRed,
-                                            ],
-                                          )
-                                        : null,
-                                    color: _isValidPhone
-                                        ? null
-                                        : const Color(0xFFE2E8F0),
-                                    borderRadius: BorderRadius.circular(12),
-                                    boxShadow: _isValidPhone
-                                        ? [
-                                            BoxShadow(
-                                              color: AppColors.primary
-                                                  .withValues(alpha: 0.15),
-                                              blurRadius: 15,
-                                              offset: const Offset(0, 10),
-                                            ),
-                                          ]
-                                        : null,
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      AppLocalizations.of(
-                                        context,
-                                      )!.continueLabel,
-                                      style: AppTypography.label2.copyWith(
-                                        color: _isValidPhone
-                                            ? Colors.white
-                                            : const Color(0xFF94A3B8),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
+                        _buildContinueButton(l10n, authState.isLoading),
 
-                        if (ref.watch(authControllerProvider).error != null)
+                        if (authState.error != null)
                           Padding(
                             padding: const EdgeInsets.only(top: 16),
                             child: Text(
-                              ref.watch(authControllerProvider).error!,
-                              style: const TextStyle(color: Colors.red),
+                              authState.error!,
+                              style: TextStyle(color: AppColors.error),
                               textAlign: TextAlign.center,
                             ),
                           ),
                         const SizedBox(height: 84),
 
-                        // Footer Terms
+                        // Footer version
                         Center(
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -231,7 +178,7 @@ class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
                               'Application version 1.0.0',
                               textAlign: TextAlign.center,
                               style: AppTypography.body3.copyWith(
-                                color: const Color(0x8064748B),
+                                color: _kTextSecondary.withValues(alpha: 0.5),
                                 height: 1.5,
                               ),
                             ),
@@ -249,12 +196,69 @@ class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
     );
   }
 
+  Widget _buildContinueButton(AppLocalizations l10n, bool isLoading) {
+    final enabled = _isValidPhone && !isLoading;
+    return Semantics(
+      button: true,
+      enabled: enabled,
+      label: l10n.continueLabel,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: enabled ? _requestOtp : null,
+          child: Ink(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            decoration: BoxDecoration(
+              gradient: enabled
+                  ? LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [AppColors.primary, AppColors.secondaryRed],
+                    )
+                  : null,
+              color: enabled ? null : _kDisabledBg,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: enabled
+                  ? [
+                      BoxShadow(
+                        color: AppColors.primary.withValues(alpha: 0.15),
+                        blurRadius: 15,
+                        offset: const Offset(0, 10),
+                      ),
+                    ]
+                  : null,
+            ),
+            child: Center(
+              child: isLoading
+                  ? const SizedBox(
+                      height: 24,
+                      width: 24,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    )
+                  : Text(
+                      l10n.continueLabel,
+                      style: AppTypography.label2.copyWith(
+                        color: enabled ? Colors.white : _kDisabledText,
+                      ),
+                    ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildLabel(String label) {
     return Padding(
       padding: const EdgeInsets.only(left: 4, bottom: 8),
       child: Text(
         label,
-        style: AppTypography.caption4.copyWith(color: const Color(0xFF64748B)),
+        style: AppTypography.caption4.copyWith(color: _kTextSecondary),
       ),
     );
   }
@@ -269,12 +273,14 @@ class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
       controller: controller,
       obscureText: obscureText,
       keyboardType: keyboardType,
+      autofillHints: const [AutofillHints.telephoneNumber],
+      style: AppTypography.body1.copyWith(color: _kTextPrimary),
       decoration: InputDecoration(
         hintText: hintText,
         hintStyle: AppTypography.caption3.copyWith(
-          color: const Color(0x8064748B),
+          color: _kTextSecondary.withValues(alpha: 0.5),
         ),
-        fillColor: const Color(0xFFF1F5F9),
+        fillColor: _kFieldFill,
         filled: true,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -286,7 +292,7 @@ class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFF1E3A8A), width: 1),
+          borderSide: BorderSide(color: AppColors.primary, width: 1),
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 20,

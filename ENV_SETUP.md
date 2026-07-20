@@ -89,6 +89,34 @@ In Xcode (`open ios/Runner.xcworkspace`):
    GMSServices.provideAPIKey(mapsKey)
    ```
    and add `GOOGLE_MAPS_API_KEY = $(GOOGLE_MAPS_API_KEY)` to `Info.plist`.
+6. **Firebase per flavor**: each flavor has its own Firebase iOS app, keyed by
+   bundle id, so the right `GoogleService-Info.plist` must be copied in at build
+   time:
+
+   | flavor | bundle id | file |
+   | --- | --- | --- |
+   | dev | `com.massdrive.customerApp.develop` | `ios/config/dev/GoogleService-Info.plist` |
+   | prod | `com.massdrive.customerApp` | `ios/config/prod/GoogleService-Info.plist` |
+
+   In Xcode:
+   1. Remove the old `GoogleService-Info.plist` from the Runner target's
+      **Build Phases → Copy Bundle Resources** (the file itself has moved to
+      `ios/config/<flavor>/`; do **not** re-add either copy to the target).
+   2. Add a **New Run Script Phase**, ordered *before* Copy Bundle Resources:
+      ```sh
+      # Pick the Firebase config matching the flavor (from BUNDLE_ID_SUFFIX).
+      case "$CONFIGURATION" in
+        *-dev)  FLAVOR_DIR=dev ;;
+        *)      FLAVOR_DIR=prod ;;
+      esac
+      SRC="${SRCROOT}/config/${FLAVOR_DIR}/GoogleService-Info.plist"
+      [ -f "$SRC" ] || { echo "error: missing $SRC"; exit 1; }
+      cp "$SRC" "${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.app/GoogleService-Info.plist"
+      ```
 
 Until step 4 is done, `--flavor` on iOS will fail. The Dart-side env
 (`API_BASE_URL` etc.) already works on iOS once the scheme exists.
+
+Until step 6 is done the app has **no** `GoogleService-Info.plist` in its
+bundle and Firebase will fail to initialise — the plist is no longer bundled
+directly, it is copied by the run-script phase.

@@ -51,6 +51,17 @@ flutter run --flavor dev --dart-define-from-file=env/dev.json
 
 Both install side-by-side. **TODO:** set the real prod Maps key in the `prod` flavor.
 
+Firebase is per flavor via source sets — the Gradle plugin picks the file up
+automatically, no script needed:
+
+| flavor | applicationId | file | Firebase project |
+| --- | --- | --- | --- |
+| dev | `com.massdrive.customer_app.dev` | `android/app/src/dev/google-services.json` | `mass-ride-delivery` |
+| prod | `com.massdrive.customer_app` | `android/app/src/prod/google-services.json` | `prod-mass-ride-delivery` |
+
+There is deliberately **no** `android/app/google-services.json` — a file there
+acts as a fallback for every flavor and silently masks a missing per-flavor one.
+
 ## iOS — one-time Xcode setup ⚠️
 
 Flutter's `--flavor <name>` maps to an Xcode **scheme**; these must be created

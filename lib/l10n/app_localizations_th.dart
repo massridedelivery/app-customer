@@ -451,6 +451,14 @@ class AppLocalizationsTh extends AppLocalizations {
       'หากคุณไม่ได้รับรหัสภายใน 2 นาที โปรดตรวจสอบเครือข่ายของคุณหรือติดต่อฝ่ายสนับสนุน';
 
   @override
+  String resendCodeIn(String time) {
+    return 'ส่งรหัสอีกครั้งใน $time';
+  }
+
+  @override
+  String get otpResent => 'ส่งรหัสใหม่ไปยังเบอร์ของคุณแล้ว';
+
+  @override
   String get createYourAccount => 'สร้างบัญชีของคุณ';
 
   @override

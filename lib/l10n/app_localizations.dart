@@ -968,6 +968,18 @@ abstract class AppLocalizations {
   /// **'If you haven\'t received the code after 2 minutes, please check your network or contact support.'**
   String get helpSubMsg;
 
+  /// No description provided for @resendCodeIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend code in {time}'**
+  String resendCodeIn(String time);
+
+  /// No description provided for @otpResent.
+  ///
+  /// In en, this message translates to:
+  /// **'A new code has been sent to your number'**
+  String get otpResent;
+
   /// No description provided for @createYourAccount.
   ///
   /// In en, this message translates to:

@@ -153,6 +153,15 @@
   "resendCode": "RESEND CODE",
   "needHelp": "Need help?",
   "helpSubMsg": "If you haven't received the code after 2 minutes, please check your network or contact support.",
+  "resendCodeIn": "Resend code in {time}",
+  "@resendCodeIn": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "otpResent": "A new code has been sent to your number",
   "createYourAccount": "Create your account",
   "fullName": "Full Name",
   "createAccount": "Create Account",

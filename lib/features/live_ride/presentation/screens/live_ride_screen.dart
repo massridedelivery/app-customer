@@ -92,7 +92,29 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final liveState = ref.watch(liveRideControllerProvider);
+    // Rebuild the sheet on DISCRETE state changes only. driverLocation ticks
+    // ~every 2s over the socket and is consumed solely by the map's driver
+    // marker (_LiveRideMap watches it in isolation), so it is deliberately
+    // excluded from this projection — otherwise the whole sheet re-rendered
+    // twice a second. Everything the sheet actually reads is listed here;
+    // `read` then grabs the full object to pass down.
+    ref.watch(
+      liveRideControllerProvider.select(
+        (s) => (
+          s.jobStatus,
+          s.driverId,
+          s.isLoading,
+          s.error,
+          s.driverProfile,
+          s.driverName,
+          s.driverRating,
+          s.vehicleType,
+          s.vehiclePlate,
+          s.fare,
+        ),
+      ),
+    );
+    final liveState = ref.read(liveRideControllerProvider);
     // Select only what this screen renders from home state — a whole-state
     // watch would rebuild the map on every unrelated HomeState change.
     final pickupLocation = ref.watch(
@@ -162,62 +184,20 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
       backgroundColor: Colors.white,
       body: Stack(
         children: [
-          // Bottom Layer: Map (Visible after finding driver)
+          // Bottom Layer: Map (Visible after finding driver). Extracted so the
+          // ~2s driver-location updates rebuild ONLY the map, not this whole
+          // screen / bottom sheet.
           Positioned.fill(
             child: uiState != RideUIState.finding
-                ? GoogleMap(
-                    initialCameraPosition: CameraPosition(
-                      target: pickup,
-                      zoom: 14.0,
-                    ),
-                    myLocationEnabled: true,
-                    myLocationButtonEnabled: false,
-                    zoomControlsEnabled: true,
-                    padding: const EdgeInsets.only(bottom: 350, top: 40),
+                ? _LiveRideMap(
+                    pickup: pickup,
+                    dropoff: dropoff,
+                    pickupIcon: pickupIcon,
+                    dropoffIcon: dropoffIcon,
+                    routePoints: routePoints,
                     onMapCreated: (controller) {
                       _mapController = controller;
                       _fitMapToMarkers(pickup, dropoff);
-                    },
-                    markers: {
-                      Marker(
-                        markerId: const MarkerId('pickup'),
-                        position: pickup,
-                        icon:
-                            pickupIcon ??
-                            BitmapDescriptor.defaultMarkerWithHue(
-                              BitmapDescriptor.hueGreen,
-                            ),
-                      ),
-                      Marker(
-                        markerId: const MarkerId('dropoff'),
-                        position: dropoff,
-                        icon:
-                            dropoffIcon ??
-                            BitmapDescriptor.defaultMarkerWithHue(
-                              BitmapDescriptor.hueRed,
-                            ),
-                      ),
-                      if (liveState.driverLocation != null)
-                        Marker(
-                          markerId: const MarkerId('driver'),
-                          position: liveState.driverLocation!,
-                          icon: BitmapDescriptor.defaultMarkerWithHue(
-                            BitmapDescriptor.hueOrange,
-                          ), // Car
-                        ),
-                    },
-                    polylines: {
-                      Polyline(
-                        polylineId: const PolylineId('route'),
-                        // Memoized decode — this screen rebuilds every ~2s on
-                        // driver-location updates; decoding inline would redo
-                        // the whole route each time.
-                        points: routePoints.isNotEmpty
-                            ? routePoints
-                            : [pickup, dropoff],
-                        color: AppColors.accentRedDeep,
-                        width: 4,
-                      ),
                     },
                   )
                 : const SizedBox.shrink(),
@@ -953,4 +933,75 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
     );
   }
 
+}
+
+/// The live map, isolated so the ~2s driver-location socket updates rebuild
+/// only this widget's marker set — not the surrounding screen and bottom sheet.
+/// The stable inputs (pickup/dropoff/icons/route) come in as params; the
+/// frequently-changing driver position is watched here.
+class _LiveRideMap extends ConsumerWidget {
+  final LatLng pickup;
+  final LatLng dropoff;
+  final BitmapDescriptor? pickupIcon;
+  final BitmapDescriptor? dropoffIcon;
+  final List<LatLng> routePoints;
+  final void Function(GoogleMapController) onMapCreated;
+
+  const _LiveRideMap({
+    required this.pickup,
+    required this.dropoff,
+    required this.pickupIcon,
+    required this.dropoffIcon,
+    required this.routePoints,
+    required this.onMapCreated,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final driverLocation = ref.watch(
+      liveRideControllerProvider.select((s) => s.driverLocation),
+    );
+
+    return GoogleMap(
+      initialCameraPosition: CameraPosition(target: pickup, zoom: 14.0),
+      myLocationEnabled: true,
+      myLocationButtonEnabled: false,
+      zoomControlsEnabled: true,
+      padding: const EdgeInsets.only(bottom: 350, top: 40),
+      onMapCreated: onMapCreated,
+      markers: {
+        Marker(
+          markerId: const MarkerId('pickup'),
+          position: pickup,
+          icon:
+              pickupIcon ??
+              BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+        ),
+        Marker(
+          markerId: const MarkerId('dropoff'),
+          position: dropoff,
+          icon:
+              dropoffIcon ??
+              BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+        ),
+        if (driverLocation != null)
+          Marker(
+            markerId: const MarkerId('driver'),
+            position: driverLocation,
+            icon: BitmapDescriptor.defaultMarkerWithHue(
+              BitmapDescriptor.hueOrange,
+            ), // Car
+          ),
+      },
+      polylines: {
+        Polyline(
+          polylineId: const PolylineId('route'),
+          // Memoized decode shared via decodedPolylineProvider.
+          points: routePoints.isNotEmpty ? routePoints : [pickup, dropoff],
+          color: AppColors.accentRedDeep,
+          width: 4,
+        ),
+      },
+    );
+  }
 }

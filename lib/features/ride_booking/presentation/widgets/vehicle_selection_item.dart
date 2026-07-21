@@ -65,7 +65,7 @@ class VehicleSelectionItem extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Left accent bar (ข้อ 1)
+                // Left accent bar for the selected vehicle
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
                   width: isSelected ? 4 : 0,
@@ -181,7 +181,7 @@ class VehicleSelectionItem extends StatelessWidget {
                                   ),
                                 ),
 
-                              // Discount badge (ข้อ 4)
+                              // Discount badge
                               if (estimation.discount > 0) ...[
                                 const SizedBox(height: 2),
                                 Container(

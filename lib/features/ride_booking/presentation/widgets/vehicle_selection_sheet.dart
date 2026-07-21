@@ -8,6 +8,10 @@ import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+// Success accent for the applied-coupon state, sourced from the design system.
+const Color _kSuccessFg = AppColors.semanticSuccessFgHigh;
+const Color _kSuccessBg = AppColors.semanticSuccessBgLow;
+
 class VehicleSelectionSheet extends ConsumerWidget {
   final List<VehicleEstimation> estimations;
   final Function(String id) onVehicleSelected;
@@ -33,6 +37,13 @@ class VehicleSelectionSheet extends ConsumerWidget {
     // No auto-select: the user must explicitly pick a vehicle before the
     // "request ride" button becomes enabled.
     final hasVehicleSelected = bookingState.vehicleTypeId != null;
+    VehicleEstimation? selectedEstimation;
+    for (final e in estimations) {
+      if (e.vehicleTypeId == bookingState.vehicleTypeId) {
+        selectedEstimation = e;
+        break;
+      }
+    }
 
     return Container(
       decoration: const BoxDecoration(
@@ -58,20 +69,31 @@ class VehicleSelectionSheet extends ConsumerWidget {
             width: 40,
             height: 4,
             decoration: BoxDecoration(
-              color: Colors.grey[300],
+              color: AppColors.semanticGrayNeutralBgDarkgray,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
           const SizedBox(height: 16),
 
-          // Vehicle List
-          SizedBox(
-            height: 230, // Approximate height for the list
+          // Vehicle list. Caps at 40% of the screen and scrolls beyond that, so
+          // more vehicles or a larger accessibility font can't push the payment
+          // row and CTA off-screen (the old fixed 230px height clipped them).
+          ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.4,
+            ),
             child: bookingAsync.isLoading
-                ? const Center(child: CircularProgressIndicator())
+                ? const SizedBox(
+                    height: 120,
+                    child: Center(child: CircularProgressIndicator()),
+                  )
                 : estimations.isEmpty
-                ? Center(child: Text(l10n.calculatingPrice))
+                ? SizedBox(
+                    height: 120,
+                    child: Center(child: Text(l10n.calculatingPrice)),
+                  )
                 : ListView.builder(
+                    shrinkWrap: true,
                     padding: EdgeInsets.zero,
                     itemCount: estimations.length,
                     itemBuilder: (context, index) {
@@ -104,6 +126,7 @@ class VehicleSelectionSheet extends ConsumerWidget {
                       context,
                       notifier,
                       bookingState.paymentMethod,
+                      l10n,
                     ),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
@@ -136,22 +159,22 @@ class VehicleSelectionSheet extends ConsumerWidget {
                     ),
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 14, bottom: 14),
+                const Padding(
+                  padding: EdgeInsets.only(top: 14, bottom: 14),
                   child: VerticalDivider(
                     width: 1,
                     thickness: 1,
-                    color: Colors.grey[200],
+                    color: AppColors.semanticGrayNeutralBorderLightgray,
                   ),
                 ),
-                // Coupon button with active state indicator (ข้อ 6)
+                // Coupon button, with an applied-coupon success state.
                 Expanded(
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 250),
                     curve: Curves.easeInOut,
                     decoration: BoxDecoration(
                       color: bookingState.appliedPromoCode != null
-                          ? const Color(0xFFE8F5E9)
+                          ? _kSuccessBg
                           : Colors.transparent,
                     ),
                     child: InkWell(
@@ -169,9 +192,11 @@ class VehicleSelectionSheet extends ConsumerWidget {
                                 bookingState.appliedPromoCode != null
                                     ? Icons.check_circle
                                     : Icons.confirmation_number_outlined,
-                                key: ValueKey(bookingState.appliedPromoCode != null),
+                                key: ValueKey(
+                                  bookingState.appliedPromoCode != null,
+                                ),
                                 color: bookingState.appliedPromoCode != null
-                                    ? const Color(0xFF2E7D32)
+                                    ? _kSuccessFg
                                     : AppColors.primary,
                               ),
                             ),
@@ -182,8 +207,8 @@ class VehicleSelectionSheet extends ConsumerWidget {
                                 style: AppTypography.label2.copyWith(
                                   fontWeight: FontWeight.bold,
                                   color: bookingState.appliedPromoCode != null
-                                      ? const Color(0xFF2E7D32)
-                                      : Colors.black87,
+                                      ? _kSuccessFg
+                                      : AppColors.semanticGrayNeutralFgHigh,
                                 ),
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -192,8 +217,8 @@ class VehicleSelectionSheet extends ConsumerWidget {
                               Icons.chevron_right,
                               size: 16,
                               color: bookingState.appliedPromoCode != null
-                                  ? const Color(0xFF2E7D32)
-                                  : Colors.grey,
+                                  ? _kSuccessFg
+                                  : AppColors.semanticGrayNeutralFgLowOnWhite,
                             ),
                           ],
                         ),
@@ -214,16 +239,16 @@ class VehicleSelectionSheet extends ConsumerWidget {
                   const Icon(
                     Icons.local_offer_rounded,
                     size: 16,
-                    color: Color(0xFF2E7D32),
+                    color: _kSuccessFg,
                   ),
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
                       bookingState.appliedPromoCode != null
-                          ? 'ส่วนลดคูปอง ${bookingState.appliedPromoCode}'
-                          : 'ส่วนลดคูปอง',
+                          ? '${l10n.couponDiscount} ${bookingState.appliedPromoCode}'
+                          : l10n.couponDiscount,
                       style: AppTypography.label2.copyWith(
-                        color: const Color(0xFF2E7D32),
+                        color: _kSuccessFg,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -231,7 +256,7 @@ class VehicleSelectionSheet extends ConsumerWidget {
                   Text(
                     '-฿${bookingState.promoDiscount.toStringAsFixed(0)}',
                     style: AppTypography.label2.copyWith(
-                      color: const Color(0xFF2E7D32),
+                      color: _kSuccessFg,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -239,7 +264,9 @@ class VehicleSelectionSheet extends ConsumerWidget {
               ),
             ),
 
-          // Request Button
+          // Request button. Disabled until a vehicle is picked — and the label
+          // says so, so the greyed-out state isn't a dead end. Once selected it
+          // confirms the exact vehicle and fare.
           Padding(
             padding: EdgeInsets.only(
               left: 16,
@@ -252,20 +279,27 @@ class VehicleSelectionSheet extends ConsumerWidget {
               child: ElevatedButton(
                 onPressed: hasVehicleSelected ? onRequest : null,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.foundationGreen500, // Green button
+                  backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
-                  disabledBackgroundColor: Colors.grey.shade300,
-                  disabledForegroundColor: Colors.white,
+                  disabledBackgroundColor: AppColors.semanticDisabledBgLow,
+                  disabledForegroundColor:
+                      AppColors.semanticDisabledFgOnGray,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(28),
                   ),
                 ),
                 child: Text(
-                  l10n.requestRideNow,
+                  hasVehicleSelected && selectedEstimation != null
+                      ? l10n.requestRideWith(
+                          selectedEstimation.displayName,
+                          selectedEstimation.totalFare.toStringAsFixed(0),
+                        )
+                      : l10n.selectVehicleFirst,
                   style: AppTypography.heading4.copyWith(
-                    color: Colors.white,
                     fontWeight: FontWeight.bold,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ),
@@ -279,7 +313,7 @@ class VehicleSelectionSheet extends ConsumerWidget {
   String _paymentLabel(String method, AppLocalizations l10n) {
     switch (method) {
       case 'PROMPTPAY':
-        return 'พร้อมเพย์';
+        return l10n.promptPay;
       case 'CASH':
         return l10n.cashLabel;
       default:
@@ -291,6 +325,7 @@ class VehicleSelectionSheet extends ConsumerWidget {
     BuildContext context,
     BookingController notifier,
     String current,
+    AppLocalizations l10n,
   ) {
     showModalBottomSheet<void>(
       context: context,
@@ -322,10 +357,10 @@ class VehicleSelectionSheet extends ConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               const SizedBox(height: 12),
-              Text('เลือกวิธีชำระเงิน', style: AppTypography.heading4),
+              Text(l10n.selectPaymentMethod, style: AppTypography.heading4),
               const SizedBox(height: 8),
-              option('CASH', 'เงินสด', Icons.monetization_on),
-              option('PROMPTPAY', 'พร้อมเพย์', Icons.qr_code_2_rounded),
+              option('CASH', l10n.cashLabel, Icons.monetization_on),
+              option('PROMPTPAY', l10n.promptPay, Icons.qr_code_2_rounded),
               const SizedBox(height: 12),
             ],
           ),

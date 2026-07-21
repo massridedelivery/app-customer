@@ -256,7 +256,7 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1976D2),
+                    color: AppColors.semanticGrayNeutralFgHigh,
                     borderRadius: BorderRadius.circular(8),
                     boxShadow: const [
                       BoxShadow(
@@ -347,8 +347,8 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                       SnackBar(
                         content: Text(
                           promoCode != null
-                              ? 'ใช้คูปอง "$promoCode" สำเร็จ'
-                              : 'ยกเลิกคูปองเรียบร้อยแล้ว',
+                              ? l10n.couponApplied(promoCode)
+                              : l10n.couponRemoved,
                         ),
                         backgroundColor: AppColors.primary,
                         duration: const Duration(seconds: 2),

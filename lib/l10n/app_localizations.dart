@@ -1261,6 +1261,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Clear text'**
   String get clearField;
+
+  /// No description provided for @promptPay.
+  ///
+  /// In en, this message translates to:
+  /// **'PromptPay'**
+  String get promptPay;
+
+  /// No description provided for @selectPaymentMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Select payment method'**
+  String get selectPaymentMethod;
+
+  /// No description provided for @couponDiscount.
+  ///
+  /// In en, this message translates to:
+  /// **'Coupon discount'**
+  String get couponDiscount;
+
+  /// No description provided for @selectVehicleFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a vehicle type first'**
+  String get selectVehicleFirst;
+
+  /// No description provided for @couponApplied.
+  ///
+  /// In en, this message translates to:
+  /// **'Coupon \"{code}\" applied'**
+  String couponApplied(String code);
+
+  /// No description provided for @couponRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Coupon removed'**
+  String get couponRemoved;
+
+  /// No description provided for @requestRideWith.
+  ///
+  /// In en, this message translates to:
+  /// **'Request {vehicle} · ฿{fare}'**
+  String requestRideWith(String vehicle, String fare);
 }
 
 class _AppLocalizationsDelegate

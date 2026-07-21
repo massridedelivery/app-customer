@@ -598,4 +598,29 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get clearField => 'ล้างข้อความ';
+
+  @override
+  String get promptPay => 'พร้อมเพย์';
+
+  @override
+  String get selectPaymentMethod => 'เลือกวิธีชำระเงิน';
+
+  @override
+  String get couponDiscount => 'ส่วนลดคูปอง';
+
+  @override
+  String get selectVehicleFirst => 'เลือกประเภทรถก่อน';
+
+  @override
+  String couponApplied(String code) {
+    return 'ใช้คูปอง \"$code\" สำเร็จ';
+  }
+
+  @override
+  String get couponRemoved => 'ยกเลิกคูปองเรียบร้อยแล้ว';
+
+  @override
+  String requestRideWith(String vehicle, String fare) {
+    return 'เรียก $vehicle · ฿$fare';
+  }
 }

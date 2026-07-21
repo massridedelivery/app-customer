@@ -128,10 +128,21 @@ The workflow expects these repository secrets to be configured:
 **Local build** (archive without signing, just to verify it compiles):
 
 ```bash
-flutter build ipa --no-codesign --dart-define-from-file=env/dev.json
+flutter build ipa --no-codesign --flavor dev --dart-define-from-file=env/dev.json
 ```
 
-> **Note:** iOS product flavors are not wired into the Xcode project yet
-> (`ios/Flutter/Dev.xcconfig` / `Prod.xcconfig` exist but aren't attached to build
-> configurations — see `ENV_SETUP.md`). The pipeline builds the plain `Runner`
-> scheme in `Release`, so there is no `--flavor` flag on iOS.
+### iOS flavors
+
+iOS mirrors Android's `dev` / `prod` split (see `ENV_SETUP.md`):
+
+| Flavor | Scheme | Build configuration | `BUNDLE_ID_SUFFIX` | Bundle id                        |
+| ------ | ------ | ------------------- | ------------------ | -------------------------------- |
+| dev    | `dev`  | `Release-dev`       | `.develop`         | `com.massdrive.customerApp.develop` |
+| prod   | `prod` | `Release-prod`      | *(empty)*          | `com.massdrive.customerApp`      |
+
+The TestFlight pipeline builds **prod** (`--flavor prod`, scheme `prod`,
+configuration `Release-prod`). Local dev builds:
+
+```bash
+flutter run --flavor dev --dart-define-from-file=env/dev.json
+```

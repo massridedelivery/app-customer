@@ -76,12 +76,23 @@ class _PlaceSearchScreenState extends ConsumerState<PlaceSearchScreen>
   }
 
   void _onSearchChanged(String query) {
-    if (_debounceTimer?.isActive ?? false) _debounceTimer!.cancel();
+    _debounceTimer?.cancel();
+    // Clearing the field should immediately restore the recent/saved tabs
+    // instead of waiting out the debounce with stale results on screen.
+    if (query.trim().isEmpty) {
+      ref.read(placeSearchControllerProvider.notifier).clear();
+      return;
+    }
     _debounceTimer = Timer(const Duration(milliseconds: 300), () {
       if (mounted) {
         ref.read(placeSearchControllerProvider.notifier).search(query);
       }
     });
+  }
+
+  void _submitSearch(String query) {
+    _debounceTimer?.cancel();
+    ref.read(placeSearchControllerProvider.notifier).search(query);
   }
 
   void _onSelectPlace(LatLng location, String name) {
@@ -98,12 +109,23 @@ class _PlaceSearchScreenState extends ConsumerState<PlaceSearchScreen>
       final currentState = ref.read(homeControllerProvider);
       if (currentState.pickupLocation != null) {
         context.push('/booking');
+      } else {
+        // A dropoff without a pickup can't continue — tell the user instead of
+        // silently doing nothing, and send focus back to the pickup field.
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            SnackBar(content: Text(AppLocalizations.of(context)!.selectPickupFirst)),
+          );
+        _pickupFocusNode.requestFocus();
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     // Sync controllers with state addresses without rebuilding the parent widget
     ref.listen(homeControllerProvider.select((s) => s.pickupAddress), (
       previous,
@@ -126,10 +148,7 @@ class _PlaceSearchScreenState extends ConsumerState<PlaceSearchScreen>
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text(
-          AppLocalizations.of(context)!.bookingDetails,
-          style: AppTypography.heading4,
-        ),
+        title: Text(l10n.bookingDetails, style: AppTypography.heading4),
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
@@ -137,27 +156,24 @@ class _PlaceSearchScreenState extends ConsumerState<PlaceSearchScreen>
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
-      body: Container(
-        color: Colors.white,
-        child: SafeArea(
-          child: Column(
-            children: [
-              _buildSearchHeader(),
-              _buildTabs(),
-              const SizedBox(height: 12),
-              PlaceSearchMainContent(
-                tabController: _tabController,
-                onSelectPlace: _onSelectPlace,
-              ),
-              _buildBottomAction(),
-            ],
-          ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            _buildSearchHeader(l10n),
+            _buildTabs(l10n),
+            const SizedBox(height: 12),
+            PlaceSearchMainContent(
+              tabController: _tabController,
+              onSelectPlace: _onSelectPlace,
+            ),
+            _buildBottomAction(l10n),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildSearchHeader() {
+  Widget _buildSearchHeader(AppLocalizations l10n) {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       child: Row(
@@ -199,16 +215,14 @@ class _PlaceSearchScreenState extends ConsumerState<PlaceSearchScreen>
                 _buildSearchInput(
                   _pickupController,
                   _pickupFocusNode,
-                  AppLocalizations.of(context)!.currentLocation,
-                  RideSelectionMode.pickup,
+                  l10n.currentLocation,
                   isDropoff: false,
                 ),
                 const SizedBox(height: 12),
                 _buildSearchInput(
                   _dropoffController,
                   _dropoffFocusNode,
-                  AppLocalizations.of(context)!.searchDropoffHint,
-                  RideSelectionMode.dropoff,
+                  l10n.searchDropoffHint,
                   isDropoff: true,
                 ),
               ],
@@ -222,9 +236,8 @@ class _PlaceSearchScreenState extends ConsumerState<PlaceSearchScreen>
   Widget _buildSearchInput(
     TextEditingController controller,
     FocusNode focusNode,
-    String hint,
-    RideSelectionMode mode, {
-    bool isDropoff = false,
+    String hint, {
+    required bool isDropoff,
   }) {
     return SearchInputContainer(
       focusNode: focusNode,
@@ -235,6 +248,8 @@ class _PlaceSearchScreenState extends ConsumerState<PlaceSearchScreen>
               controller: controller,
               focusNode: focusNode,
               onChanged: _onSearchChanged,
+              onSubmitted: _submitSearch,
+              textInputAction: TextInputAction.search,
               decoration: InputDecoration(
                 hintText: hint,
                 border: InputBorder.none,
@@ -247,25 +262,48 @@ class _PlaceSearchScreenState extends ConsumerState<PlaceSearchScreen>
               ),
             ),
           ),
-          const SizedBox(width: 8),
-          GestureDetector(
-            onTap: () {
-              if (isDropoff) {
-                ref
-                    .read(homeControllerProvider.notifier)
-                    .startSelection(mode: RideSelectionMode.dropoff);
-                context.push('/select-dropoff');
-              } else {
-                ref
-                    .read(homeControllerProvider.notifier)
-                    .startSelection(mode: RideSelectionMode.pickup);
-                context.push('/select-pickup');
-              }
+          // Clear button — only while the field has text.
+          ValueListenableBuilder<TextEditingValue>(
+            valueListenable: controller,
+            builder: (context, value, _) {
+              if (value.text.isEmpty) return const SizedBox.shrink();
+              return GestureDetector(
+                onTap: () {
+                  controller.clear();
+                  _onSearchChanged('');
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: Icon(
+                    Icons.close,
+                    size: 18,
+                    color: AppColors.semanticGrayNeutralFgMidOnWhite,
+                    semanticLabel: AppLocalizations.of(context)!.clearField,
+                  ),
+                ),
+              );
             },
-            child: const Icon(
-              Icons.map_outlined,
-              color: AppColors.primary,
-              size: 20,
+          ),
+          const SizedBox(width: 8),
+          InkWell(
+            borderRadius: BorderRadius.circular(20),
+            onTap: () {
+              ref
+                  .read(homeControllerProvider.notifier)
+                  .startSelection(
+                    mode: isDropoff
+                        ? RideSelectionMode.dropoff
+                        : RideSelectionMode.pickup,
+                  );
+              context.push(isDropoff ? '/select-dropoff' : '/select-pickup');
+            },
+            child: const Padding(
+              padding: EdgeInsets.all(4),
+              child: Icon(
+                Icons.map_outlined,
+                color: AppColors.primary,
+                size: 20,
+              ),
             ),
           ),
         ],
@@ -273,48 +311,65 @@ class _PlaceSearchScreenState extends ConsumerState<PlaceSearchScreen>
     );
   }
 
-  Widget _buildTabs() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          _buildTabItem(0, AppLocalizations.of(context)!.recent),
-          const SizedBox(width: 12),
-          _buildTabItem(1, AppLocalizations.of(context)!.recommended),
-          const SizedBox(width: 12),
-          _buildTabItem(2, AppLocalizations.of(context)!.saved),
-        ],
+  Widget _buildTabs(AppLocalizations l10n) {
+    // AnimatedBuilder rebuilds ONLY this pill row as the tab controller moves
+    // (tap or swipe), keeping the selection in sync without rebuilding the
+    // sibling TabBarView — a full-screen rebuild per animation frame would
+    // recreate the TabBarView and freeze its page transition.
+    return AnimatedBuilder(
+      animation: _tabController,
+      builder: (context, _) => Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _buildTabItem(0, l10n.recent),
+            const SizedBox(width: 12),
+            _buildTabItem(1, l10n.recommended),
+            const SizedBox(width: 12),
+            _buildTabItem(2, l10n.saved),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildTabItem(int index, String text) {
     final isSelected = _tabController.index == index;
-    return GestureDetector(
-      onTap: () => setState(() => _tabController.animateTo(index)),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : Colors.transparent,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Text(
-          text,
-          style: AppTypography.label1.copyWith(
-            color: isSelected ? AppColors.white : Colors.grey,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+    return Semantics(
+      button: true,
+      selected: isSelected,
+      label: text,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(20),
+        onTap: () => _tabController.animateTo(index),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: isSelected ? AppColors.primary : Colors.transparent,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Text(
+            text,
+            style: AppTypography.label1.copyWith(
+              color: isSelected
+                  ? AppColors.white
+                  : AppColors.semanticGrayNeutralFgMidOnWhite,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildBottomAction() {
+  Widget _buildBottomAction(AppLocalizations l10n) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        border: Border(top: BorderSide(color: Colors.grey[200]!)),
+        border: Border(
+          top: BorderSide(color: AppColors.semanticGrayNeutralBorderLightgray),
+        ),
       ),
       child: InkWell(
         onTap: () {
@@ -329,7 +384,7 @@ class _PlaceSearchScreenState extends ConsumerState<PlaceSearchScreen>
             const Icon(Icons.map_outlined, color: Colors.black),
             const SizedBox(width: 8),
             Text(
-              AppLocalizations.of(context)!.selectOnMaps,
+              l10n.selectOnMaps,
               style: AppTypography.label1.copyWith(fontWeight: FontWeight.bold),
             ),
           ],

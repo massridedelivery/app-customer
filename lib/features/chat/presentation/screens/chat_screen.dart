@@ -69,11 +69,15 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     final chatState = ref.watch(chatControllerProvider((id: widget.jobId, kind: ChatKind.ride)));
-    final liveState = ref.watch(liveRideControllerProvider);
+    // Only the two fields the header needs — a whole-state watch rebuilt the
+    // entire chat on every ~2s driver-location socket tick.
+    final (rideJobId, rideDriverName) = ref.watch(
+      liveRideControllerProvider.select((s) => (s.jobId, s.driverName)),
+    );
 
     // Get driver name from live ride controller if active jobId matches, else default
-    final driverName = (liveState.jobId == widget.jobId)
-        ? (liveState.driverName ?? 'Driver')
+    final driverName = (rideJobId == widget.jobId)
+        ? (rideDriverName ?? 'Driver')
         : 'Driver';
 
     // Automatically scroll to bottom when new messages arrive

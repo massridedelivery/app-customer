@@ -70,10 +70,16 @@ class _FoodChatScreenState extends ConsumerState<FoodChatScreen> {
   @override
   Widget build(BuildContext context) {
     final chatState = ref.watch(chatControllerProvider((id: widget.orderId, kind: ChatKind.food)));
-    final trackingState = ref.watch(liveFoodTrackingControllerProvider);
+    // Only the two fields the header needs — a whole-state watch rebuilt the
+    // entire chat on every food-tracking location update.
+    final (trackOrderId, trackDriverName) = ref.watch(
+      liveFoodTrackingControllerProvider.select(
+        (s) => (s.orderId, s.driverName),
+      ),
+    );
 
-    final riderName = (trackingState.orderId == widget.orderId)
-        ? (trackingState.driverName ?? 'คนขับของคุณ')
+    final riderName = (trackOrderId == widget.orderId)
+        ? (trackDriverName ?? 'คนขับของคุณ')
         : 'คนขับของคุณ';
 
     // Automatically scroll to bottom when new messages arrive

@@ -234,9 +234,21 @@ class FoodCartController extends _$FoodCartController {
     _scheduleSync();
   }
 
+  double get foodTotal => state.foodTotal;
+
+  int get totalQuantity => state.totalQuantity;
+}
+
+/// Cart totals derived from state, exposed as an extension so widgets can
+/// `ref.watch(foodCartControllerProvider.select((s) => s.totalQuantity))` and
+/// rebuild only when the derived number changes — instead of watching the
+/// whole controller and rebuilding on every unrelated field change.
+extension FoodCartTotals on FoodCartState {
+  int get totalQuantity => items.fold(0, (sum, item) => sum + item.quantity);
+
   double get foodTotal {
     double total = 0.0;
-    for (final cartItem in state.items) {
+    for (final cartItem in items) {
       double itemPrice = cartItem.item.price;
       for (final mod in cartItem.selectedModifiers) {
         itemPrice += mod.price;
@@ -244,9 +256,5 @@ class FoodCartController extends _$FoodCartController {
       total += itemPrice * cartItem.quantity;
     }
     return total;
-  }
-
-  int get totalQuantity {
-    return state.items.fold(0, (sum, item) => sum + item.quantity);
   }
 }

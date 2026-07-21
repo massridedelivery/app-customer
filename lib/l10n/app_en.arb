@@ -208,5 +208,23 @@
   "searchError": "Search failed. Tap to retry.",
   "selectPickupFirst": "Please choose a pickup point first",
   "useCurrentLocation": "Use current location",
-  "clearField": "Clear text"
+  "clearField": "Clear text",
+  "promptPay": "PromptPay",
+  "selectPaymentMethod": "Select payment method",
+  "couponDiscount": "Coupon discount",
+  "selectVehicleFirst": "Choose a vehicle type first",
+  "couponApplied": "Coupon \"{code}\" applied",
+  "@couponApplied": {
+    "placeholders": {
+      "code": { "type": "String" }
+    }
+  },
+  "couponRemoved": "Coupon removed",
+  "requestRideWith": "Request {vehicle} · ฿{fare}",
+  "@requestRideWith": {
+    "placeholders": {
+      "vehicle": { "type": "String" },
+      "fare": { "type": "String" }
+    }
+  }
 }

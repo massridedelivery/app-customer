@@ -598,4 +598,29 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get clearField => 'Clear text';
+
+  @override
+  String get promptPay => 'PromptPay';
+
+  @override
+  String get selectPaymentMethod => 'Select payment method';
+
+  @override
+  String get couponDiscount => 'Coupon discount';
+
+  @override
+  String get selectVehicleFirst => 'Choose a vehicle type first';
+
+  @override
+  String couponApplied(String code) {
+    return 'Coupon \"$code\" applied';
+  }
+
+  @override
+  String get couponRemoved => 'Coupon removed';
+
+  @override
+  String requestRideWith(String vehicle, String fare) {
+    return 'Request $vehicle · ฿$fare';
+  }
 }

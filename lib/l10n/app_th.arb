@@ -208,5 +208,23 @@
   "searchError": "ค้นหาไม่สำเร็จ แตะเพื่อลองใหม่",
   "selectPickupFirst": "กรุณาเลือกจุดรับก่อน",
   "useCurrentLocation": "ใช้ตำแหน่งปัจจุบัน",
-  "clearField": "ล้างข้อความ"
+  "clearField": "ล้างข้อความ",
+  "promptPay": "พร้อมเพย์",
+  "selectPaymentMethod": "เลือกวิธีชำระเงิน",
+  "couponDiscount": "ส่วนลดคูปอง",
+  "selectVehicleFirst": "เลือกประเภทรถก่อน",
+  "couponApplied": "ใช้คูปอง \"{code}\" สำเร็จ",
+  "@couponApplied": {
+    "placeholders": {
+      "code": { "type": "String" }
+    }
+  },
+  "couponRemoved": "ยกเลิกคูปองเรียบร้อยแล้ว",
+  "requestRideWith": "เรียก {vehicle} · ฿{fare}",
+  "@requestRideWith": {
+    "placeholders": {
+      "vehicle": { "type": "String" },
+      "fare": { "type": "String" }
+    }
+  }
 }

@@ -17,10 +17,12 @@ class ActiveOrdersController extends _$ActiveOrdersController {
     return _fetchActiveOrders();
   }
 
-  Future<List<ActiveOrderItem>> _fetchActiveOrders() async {
+  Future<List<ActiveOrderItem>> _fetchActiveOrders({
+    bool forceRefresh = false,
+  }) async {
     try {
       final repository = ref.read(activeOrdersRepositoryProvider);
-      return await repository.getActiveOrders();
+      return await repository.getActiveOrders(forceRefresh: forceRefresh);
     } catch (e) {
       debugPrint('Error in ActiveOrdersController: $e');
       // Return empty list on failure instead of crashing the UI
@@ -30,6 +32,10 @@ class ActiveOrdersController extends _$ActiveOrdersController {
 
   Future<void> refresh() async {
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() => _fetchActiveOrders());
+    // Explicit refresh means "give me the latest" — bypass the repo's TTL cache
+    // (still coalesced with any in-flight request).
+    state = await AsyncValue.guard(
+      () => _fetchActiveOrders(forceRefresh: true),
+    );
   }
 }

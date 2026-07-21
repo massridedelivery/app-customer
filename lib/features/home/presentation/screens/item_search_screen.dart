@@ -5,6 +5,7 @@ import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/features/food_order/domain/models/food_models.dart';
 import 'package:customer_app/features/food_order/presentation/controllers/food_search_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:customer_app/core/widgets/app_network_image.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -169,22 +170,12 @@ class _ItemSearchScreenState extends ConsumerState<ItemSearchScreen> {
       onTap: () => context.push('/restaurant/${restaurant.id}'),
       leading: ClipRRect(
         borderRadius: BorderRadius.circular(8),
-        child: Image.network(
-          restaurant.imageUrl ??
-              'https://plus.unsplash.com/premium_photo-1694141253763-209b4c8f8ace?w=400',
+        child: AppNetworkImage(
+          url: restaurant.imageUrl,
           width: 50,
           height: 50,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) => Container(
-            width: 50,
-            height: 50,
-            color: Colors.grey[200],
-            child: const Icon(
-              Icons.image_not_supported,
-              color: Colors.grey,
-              size: 20,
-            ),
-          ),
+          fallbackIcon: Icons.image_not_supported,
+          fallbackIconSize: 20,
         ),
       ),
       title: Text(

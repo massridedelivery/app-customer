@@ -8,6 +8,7 @@ import 'package:customer_app/features/home/presentation/states/home_state.dart';
 import 'package:customer_app/features/home/presentation/widgets/app_drawer.dart';
 import 'package:customer_app/features/active_orders/presentation/widgets/active_orders_banner.dart';
 import 'package:flutter/material.dart';
+import 'package:customer_app/core/widgets/app_network_image.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -622,11 +623,10 @@ class _ServiceSelectionScreenState
               borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(16),
               ),
-              child: Image.network(
-                item.image,
-                height: 110,
+              child: AppNetworkImage(
+                url: item.image,
                 width: double.infinity,
-                fit: BoxFit.cover,
+                height: 110,
               ),
             ),
             Padding(
@@ -749,11 +749,10 @@ class _ServiceSelectionScreenState
               borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(16),
               ),
-              child: Image.network(
-                item.image,
-                height: 120,
+              child: AppNetworkImage(
+                url: item.image,
                 width: double.infinity,
-                fit: BoxFit.cover,
+                height: 120,
               ),
             ),
             Padding(

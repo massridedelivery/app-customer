@@ -1,5 +1,6 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
+import 'package:customer_app/core/widgets/app_network_image.dart';
 import 'package:customer_app/features/food_order/domain/models/food_models.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -31,34 +32,13 @@ class RestaurantFeedWidget extends StatelessWidget {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(12),
-                  child: (rest.imageUrl != null && rest.imageUrl!.isNotEmpty)
-                      ? Image.network(
-                          rest.imageUrl!,
-                          width: 100,
-                          height: 100,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) =>
-                              Container(
-                                width: 100,
-                                height: 100,
-                                color: Colors.grey[100],
-                                child: const Icon(
-                                  Icons.restaurant,
-                                  color: Colors.grey,
-                                  size: 28,
-                                ),
-                              ),
-                        )
-                      : Container(
-                          width: 100,
-                          height: 100,
-                          color: Colors.grey[100],
-                          child: const Icon(
-                            Icons.restaurant,
-                            color: Colors.grey,
-                            size: 28,
-                          ),
-                        ),
+                  child: AppNetworkImage(
+                    url: rest.imageUrl,
+                    width: 100,
+                    height: 100,
+                    fallbackIcon: Icons.restaurant,
+                    fallbackIconSize: 28,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(

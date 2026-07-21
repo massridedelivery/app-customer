@@ -3,9 +3,16 @@ import 'package:customer_app/core/services/api_service.dart';
 import 'package:customer_app/features/trips/domain/models/history_order.dart';
 import 'package:customer_app/features/trips/domain/repositories/i_trips_repository.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'trips_repository_impl.g.dart';
+
+// Runs in a background isolate via compute() — HistoryResponse wraps a list of
+// the deeply-nested HistoryOrder, whose fromJson does enough allocation to drop
+// frames if parsed on the UI isolate while the history list is scrolling.
+HistoryResponse _parseHistoryResponse(Map<String, dynamic> json) =>
+    HistoryResponse.fromJson(json);
 
 @riverpod
 ITripsRepository tripsRepository(Ref ref) {
@@ -38,7 +45,14 @@ class TripsRepositoryImpl implements ITripsRepository {
         '/api/customer/history',
         queryParameters: queryParams,
       );
-      return HistoryResponse.fromJson(response.data as Map<String, dynamic>);
+      final json = response.data as Map<String, dynamic>;
+      try {
+        return await compute(_parseHistoryResponse, json);
+      } catch (_) {
+        // Defensive: if the model can't cross the isolate boundary, fall back
+        // to parsing here. Same result — just not offloaded from the UI thread.
+        return _parseHistoryResponse(json);
+      }
     } on DioException catch (e) {
       throw Exception(
         e.response?.data['message'] ?? 'Failed to fetch history orders',

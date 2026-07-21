@@ -12,6 +12,7 @@ import 'package:customer_app/features/food_order/presentation/widgets/for_you_se
 import 'package:customer_app/features/food_order/presentation/widgets/restaurant_info_card.dart';
 import 'package:customer_app/features/home/presentation/widgets/menu_item_bottom_sheet.dart';
 import 'package:flutter/material.dart';
+import 'package:customer_app/core/widgets/app_network_image.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class RestaurantDetailScreen extends ConsumerWidget {
@@ -321,9 +322,8 @@ class RestaurantDetailScreen extends ConsumerWidget {
               children: [
                 Opacity(
                   opacity: (1.0 - t).clamp(0.0, 1.0),
-                  child: Image.network(
-                    restaurant.imageUrl ??
-                        'https://plus.unsplash.com/premium_photo-1694141253763-209b4c8f8ace?w=600',
+                  child: AppNetworkImage(
+                    url: restaurant.imageUrl,
                     fit: BoxFit.cover,
                   ),
                 ),

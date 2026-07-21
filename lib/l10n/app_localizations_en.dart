@@ -580,4 +580,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get setAsDefaultAddress => 'Set as default address';
+
+  @override
+  String get noRecentSearches => 'No recent searches yet';
+
+  @override
+  String get recommendedEmpty => 'No recommendations yet';
+
+  @override
+  String get searchError => 'Search failed. Tap to retry.';
+
+  @override
+  String get selectPickupFirst => 'Please choose a pickup point first';
+
+  @override
+  String get useCurrentLocation => 'Use current location';
+
+  @override
+  String get clearField => 'Clear text';
 }

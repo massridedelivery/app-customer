@@ -17,24 +17,36 @@ class PlaceSearchController extends _$PlaceSearchController {
   PlaceSearchState build() => const PlaceSearchState();
 
   Future<void> search(String query) async {
-    if (query.isEmpty) {
+    final trimmed = query.trim();
+    if (trimmed.isEmpty) {
       state = const PlaceSearchState();
       return;
     }
 
-    state = state.copyWith(isSearching: true);
+    state = state.copyWith(
+      query: trimmed,
+      isSearching: true,
+      hasError: false,
+    );
     try {
       // Read the current location once, without subscribing to home state.
       final location = ref.read(homeControllerProvider).currentLocation;
       final predictions = await ref
           .read(searchPlacesUseCaseProvider)
-          .call(query, lat: location?.latitude, lng: location?.longitude);
+          .call(trimmed, lat: location?.latitude, lng: location?.longitude);
       state = state.copyWith(results: predictions, isSearching: false);
     } catch (e) {
       debugPrint('Search failed: $e');
-      state = state.copyWith(results: const [], isSearching: false);
+      state = state.copyWith(
+        results: const [],
+        isSearching: false,
+        hasError: true,
+      );
     }
   }
+
+  /// Re-runs the last query — used by the error state's retry action.
+  Future<void> retry() => search(state.query);
 
   /// Resolves a selected autocomplete [prediction] into a full [Place] with
   /// coordinates via a Place Details lookup. Returns null on failure.

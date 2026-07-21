@@ -1225,6 +1225,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Set as default address'**
   String get setAsDefaultAddress;
+
+  /// No description provided for @noRecentSearches.
+  ///
+  /// In en, this message translates to:
+  /// **'No recent searches yet'**
+  String get noRecentSearches;
+
+  /// No description provided for @recommendedEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No recommendations yet'**
+  String get recommendedEmpty;
+
+  /// No description provided for @searchError.
+  ///
+  /// In en, this message translates to:
+  /// **'Search failed. Tap to retry.'**
+  String get searchError;
+
+  /// No description provided for @selectPickupFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Please choose a pickup point first'**
+  String get selectPickupFirst;
+
+  /// No description provided for @useCurrentLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Use current location'**
+  String get useCurrentLocation;
+
+  /// No description provided for @clearField.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear text'**
+  String get clearField;
 }
 
 class _AppLocalizationsDelegate

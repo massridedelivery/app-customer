@@ -60,7 +60,9 @@ class _SearchInputContainerState extends State<SearchInputContainer> {
       decoration: BoxDecoration(
         color: Colors.white,
         border: Border.all(
-          color: hasFocus ? AppColors.primary : Colors.grey.shade300,
+          color: hasFocus
+              ? AppColors.primary
+              : AppColors.semanticGrayNeutralBorderMidgray,
           width: hasFocus ? 1.5 : 1,
         ),
         borderRadius: BorderRadius.circular(12),
@@ -82,19 +84,25 @@ class PlaceSearchMainContent extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final searchResults = ref.watch(
-      placeSearchControllerProvider.select((s) => s.results),
-    );
-    final isSearching = ref.watch(
-      placeSearchControllerProvider.select((s) => s.isSearching),
-    );
+    final l10n = AppLocalizations.of(context)!;
+    final searchState = ref.watch(placeSearchControllerProvider);
 
-    if (searchResults.isNotEmpty) {
+    if (searchState.hasError) {
+      return Expanded(
+        child: _SearchErrorView(
+          message: l10n.searchError,
+          onRetry: () =>
+              ref.read(placeSearchControllerProvider.notifier).retry(),
+        ),
+      );
+    }
+
+    if (searchState.results.isNotEmpty) {
       return Expanded(
         child: ListView.builder(
-          itemCount: searchResults.length,
+          itemCount: searchState.results.length,
           itemBuilder: (context, index) {
-            final PlacePrediction p = searchResults[index];
+            final PlacePrediction p = searchState.results[index];
             return SearchItem(
               title: p.mainText.isNotEmpty ? p.mainText : p.description,
               subtitle: p.secondaryText,
@@ -107,10 +115,8 @@ class PlaceSearchMainContent extends ConsumerWidget {
       );
     }
 
-    if (isSearching) {
-      return const Expanded(
-        child: Center(child: CircularProgressIndicator()),
-      );
+    if (searchState.isSearching) {
+      return const Expanded(child: Center(child: CircularProgressIndicator()));
     }
 
     return Expanded(
@@ -121,18 +127,23 @@ class PlaceSearchMainContent extends ConsumerWidget {
             places: ref.watch(
               homeControllerProvider.select((s) => s.recentPlaces),
             ),
-            emptyText: AppLocalizations.of(context)!.recent,
+            emptyMessage: l10n.noRecentSearches,
+            emptyIcon: Icons.history,
             icon: Icons.access_time_filled,
             onSelectPlace: onSelectPlace,
           ),
-          Center(child: Text(AppLocalizations.of(context)!.recommended)),
+          _PlaceSearchEmpty(
+            icon: Icons.star_outline,
+            message: l10n.recommendedEmpty,
+          ),
           PlaceSearchPlaceList(
             places: ref.watch(
               homeControllerProvider.select((s) => s.savedPlaces),
             ),
-            emptyText: AppLocalizations.of(context)!.saved,
+            emptyMessage: l10n.noSavedPlaces,
+            emptyIcon: Icons.favorite_border,
             icon: Icons.favorite,
-            iconColor: Colors.redAccent,
+            iconColor: AppColors.secondaryRed,
             onSelectPlace: onSelectPlace,
           ),
         ],
@@ -145,17 +156,15 @@ class PlaceSearchMainContent extends ConsumerWidget {
         .read(placeSearchControllerProvider.notifier)
         .resolveDetails(p);
     if (place == null) return;
-    onSelectPlace(
-      LatLng(place.lat, place.lng),
-      place.address ?? place.name,
-    );
+    onSelectPlace(LatLng(place.lat, place.lng), place.address ?? place.name);
   }
 }
 
 /// Renders a list of [Place]s (recent or saved) with a shared empty state.
 class PlaceSearchPlaceList extends StatelessWidget {
   final List<Place> places;
-  final String emptyText;
+  final String emptyMessage;
+  final IconData emptyIcon;
   final IconData icon;
   final Color iconColor;
   final void Function(LatLng, String) onSelectPlace;
@@ -163,7 +172,8 @@ class PlaceSearchPlaceList extends StatelessWidget {
   const PlaceSearchPlaceList({
     super.key,
     required this.places,
-    required this.emptyText,
+    required this.emptyMessage,
+    required this.emptyIcon,
     required this.icon,
     required this.onSelectPlace,
     this.iconColor = Colors.blueGrey,
@@ -172,12 +182,7 @@ class PlaceSearchPlaceList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (places.isEmpty) {
-      return Center(
-        child: Text(
-          emptyText,
-          style: AppTypography.body2.copyWith(color: Colors.grey),
-        ),
-      );
+      return _PlaceSearchEmpty(icon: emptyIcon, message: emptyMessage);
     }
     return ListView.builder(
       itemCount: places.length,
@@ -188,12 +193,76 @@ class PlaceSearchPlaceList extends StatelessWidget {
           subtitle: p.address ?? '',
           icon: icon,
           iconColor: iconColor,
-          onTap: () => onSelectPlace(
-            LatLng(p.lat, p.lng),
-            p.address ?? p.name,
-          ),
+          onTap: () => onSelectPlace(LatLng(p.lat, p.lng), p.address ?? p.name),
         );
       },
+    );
+  }
+}
+
+/// Shared empty-state placeholder: a muted icon above a short message.
+class _PlaceSearchEmpty extends StatelessWidget {
+  final IconData icon;
+  final String message;
+
+  const _PlaceSearchEmpty({required this.icon, required this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 40, color: AppColors.semanticGrayNeutralFgLowOnWhite),
+          const SizedBox(height: 12),
+          Text(
+            message,
+            textAlign: TextAlign.center,
+            style: AppTypography.body2.copyWith(
+              color: AppColors.semanticGrayNeutralFgMidOnWhite,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Error placeholder with a retry affordance for a failed autocomplete call.
+class _SearchErrorView extends StatelessWidget {
+  final String message;
+  final VoidCallback onRetry;
+
+  const _SearchErrorView({required this.message, required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: InkWell(
+        onTap: onRetry,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.cloud_off_outlined,
+                size: 40,
+                color: AppColors.semanticGrayNeutralFgLowOnWhite,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                message,
+                textAlign: TextAlign.center,
+                style: AppTypography.body2.copyWith(
+                  color: AppColors.semanticGrayNeutralFgMidOnWhite,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -221,7 +290,7 @@ class SearchItem extends StatelessWidget {
         leading: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: Colors.grey[100],
+            color: AppColors.semanticGrayNeutralBgLightgray,
             shape: BoxShape.circle,
           ),
           child: Icon(icon, color: iconColor, size: 24),
@@ -232,13 +301,16 @@ class SearchItem extends StatelessWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
-        subtitle: Text(
-          subtitle,
-          style: AppTypography.caption5.copyWith(color: Colors.grey),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        trailing: const Icon(Icons.more_vert, color: Colors.grey),
+        subtitle: subtitle.isEmpty
+            ? null
+            : Text(
+                subtitle,
+                style: AppTypography.caption5.copyWith(
+                  color: AppColors.semanticGrayNeutralFgMidOnWhite,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
         onTap: onTap,
       ),
     );

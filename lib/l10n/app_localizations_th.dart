@@ -580,4 +580,22 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get setAsDefaultAddress => 'ตั้งเป็นที่อยู่เริ่มต้น';
+
+  @override
+  String get noRecentSearches => 'ยังไม่มีการค้นหาล่าสุด';
+
+  @override
+  String get recommendedEmpty => 'ยังไม่มีรายการแนะนำ';
+
+  @override
+  String get searchError => 'ค้นหาไม่สำเร็จ แตะเพื่อลองใหม่';
+
+  @override
+  String get selectPickupFirst => 'กรุณาเลือกจุดรับก่อน';
+
+  @override
+  String get useCurrentLocation => 'ใช้ตำแหน่งปัจจุบัน';
+
+  @override
+  String get clearField => 'ล้างข้อความ';
 }

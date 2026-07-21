@@ -153,6 +153,15 @@
   "resendCode": "ส่งรหัสอีกครั้ง",
   "needHelp": "ต้องการความช่วยเหลือ?",
   "helpSubMsg": "หากคุณไม่ได้รับรหัสภายใน 2 นาที โปรดตรวจสอบเครือข่ายของคุณหรือติดต่อฝ่ายสนับสนุน",
+  "resendCodeIn": "ส่งรหัสอีกครั้งใน {time}",
+  "@resendCodeIn": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "otpResent": "ส่งรหัสใหม่ไปยังเบอร์ของคุณแล้ว",
   "createYourAccount": "สร้างบัญชีของคุณ",
   "fullName": "ชื่อ-นามสกุล",
   "createAccount": "สร้างบัญชี",
@@ -193,5 +202,29 @@
   "noteToRider": "โน้ตถึงคนขับ",
   "noteToRiderHint": "เช่น บ้านสีขาวหลังคาเขียว",
   "cannotSaveAddress": "ไม่สามารถบันทึกที่อยู่ได้ในขณะนี้",
-  "setAsDefaultAddress": "ตั้งเป็นที่อยู่เริ่มต้น"
+  "setAsDefaultAddress": "ตั้งเป็นที่อยู่เริ่มต้น",
+  "noRecentSearches": "ยังไม่มีการค้นหาล่าสุด",
+  "recommendedEmpty": "ยังไม่มีรายการแนะนำ",
+  "searchError": "ค้นหาไม่สำเร็จ แตะเพื่อลองใหม่",
+  "selectPickupFirst": "กรุณาเลือกจุดรับก่อน",
+  "useCurrentLocation": "ใช้ตำแหน่งปัจจุบัน",
+  "clearField": "ล้างข้อความ",
+  "promptPay": "พร้อมเพย์",
+  "selectPaymentMethod": "เลือกวิธีชำระเงิน",
+  "couponDiscount": "ส่วนลดคูปอง",
+  "selectVehicleFirst": "เลือกประเภทรถก่อน",
+  "couponApplied": "ใช้คูปอง \"{code}\" สำเร็จ",
+  "@couponApplied": {
+    "placeholders": {
+      "code": { "type": "String" }
+    }
+  },
+  "couponRemoved": "ยกเลิกคูปองเรียบร้อยแล้ว",
+  "requestRideWith": "เรียก {vehicle} · ฿{fare}",
+  "@requestRideWith": {
+    "placeholders": {
+      "vehicle": { "type": "String" },
+      "fare": { "type": "String" }
+    }
+  }
 }

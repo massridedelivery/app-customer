@@ -1,0 +1,3 @@
+// Assign to the "Debug-dev" build configuration in Xcode.
+#include "Debug.xcconfig"
+#include "Dev.xcconfig"

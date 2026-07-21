@@ -451,6 +451,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'If you haven\'t received the code after 2 minutes, please check your network or contact support.';
 
   @override
+  String resendCodeIn(String time) {
+    return 'Resend code in $time';
+  }
+
+  @override
+  String get otpResent => 'A new code has been sent to your number';
+
+  @override
   String get createYourAccount => 'Create your account';
 
   @override
@@ -572,4 +580,47 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get setAsDefaultAddress => 'Set as default address';
+
+  @override
+  String get noRecentSearches => 'No recent searches yet';
+
+  @override
+  String get recommendedEmpty => 'No recommendations yet';
+
+  @override
+  String get searchError => 'Search failed. Tap to retry.';
+
+  @override
+  String get selectPickupFirst => 'Please choose a pickup point first';
+
+  @override
+  String get useCurrentLocation => 'Use current location';
+
+  @override
+  String get clearField => 'Clear text';
+
+  @override
+  String get promptPay => 'PromptPay';
+
+  @override
+  String get selectPaymentMethod => 'Select payment method';
+
+  @override
+  String get couponDiscount => 'Coupon discount';
+
+  @override
+  String get selectVehicleFirst => 'Choose a vehicle type first';
+
+  @override
+  String couponApplied(String code) {
+    return 'Coupon \"$code\" applied';
+  }
+
+  @override
+  String get couponRemoved => 'Coupon removed';
+
+  @override
+  String requestRideWith(String vehicle, String fare) {
+    return 'Request $vehicle · ฿$fare';
+  }
 }

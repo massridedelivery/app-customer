@@ -17,6 +17,8 @@ class PickupSelectionScreen extends ConsumerStatefulWidget {
 
 class _PickupSelectionScreenState extends ConsumerState<PickupSelectionScreen> {
   GoogleMapController? _mapController;
+  // Guards the one-shot recenter below so we never fight the user's panning.
+  bool _centeredOnTarget = false;
 
   @override
   Widget build(BuildContext context) {
@@ -26,6 +28,22 @@ class _PickupSelectionScreenState extends ConsumerState<PickupSelectionScreen> {
       homeControllerProvider.select(
         (s) => s.pickupLocation ?? s.currentLocation,
       ),
+    );
+
+    // GoogleMap.initialCameraPosition is only read once at creation, so when
+    // GPS resolves afterwards the camera stays on the fallback. Recenter once
+    // the moment the target first becomes available.
+    ref.listen(
+      homeControllerProvider.select((s) => s.pickupLocation ?? s.currentLocation),
+      (prev, next) {
+        if (!_centeredOnTarget &&
+            next != null &&
+            prev != next &&
+            _mapController != null) {
+          _centeredOnTarget = true;
+          _mapController!.animateCamera(CameraUpdate.newLatLng(next));
+        }
+      },
     );
 
     return Scaffold(

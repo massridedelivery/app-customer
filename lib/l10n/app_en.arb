@@ -153,6 +153,15 @@
   "resendCode": "RESEND CODE",
   "needHelp": "Need help?",
   "helpSubMsg": "If you haven't received the code after 2 minutes, please check your network or contact support.",
+  "resendCodeIn": "Resend code in {time}",
+  "@resendCodeIn": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "otpResent": "A new code has been sent to your number",
   "createYourAccount": "Create your account",
   "fullName": "Full Name",
   "createAccount": "Create Account",
@@ -193,5 +202,29 @@
   "noteToRider": "Note to rider",
   "noteToRiderHint": "e.g. White house with green roof",
   "cannotSaveAddress": "Cannot save address at this time",
-  "setAsDefaultAddress": "Set as default address"
+  "setAsDefaultAddress": "Set as default address",
+  "noRecentSearches": "No recent searches yet",
+  "recommendedEmpty": "No recommendations yet",
+  "searchError": "Search failed. Tap to retry.",
+  "selectPickupFirst": "Please choose a pickup point first",
+  "useCurrentLocation": "Use current location",
+  "clearField": "Clear text",
+  "promptPay": "PromptPay",
+  "selectPaymentMethod": "Select payment method",
+  "couponDiscount": "Coupon discount",
+  "selectVehicleFirst": "Choose a vehicle type first",
+  "couponApplied": "Coupon \"{code}\" applied",
+  "@couponApplied": {
+    "placeholders": {
+      "code": { "type": "String" }
+    }
+  },
+  "couponRemoved": "Coupon removed",
+  "requestRideWith": "Request {vehicle} · ฿{fare}",
+  "@requestRideWith": {
+    "placeholders": {
+      "vehicle": { "type": "String" },
+      "fare": { "type": "String" }
+    }
+  }
 }

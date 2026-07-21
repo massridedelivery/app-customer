@@ -58,10 +58,12 @@ jobs:
       # --config-only compiles no binary; it writes the dart-defines, version
       # name (from pubspec.yaml) and build number into ios/Flutter/Generated.xcconfig
       # so the subsequent fastlane/gym archive picks them up.
+      # --flavor prod selects the `prod` scheme / Release-prod configuration,
+      # which resolves BUNDLE_ID_SUFFIX to empty -> com.massdrive.customerApp.
       # Build number = run number + 10, matching the Android pipeline's scheme.
       - name: Configure iOS build (dart-defines + build number)
         run: |
-          flutter build ios --config-only --release \
+          flutter build ios --config-only --release --flavor prod \
             --dart-define-from-file=env/prod.json \
             --build-number=$((GITHUB_RUN_NUMBER + 10))
 

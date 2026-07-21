@@ -968,6 +968,18 @@ abstract class AppLocalizations {
   /// **'If you haven\'t received the code after 2 minutes, please check your network or contact support.'**
   String get helpSubMsg;
 
+  /// No description provided for @resendCodeIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend code in {time}'**
+  String resendCodeIn(String time);
+
+  /// No description provided for @otpResent.
+  ///
+  /// In en, this message translates to:
+  /// **'A new code has been sent to your number'**
+  String get otpResent;
+
   /// No description provided for @createYourAccount.
   ///
   /// In en, this message translates to:
@@ -1213,6 +1225,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Set as default address'**
   String get setAsDefaultAddress;
+
+  /// No description provided for @noRecentSearches.
+  ///
+  /// In en, this message translates to:
+  /// **'No recent searches yet'**
+  String get noRecentSearches;
+
+  /// No description provided for @recommendedEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No recommendations yet'**
+  String get recommendedEmpty;
+
+  /// No description provided for @searchError.
+  ///
+  /// In en, this message translates to:
+  /// **'Search failed. Tap to retry.'**
+  String get searchError;
+
+  /// No description provided for @selectPickupFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Please choose a pickup point first'**
+  String get selectPickupFirst;
+
+  /// No description provided for @useCurrentLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Use current location'**
+  String get useCurrentLocation;
+
+  /// No description provided for @clearField.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear text'**
+  String get clearField;
+
+  /// No description provided for @promptPay.
+  ///
+  /// In en, this message translates to:
+  /// **'PromptPay'**
+  String get promptPay;
+
+  /// No description provided for @selectPaymentMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Select payment method'**
+  String get selectPaymentMethod;
+
+  /// No description provided for @couponDiscount.
+  ///
+  /// In en, this message translates to:
+  /// **'Coupon discount'**
+  String get couponDiscount;
+
+  /// No description provided for @selectVehicleFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a vehicle type first'**
+  String get selectVehicleFirst;
+
+  /// No description provided for @couponApplied.
+  ///
+  /// In en, this message translates to:
+  /// **'Coupon \"{code}\" applied'**
+  String couponApplied(String code);
+
+  /// No description provided for @couponRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Coupon removed'**
+  String get couponRemoved;
+
+  /// No description provided for @requestRideWith.
+  ///
+  /// In en, this message translates to:
+  /// **'Request {vehicle} · ฿{fare}'**
+  String requestRideWith(String vehicle, String fare);
 }
 
 class _AppLocalizationsDelegate

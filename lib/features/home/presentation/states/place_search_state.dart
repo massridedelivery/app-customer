@@ -11,5 +11,7 @@ abstract class PlaceSearchState with _$PlaceSearchState {
   const factory PlaceSearchState({
     @Default([]) List<PlacePrediction> results,
     @Default(false) bool isSearching,
+    @Default(false) bool hasError,
+    @Default('') String query,
   }) = _PlaceSearchState;
 }

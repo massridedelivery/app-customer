@@ -16,6 +16,10 @@ class ApiService {
   // --dart-define-from-file; defaults to dev.
   static const String baseUrl = Env.apiBaseUrl;
 
+  // Marks a request that has already been replayed after a token refresh, so a
+  // subsequent 401 logs out instead of triggering another refresh (loop guard).
+  static const String _retriedFlag = 'retried_after_refresh';
+
   Completer<bool>? _refreshCompleter;
 
   ApiService(this._tokenStorage, this._ref)
@@ -56,35 +60,47 @@ class ApiService {
           return handler.next(options);
         },
         onError: (DioException error, handler) async {
-          // Handle 401 Unauthorized for Refresh Token logic
-          if (error.response?.statusCode == 401) {
-            if (_tokenStorage.hasToken) {
-              // Use a completer to handle concurrent refresh attempts
-              if (_refreshCompleter != null) {
-                final isRefreshed = await _refreshCompleter!.future;
-                if (isRefreshed) {
-                  return _retry(error, handler);
-                }
-              }
-
-              _refreshCompleter = Completer<bool>();
-              final isRefreshed = await _refreshToken();
-              _refreshCompleter!.complete(isRefreshed);
-              _refreshCompleter = null;
-
-              if (isRefreshed) {
-                return _retry(error, handler);
-              } else {
-                _handleLogout();
-                return handler.next(error);
-              }
-            } else {
-              // No token in storage, but got 401? Force logout for safety.
-              _handleLogout();
-              return handler.next(error);
-            }
+          // Only 401s go through the refresh flow; everything else surfaces.
+          if (error.response?.statusCode != 401) {
+            return handler.next(error);
           }
-          return handler.next(error);
+
+          // A request that already carried a freshly refreshed token and STILL
+          // got 401 means the new token is genuinely rejected. Don't refresh
+          // again (which would loop) — log out once and surface the error.
+          if (error.requestOptions.extra[_retriedFlag] == true) {
+            _handleLogout();
+            return handler.next(error);
+          }
+
+          if (!_tokenStorage.hasToken) {
+            // No token in storage, but got 401? Force logout for safety.
+            _handleLogout();
+            return handler.next(error);
+          }
+
+          // Coalesce concurrent 401s onto a single in-flight refresh.
+          if (_refreshCompleter != null) {
+            final isRefreshed = await _refreshCompleter!.future;
+            if (isRefreshed) {
+              return _retry(error, handler);
+            }
+            // The shared refresh failed; the initiator already logged out, so
+            // just surface the error instead of starting another refresh.
+            return handler.next(error);
+          }
+
+          _refreshCompleter = Completer<bool>();
+          final isRefreshed = await _refreshToken();
+          _refreshCompleter!.complete(isRefreshed);
+          _refreshCompleter = null;
+
+          if (isRefreshed) {
+            return _retry(error, handler);
+          } else {
+            _handleLogout();
+            return handler.next(error);
+          }
         },
       ),
     );
@@ -96,9 +112,13 @@ class ApiService {
   ) async {
     final opts = Options(
       method: error.requestOptions.method,
-      headers: error.requestOptions.headers,
+      headers: Map<String, dynamic>.from(error.requestOptions.headers),
+      // Tag the replay so a second 401 logs out instead of looping (see
+      // onError). The tag rides on requestOptions.extra of the cloned request.
+      extra: {...error.requestOptions.extra, _retriedFlag: true},
     );
-    opts.headers?['Authorization'] = 'Bearer ${_tokenStorage.getAccessToken()}';
+    opts.headers!['Authorization'] =
+        'Bearer ${_tokenStorage.getAccessToken()}';
 
     try {
       final cloneReq = await _dio.request(
@@ -109,15 +129,29 @@ class ApiService {
       );
       return handler.resolve(cloneReq);
     } catch (e) {
-      _handleLogout();
+      // Do NOT log out here: a genuine auth failure on the replay is a 401,
+      // which the interceptor's onError already handled via the retried flag.
+      // Reaching this catch means a transport/5xx/timeout error — the session
+      // is still valid, so surface the failure without dropping it.
       return handler.next(error);
     }
   }
 
   void _handleLogout() {
     _tokenStorage.clearTokens();
-    // Trigger the AuthController to reset its state, which will trigger the router redirect
-    _ref.read(authControllerProvider.notifier).logout();
+    // Reset auth state on a microtask. Calling AuthController.logout() straight
+    // from this interceptor re-enters ApiService's own provider (logout reads
+    // providers that transitively depend on ApiService) and throws
+    // CircularDependencyError; deferring runs it after the current chain unwinds
+    // so the router redirect still fires.
+    Future.microtask(() {
+      try {
+        _ref.read(authControllerProvider.notifier).logout();
+      } catch (_) {
+        // Tokens are already cleared above, so the router redirect still lands
+        // the user on login even if the controller can't be reached here.
+      }
+    });
   }
 
   Future<bool> _refreshToken() async {

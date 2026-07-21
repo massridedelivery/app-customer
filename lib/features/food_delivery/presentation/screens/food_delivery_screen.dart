@@ -11,6 +11,7 @@ import 'package:customer_app/features/home/presentation/controllers/home_control
 import 'package:customer_app/features/food_order/presentation/screens/checkout_screen.dart';
 import 'package:customer_app/features/active_orders/presentation/widgets/active_orders_banner.dart';
 import 'package:flutter/material.dart';
+import 'package:customer_app/core/widgets/app_network_image.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:customer_app/features/food_order/domain/models/food_models.dart';
 import 'package:go_router/go_router.dart';
@@ -166,25 +167,10 @@ class _FoodDeliveryScreenState extends ConsumerState<FoodDeliveryScreen> {
                                               child: ClipRRect(
                                                 borderRadius:
                                                     BorderRadius.circular(16),
-                                                child: Image.network(
-                                                  item.imageUrl ?? '',
+                                                child: AppNetworkImage(
+                                                  url: item.imageUrl,
                                                   width: 220,
                                                   height: 130,
-                                                  fit: BoxFit.cover,
-                                                  errorBuilder:
-                                                      (
-                                                        context,
-                                                        error,
-                                                        stackTrace,
-                                                      ) => Container(
-                                                        width: 220,
-                                                        height: 130,
-                                                        color: Colors.grey[200],
-                                                        child: const Icon(
-                                                          Icons.image,
-                                                          color: Colors.grey,
-                                                        ),
-                                                      ),
                                                 ),
                                               ),
                                             ),
@@ -541,25 +527,12 @@ class _FoodDeliveryScreenState extends ConsumerState<FoodDeliveryScreen> {
               borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(16),
               ),
-              child: (item.imageUrl != null && item.imageUrl!.isNotEmpty)
-                  ? Image.network(
-                      item.imageUrl!,
-                      width: 120,
-                      height: 105,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => Container(
-                        width: 120,
-                        height: 105,
-                        color: Colors.grey[100],
-                        child: const Icon(Icons.restaurant, color: Colors.grey),
-                      ),
-                    )
-                  : Container(
-                      width: 120,
-                      height: 105,
-                      color: Colors.grey[100],
-                      child: const Icon(Icons.restaurant, color: Colors.grey),
-                    ),
+              child: AppNetworkImage(
+                url: item.imageUrl,
+                width: 120,
+                height: 105,
+                fallbackIcon: Icons.restaurant,
+              ),
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
@@ -620,32 +593,12 @@ class _FoodDeliveryScreenState extends ConsumerState<FoodDeliveryScreen> {
                   borderRadius: const BorderRadius.vertical(
                     top: Radius.circular(16),
                   ),
-                  child: (item.imageUrl != null && item.imageUrl!.isNotEmpty)
-                      ? Image.network(
-                          item.imageUrl!,
-                          width: 175,
-                          height: 110,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) =>
-                              Container(
-                                width: 175,
-                                height: 110,
-                                color: Colors.grey[100],
-                                child: const Icon(
-                                  Icons.restaurant,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                        )
-                      : Container(
-                          width: 175,
-                          height: 110,
-                          color: Colors.grey[100],
-                          child: const Icon(
-                            Icons.restaurant,
-                            color: Colors.grey,
-                          ),
-                        ),
+                  child: AppNetworkImage(
+                    url: item.imageUrl,
+                    width: 175,
+                    height: 110,
+                    fallbackIcon: Icons.restaurant,
+                  ),
                 ),
                 if (hasAd)
                   Positioned(

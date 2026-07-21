@@ -4,6 +4,7 @@ import 'package:customer_app/features/food_delivery/data/repositories/food_disco
 import 'package:customer_app/features/food_order/domain/models/food_models.dart';
 import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:customer_app/core/widgets/app_network_image.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -168,20 +169,11 @@ class CategoryListScreen extends ConsumerWidget {
                   borderRadius: const BorderRadius.vertical(
                     top: Radius.circular(16),
                   ),
-                  child: Image.network(
-                    restaurant.imageUrl ??
-                        'https://plus.unsplash.com/premium_photo-1694141253763-209b4c8f8ace?w=400',
-                    height: 120,
+                  child: AppNetworkImage(
+                    url: restaurant.imageUrl,
                     width: double.infinity,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => Container(
-                      height: 120,
-                      color: Colors.grey[200],
-                      child: const Icon(
-                        Icons.image_not_supported,
-                        color: Colors.grey,
-                      ),
-                    ),
+                    height: 120,
+                    fallbackIcon: Icons.image_not_supported,
                   ),
                 ),
                 if (!restaurant.isOpen)

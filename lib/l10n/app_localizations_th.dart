@@ -451,6 +451,14 @@ class AppLocalizationsTh extends AppLocalizations {
       'หากคุณไม่ได้รับรหัสภายใน 2 นาที โปรดตรวจสอบเครือข่ายของคุณหรือติดต่อฝ่ายสนับสนุน';
 
   @override
+  String resendCodeIn(String time) {
+    return 'ส่งรหัสอีกครั้งใน $time';
+  }
+
+  @override
+  String get otpResent => 'ส่งรหัสใหม่ไปยังเบอร์ของคุณแล้ว';
+
+  @override
   String get createYourAccount => 'สร้างบัญชีของคุณ';
 
   @override
@@ -572,4 +580,47 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get setAsDefaultAddress => 'ตั้งเป็นที่อยู่เริ่มต้น';
+
+  @override
+  String get noRecentSearches => 'ยังไม่มีการค้นหาล่าสุด';
+
+  @override
+  String get recommendedEmpty => 'ยังไม่มีรายการแนะนำ';
+
+  @override
+  String get searchError => 'ค้นหาไม่สำเร็จ แตะเพื่อลองใหม่';
+
+  @override
+  String get selectPickupFirst => 'กรุณาเลือกจุดรับก่อน';
+
+  @override
+  String get useCurrentLocation => 'ใช้ตำแหน่งปัจจุบัน';
+
+  @override
+  String get clearField => 'ล้างข้อความ';
+
+  @override
+  String get promptPay => 'พร้อมเพย์';
+
+  @override
+  String get selectPaymentMethod => 'เลือกวิธีชำระเงิน';
+
+  @override
+  String get couponDiscount => 'ส่วนลดคูปอง';
+
+  @override
+  String get selectVehicleFirst => 'เลือกประเภทรถก่อน';
+
+  @override
+  String couponApplied(String code) {
+    return 'ใช้คูปอง \"$code\" สำเร็จ';
+  }
+
+  @override
+  String get couponRemoved => 'ยกเลิกคูปองเรียบร้อยแล้ว';
+
+  @override
+  String requestRideWith(String vehicle, String fare) {
+    return 'เรียก $vehicle · ฿$fare';
+  }
 }

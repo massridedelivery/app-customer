@@ -1,8 +1,11 @@
 default_platform(:ios)
 
+# The prod flavor resolves BUNDLE_ID_SUFFIX to empty, so the shipped id is the
+# bare one below (dev builds are com.massdrive.customerApp.develop).
 APP_IDENTIFIER = "com.massdrive.customerApp"
 TEAM_ID        = "Q7742Z74Q3"
-SCHEME         = "Runner"
+SCHEME         = "prod"
+CONFIGURATION  = "Release-prod"
 # Profile name that `match(type: "appstore")` creates for this app id.
 PROFILE_NAME   = "match AppStore #{APP_IDENTIFIER}"
 
@@ -32,11 +35,15 @@ platform :ios do
 
     # The project ships with automatic signing; force manual signing against
     # the match-managed profile so the archive is reproducible on CI.
+    # Scoped to Release-prod only, and deliberately WITHOUT bundle_identifier so
+    # the project's "com.massdrive.customerApp$(BUNDLE_ID_SUFFIX)" pattern (which
+    # the dev flavor relies on) is left intact.
     update_code_signing_settings(
       use_automatic_signing: false,
       path: "Runner.xcodeproj",
       team_id: TEAM_ID,
-      bundle_identifier: APP_IDENTIFIER,
+      targets: ["Runner"],
+      build_configurations: [CONFIGURATION],
       profile_name: PROFILE_NAME,
       code_sign_identity: "Apple Distribution",
     )
@@ -47,7 +54,7 @@ platform :ios do
     build_app(
       workspace: "Runner.xcworkspace",
       scheme: SCHEME,
-      configuration: "Release",
+      configuration: CONFIGURATION,
       export_method: "app-store",
       export_options: {
         provisioningProfiles: {

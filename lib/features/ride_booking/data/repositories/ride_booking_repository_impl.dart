@@ -1,8 +1,10 @@
+import 'package:customer_app/core/error/api_error.dart';
 import 'package:customer_app/features/ride_booking/data/datasources/ride_booking_remote_datasource.dart';
 import 'package:customer_app/features/ride_booking/domain/models/fare_estimation_response.dart';
 import 'package:customer_app/features/ride_booking/domain/models/ride_promo.dart';
 import 'package:customer_app/features/ride_booking/domain/repositories/ride_booking_repository.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'ride_booking_repository_impl.g.dart';
@@ -38,9 +40,19 @@ class RideBookingRepositoryImpl implements RideBookingRepository {
       );
 
       return FareEstimationResponse.fromJson(response);
+    } on DioException catch (e) {
+      // Surface the server's actual validation detail (which field/rule failed)
+      // to the logs — this is what explains a 422 instead of a generic string.
+      debugPrint(
+        'estimateFare failed: ${e.response?.statusCode} ${e.response?.data}',
+      );
+      throw Exception(
+        apiErrorMessage(e, fallback: 'ไม่สามารถคำนวณค่าโดยสารได้ กรุณาลองใหม่'),
+      );
     } catch (e) {
-      // โยน Custom Exception ออกไปให้ Riverpod Controller เป็นคนจัดการ (เช่น ผ่าน AsyncValue.guard)
-      throw Exception('Failed to estimate fare: $e');
+      throw Exception(
+        apiErrorMessage(e, fallback: 'ไม่สามารถคำนวณค่าโดยสารได้ กรุณาลองใหม่'),
+      );
     }
   }
 
@@ -126,9 +138,17 @@ class RideBookingRepositoryImpl implements RideBookingRepository {
         promoCode: promoCode,
       );
       return response['id'] as String;
+    } on DioException catch (e) {
+      debugPrint(
+        'createJob failed: ${e.response?.statusCode} ${e.response?.data}',
+      );
+      throw Exception(
+        apiErrorMessage(e, fallback: 'ไม่สามารถเรียกรถได้ กรุณาลองใหม่'),
+      );
     } catch (e) {
-      // โยน Custom Exception ออกไปให้ Riverpod Controller เป็นคนจัดการ (เช่น ผ่าน AsyncValue.guard)
-      throw Exception('Failed to create job: $e');
+      throw Exception(
+        apiErrorMessage(e, fallback: 'ไม่สามารถเรียกรถได้ กรุณาลองใหม่'),
+      );
     }
   }
 }

@@ -1,5 +1,6 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
+import 'package:customer_app/core/error/api_error.dart';
 import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
 import 'package:customer_app/features/ride_booking/presentation/controllers/booking_controller.dart';
 import 'package:customer_app/features/ride_booking/presentation/states/booking_state.dart';
@@ -183,12 +184,31 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
 
     // Listen for errors and show SnackBar (error is shown without replacing UI)
     ref.listen(bookingControllerProvider, (previous, next) {
-      if (next is AsyncError && next.error != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
+      if (next is AsyncError) {
+        final messenger = ScaffoldMessenger.of(context);
+        messenger.hideCurrentSnackBar();
+        messenger.showSnackBar(
           SnackBar(
-            content: Text(next.error.toString()),
+            content: Row(
+              children: [
+                const Icon(Icons.error_outline, color: Colors.white, size: 20),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    apiErrorMessage(next.error),
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
             backgroundColor: AppColors.foundationRed600,
             behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            duration: const Duration(seconds: 4),
           ),
         );
       }
@@ -236,7 +256,7 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1976D2),
+                    color: AppColors.semanticGrayNeutralFgHigh,
                     borderRadius: BorderRadius.circular(8),
                     boxShadow: const [
                       BoxShadow(
@@ -327,8 +347,8 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                       SnackBar(
                         content: Text(
                           promoCode != null
-                              ? 'ใช้คูปอง "$promoCode" สำเร็จ'
-                              : 'ยกเลิกคูปองเรียบร้อยแล้ว',
+                              ? l10n.couponApplied(promoCode)
+                              : l10n.couponRemoved,
                         ),
                         backgroundColor: AppColors.primary,
                         duration: const Duration(seconds: 2),

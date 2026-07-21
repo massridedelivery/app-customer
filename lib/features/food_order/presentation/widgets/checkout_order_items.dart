@@ -5,6 +5,7 @@ import 'package:customer_app/features/food_order/presentation/controllers/checko
 import 'package:customer_app/features/food_order/presentation/controllers/food_cart_controller.dart';
 import 'package:customer_app/features/food_order/presentation/states/food_cart_state.dart';
 import 'package:flutter/material.dart';
+import 'package:customer_app/core/widgets/app_network_image.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class CheckoutOrderItems extends ConsumerWidget {
@@ -96,18 +97,10 @@ class CheckoutOrderItems extends ConsumerWidget {
       children: [
         ClipRRect(
           borderRadius: BorderRadius.circular(12),
-          child: Image.network(
-            cartItem.item.imageUrl ??
-                'https://plus.unsplash.com/premium_photo-1694141253763-209b4c8f8ace?w=300',
+          child: AppNetworkImage(
+            url: cartItem.item.imageUrl,
             width: 80,
             height: 60,
-            fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) => Container(
-              width: 80,
-              height: 60,
-              color: Colors.grey[100],
-              child: const Icon(Icons.image, color: Colors.grey),
-            ),
           ),
         ),
         const SizedBox(width: 16),

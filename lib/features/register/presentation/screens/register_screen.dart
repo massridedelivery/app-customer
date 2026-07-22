@@ -45,6 +45,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     ref.listen<AsyncValue<void>>(registerControllerProvider, (previous, next) {
       if (next is AsyncError) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -79,7 +80,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 children: [
                   const SizedBox(height: 24),
                   Text(
-                    AppLocalizations.of(context)!.createYourAccount,
+                    l10n.createYourAccount,
                     style: AppTypography.heading3.copyWith(
                       color: const Color(0xFF0F172A),
                     ),
@@ -87,7 +88,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   const SizedBox(height: 40),
 
                   // Form Fields
-                  RegisterLabel(label: AppLocalizations.of(context)!.fullName),
+                  RegisterLabel(label: l10n.fullName),
                   RegisterTextField(
                     controller: _nameController,
                     hintText: 'ชื่อ - นามสกุล',
@@ -95,7 +96,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   const SizedBox(height: 24),
 
                   RegisterLabel(
-                    label: AppLocalizations.of(context)!.emailAddress,
+                    label: l10n.emailAddress,
                   ),
                   RegisterTextField(
                     controller: _emailController,
@@ -145,7 +146,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                     ),
                                   )
                                 : Text(
-                                    AppLocalizations.of(context)!.createAccount,
+                                    l10n.createAccount,
                                     style: AppTypography.label2.copyWith(
                                       color: Colors.white,
                                     ),
@@ -162,7 +163,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          AppLocalizations.of(context)!.alreadyHaveAccount,
+                          l10n.alreadyHaveAccount,
                           style: AppTypography.caption4.copyWith(
                             color: AppColors.semanticGrayNeutralFgHigh,
                           ),

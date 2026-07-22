@@ -92,6 +92,7 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     // Rebuild the sheet on DISCRETE state changes only. driverLocation ticks
     // ~every 2s over the socket and is consumed solely by the map's driver
     // marker (_LiveRideMap watches it in isolation), so it is deliberately
@@ -167,8 +168,8 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
           SnackBar(
             content: Text(
               next.jobStatus == 'COMPLETED'
-                  ? AppLocalizations.of(context)!.rideCompleted
-                  : AppLocalizations.of(context)!.rideCancelled,
+                  ? l10n.rideCompleted
+                  : l10n.rideCancelled,
             ),
             duration: const Duration(seconds: 2),
           ),
@@ -362,7 +363,7 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
                           : Text(
-                              AppLocalizations.of(context)!.cancelSearch,
+                              l10n.cancelSearch,
                               style: AppTypography.caption4.copyWith(
                                 color: AppColors.semanticGrayNeutralFgHigh,
                                 fontWeight: FontWeight.w600,

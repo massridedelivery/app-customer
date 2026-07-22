@@ -99,6 +99,7 @@ class _AddressFormScreenState extends ConsumerState<AddressFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final formState = ref.watch(addressFormControllerProvider);
     final homeState = ref.watch(homeControllerProvider);
     final displayAddress = (homeState.foodAddress != null && homeState.foodAddress!.isNotEmpty)
@@ -121,7 +122,7 @@ class _AddressFormScreenState extends ConsumerState<AddressFormScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          AppLocalizations.of(context)!.deliveryInfo,
+          l10n.deliveryInfo,
           style: AppTypography.heading4.copyWith(color: AppColors.textPrimary),
         ),
         centerTitle: false,
@@ -138,31 +139,31 @@ class _AddressFormScreenState extends ConsumerState<AddressFormScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Address Name Section
-                      _buildHeader(AppLocalizations.of(context)!.addressName),
+                      _buildHeader(l10n.addressName),
                       const SizedBox(height: 8),
                       _CustomTextField(
                         controller: _addressNameCtrl,
-                        hint: AppLocalizations.of(context)!.addressNameHint,
+                        hint: l10n.addressNameHint,
                       ),
                       const SizedBox(height: 20),
 
                       // Contact Info Section
-                      _buildHeader(AppLocalizations.of(context)!.contactInfo),
+                      _buildHeader(l10n.contactInfo),
                       const SizedBox(height: 8),
                       _CustomTextField(
                         controller: _contactNameCtrl,
-                        hint: AppLocalizations.of(context)!.contactName,
+                        hint: l10n.contactName,
                       ),
                       const SizedBox(height: 12),
                       _CustomTextField(
                         controller: _contactPhoneCtrl,
-                        hint: AppLocalizations.of(context)!.phoneNumber,
+                        hint: l10n.phoneNumber,
                         keyboardType: TextInputType.phone,
                       ),
                       const SizedBox(height: 20),
 
                       // Address Info Section
-                      _buildHeader(AppLocalizations.of(context)!.addressInfo),
+                      _buildHeader(l10n.addressInfo),
                       const SizedBox(height: 8),
                       _ChooseFromMapButton(
                         address: displayAddress,
@@ -171,11 +172,11 @@ class _AddressFormScreenState extends ConsumerState<AddressFormScreen> {
                       const SizedBox(height: 24),
 
                       // Note to Rider Section
-                      _buildHeader(AppLocalizations.of(context)!.noteToRider, isRequired: false),
+                      _buildHeader(l10n.noteToRider, isRequired: false),
                       const SizedBox(height: 8),
                       _CustomTextField(
                         controller: _noteCtrl,
-                        hint: AppLocalizations.of(context)!.noteToRiderHint,
+                        hint: l10n.noteToRiderHint,
                         maxLines: 4,
                       ),
                       const SizedBox(height: 16),
@@ -207,7 +208,7 @@ class _AddressFormScreenState extends ConsumerState<AddressFormScreen> {
                                   .toggleDefault(!formState.isDefault);
                             },
                             child: Text(
-                              AppLocalizations.of(context)!.setAsDefaultAddress,
+                              l10n.setAsDefaultAddress,
                               style: AppTypography.body1.copyWith(
                                 color: AppColors.textPrimary,
                               ),
@@ -249,7 +250,7 @@ class _AddressFormScreenState extends ConsumerState<AddressFormScreen> {
                           ),
                         )
                       : Text(
-                          AppLocalizations.of(context)!.save,
+                          l10n.save,
                           style: AppTypography.heading4.copyWith(color: Colors.white),
                         ),
                 ),

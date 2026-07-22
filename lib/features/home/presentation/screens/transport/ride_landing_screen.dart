@@ -31,6 +31,7 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final homeState = ref.watch(homeControllerProvider);
     return Scaffold(
       backgroundColor: AppColors.semanticGrayNeutralFgWhite,
@@ -64,14 +65,14 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          AppLocalizations.of(context)!.newPriceSure,
+                          l10n.newPriceSure,
                           style: AppTypography.caption2,
                         ),
                         const SizedBox(height: 4),
                         Row(
                           children: [
                             Text(
-                              AppLocalizations.of(context)!.gelPromo,
+                              l10n.gelPromo,
                               style: AppTypography.caption2,
                             ),
                           ],
@@ -121,7 +122,7 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
                       ),
                       const SizedBox(width: 16),
                       Text(
-                        AppLocalizations.of(context)!.whereToToday,
+                        l10n.whereToToday,
                         style: AppTypography.caption3.copyWith(
                           color: Colors.black,
                         ),
@@ -172,7 +173,7 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
                           .refreshSavedPlaces();
                     },
                     child: _buildSavedPlaceItem(
-                      AppLocalizations.of(context)!.addAddress,
+                      l10n.addAddress,
                       ' ',
                       AppAssets.icPlus,
                       isAction: false,

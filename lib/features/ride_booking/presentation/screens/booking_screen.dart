@@ -8,6 +8,8 @@ import 'package:customer_app/features/ride_booking/presentation/widgets/BookingM
 import 'package:customer_app/features/ride_booking/presentation/screens/ride_coupon_screen.dart';
 import 'package:customer_app/features/ride_booking/presentation/widgets/vehicle_selection_sheet.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
+import 'package:flutter/foundation.dart'
+    show defaultTargetPlatform, TargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -51,15 +53,22 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
         final pickup = homeState.pickupLocation;
         final dropoff = homeState.dropoffLocation;
 
-        final pixelRatio = MediaQuery.of(context).devicePixelRatio;
+        // getScreenCoordinate returns PHYSICAL pixels on Android but LOGICAL
+        // points on iOS. Divide by the device pixel ratio only on Android —
+        // dividing on iOS shrank every coordinate ~3x, collapsing the address
+        // bubbles into the top-left corner (the reported bug). Emulator testing
+        // on Android never surfaced it.
+        final divisor = defaultTargetPlatform == TargetPlatform.android
+            ? MediaQuery.of(context).devicePixelRatio
+            : 1.0;
 
         if (pickup != null) {
           final pickupScreen = await _mapController!.getScreenCoordinate(pickup);
           if (!mounted) return;
           setState(() {
             _pickupPos = Offset(
-              pickupScreen.x.toDouble() / pixelRatio,
-              pickupScreen.y.toDouble() / pixelRatio,
+              pickupScreen.x.toDouble() / divisor,
+              pickupScreen.y.toDouble() / divisor,
             );
           });
         }
@@ -70,8 +79,8 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
           if (!mounted) return;
           setState(() {
             _dropoffPos = Offset(
-              dropoffScreen.x.toDouble() / pixelRatio,
-              dropoffScreen.y.toDouble() / pixelRatio,
+              dropoffScreen.x.toDouble() / divisor,
+              dropoffScreen.y.toDouble() / divisor,
             );
           });
         }

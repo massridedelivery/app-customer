@@ -1,6 +1,7 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:customer_app/features/auth/presentation/widgets/gradient_auth_button.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -54,6 +55,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final authState = ref.watch(authControllerProvider);
 
     ref.listen(authControllerProvider, (previous, next) {
@@ -84,14 +86,14 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'ลืมรหัสผ่าน?',
+                l10n.forgotPassword,
                 style: AppTypography.heading3.copyWith(
                   color: const Color(0xFF0F172A),
                 ),
               ),
               const SizedBox(height: 12),
               Text(
-                'ไม่ต้องกังวล! เพียงกรอกอีเมลของคุณเพื่อรับรหัสยืนยันการตั้งค่ารหัสผ่านใหม่',
+                l10n.forgotPasswordSubtitle,
                 style: AppTypography.caption4.copyWith(
                   color: const Color(0xFF64748B),
                 ),
@@ -99,7 +101,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
               const SizedBox(height: 40),
 
               // Email Field
-              _buildLabel(AppLocalizations.of(context)!.emailAddress),
+              _buildLabel(l10n.emailAddress),
               _buildTextField(
                 controller: _emailController,
                 hintText: 'mass@example.com',
@@ -108,42 +110,10 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
               const SizedBox(height: 32),
 
               // Submit Button
-              GestureDetector(
-                onTap: (authState.isLoading || !_isValid) ? null : _submit,
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  decoration: BoxDecoration(
-                    gradient: _isValid
-                        ? const LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [AppColors.primary, AppColors.secondaryRed],
-                          )
-                        : null,
-                    color: _isValid ? null : const Color(0xFFE2E8F0),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Center(
-                    child: authState.isLoading
-                        ? const SizedBox(
-                            height: 24,
-                            width: 24,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2,
-                            ),
-                          )
-                        : Text(
-                            'ส่งรหัสยืนยัน',
-                            style: AppTypography.label2.copyWith(
-                              color: _isValid
-                                  ? Colors.white
-                                  : const Color(0xFF94A3B8),
-                            ),
-                          ),
-                  ),
-                ),
+              GradientAuthButton(
+                label: l10n.sendResetCode,
+                isLoading: authState.isLoading,
+                onPressed: _isValid ? _submit : null,
               ),
             ],
           ),

@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:customer_app/core/config/app_env.dart';
+import 'package:customer_app/core/configs/app_env.dart';
 import 'package:customer_app/core/data/token_storage.dart';
 import 'package:customer_app/core/managers/providers.dart';
 import 'package:flutter/foundation.dart';

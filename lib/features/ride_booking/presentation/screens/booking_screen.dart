@@ -92,40 +92,28 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
     }
   }
 
-  /// Places an address bubble anchored to a marker. Sits above the marker by
-  /// default, but flips below it when there isn't room above (marker near the
-  /// top safe area) so the bubble never gets clipped by the status bar.
+  /// Places an address bubble anchored to a marker. Centred over the marker,
+  /// it flips below when there isn't room above (marker near the top safe area)
+  /// and is clamped to the screen edges so it never gets clipped by the status
+  /// bar or run off the sides. The clamping uses the bubble's *measured* size
+  /// (via [_BubbleLayoutDelegate]) rather than an estimate, so a wide two-line
+  /// address near a screen edge stays fully on-screen.
   Widget _buildLocationOverlay({
     required Offset pos,
     required String label,
     required Color labelColor,
     required String address,
   }) {
-    final media = MediaQuery.of(context);
-    final safeTop = media.padding.top;
-
-    // Rough max height of a two-line bubble — only used to decide the flip
-    // side, so an estimate is fine.
-    const estimatedHeight = 64.0;
-    const gapAbove = 45.0;
-    const gapBelow = 12.0;
-
-    final placeAbove = pos.dy - gapAbove - estimatedHeight > safeTop + 8;
-    final anchorTop = placeAbove ? pos.dy - gapAbove : pos.dy + gapBelow;
-
-    return Positioned(
-      left: pos.dx,
-      top: anchorTop,
-      child: FractionalTranslation(
-        // -1.0 = bubble sits above the anchor; 0.0 = below it.
-        translation: Offset(-0.5, placeAbove ? -1.0 : 0.0),
-        child: Container(
-          constraints: BoxConstraints(maxWidth: media.size.width * 0.6),
-          child: _LocationOverlay(
-            label: label,
-            labelColor: labelColor,
-            address: address,
-          ),
+    return Positioned.fill(
+      child: CustomSingleChildLayout(
+        delegate: _BubbleLayoutDelegate(
+          anchor: pos,
+          safeTop: MediaQuery.of(context).padding.top,
+        ),
+        child: _LocationOverlay(
+          label: label,
+          labelColor: labelColor,
+          address: address,
         ),
       ),
     );
@@ -428,6 +416,55 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
       ),
     );
   }
+}
+
+/// Lays out an address bubble relative to a marker's screen position, using the
+/// bubble's measured size to keep it fully on-screen. Vertically it sits above
+/// the marker, flipping below when there isn't room under the status bar.
+/// Horizontally it centres on the marker, then clamps so neither edge is
+/// clipped — the piece the plain `left: pos.dx` + `FractionalTranslation(-0.5)`
+/// approach was missing.
+class _BubbleLayoutDelegate extends SingleChildLayoutDelegate {
+  final Offset anchor;
+  final double safeTop;
+
+  // Gap between the marker and the bubble on each flip side, and the minimum
+  // breathing room to keep from any screen edge.
+  static const double _gapAbove = 45.0;
+  static const double _gapBelow = 12.0;
+  static const double _margin = 12.0;
+
+  const _BubbleLayoutDelegate({required this.anchor, required this.safeTop});
+
+  @override
+  BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
+    // Keep the existing 60%-of-width cap so long addresses wrap instead of
+    // stretching across the whole map.
+    return constraints.copyWith(
+      minWidth: 0,
+      minHeight: 0,
+      maxWidth: constraints.maxWidth * 0.6,
+    );
+  }
+
+  @override
+  Offset getPositionForChild(Size size, Size childSize) {
+    final placeAbove = anchor.dy - _gapAbove - childSize.height > safeTop + 8;
+    final top = placeAbove
+        ? anchor.dy - _gapAbove - childSize.height
+        : anchor.dy + _gapBelow;
+
+    final left = anchor.dx - childSize.width / 2;
+
+    return Offset(
+      left.clamp(_margin, size.width - childSize.width - _margin),
+      top.clamp(safeTop + 8, size.height - childSize.height - _margin),
+    );
+  }
+
+  @override
+  bool shouldRelayout(_BubbleLayoutDelegate oldDelegate) =>
+      anchor != oldDelegate.anchor || safeTop != oldDelegate.safeTop;
 }
 
 class _LocationOverlay extends StatelessWidget {

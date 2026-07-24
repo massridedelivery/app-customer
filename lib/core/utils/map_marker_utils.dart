@@ -52,7 +52,13 @@ class MapMarkerUtils {
       return BitmapDescriptor.defaultMarker;
     }
 
-    return BitmapDescriptor.fromBytes(byteData.buffer.asUint8List());
+    // BitmapDescriptor.bytes replaces the deprecated fromBytes. imagePixelRatio
+    // 1.0 preserves the previous raw-pixel sizing — the bitmap is already
+    // rendered at explicit pixel dimensions above, so no extra DPI scaling.
+    return BitmapDescriptor.bytes(
+      byteData.buffer.asUint8List(),
+      imagePixelRatio: 1.0,
+    );
   }
 
   /// Centralized Pickup Marker (Green pin with white hole)
@@ -124,6 +130,12 @@ class MapMarkerUtils {
     pictureInfo.picture.dispose();
 
     if (byteData == null) return BitmapDescriptor.defaultMarker;
-    return BitmapDescriptor.fromBytes(byteData.buffer.asUint8List());
+    // BitmapDescriptor.bytes replaces the deprecated fromBytes. imagePixelRatio
+    // 1.0 preserves the previous raw-pixel sizing — the bitmap is already
+    // rendered at explicit pixel dimensions above, so no extra DPI scaling.
+    return BitmapDescriptor.bytes(
+      byteData.buffer.asUint8List(),
+      imagePixelRatio: 1.0,
+    );
   }
 }

@@ -2,6 +2,7 @@ import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/features/register/presentation/controllers/register_controller.dart';
 import 'package:customer_app/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:customer_app/features/auth/presentation/widgets/gradient_auth_button.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -91,7 +92,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   RegisterLabel(label: l10n.fullName),
                   RegisterTextField(
                     controller: _nameController,
-                    hintText: 'ชื่อ - นามสกุล',
+                    hintText: l10n.fullNameHint,
                   ),
                   const SizedBox(height: 24),
 
@@ -110,49 +111,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       final isLoading = ref.watch(
                         registerControllerProvider.select((s) => s.isLoading),
                       );
-                      return GestureDetector(
-                        onTap: isLoading ? null : _submit,
-                        child: Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                AppColors.primary,
-                                AppColors.secondaryRed,
-                              ],
-                            ),
-                            borderRadius: BorderRadius.circular(12),
-                            boxShadow: [
-                              BoxShadow(
-                                color: AppColors.primary.withValues(
-                                  alpha: 0.15,
-                                ),
-                                blurRadius: 15,
-                                offset: const Offset(0, 10),
-                              ),
-                            ],
-                          ),
-                          child: Center(
-                            child: isLoading
-                                ? const SizedBox(
-                                    height: 24,
-                                    width: 24,
-                                    child: CircularProgressIndicator(
-                                      color: Colors.white,
-                                      strokeWidth: 2,
-                                    ),
-                                  )
-                                : Text(
-                                    l10n.createAccount,
-                                    style: AppTypography.label2.copyWith(
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                          ),
-                        ),
+                      return GradientAuthButton(
+                        label: l10n.createAccount,
+                        isLoading: isLoading,
+                        onPressed: _submit,
                       );
                     },
                   ),
@@ -166,6 +128,23 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           l10n.alreadyHaveAccount,
                           style: AppTypography.caption4.copyWith(
                             color: AppColors.semanticGrayNeutralFgHigh,
+                          ),
+                        ),
+                        InkWell(
+                          onTap: () => context.go('/auth/email_login'),
+                          borderRadius: BorderRadius.circular(4),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 2,
+                              vertical: 2,
+                            ),
+                            child: Text(
+                              l10n.signIn,
+                              style: AppTypography.caption4.copyWith(
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ),
                         ),
                       ],
@@ -237,7 +216,7 @@ class RegisterTextField extends StatelessWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFF1E3A8A), width: 1),
+          borderSide: const BorderSide(color: AppColors.primary, width: 1),
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 20,

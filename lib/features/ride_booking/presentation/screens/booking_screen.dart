@@ -131,6 +131,58 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
     );
   }
 
+  /// The trip's total duration + distance, centred on the midpoint between the
+  /// pickup and dropoff pins. The centre is clamped by a conservative half-size
+  /// so the pill can never spill past a screen edge or hide under the status bar
+  /// — regardless of where the route sits or how close the two pins are.
+  Widget _buildRouteMetricTag(BookingState state, AppLocalizations l10n) {
+    final media = MediaQuery.of(context);
+    final size = media.size;
+
+    final midX = (_pickupPos!.dx + _dropoffPos!.dx) / 2;
+    final midY = (_pickupPos!.dy + _dropoffPos!.dy) / 2;
+
+    const halfW = 80.0;
+    const halfH = 18.0;
+    const margin = 12.0;
+    final left = midX
+        .clamp(margin + halfW, size.width - margin - halfW)
+        .toDouble();
+    final top = midY
+        .clamp(media.padding.top + margin + halfH, size.height - margin - halfH)
+        .toDouble();
+
+    return Positioned(
+      left: left,
+      top: top,
+      child: FractionalTranslation(
+        // Centre the pill on the (clamped) midpoint.
+        translation: const Offset(-0.5, -0.5),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: AppColors.semanticGrayNeutralFgHigh,
+            borderRadius: BorderRadius.circular(8),
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black26,
+                blurRadius: 4,
+                offset: Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Text(
+            "${(state.durationMin ?? 0).toStringAsFixed(0)} ${l10n.minutes} · ${(state.distanceKm ?? 0).toStringAsFixed(1)} ${l10n.km}",
+            style: AppTypography.numericMedium4.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final bookingAsync = ref.watch(bookingControllerProvider);
@@ -248,43 +300,19 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                 labelColor: AppColors.foundationGreen500,
                 address: pickupAddress ?? l10n.currentLocation,
               ),
-            if (_dropoffPos != null) ...[
+            if (_dropoffPos != null)
               _buildLocationOverlay(
                 pos: _dropoffPos!,
                 label: "2",
                 labelColor: AppColors.foundationRed600,
                 address: dropoffAddress ?? l10n.dropoffPoint,
               ),
-              // Duration & Distance tag attached to dropoff marker
-              Positioned(
-                left: _dropoffPos!.dx + 16,
-                top: _dropoffPos!.dy - 20,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.semanticGrayNeutralFgHigh,
-                    borderRadius: BorderRadius.circular(8),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Colors.black26,
-                        blurRadius: 4,
-                        offset: Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Text(
-                    "${(bookingState.durationMin ?? 0).toStringAsFixed(0)} ${l10n.minutes} · ${(bookingState.distanceKm ?? 0).toStringAsFixed(1)} ${l10n.km}",
-                    style: AppTypography.numericMedium4.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-            ],
+            // Total-trip duration + distance. Anchored to the route midpoint
+            // (not the dropoff pin): the value covers the whole pickup→dropoff
+            // trip, and pinning it to one endpoint both mislabelled it and let
+            // it collide with the dropoff bubble or run off the screen edge.
+            if (_pickupPos != null && _dropoffPos != null)
+              _buildRouteMetricTag(bookingState, l10n),
           ],
 
           // Top Back Arrow Button

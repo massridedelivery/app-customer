@@ -13,7 +13,7 @@ class ApiRepository {
   Future<Map<String, dynamic>> sendOtp(String phone, {String? deviceId}) async {
     final res = await _dio.post(
       '/auth/otp/send',
-      data: {'phone': phone, if (deviceId != null) 'device_id': deviceId},
+      data: {'phone': phone, 'device_id': ?deviceId},
     );
     return res.data as Map<String, dynamic>;
   }
@@ -33,7 +33,7 @@ class ApiRepository {
         'otp': otp,
         'ref_id': refId,
         'role': role,
-        if (fullName != null) 'full_name': fullName,
+        'full_name': ?fullName,
       },
     );
     return res.data as Map<String, dynamic>;
@@ -144,7 +144,7 @@ class ApiRepository {
   }) async {
     final res = await _dio.post(
       '/api/customer/jobs/$id/rate',
-      data: {'rating': rating, if (comment != null) 'comment': comment},
+      data: {'rating': rating, 'comment': ?comment},
     );
     return res.data as Map<String, dynamic>;
   }
@@ -157,7 +157,7 @@ class ApiRepository {
   }) async {
     final res = await _dio.get(
       '/api/customer/jobs/$id/chat',
-      queryParameters: {'limit': limit, if (before != null) 'before': before},
+      queryParameters: {'limit': limit, 'before': ?before},
     );
     return res.data as List<dynamic>;
   }
@@ -174,7 +174,7 @@ class ApiRepository {
       data: {
         'text': text,
         'msg_type': msgType,
-        if (fileKey != null) 'file_key': fileKey,
+        'file_key': ?fileKey,
       },
     );
     return res.data as Map<String, dynamic>;
@@ -217,7 +217,7 @@ class ApiRepository {
   }) async {
     final res = await _dio.get(
       '/api/customer/orders/$id/chat',
-      queryParameters: {'limit': limit, if (before != null) 'before': before},
+      queryParameters: {'limit': limit, 'before': ?before},
     );
     return res.data as List<dynamic>;
   }
@@ -234,7 +234,7 @@ class ApiRepository {
       data: {
         'text': text,
         'msg_type': msgType,
-        if (fileKey != null) 'file_key': fileKey,
+        'file_key': ?fileKey,
       },
     );
     return res.data as Map<String, dynamic>;
@@ -248,7 +248,7 @@ class ApiRepository {
   }) async {
     final res = await _dio.post(
       '/api/customer/orders/$id/review',
-      data: {'rating': rating, if (comment != null) 'comment': comment},
+      data: {'rating': rating, 'comment': ?comment},
     );
     return res.data as Map<String, dynamic>;
   }
@@ -265,8 +265,8 @@ class ApiRepository {
       '/api/geospatial/place-search',
       queryParameters: {
         'query': query,
-        if (lat != null) 'lat': lat,
-        if (lng != null) 'lng': lng,
+        'lat': ?lat,
+        'lng': ?lng,
       },
     );
     return res.data as List<dynamic>;

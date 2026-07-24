@@ -4,7 +4,7 @@ import 'package:customer_app/core/constants/app_icons.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/utils/map_marker_providers.dart';
 import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
-import 'package:customer_app/features/ride_booking/presentation/widgets/BookingMapWidget.dart'
+import 'package:customer_app/features/ride_booking/presentation/widgets/booking_map_widget.dart'
     show decodedPolylineProvider;
 import 'package:customer_app/features/live_ride/presentation/controllers/live_ride_controller.dart';
 import 'package:customer_app/features/ride_booking/presentation/controllers/booking_controller.dart';

@@ -4,7 +4,7 @@ import 'package:customer_app/core/error/api_error.dart';
 import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
 import 'package:customer_app/features/ride_booking/presentation/controllers/booking_controller.dart';
 import 'package:customer_app/features/ride_booking/presentation/states/booking_state.dart';
-import 'package:customer_app/features/ride_booking/presentation/widgets/BookingMapWidget.dart';
+import 'package:customer_app/features/ride_booking/presentation/widgets/booking_map_widget.dart';
 import 'package:customer_app/features/ride_booking/presentation/screens/ride_coupon_screen.dart';
 import 'package:customer_app/features/ride_booking/presentation/widgets/vehicle_selection_sheet.dart';
 import 'package:customer_app/l10n/app_localizations.dart';

@@ -33,7 +33,7 @@ class SosController extends _$SosController {
 
       // Body shape per POST /api/customer/sos: flat lat/lng (not nested).
       await ref.read(sosRemoteDataSourceProvider).trigger({
-        if (jobId != null) 'job_id': jobId,
+        'job_id': ?jobId,
         'lat': lat,
         'lng': lng,
         'reason': 'ผู้ใช้กดปุ่ม SOS ฉุกเฉิน',

@@ -191,6 +191,14 @@ class _ProfileHeader extends StatelessWidget {
   final String phone;
   final Map<String, dynamic>? loyalty;
 
+  // The loyalty summary is fully built but parked until the backend returns a
+  // loyalty payload (`loyalty` is null everywhere today). Gated behind a
+  // build-time flag instead of `if (false)` so it stays wired and lint-clean —
+  // flip it with `--dart-define=ENABLE_LOYALTY_SUMMARY=true`.
+  static const bool _showLoyaltySummary = bool.fromEnvironment(
+    'ENABLE_LOYALTY_SUMMARY',
+  );
+
   const _ProfileHeader({
     required this.name,
     required this.phone,
@@ -274,7 +282,7 @@ class _ProfileHeader extends StatelessWidget {
                 ],
               ),
               if (loyalty != null) ...[
-                if (false) ...[
+                if (_showLoyaltySummary) ...[
                   const SizedBox(height: 24),
                   const Divider(
                     color: AppColors.foundationGrayscale100,

@@ -58,8 +58,8 @@ class RideBookingRemoteDataSourceImpl implements RideBookingRemoteDataSource {
         'pickup_lng': pickupLng,
         'dropoff_lat': dropoffLat,
         'dropoff_lng': dropoffLng,
-        if (promoCode != null) 'promo_code': promoCode,
-        if (vehicleTypeId != null) 'vehicle_type_id': vehicleTypeId,
+        'promo_code': ?promoCode,
+        'vehicle_type_id': ?vehicleTypeId,
       },
     );
     return response.data as Map<String, dynamic>;
@@ -112,7 +112,7 @@ class RideBookingRemoteDataSourceImpl implements RideBookingRemoteDataSource {
         'dropoff_address': dropoffAddress,
         'payment_method': paymentMethod,
         'vehicle_type_id': vehicleTypeId,
-        if (promoCode != null) 'promo_code': promoCode,
+        'promo_code': ?promoCode,
       },
     );
     return response.data as Map<String, dynamic>;

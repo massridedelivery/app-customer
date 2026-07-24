@@ -102,14 +102,14 @@ class PlaceDataSourceImpl implements PlaceDataSource {
     final response = await _apiService.dio.post(
       '/api/customer/places',
       data: {
-        if (id != null) 'id': id,
+        'id': ?id,
         'name': name,
-        if (address != null) 'address': address,
+        'address': ?address,
         'lat': lat,
         'lng': lng,
-        if (note != null) 'note': note,
-        if (isDefault != null) 'is_default': isDefault,
-        if (phoneNumber != null) 'phone_number': phoneNumber,
+        'note': ?note,
+        'is_default': ?isDefault,
+        'phone_number': ?phoneNumber,
       },
     );
     return response.data as Map<String, dynamic>;

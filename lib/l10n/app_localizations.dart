@@ -1004,6 +1004,66 @@ abstract class AppLocalizations {
   /// **'Already have an account? '**
   String get alreadyHaveAccount;
 
+  /// No description provided for @fullNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'First name - Last name'**
+  String get fullNameHint;
+
+  /// No description provided for @forgotPasswordSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t worry! Just enter your email and we\'ll send you a code to reset your password.'**
+  String get forgotPasswordSubtitle;
+
+  /// No description provided for @sendResetCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Code'**
+  String get sendResetCode;
+
+  /// No description provided for @resetOtpSentMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'A verification code (OTP) has been sent to your email\n{email}'**
+  String resetOtpSentMsg(String email);
+
+  /// No description provided for @setNewPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Set New Password'**
+  String get setNewPassword;
+
+  /// No description provided for @setNewPasswordSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Please choose a strong, hard-to-guess password to keep your account secure.'**
+  String get setNewPasswordSubtitle;
+
+  /// No description provided for @newPasswordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'New Password'**
+  String get newPasswordLabel;
+
+  /// No description provided for @confirmNewPasswordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm New Password'**
+  String get confirmNewPasswordLabel;
+
+  /// No description provided for @changePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Change Password'**
+  String get changePassword;
+
+  /// No description provided for @passwordChangedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Your password has been changed. Please sign in with your new password.'**
+  String get passwordChangedSuccess;
+
   /// No description provided for @secureRegistration.
   ///
   /// In en, this message translates to:

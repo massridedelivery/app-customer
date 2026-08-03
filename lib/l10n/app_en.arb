@@ -166,6 +166,23 @@
   "fullName": "Full Name",
   "createAccount": "Create Account",
   "alreadyHaveAccount": "Already have an account? ",
+  "fullNameHint": "First name - Last name",
+  "forgotPasswordSubtitle": "Don't worry! Just enter your email and we'll send you a code to reset your password.",
+  "sendResetCode": "Send Code",
+  "resetOtpSentMsg": "A verification code (OTP) has been sent to your email\n{email}",
+  "@resetOtpSentMsg": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "setNewPassword": "Set New Password",
+  "setNewPasswordSubtitle": "Please choose a strong, hard-to-guess password to keep your account secure.",
+  "newPasswordLabel": "New Password",
+  "confirmNewPasswordLabel": "Confirm New Password",
+  "changePassword": "Change Password",
+  "passwordChangedSuccess": "Your password has been changed. Please sign in with your new password.",
   "secureRegistration": "SECURE REGISTRATION",
   "fillAllFields": "Please fill in all fields",
   "inProgress": "In Progress",

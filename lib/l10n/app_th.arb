@@ -166,6 +166,23 @@
   "fullName": "ชื่อ-นามสกุล",
   "createAccount": "สร้างบัญชี",
   "alreadyHaveAccount": "มีบัญชีอยู่แล้วใช่ไหม? ",
+  "fullNameHint": "ชื่อ - นามสกุล",
+  "forgotPasswordSubtitle": "ไม่ต้องกังวล! เพียงกรอกอีเมลของคุณเพื่อรับรหัสยืนยันการตั้งค่ารหัสผ่านใหม่",
+  "sendResetCode": "ส่งรหัสยืนยัน",
+  "resetOtpSentMsg": "รหัสยืนยัน (OTP) ถูกส่งไปที่อีเมล\n{email}",
+  "@resetOtpSentMsg": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "setNewPassword": "ตั้งรหัสผ่านใหม่",
+  "setNewPasswordSubtitle": "กรุณาตั้งรหัสผ่านใหม่ที่คาดเดาได้ยากเพื่อความปลอดภัยของบัญชีคุณ",
+  "newPasswordLabel": "รหัสผ่านใหม่",
+  "confirmNewPasswordLabel": "ยืนยันรหัสผ่านใหม่",
+  "changePassword": "เปลี่ยนรหัสผ่าน",
+  "passwordChangedSuccess": "เปลี่ยนรหัสผ่านสำเร็จแล้ว กรุณาเข้าสู่ระบบด้วยรหัสผ่านใหม่",
   "secureRegistration": "การลงทะเบียนที่ปลอดภัย",
   "fillAllFields": "โปรดกรอกข้อมูลให้ครบทุกช่อง",
   "inProgress": "กำลังดำเนินการอยู่",

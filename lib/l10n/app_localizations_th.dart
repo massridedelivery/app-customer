@@ -471,6 +471,41 @@ class AppLocalizationsTh extends AppLocalizations {
   String get alreadyHaveAccount => 'มีบัญชีอยู่แล้วใช่ไหม? ';
 
   @override
+  String get fullNameHint => 'ชื่อ - นามสกุล';
+
+  @override
+  String get forgotPasswordSubtitle =>
+      'ไม่ต้องกังวล! เพียงกรอกอีเมลของคุณเพื่อรับรหัสยืนยันการตั้งค่ารหัสผ่านใหม่';
+
+  @override
+  String get sendResetCode => 'ส่งรหัสยืนยัน';
+
+  @override
+  String resetOtpSentMsg(String email) {
+    return 'รหัสยืนยัน (OTP) ถูกส่งไปที่อีเมล\n$email';
+  }
+
+  @override
+  String get setNewPassword => 'ตั้งรหัสผ่านใหม่';
+
+  @override
+  String get setNewPasswordSubtitle =>
+      'กรุณาตั้งรหัสผ่านใหม่ที่คาดเดาได้ยากเพื่อความปลอดภัยของบัญชีคุณ';
+
+  @override
+  String get newPasswordLabel => 'รหัสผ่านใหม่';
+
+  @override
+  String get confirmNewPasswordLabel => 'ยืนยันรหัสผ่านใหม่';
+
+  @override
+  String get changePassword => 'เปลี่ยนรหัสผ่าน';
+
+  @override
+  String get passwordChangedSuccess =>
+      'เปลี่ยนรหัสผ่านสำเร็จแล้ว กรุณาเข้าสู่ระบบด้วยรหัสผ่านใหม่';
+
+  @override
   String get secureRegistration => 'การลงทะเบียนที่ปลอดภัย';
 
   @override

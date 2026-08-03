@@ -471,6 +471,41 @@ class AppLocalizationsEn extends AppLocalizations {
   String get alreadyHaveAccount => 'Already have an account? ';
 
   @override
+  String get fullNameHint => 'First name - Last name';
+
+  @override
+  String get forgotPasswordSubtitle =>
+      'Don\'t worry! Just enter your email and we\'ll send you a code to reset your password.';
+
+  @override
+  String get sendResetCode => 'Send Code';
+
+  @override
+  String resetOtpSentMsg(String email) {
+    return 'A verification code (OTP) has been sent to your email\n$email';
+  }
+
+  @override
+  String get setNewPassword => 'Set New Password';
+
+  @override
+  String get setNewPasswordSubtitle =>
+      'Please choose a strong, hard-to-guess password to keep your account secure.';
+
+  @override
+  String get newPasswordLabel => 'New Password';
+
+  @override
+  String get confirmNewPasswordLabel => 'Confirm New Password';
+
+  @override
+  String get changePassword => 'Change Password';
+
+  @override
+  String get passwordChangedSuccess =>
+      'Your password has been changed. Please sign in with your new password.';
+
+  @override
   String get secureRegistration => 'SECURE REGISTRATION';
 
   @override

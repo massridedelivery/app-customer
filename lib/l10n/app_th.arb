@@ -72,6 +72,7 @@
   "saved": "ที่บันทึกไว้",
   "selectOnMaps": "เลือกบน MassMaps",
   "currentLocation": "ตำแหน่งปัจจุบัน",
+  "pickupNotReady": "กำลังหาตำแหน่งจุดรับ — เปิดตำแหน่งหรือเลือกจุดรับก่อน",
   "tripCompleted": "การเดินทางสำเร็จ",
   "rideCompleted": "การเดินทางสำเร็จ",
   "completed": "สำเร็จ",

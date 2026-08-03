@@ -157,6 +157,23 @@ class _HomeLandingViewState extends ConsumerState<HomeLandingView> {
                       // Drop-off Row
                       InkWell(
                         onTap: () {
+                          // The drop-off-first flow assumes the pickup is the
+                          // user's current location. If that hasn't resolved
+                          // yet, entering it would book from an unknown origin
+                          // (previously the Bangkok fallback), so ask them to
+                          // wait / set a pickup instead.
+                          if ((homeState.pickupLocation ??
+                                  homeState.currentLocation) ==
+                              null) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  AppLocalizations.of(context)!.pickupNotReady,
+                                ),
+                              ),
+                            );
+                            return;
+                          }
                           ref
                               .read(homeControllerProvider.notifier)
                               .startSelection(mode: RideSelectionMode.dropoff);
@@ -267,17 +284,32 @@ class _HomeLandingViewState extends ConsumerState<HomeLandingView> {
                           final notifier = ref.read(
                             homeControllerProvider.notifier,
                           );
-                          if (homeState.currentLocation != null) {
-                            notifier.setPickupLocation(
-                              homeState.currentLocation!,
-                              homeState.pickupAddress ?? 'ตำแหน่งปัจจุบัน',
+                          // Origin is the resolved pickup or the device
+                          // location; if neither has resolved yet, don't book
+                          // from an unknown origin — prompt instead.
+                          final origin =
+                              homeState.pickupLocation ??
+                              homeState.currentLocation;
+                          if (origin == null) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  AppLocalizations.of(context)!.pickupNotReady,
+                                ),
+                              ),
                             );
-                            notifier.setDropoffLocation(
-                              LatLng(place.lat, place.lng),
-                              place.name,
-                            );
-                            context.push('/booking');
+                            return;
                           }
+                          notifier.setPickupLocation(
+                            origin,
+                            homeState.pickupAddress ??
+                                AppLocalizations.of(context)!.currentLocation,
+                          );
+                          notifier.setDropoffLocation(
+                            LatLng(place.lat, place.lng),
+                            place.name,
+                          );
+                          context.push('/booking');
                         },
                       );
                     }),

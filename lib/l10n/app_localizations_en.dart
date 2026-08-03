@@ -229,6 +229,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get currentLocation => 'Current Location';
 
   @override
+  String get pickupNotReady =>
+      'Finding your pickup location — enable location or set a pickup point first.';
+
+  @override
   String get tripCompleted => 'Trip Completed';
 
   @override

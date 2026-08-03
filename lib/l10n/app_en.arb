@@ -72,6 +72,7 @@
   "saved": "Saved",
   "selectOnMaps": "Select on MassMaps",
   "currentLocation": "Current Location",
+  "pickupNotReady": "Finding your pickup location — enable location or set a pickup point first.",
   "tripCompleted": "Trip Completed",
   "rideCompleted": "Ride Completed",
   "completed": "Completed",

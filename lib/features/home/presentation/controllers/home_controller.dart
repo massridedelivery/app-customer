@@ -11,6 +11,12 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'home_controller.g.dart';
 
+/// Camera-only fallback (central Bangkok), used purely as the initial map
+/// centre until the device location resolves. It is deliberately NOT seeded
+/// into [HomeState.pickupLocation]/[HomeState.currentLocation]: doing so let a
+/// ride be booked from the city centre when GPS was slow or denied.
+const LatLng _kMapCameraFallback = LatLng(13.7563, 100.5018);
+
 @Riverpod(keepAlive: true)
 class HomeController extends _$HomeController {
   final Location _location = Location();
@@ -25,12 +31,14 @@ class HomeController extends _$HomeController {
     _loadSavedPlaces();
     _loadDefaultPlace();
     _loadRecentPlaces();
-    // Start with default BKK coordinates and no loading screen
+    // Only seed the map camera. currentLocation and pickupLocation stay null
+    // until a real source resolves them (GPS in _initLocation, the user's
+    // default saved place, or a manual pick) — so a null pickup means
+    // "not resolved yet" and callers can gate booking on it instead of
+    // silently using the Bangkok fallback.
     return const HomeState(
       isLoading: false,
-      currentLocation: LatLng(13.7563, 100.5018),
-      mapCenter: LatLng(13.7563, 100.5018),
-      pickupLocation: LatLng(13.7563, 100.5018),
+      mapCenter: _kMapCameraFallback,
     );
   }
 
@@ -204,7 +212,11 @@ class HomeController extends _$HomeController {
             foodLocation: LatLng(defaultPlace.lat, defaultPlace.lng),
           );
         }
-        if (state.pickupAddress == null || state.pickupAddress == 'Unknown Address' || state.pickupAddress == 'Failed to locate') {
+        // Fall back to the default saved place whenever GPS hasn't produced a
+        // real pickup yet — covers permission-denied/location-disabled/failed
+        // and the still-pending case. A non-null pickupLocation means GPS (or a
+        // manual pick) already won, so we don't clobber it.
+        if (state.pickupLocation == null) {
           state = state.copyWith(
             pickupAddress: defaultPlace.address ?? defaultPlace.name,
             pickupLocation: LatLng(defaultPlace.lat, defaultPlace.lng),
@@ -226,7 +238,11 @@ class HomeController extends _$HomeController {
             foodLocation: LatLng(place.lat, place.lng),
           );
         }
-        if (state.pickupAddress == null || state.pickupAddress == 'Unknown Address' || state.pickupAddress == 'Failed to locate') {
+        // Fall back to the default saved place whenever GPS hasn't produced a
+        // real pickup yet — covers permission-denied/location-disabled/failed
+        // and the still-pending case. A non-null pickupLocation means GPS (or a
+        // manual pick) already won, so we don't clobber it.
+        if (state.pickupLocation == null) {
           state = state.copyWith(
             pickupAddress: place.address ?? place.name,
             pickupLocation: LatLng(place.lat, place.lng),

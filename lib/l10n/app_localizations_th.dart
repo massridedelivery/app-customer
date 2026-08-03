@@ -229,6 +229,10 @@ class AppLocalizationsTh extends AppLocalizations {
   String get currentLocation => 'ตำแหน่งปัจจุบัน';
 
   @override
+  String get pickupNotReady =>
+      'กำลังหาตำแหน่งจุดรับ — เปิดตำแหน่งหรือเลือกจุดรับก่อน';
+
+  @override
   String get tripCompleted => 'การเดินทางสำเร็จ';
 
   @override

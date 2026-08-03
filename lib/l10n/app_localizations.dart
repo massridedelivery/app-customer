@@ -536,6 +536,12 @@ abstract class AppLocalizations {
   /// **'Current Location'**
   String get currentLocation;
 
+  /// No description provided for @pickupNotReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Finding your pickup location — enable location or set a pickup point first.'**
+  String get pickupNotReady;
+
   /// No description provided for @tripCompleted.
   ///
   /// In en, this message translates to:

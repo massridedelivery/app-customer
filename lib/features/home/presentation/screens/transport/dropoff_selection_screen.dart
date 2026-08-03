@@ -1,3 +1,4 @@
+import 'package:customer_app/core/constants/map_defaults.dart';
 import 'package:customer_app/core/constants/app_assets.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_icons.dart';
@@ -53,7 +54,7 @@ class _DropoffSelectionScreenState
           // 1. Map Layer
           GoogleMap(
             initialCameraPosition: CameraPosition(
-              target: initialTarget ?? const LatLng(13.7563, 100.5018),
+              target: initialTarget ?? MapDefaults.bangkokCenter,
               zoom: 15.0,
             ),
             mapToolbarEnabled: true,

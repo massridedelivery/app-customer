@@ -1,3 +1,4 @@
+import 'package:customer_app/core/constants/map_defaults.dart';
 import 'package:customer_app/features/home/domain/usecases/add_saved_place_usecase_impl.dart';
 import 'package:customer_app/features/home/domain/usecases/get_default_place_usecase_impl.dart';
 import 'package:customer_app/features/home/domain/usecases/get_recent_places_usecase_impl.dart';
@@ -15,7 +16,7 @@ part 'home_controller.g.dart';
 /// centre until the device location resolves. It is deliberately NOT seeded
 /// into [HomeState.pickupLocation]/[HomeState.currentLocation]: doing so let a
 /// ride be booked from the city centre when GPS was slow or denied.
-const LatLng _kMapCameraFallback = LatLng(13.7563, 100.5018);
+const LatLng _kMapCameraFallback = MapDefaults.bangkokCenter;
 
 @Riverpod(keepAlive: true)
 class HomeController extends _$HomeController {

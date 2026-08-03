@@ -1,3 +1,4 @@
+import 'package:customer_app/core/constants/map_defaults.dart';
 import 'package:customer_app/core/constants/app_assets.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_icons.dart';
@@ -177,7 +178,7 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
       }
     });
 
-    final pickup = pickupLocation ?? const LatLng(13.7563, 100.5018);
+    final pickup = pickupLocation ?? MapDefaults.bangkokCenter;
     final dropoff =
         dropoffLocation ?? const LatLng(13.7650, 100.5100);
 

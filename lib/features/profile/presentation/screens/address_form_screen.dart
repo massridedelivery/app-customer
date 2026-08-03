@@ -1,3 +1,4 @@
+import 'package:customer_app/core/constants/map_defaults.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
@@ -7,7 +8,6 @@ import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class AddressFormScreen extends ConsumerStatefulWidget {
   const AddressFormScreen({super.key});
@@ -25,8 +25,8 @@ class _AddressFormScreenState extends ConsumerState<AddressFormScreen> {
   final _noteCtrl = TextEditingController();
 
   final String _chosenAddress = '';
-  final double _lat = 13.7563;
-  final double _lng = 100.5018;
+  final double _lat = MapDefaults.bangkokLat;
+  final double _lng = MapDefaults.bangkokLng;
 
   @override
   void dispose() {
@@ -44,7 +44,7 @@ class _AddressFormScreenState extends ConsumerState<AddressFormScreen> {
     // Clear previous food location/address selection
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(homeControllerProvider.notifier).setFoodLocation(
-        const LatLng(13.7563, 100.5018),
+        MapDefaults.bangkokCenter,
         '',
       );
     });

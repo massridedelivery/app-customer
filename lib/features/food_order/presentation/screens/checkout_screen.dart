@@ -1,3 +1,4 @@
+import 'package:customer_app/core/constants/map_defaults.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/constants/feature_flags.dart';
@@ -73,8 +74,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           homeState.foodLocation ??
           homeState.pickupLocation ??
           homeState.currentLocation;
-      final lat = location?.latitude ?? 13.7563;
-      final lng = location?.longitude ?? 100.5018;
+      final lat = location?.latitude ?? MapDefaults.bangkokLat;
+      final lng = location?.longitude ?? MapDefaults.bangkokLng;
       ref.read(checkoutProvider.notifier).loadEstimate(
             restaurantId: cart.restaurantId!,
             cartItems: cart.items,
@@ -91,8 +92,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         homeState.foodLocation ??
         homeState.pickupLocation ??
         homeState.currentLocation;
-    final lat = location?.latitude ?? 13.7563;
-    final lng = location?.longitude ?? 100.5018;
+    final lat = location?.latitude ?? MapDefaults.bangkokLat;
+    final lng = location?.longitude ?? MapDefaults.bangkokLng;
 
     if (cart.restaurantId == null || cart.items.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(

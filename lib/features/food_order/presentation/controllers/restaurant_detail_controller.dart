@@ -1,3 +1,4 @@
+import 'package:customer_app/core/constants/map_defaults.dart';
 import 'package:customer_app/features/food_order/domain/models/food_models.dart';
 import 'package:customer_app/features/food_order/data/repositories/food_order_repository_impl.dart';
 import 'package:customer_app/features/food_order/presentation/states/restaurant_detail_state.dart';
@@ -24,8 +25,8 @@ class RestaurantDetail extends _$RestaurantDetail {
           homeState.foodLocation ??
           homeState.pickupLocation ??
           homeState.currentLocation;
-      final lat = location?.latitude ?? 13.7563;
-      final lng = location?.longitude ?? 100.5018;
+      final lat = location?.latitude ?? MapDefaults.bangkokLat;
+      final lng = location?.longitude ?? MapDefaults.bangkokLng;
 
       final repo = ref.read(foodOrderRepositoryProvider);
       var profile = await repo.getRestaurantProfile(id);

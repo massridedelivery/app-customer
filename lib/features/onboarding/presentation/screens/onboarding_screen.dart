@@ -46,14 +46,19 @@ class OnboardingScreen extends ConsumerWidget {
     final currentPageIndex = ref.watch(onboardingControllerProvider);
     final pageController = PageController(initialPage: currentPageIndex);
 
-    void onNextPressed() {
+    Future<void> onNextPressed() async {
       if (currentPageIndex < _pages.length - 1) {
         pageController.nextPage(
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeIn,
         );
       } else {
-        context.go('/location_setup');
+        // Skip the location-setup screen: the app resolves the current location
+        // on the map surface, so finishing onboarding goes straight to auth.
+        await ref
+            .read(onboardingControllerProvider.notifier)
+            .completeOnboarding();
+        if (context.mounted) context.go('/auth');
       }
     }
 

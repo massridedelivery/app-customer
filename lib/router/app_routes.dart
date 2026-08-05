@@ -34,7 +34,6 @@ import 'package:customer_app/features/messenger/presentation/screens/messenger_r
 import 'package:customer_app/features/messenger/presentation/screens/messenger_tracking_screen.dart';
 import 'package:customer_app/features/main/presentation/screens/main_screen.dart'
     as customer_app_main;
-import 'package:customer_app/features/onboarding/presentation/screens/location_setup_screen.dart';
 import 'package:customer_app/features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'package:customer_app/features/onboarding/presentation/screens/splash_screen.dart';
 import 'package:customer_app/features/payment/presentation/screens/add_card_screen.dart';
@@ -116,8 +115,7 @@ final routerProvider = Provider<GoRouter>((ref) {
 
       final isAuthPath = currentPath.startsWith('/auth');
       final isSplash = currentPath == '/splash';
-      final isOnboarding =
-          currentPath == '/onboarding' || currentPath == '/location_setup';
+      final isOnboarding = currentPath == '/onboarding';
 
       final hasCompletedOnboarding = ref
           .read(appStorageProvider)
@@ -219,10 +217,6 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/onboarding',
         builder: (context, state) => const OnboardingScreen(),
-      ),
-      GoRoute(
-        path: '/location_setup',
-        builder: (context, state) => const LocationSetupScreen(),
       ),
       GoRoute(
         path: '/auth',

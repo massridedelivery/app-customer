@@ -1,5 +1,6 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
+import 'package:customer_app/core/widgets/app_filter_chip.dart';
 import 'package:customer_app/core/constants/feature_flags.dart';
 import 'package:customer_app/features/food_order/presentation/controllers/food_rating_controller.dart';
 import 'package:customer_app/features/food_order/presentation/states/food_rating_state.dart';
@@ -204,33 +205,16 @@ class _FoodRatingScreenState extends ConsumerState<FoodRatingScreen> {
                   runSpacing: 8,
                   children: _riderTags.map((tag) {
                     final selected = _selectedTags.contains(tag);
-                    return FilterChip(
-                      label: Text(tag),
+                    return AppFilterChip(
+                      label: tag,
                       selected: selected,
-                      onSelected: (v) {
+                      onTap: () {
                         setState(() {
-                          v
-                              ? _selectedTags.add(tag)
-                              : _selectedTags.remove(tag);
+                          selected
+                              ? _selectedTags.remove(tag)
+                              : _selectedTags.add(tag);
                         });
                       },
-                      selectedColor: AppColors.foundationGreen100,
-                      checkmarkColor: AppColors.foundationGreen600,
-                      labelStyle: AppTypography.caption4.copyWith(
-                        color: selected
-                            ? AppColors.foundationGreen600
-                            : AppColors.semanticGrayNeutralFgHigh,
-                      ),
-                      side: BorderSide(
-                        color: selected
-                            ? AppColors.foundationGreen500
-                            : AppColors.grey300,
-                      ),
-                      backgroundColor: AppColors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      showCheckmark: true,
                     );
                   }).toList(),
                 ),

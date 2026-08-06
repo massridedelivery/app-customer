@@ -1369,6 +1369,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Request {vehicle} · ฿{fare}'**
   String requestRideWith(String vehicle, String fare);
+
+  /// No description provided for @map.
+  ///
+  /// In en, this message translates to:
+  /// **'Map'**
+  String get map;
+
+  /// No description provided for @experienceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A new experience with Mass Move'**
+  String get experienceTitle;
+
+  /// No description provided for @experiencePremiumTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Premium rides'**
+  String get experiencePremiumTitle;
+
+  /// No description provided for @experiencePremiumSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cars with every comfort on board'**
+  String get experiencePremiumSubtitle;
+
+  /// No description provided for @experienceAirportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'To the airport, on time'**
+  String get experienceAirportTitle;
+
+  /// No description provided for @experienceAirportSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Book ahead and never miss a flight'**
+  String get experienceAirportSubtitle;
+
+  /// No description provided for @experienceSafetyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Safe on every route'**
+  String get experienceSafetyTitle;
+
+  /// No description provided for @experienceSafetySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Live location sharing + SOS button'**
+  String get experienceSafetySubtitle;
+
+  /// No description provided for @experienceValueTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Great value, cheaper for sure'**
+  String get experienceValueTitle;
+
+  /// No description provided for @experienceValueSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Transparent fares — know the price before you ride'**
+  String get experienceValueSubtitle;
 }
 
 class _AppLocalizationsDelegate

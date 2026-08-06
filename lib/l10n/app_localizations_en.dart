@@ -662,4 +662,35 @@ class AppLocalizationsEn extends AppLocalizations {
   String requestRideWith(String vehicle, String fare) {
     return 'Request $vehicle · ฿$fare';
   }
+
+  @override
+  String get map => 'Map';
+
+  @override
+  String get experienceTitle => 'A new experience with Mass Move';
+
+  @override
+  String get experiencePremiumTitle => 'Premium rides';
+
+  @override
+  String get experiencePremiumSubtitle => 'Cars with every comfort on board';
+
+  @override
+  String get experienceAirportTitle => 'To the airport, on time';
+
+  @override
+  String get experienceAirportSubtitle => 'Book ahead and never miss a flight';
+
+  @override
+  String get experienceSafetyTitle => 'Safe on every route';
+
+  @override
+  String get experienceSafetySubtitle => 'Live location sharing + SOS button';
+
+  @override
+  String get experienceValueTitle => 'Great value, cheaper for sure';
+
+  @override
+  String get experienceValueSubtitle =>
+      'Transparent fares — know the price before you ride';
 }

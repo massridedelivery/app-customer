@@ -244,5 +244,15 @@
       "vehicle": { "type": "String" },
       "fare": { "type": "String" }
     }
-  }
+  },
+  "map": "แผนที่",
+  "experienceTitle": "สัมผัสประสบการณ์ใหม่กับ Mass Move",
+  "experiencePremiumTitle": "การเดินทางระดับพรีเมียม",
+  "experiencePremiumSubtitle": "รถพร้อมสิ่งอำนวยความสะดวกครบครัน",
+  "experienceAirportTitle": "ไปสนามบิน ตรงเวลา",
+  "experienceAirportSubtitle": "จองล่วงหน้า ไม่พลาดไฟลต์",
+  "experienceSafetyTitle": "ปลอดภัยทุกเส้นทาง",
+  "experienceSafetySubtitle": "แชร์ตำแหน่งเรียลไทม์ + ปุ่ม SOS",
+  "experienceValueTitle": "ราคาคุ้มค่า ถูกกว่าชัวร์",
+  "experienceValueSubtitle": "ค่าโดยสารโปร่งใส รู้ราคาก่อนเรียก"
 }

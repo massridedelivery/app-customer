@@ -244,5 +244,15 @@
       "vehicle": { "type": "String" },
       "fare": { "type": "String" }
     }
-  }
+  },
+  "map": "Map",
+  "experienceTitle": "A new experience with Mass Move",
+  "experiencePremiumTitle": "Premium rides",
+  "experiencePremiumSubtitle": "Cars with every comfort on board",
+  "experienceAirportTitle": "To the airport, on time",
+  "experienceAirportSubtitle": "Book ahead and never miss a flight",
+  "experienceSafetyTitle": "Safe on every route",
+  "experienceSafetySubtitle": "Live location sharing + SOS button",
+  "experienceValueTitle": "Great value, cheaper for sure",
+  "experienceValueSubtitle": "Transparent fares — know the price before you ride"
 }

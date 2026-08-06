@@ -66,7 +66,7 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
               _buildRecentTrips(l10n, homeState.recentPlaces),
               const SizedBox(height: 28),
             ],
-            _buildExperienceSection(),
+            _buildExperienceSection(l10n),
           ],
         ),
       ),
@@ -125,7 +125,7 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
                           ),
                           const SizedBox(width: 6),
                           Text(
-                            'แผนที่',
+                            l10n.map,
                             style: AppTypography.label2.copyWith(
                               color: Colors.white,
                             ),
@@ -458,7 +458,7 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
   // "สัมผัสประสบการณ์ใหม่กับ Mass Move" — horizontal feature cards that fill out
   // the lower half of the screen.
   // ---------------------------------------------------------------------------
-  Widget _buildExperienceSection() {
+  Widget _buildExperienceSection(AppLocalizations l10n) {
     final items = <({
       IconData icon,
       String title,
@@ -467,26 +467,26 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
     })>[
       (
         icon: Icons.workspace_premium_rounded,
-        title: 'การเดินทางระดับพรีเมียม',
-        subtitle: 'รถพร้อมสิ่งอำนวยความสะดวกครบครัน',
+        title: l10n.experiencePremiumTitle,
+        subtitle: l10n.experiencePremiumSubtitle,
         colors: [AppColors.foundationRed600, AppColors.foundationRed800],
       ),
       (
         icon: Icons.flight_takeoff_rounded,
-        title: 'ไปสนามบิน ตรงเวลา',
-        subtitle: 'จองล่วงหน้า ไม่พลาดไฟลต์',
+        title: l10n.experienceAirportTitle,
+        subtitle: l10n.experienceAirportSubtitle,
         colors: [const Color(0xFF3B82F6), const Color(0xFF1D4ED8)],
       ),
       (
         icon: Icons.verified_user_rounded,
-        title: 'ปลอดภัยทุกเส้นทาง',
-        subtitle: 'แชร์ตำแหน่งเรียลไทม์ + ปุ่ม SOS',
+        title: l10n.experienceSafetyTitle,
+        subtitle: l10n.experienceSafetySubtitle,
         colors: [AppColors.success, const Color(0xFF059669)],
       ),
       (
         icon: Icons.savings_rounded,
-        title: 'ราคาคุ้มค่า ถูกกว่าชัวร์',
-        subtitle: 'ค่าโดยสารโปร่งใส รู้ราคาก่อนเรียก',
+        title: l10n.experienceValueTitle,
+        subtitle: l10n.experienceValueSubtitle,
         colors: [
           AppColors.foundationOrange500,
           AppColors.foundationOrange700,
@@ -497,11 +497,11 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Text(
-            'สัมผัสประสบการณ์ใหม่กับ Mass Move',
-            style: TextStyle(
+            l10n.experienceTitle,
+            style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
               color: AppColors.textPrimary,

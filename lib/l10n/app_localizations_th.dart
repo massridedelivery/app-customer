@@ -662,4 +662,34 @@ class AppLocalizationsTh extends AppLocalizations {
   String requestRideWith(String vehicle, String fare) {
     return 'เรียก $vehicle · ฿$fare';
   }
+
+  @override
+  String get map => 'แผนที่';
+
+  @override
+  String get experienceTitle => 'สัมผัสประสบการณ์ใหม่กับ Mass Move';
+
+  @override
+  String get experiencePremiumTitle => 'การเดินทางระดับพรีเมียม';
+
+  @override
+  String get experiencePremiumSubtitle => 'รถพร้อมสิ่งอำนวยความสะดวกครบครัน';
+
+  @override
+  String get experienceAirportTitle => 'ไปสนามบิน ตรงเวลา';
+
+  @override
+  String get experienceAirportSubtitle => 'จองล่วงหน้า ไม่พลาดไฟลต์';
+
+  @override
+  String get experienceSafetyTitle => 'ปลอดภัยทุกเส้นทาง';
+
+  @override
+  String get experienceSafetySubtitle => 'แชร์ตำแหน่งเรียลไทม์ + ปุ่ม SOS';
+
+  @override
+  String get experienceValueTitle => 'ราคาคุ้มค่า ถูกกว่าชัวร์';
+
+  @override
+  String get experienceValueSubtitle => 'ค่าโดยสารโปร่งใส รู้ราคาก่อนเรียก';
 }

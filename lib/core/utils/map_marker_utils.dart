@@ -80,7 +80,7 @@ class MapMarkerUtils {
   static Future<BitmapDescriptor> _createCompositeMarker({
     required Color backgroundColor,
     required Color iconColor,
-    double size = 84, // Compact pin so it doesn't dominate the map
+    double size = 60, // Compact pin so it doesn't dominate the map
   }) async {
     final ui.PictureRecorder pictureRecorder = ui.PictureRecorder();
     final ui.Canvas canvas = ui.Canvas(pictureRecorder);

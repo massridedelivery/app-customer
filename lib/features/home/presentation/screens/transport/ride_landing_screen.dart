@@ -63,7 +63,7 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
             // (GET /api/customer/places/frequent). Hidden when empty so there's
             // no dangling header while the endpoint returns nothing.
             if (homeState.recentPlaces.isNotEmpty) ...[
-              _buildRecentTrips(homeState.recentPlaces),
+              _buildRecentTrips(l10n, homeState.recentPlaces),
               const SizedBox(height: 28),
             ],
             _buildExperienceSection(),
@@ -307,7 +307,7 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
   // ---------------------------------------------------------------------------
   // Recent trips.
   // ---------------------------------------------------------------------------
-  Widget _buildRecentTrips(List<Place> places) {
+  Widget _buildRecentTrips(AppLocalizations l10n, List<Place> places) {
     final visible = _recentExpanded
         ? places
         : places.take(_recentCollapsedCount).toList();
@@ -318,7 +318,7 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'เดินทางล่าสุด',
+            l10n.recentUsage,
             style: AppTypography.heading5.copyWith(
               fontWeight: FontWeight.bold,
               color: AppColors.textPrimary,

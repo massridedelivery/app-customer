@@ -33,6 +33,14 @@ class _AppState extends ConsumerState<App> {
       routerConfig: router,
       debugShowCheckedModeBanner: false,
       locale: locale,
+      // App-wide: tapping empty space dismisses the keyboard. Interactive
+      // widgets (fields, buttons, list items) still win their own taps; only
+      // taps that no widget claims fall through to here and unfocus.
+      builder: (context, child) => GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+        child: child,
+      ),
       localizationsDelegates: const [
         AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,

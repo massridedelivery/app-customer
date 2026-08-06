@@ -1,6 +1,7 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/widgets/app_filter_chip.dart';
+import 'package:customer_app/core/widgets/app_pill_tab.dart';
 import 'package:customer_app/features/messenger/domain/models/messenger_order.dart';
 import 'package:customer_app/features/messenger/presentation/controllers/messenger_history_controller.dart';
 import 'package:customer_app/features/trips/domain/models/history_order.dart';
@@ -158,9 +159,9 @@ class _TripsFilterBar extends StatelessWidget implements PreferredSizeWidget {
             child: Row(
               children: [
                 _buildStatusTab(HistoryStatus.ongoing, 'กำลังดำเนินการ'),
-                const SizedBox(width: 24),
+                const SizedBox(width: 8),
                 _buildStatusTab(HistoryStatus.completed, 'เสร็จสิ้น'),
-                const SizedBox(width: 24),
+                const SizedBox(width: 8),
                 _buildStatusTab(HistoryStatus.canceled, 'ยกเลิก/ไม่สำเร็จ'),
               ],
             ),
@@ -193,44 +194,12 @@ class _TripsFilterBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   Widget _buildStatusTab(HistoryStatus status, String label) {
-    final isSelected = selectedStatus == status;
-    const activeColor = AppColors.primary;
-    final inactiveColor = AppColors.semanticGrayNeutralFgLowOnWhite;
-
-    return GestureDetector(
+    return AppPillTab(
+      label: label,
+      selected: selectedStatus == status,
       onTap: () {
-        if (selectedStatus != status) {
-          onStatusChanged(status);
-        }
+        if (selectedStatus != status) onStatusChanged(status);
       },
-      child: IntrinsicWidth(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              child: Text(
-                label,
-                style: AppTypography.body2.copyWith(
-                  color: isSelected ? activeColor : inactiveColor,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                ),
-              ),
-            ),
-            Container(
-              height: 3,
-              decoration: BoxDecoration(
-                color: isSelected ? activeColor : Colors.transparent,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(1.5),
-                  topRight: Radius.circular(1.5),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 

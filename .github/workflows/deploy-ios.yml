@@ -71,6 +71,18 @@ jobs:
         working-directory: ios
         run: bundle exec pod install
 
+      # altool reads the App Store Connect API key from a .p8 file in one of its
+      # search dirs. Decode the base64 secret with Ruby's Base64 (matching how
+      # fastlane/spaceship decoded it) so the bytes are the real P-256 key.
+      - name: Stage App Store Connect API key for altool
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_KEY_P8_BASE64: ${{ secrets.ASC_KEY_P8_BASE64 }}
+        run: |
+          mkdir -p "$HOME/.appstoreconnect/private_keys"
+          ruby -rbase64 -e 'File.binwrite(File.join(Dir.home, ".appstoreconnect", "private_keys", "AuthKey_#{ENV.fetch("ASC_KEY_ID")}.p8"), Base64.decode64(ENV.fetch("ASC_KEY_P8_BASE64")))'
+          ls -l "$HOME/.appstoreconnect/private_keys"
+
       - name: Build & upload to TestFlight
         working-directory: ios
         env:
@@ -79,5 +91,4 @@ jobs:
           MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
-          ASC_KEY_P8_BASE64: ${{ secrets.ASC_KEY_P8_BASE64 }}
         run: bundle exec fastlane beta

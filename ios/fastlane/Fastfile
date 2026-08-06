@@ -16,21 +16,14 @@ platform :ios do
     # No-op on a normal developer machine.
     setup_ci
 
-    api_key = app_store_connect_api_key(
-      key_id: ENV["ASC_KEY_ID"],
-      issuer_id: ENV["ASC_ISSUER_ID"],
-      key_content: ENV["ASC_KEY_P8_BASE64"],
-      is_key_content_base64: true,
-      in_house: false,
-    )
-
     # Pull the distribution cert + App Store provisioning profile from the
-    # match repo (read-only) into the keychain.
+    # match repo (read-only). No api_key on purpose: readonly match only needs
+    # to git-clone + decrypt, so it never builds a spaceship JWT — which crashes
+    # on the runner's OpenSSL 3 with "invalid curve name (OpenSSL::PKey::ECError)".
     match(
       type: "appstore",
       readonly: true,
       app_identifier: [APP_IDENTIFIER],
-      api_key: api_key,
     )
 
     # The project ships with automatic signing; force manual signing against
@@ -51,7 +44,7 @@ platform :ios do
     # Archive + export. The Dart/Flutter layer is compiled by the Xcode build
     # phase; `flutter build ios --config-only` in CI has already written the
     # dart-defines, version name and build number into Generated.xcconfig.
-    build_app(
+    ipa_path = build_app(
       workspace: "Runner.xcworkspace",
       scheme: SCHEME,
       configuration: CONFIGURATION,
@@ -63,9 +56,17 @@ platform :ios do
       },
     )
 
-    upload_to_testflight(
-      api_key: api_key,
-      skip_waiting_for_build_processing: true,
+    # Upload with Apple's own altool rather than pilot/upload_to_testflight,
+    # which goes through spaceship and hits the same OpenSSL 3 "invalid curve
+    # name" crash. altool signs its App Store Connect JWT natively (no Ruby
+    # OpenSSL), reading the key from ~/.appstoreconnect/private_keys/AuthKey_<id>.p8
+    # that the workflow stages beforehand.
+    sh(
+      "xcrun", "altool", "--upload-app",
+      "--type", "ios",
+      "--file", ipa_path,
+      "--apiKey", ENV.fetch("ASC_KEY_ID"),
+      "--apiIssuer", ENV.fetch("ASC_ISSUER_ID"),
     )
   end
 end

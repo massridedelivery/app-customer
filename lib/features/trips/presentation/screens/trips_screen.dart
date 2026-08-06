@@ -1,7 +1,8 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/widgets/app_filter_chip.dart';
-import 'package:customer_app/core/widgets/app_pill_tab.dart';
+import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:customer_app/features/messenger/domain/models/messenger_order.dart';
 import 'package:customer_app/features/messenger/presentation/controllers/messenger_history_controller.dart';
 import 'package:customer_app/features/trips/domain/models/history_order.dart';
@@ -20,30 +21,18 @@ class TripsScreen extends ConsumerStatefulWidget {
 }
 
 class _TripsScreenState extends ConsumerState<TripsScreen> {
-  late HistoryStatus _selectedStatus;
+  // All statuses are shown together (ongoing first); only the service type is
+  // filtered via the chips.
   HistoryType? _selectedType;
   late final ScrollController _scrollController;
 
   @override
   void initState() {
     super.initState();
-    _selectedStatus = widget.initialStatus ?? HistoryStatus.ongoing;
     _scrollController = ScrollController()..addListener(_onScroll);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadHistory(isRefresh: true);
     });
-  }
-
-  @override
-  void didUpdateWidget(covariant TripsScreen oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.initialStatus != null &&
-        widget.initialStatus != oldWidget.initialStatus) {
-      setState(() {
-        _selectedStatus = widget.initialStatus!;
-      });
-      _loadHistory(isRefresh: true);
-    }
   }
 
   @override
@@ -73,7 +62,7 @@ class _TripsScreenState extends ConsumerState<TripsScreen> {
         .read(tripsControllerProvider.notifier)
         .fetchHistoryOrders(
           type: _selectedType,
-          status: _selectedStatus,
+          status: null, // all statuses combined
           isRefresh: isRefresh,
         );
   }
@@ -94,16 +83,9 @@ class _TripsScreenState extends ConsumerState<TripsScreen> {
         ),
         centerTitle: false,
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(115),
+          preferredSize: const Size.fromHeight(60),
           child: _TripsFilterBar(
-            selectedStatus: _selectedStatus,
             selectedType: _selectedType,
-            onStatusChanged: (status) {
-              setState(() {
-                _selectedStatus = status;
-              });
-              _loadHistory(isRefresh: true);
-            },
             onTypeChanged: (type) {
               setState(() {
                 _selectedType = type;
@@ -117,7 +99,6 @@ class _TripsScreenState extends ConsumerState<TripsScreen> {
         onRefresh: () async => _loadHistory(isRefresh: true),
         child: _selectedType == HistoryType.messenger
             ? _MessengerHistoryBody(
-                status: _selectedStatus,
                 onRetry: () => _loadHistory(isRefresh: true),
               )
             : _TripsListBody(
@@ -130,20 +111,16 @@ class _TripsScreenState extends ConsumerState<TripsScreen> {
 }
 
 class _TripsFilterBar extends StatelessWidget implements PreferredSizeWidget {
-  final HistoryStatus selectedStatus;
   final HistoryType? selectedType;
-  final ValueChanged<HistoryStatus> onStatusChanged;
   final ValueChanged<HistoryType?> onTypeChanged;
 
   const _TripsFilterBar({
-    required this.selectedStatus,
     required this.selectedType,
-    required this.onStatusChanged,
     required this.onTypeChanged,
   });
 
   @override
-  Size get preferredSize => const Size.fromHeight(115);
+  Size get preferredSize => const Size.fromHeight(60);
 
   @override
   Widget build(BuildContext context) {
@@ -153,26 +130,8 @@ class _TripsFilterBar extends StatelessWidget implements PreferredSizeWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Top Row: Status Tabs
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              children: [
-                _buildStatusTab(HistoryStatus.ongoing, 'กำลังดำเนินการ'),
-                const SizedBox(width: 8),
-                _buildStatusTab(HistoryStatus.completed, 'เสร็จสิ้น'),
-                const SizedBox(width: 8),
-                _buildStatusTab(HistoryStatus.canceled, 'ยกเลิก/ไม่สำเร็จ'),
-              ],
-            ),
-          ),
-          const Divider(
-            height: 1,
-            thickness: 1,
-            color: AppColors.foundationGrayscale200,
-          ),
-          const SizedBox(height: 10),
-          // Bottom Row: Type Chips
+          const SizedBox(height: 8),
+          // Type chips only — statuses are combined into one list below.
           SizedBox(
             height: 42,
             child: ListView(
@@ -190,16 +149,6 @@ class _TripsFilterBar extends StatelessWidget implements PreferredSizeWidget {
           const SizedBox(height: 8),
         ],
       ),
-    );
-  }
-
-  Widget _buildStatusTab(HistoryStatus status, String label) {
-    return AppPillTab(
-      label: label,
-      selected: selectedStatus == status,
-      onTap: () {
-        if (selectedStatus != status) onStatusChanged(status);
-      },
     );
   }
 
@@ -258,35 +207,85 @@ class _TripsListBody extends ConsumerWidget {
       return Center(child: Text(AppLocalizations.of(context)!.noTripsYet));
     }
 
+    // Ongoing orders first, then the rest — preserving the API order within
+    // each group.
+    final sorted = [
+      ...orders.where((o) => _isOngoingOrder(o.status)),
+      ...orders.where((o) => !_isOngoingOrder(o.status)),
+    ];
+
     return ListView.separated(
       controller: scrollController,
       padding: const EdgeInsets.symmetric(vertical: 8),
-      itemCount: orders.length + (isLoadingMore ? 1 : 0),
+      itemCount: sorted.length + (isLoadingMore ? 1 : 0),
       separatorBuilder: (context, index) => const Padding(
         padding: EdgeInsets.symmetric(horizontal: 16),
         child: Divider(height: 0.5, color: AppColors.foundationGrayscale100),
       ),
       itemBuilder: (context, index) {
-        if (index == orders.length) {
+        if (index == sorted.length) {
           return const Padding(
             padding: EdgeInsets.symmetric(vertical: 16),
             child: Center(child: CircularProgressIndicator()),
           );
         }
-        final order = orders[index];
-        return _OrderListItem(order: order);
+        return _OrderListItem(order: sorted[index]);
       },
     );
   }
 }
 
-class _OrderListItem extends StatelessWidget {
+/// True when an order is still in progress (not completed/cancelled/failed).
+bool _isOngoingOrder(String status) {
+  final s = status.toUpperCase();
+  return s != 'COMPLETED' &&
+      s != 'SUCCESS' &&
+      s != 'CANCELLED' &&
+      s != 'FAILED';
+}
+
+class _OrderListItem extends ConsumerWidget {
   final HistoryOrder order;
 
   const _OrderListItem({required this.order});
 
+  // "Book again": rides re-open the booking screen with the same route; food /
+  // mart re-open the restaurant (or the food home); anything else falls back to
+  // the trip detail.
+  void _rebook(BuildContext context, WidgetRef ref) {
+    final type = order.type.toUpperCase();
+    if (type == 'RIDE' && order.rideDetails != null) {
+      final r = order.rideDetails!;
+      if (r.dropoffLat != null && r.dropoffLng != null) {
+        final home = ref.read(homeControllerProvider.notifier);
+        if (r.pickupLat != null && r.pickupLng != null) {
+          home.setPickupLocation(
+            LatLng(r.pickupLat!, r.pickupLng!),
+            r.pickupAddress ?? '',
+          );
+        }
+        home.setDropoffLocation(
+          LatLng(r.dropoffLat!, r.dropoffLng!),
+          r.dropoffAddress ?? '',
+        );
+        context.push('/booking');
+        return;
+      }
+    }
+    if (type == 'FOOD' || type == 'MART') {
+      final restId = order.foodDetails?.restaurantId;
+      if (restId != null && restId.isNotEmpty) {
+        context.push('/restaurant/$restId');
+        return;
+      }
+      context.push('/food-delivery');
+      return;
+    }
+    context.push('/trip/${order.id}?type=${order.type}');
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isCancelled =
         order.status.toUpperCase() == 'CANCELLED' ||
         order.status.toUpperCase() == 'FAILED';
@@ -364,6 +363,28 @@ class _OrderListItem extends StatelessWidget {
                     ),
                     const SizedBox(height: 6),
                     _StatusText(status: order.status),
+                    const SizedBox(height: 6),
+                    GestureDetector(
+                      onTap: () => _rebook(context, ref),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'จองอีกครั้ง',
+                            style: AppTypography.label2.copyWith(
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          const Icon(
+                            Icons.arrow_forward,
+                            size: 16,
+                            color: AppColors.primary,
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -426,21 +447,9 @@ class _StatusText extends StatelessWidget {
 /// Messenger history list — sourced from `/api/messenger/customer/orders`
 /// and filtered client-side by the shared status tabs.
 class _MessengerHistoryBody extends ConsumerWidget {
-  final HistoryStatus status;
   final VoidCallback onRetry;
 
-  const _MessengerHistoryBody({required this.status, required this.onRetry});
-
-  bool _matchesStatus(MessengerOrder order) {
-    switch (status) {
-      case HistoryStatus.ongoing:
-        return !order.isTerminal;
-      case HistoryStatus.completed:
-        return order.isDelivered;
-      case HistoryStatus.canceled:
-        return order.isCancelled;
-    }
-  }
+  const _MessengerHistoryBody({required this.onRetry});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -462,7 +471,11 @@ class _MessengerHistoryBody extends ConsumerWidget {
         ),
       ),
       data: (orders) {
-        final filtered = orders.where(_matchesStatus).toList();
+        // Ongoing first, then the rest.
+        final filtered = [
+          ...orders.where((o) => !o.isTerminal),
+          ...orders.where((o) => o.isTerminal),
+        ];
         if (filtered.isEmpty) {
           return LayoutBuilder(
             builder: (context, constraints) => SingleChildScrollView(

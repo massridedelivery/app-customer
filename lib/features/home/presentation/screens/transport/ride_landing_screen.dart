@@ -60,10 +60,13 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
             _buildQuickActions(context, l10n, homeState.savedPlaces),
             const SizedBox(height: 28),
             // Recent trips — driven by homeState.recentPlaces
-            // (GET /api/customer/places/recent). Hidden when empty so there's no
-            // dangling header while the endpoint returns nothing.
-            if (homeState.recentPlaces.isNotEmpty)
+            // (GET /api/customer/places/frequent). Hidden when empty so there's
+            // no dangling header while the endpoint returns nothing.
+            if (homeState.recentPlaces.isNotEmpty) ...[
               _buildRecentTrips(homeState.recentPlaces),
+              const SizedBox(height: 28),
+            ],
+            _buildExperienceSection(),
           ],
         ),
       ),
@@ -75,7 +78,9 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
   // a promo strip (Grab-style layout, MassMove brand colours).
   // ---------------------------------------------------------------------------
   Widget _buildHeader(BuildContext context, AppLocalizations l10n) {
-    return Container(
+    return ClipPath(
+      clipper: _HeaderWaveClipper(),
+      child: Container(
       width: double.infinity,
       decoration: const BoxDecoration(
         gradient: LinearGradient(
@@ -83,15 +88,11 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
           end: Alignment.bottomRight,
           colors: [AppColors.foundationRed700, AppColors.foundationRed900],
         ),
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(28),
-          bottomRight: Radius.circular(28),
-        ),
       ),
       child: SafeArea(
         bottom: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
+          padding: const EdgeInsets.fromLTRB(20, 4, 20, 52),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -191,6 +192,7 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
             ],
           ),
         ),
+      ),
       ),
     );
   }
@@ -451,4 +453,157 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
       ),
     );
   }
+
+  // ---------------------------------------------------------------------------
+  // "สัมผัสประสบการณ์ใหม่กับ Mass Move" — horizontal feature cards that fill out
+  // the lower half of the screen.
+  // ---------------------------------------------------------------------------
+  Widget _buildExperienceSection() {
+    final items = <({
+      IconData icon,
+      String title,
+      String subtitle,
+      List<Color> colors,
+    })>[
+      (
+        icon: Icons.workspace_premium_rounded,
+        title: 'การเดินทางระดับพรีเมียม',
+        subtitle: 'รถพร้อมสิ่งอำนวยความสะดวกครบครัน',
+        colors: [AppColors.foundationRed600, AppColors.foundationRed800],
+      ),
+      (
+        icon: Icons.flight_takeoff_rounded,
+        title: 'ไปสนามบิน ตรงเวลา',
+        subtitle: 'จองล่วงหน้า ไม่พลาดไฟลต์',
+        colors: [const Color(0xFF3B82F6), const Color(0xFF1D4ED8)],
+      ),
+      (
+        icon: Icons.verified_user_rounded,
+        title: 'ปลอดภัยทุกเส้นทาง',
+        subtitle: 'แชร์ตำแหน่งเรียลไทม์ + ปุ่ม SOS',
+        colors: [AppColors.success, const Color(0xFF059669)],
+      ),
+      (
+        icon: Icons.savings_rounded,
+        title: 'ราคาคุ้มค่า ถูกกว่าชัวร์',
+        subtitle: 'ค่าโดยสารโปร่งใส รู้ราคาก่อนเรียก',
+        colors: [
+          AppColors.foundationOrange500,
+          AppColors.foundationOrange700,
+        ],
+      ),
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20),
+          child: Text(
+            'สัมผัสประสบการณ์ใหม่กับ Mass Move',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary,
+            ),
+          ),
+        ),
+        const SizedBox(height: 14),
+        SizedBox(
+          height: 180,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            itemCount: items.length,
+            separatorBuilder: (_, _) => const SizedBox(width: 14),
+            itemBuilder: (context, i) => _experienceCard(items[i]),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _experienceCard(
+    ({IconData icon, String title, String subtitle, List<Color> colors}) item,
+  ) {
+    return Container(
+      width: 210,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            height: 88,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: item.colors,
+              ),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(16),
+              ),
+            ),
+            child: Icon(item.icon, color: Colors.white, size: 40),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.title,
+                  style: AppTypography.label1.copyWith(
+                    color: AppColors.textPrimary,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  item.subtitle,
+                  style: AppTypography.caption4.copyWith(
+                    color: AppColors.textSecondary,
+                    height: 1.35,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// Gives the red header a soft double-wave bottom edge (see reference design).
+class _HeaderWaveClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    final w = size.width;
+    final h = size.height;
+    final path = Path()
+      ..lineTo(0, h - 36)
+      ..quadraticBezierTo(w * 0.25, h, w * 0.52, h - 16)
+      ..quadraticBezierTo(w * 0.80, h - 40, w, h - 6)
+      ..lineTo(w, 0)
+      ..close();
+    return path;
+  }
+
+  @override
+  bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
 }

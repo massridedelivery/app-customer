@@ -75,13 +75,11 @@ class VehicleSelectionSheet extends ConsumerWidget {
           ),
           const SizedBox(height: 16),
 
-          // Vehicle list. Caps at 40% of the screen and scrolls beyond that, so
-          // more vehicles or a larger accessibility font can't push the payment
-          // row and CTA off-screen (the old fixed 230px height clipped them).
+          // Vehicle list. Caps at roughly 3 rows and scrolls beyond that, so the
+          // payment row and CTA stay on-screen regardless of how many vehicles
+          // the estimate returns.
           ConstrainedBox(
-            constraints: BoxConstraints(
-              maxHeight: MediaQuery.of(context).size.height * 0.4,
-            ),
+            constraints: const BoxConstraints(maxHeight: 3 * 78.0),
             child: bookingAsync.isLoading
                 ? const SizedBox(
                     height: 120,

@@ -20,7 +20,6 @@ class RideLandingScreen extends ConsumerStatefulWidget {
 class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
   // Recent list shows the first few by default; "see more" reveals the rest.
   static const _recentCollapsedCount = 3;
-  bool _recentExpanded = false;
 
   void _openDropoff(Place place) {
     ref
@@ -302,9 +301,8 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
   // Recent trips.
   // ---------------------------------------------------------------------------
   Widget _buildRecentTrips(AppLocalizations l10n, List<Place> places) {
-    final visible = _recentExpanded
-        ? places
-        : places.take(_recentCollapsedCount).toList();
+    // Show at most the first few recent places — no "see more".
+    final visible = places.take(_recentCollapsedCount).toList();
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -341,33 +339,6 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
               ],
             ),
           ),
-          if (places.length > _recentCollapsedCount) ...[
-            const SizedBox(height: 12),
-            Center(
-              child: TextButton(
-                onPressed: () =>
-                    setState(() => _recentExpanded = !_recentExpanded),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      AppLocalizations.of(context)!.seeMore,
-                      style: AppTypography.label1.copyWith(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Icon(
-                      _recentExpanded
-                          ? Icons.keyboard_arrow_up
-                          : Icons.keyboard_arrow_down,
-                      color: AppColors.primary,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
         ],
       ),
     );

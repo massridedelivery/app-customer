@@ -12,7 +12,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 const Color _kSuccessFg = AppColors.semanticSuccessFgHigh;
 const Color _kSuccessBg = AppColors.semanticSuccessBgLow;
 
-class VehicleSelectionSheet extends ConsumerWidget {
+class VehicleSelectionSheet extends ConsumerStatefulWidget {
   final List<VehicleEstimation> estimations;
   final Function(String id) onVehicleSelected;
   final VoidCallback onRequest;
@@ -27,18 +27,64 @@ class VehicleSelectionSheet extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<VehicleSelectionSheet> createState() =>
+      _VehicleSelectionSheetState();
+}
+
+class _VehicleSelectionSheetState extends ConsumerState<VehicleSelectionSheet> {
+  // Approximate height of one vehicle row; used to size the snap points.
+  static const double _rowHeight = 78;
+  // Snap index: 0 = 1 row, 1 = 3 rows, 2 = almost full screen. Default = 3 rows.
+  int _snapIndex = 1;
+  // Live list height while dragging the grabber (null → use the snap point).
+  double? _dragHeight;
+
+  List<double> _snapHeights(BuildContext context) => [
+    _rowHeight,
+    _rowHeight * 3,
+    MediaQuery.of(context).size.height * 0.55,
+  ];
+
+  void _onDragUpdate(DragUpdateDetails d, List<double> snaps) {
+    final base = _dragHeight ?? snaps[_snapIndex];
+    // Dragging up (negative dy) grows the list.
+    setState(
+      () => _dragHeight = (base - d.delta.dy).clamp(snaps.first, snaps.last),
+    );
+  }
+
+  void _onDragEnd(List<double> snaps) {
+    final current = _dragHeight ?? snaps[_snapIndex];
+    var nearest = 0;
+    var best = double.infinity;
+    for (var i = 0; i < snaps.length; i++) {
+      final dist = (snaps[i] - current).abs();
+      if (dist < best) {
+        best = dist;
+        nearest = i;
+      }
+    }
+    setState(() {
+      _snapIndex = nearest;
+      _dragHeight = null;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final bookingAsync = ref.watch(bookingControllerProvider);
     final bookingState = bookingAsync.value ?? const BookingState();
     final notifier = ref.read(bookingControllerProvider.notifier);
     final bottomPadding = MediaQuery.of(context).padding.bottom;
     final l10n = AppLocalizations.of(context)!;
+    final snaps = _snapHeights(context);
+    final listHeight = _dragHeight ?? snaps[_snapIndex];
 
     // No auto-select: the user must explicitly pick a vehicle before the
     // "request ride" button becomes enabled.
     final hasVehicleSelected = bookingState.vehicleTypeId != null;
     VehicleEstimation? selectedEstimation;
-    for (final e in estimations) {
+    for (final e in widget.estimations) {
       if (e.vehicleTypeId == bookingState.vehicleTypeId) {
         selectedEstimation = e;
         break;
@@ -63,29 +109,39 @@ class VehicleSelectionSheet extends ConsumerWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const SizedBox(height: 12),
-          // Grabber
-          Container(
-            width: 40,
-            height: 4,
-            decoration: BoxDecoration(
-              color: AppColors.semanticGrayNeutralBgDarkgray,
-              borderRadius: BorderRadius.circular(2),
+          // Draggable grabber: drag up/down to snap the list between 1 row,
+          // 3 rows and almost-full-screen.
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onVerticalDragUpdate: (d) => _onDragUpdate(d, snaps),
+            onVerticalDragEnd: (_) => _onDragEnd(snaps),
+            child: Column(
+              children: [
+                const SizedBox(height: 12),
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: AppColors.semanticGrayNeutralBgDarkgray,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
             ),
           ),
-          const SizedBox(height: 16),
 
-          // Vehicle list. Caps at roughly 3 rows and scrolls beyond that, so the
-          // payment row and CTA stay on-screen regardless of how many vehicles
-          // the estimate returns.
+          // Vehicle list. Height snaps to 1 / 3 / almost-full rows via the
+          // draggable grabber above; it scrolls within whatever height is set,
+          // so the payment row and CTA always stay on-screen.
           ConstrainedBox(
-            constraints: const BoxConstraints(maxHeight: 3 * 78.0),
+            constraints: BoxConstraints(maxHeight: listHeight),
             child: bookingAsync.isLoading
                 ? const SizedBox(
                     height: 120,
                     child: Center(child: CircularProgressIndicator()),
                   )
-                : estimations.isEmpty
+                : widget.estimations.isEmpty
                 ? SizedBox(
                     height: 120,
                     child: Center(child: Text(l10n.calculatingPrice)),
@@ -93,9 +149,9 @@ class VehicleSelectionSheet extends ConsumerWidget {
                 : ListView.builder(
                     shrinkWrap: true,
                     padding: EdgeInsets.zero,
-                    itemCount: estimations.length,
+                    itemCount: widget.estimations.length,
                     itemBuilder: (context, index) {
-                      final estimation = estimations[index];
+                      final estimation = widget.estimations[index];
                       final isSelected =
                           bookingState.vehicleTypeId ==
                           estimation.vehicleTypeId;
@@ -176,7 +232,7 @@ class VehicleSelectionSheet extends ConsumerWidget {
                           : Colors.transparent,
                     ),
                     child: InkWell(
-                      onTap: onPromoTap,
+                      onTap: widget.onPromoTap,
                       child: Padding(
                         padding: const EdgeInsets.symmetric(
                           vertical: 16,
@@ -275,7 +331,7 @@ class VehicleSelectionSheet extends ConsumerWidget {
               width: double.infinity,
               height: 56,
               child: ElevatedButton(
-                onPressed: hasVehicleSelected ? onRequest : null,
+                onPressed: hasVehicleSelected ? widget.onRequest : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,

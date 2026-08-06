@@ -337,10 +337,16 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
               ),
             ),
 
-          // Bottom Vehicle Selection Sheet
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: VehicleSelectionSheet(
+          // Bottom Vehicle Selection Sheet — draggable, snapping to ~1 row,
+          // ~3 rows and almost-full-screen.
+          DraggableScrollableSheet(
+            initialChildSize: 0.48,
+            minChildSize: 0.32,
+            maxChildSize: 0.92,
+            snap: true,
+            snapSizes: const [0.32, 0.48, 0.92],
+            builder: (context, scrollController) => VehicleSelectionSheet(
+              scrollController: scrollController,
               estimations: bookingState.estimations,
               onVehicleSelected: (id) {
                 ref

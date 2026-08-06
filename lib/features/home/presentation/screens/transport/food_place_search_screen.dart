@@ -2,6 +2,7 @@ import 'package:customer_app/core/constants/app_assets.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_icons.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
+import 'package:customer_app/core/widgets/app_pill_tab.dart';
 import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
 import 'package:customer_app/features/home/presentation/controllers/place_search_controller.dart';
 import 'package:customer_app/features/home/presentation/states/home_state.dart';
@@ -145,23 +146,10 @@ class _FoodPlaceSearchScreenState extends ConsumerState<FoodPlaceSearchScreen>
   }
 
   Widget _buildTabItem(int index, String text) {
-    final isSelected = _tabController.index == index;
-    return GestureDetector(
+    return AppPillTab(
+      label: text,
+      selected: _tabController.index == index,
       onTap: () => setState(() => _tabController.animateTo(index)),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.foundationBlue300 : Colors.transparent,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Text(
-          text,
-          style: AppTypography.label1.copyWith(
-            color: isSelected ? AppColors.primary : Colors.grey,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-          ),
-        ),
-      ),
     );
   }
 

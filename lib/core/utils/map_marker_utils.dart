@@ -80,7 +80,7 @@ class MapMarkerUtils {
   /// On-screen size of the pickup/dropoff pins, in logical pixels — the
   /// compact pin agreed on in 0d6d475. Adjust here to resize; the raster
   /// resolution follows automatically.
-  static const double _pinDisplaySize = 60;
+  static const double _pinDisplaySize = 44;
 
   /// The pin bitmap is rasterised at [_pinRasterScale]× [_pinDisplaySize] so it
   /// stays crisp on high-DPI screens; the same value is handed to

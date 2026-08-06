@@ -4,7 +4,6 @@ import 'package:customer_app/core/constants/app_icons.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/features/home/domain/models/place.dart';
 import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
-import 'package:customer_app/features/home/presentation/states/home_state.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -30,19 +29,14 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
     context.push('/booking');
   }
 
-  // "แผนที่": pick the pickup point on the map, then the dropoff point. The
-  // dropoff screen's confirm continues to the vehicle-selection screen
-  // (/booking), so the map button walks pickup -> dropoff -> เลือกรถ.
-  Future<void> _openMapSelection() async {
-    final notifier = ref.read(homeControllerProvider.notifier);
-    notifier.startSelection(mode: RideSelectionMode.pickup);
-    await context.push('/select-pickup');
-    if (!mounted) return;
-    // Bail out if the user backed out of the pickup step without confirming.
-    if (ref.read(homeControllerProvider).pickupLocation == null) return;
-    notifier.startSelection(mode: RideSelectionMode.dropoff);
-    context.push('/select-dropoff');
-  }
+  // "แผนที่" opens the place-search flow, which orchestrates pickup + dropoff
+  // selection (each openable on the map) and then continues to the
+  // vehicle-selection screen. The earlier approach chained /select-pickup ->
+  // /select-dropoff manually from here, but that fought the shared
+  // RideSelectionView flow (whose pickup confirm pops back to its caller),
+  // leaving the dropoff step to pop back to this screen instead of reaching
+  // /booking — an apparent pickup→dropoff→landing loop.
+  void _openMapSelection() => context.push('/place-search');
 
   @override
   Widget build(BuildContext context) {

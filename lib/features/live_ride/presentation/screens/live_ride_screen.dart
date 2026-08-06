@@ -7,6 +7,7 @@ import 'package:customer_app/core/utils/map_marker_providers.dart';
 import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
 import 'package:customer_app/features/ride_booking/presentation/widgets/booking_map_widget.dart'
     show decodedPolylineProvider;
+import 'package:customer_app/core/utils/polyline_decoder.dart';
 import 'package:customer_app/features/live_ride/presentation/controllers/live_ride_controller.dart';
 import 'package:customer_app/features/ride_booking/presentation/controllers/booking_controller.dart';
 import 'package:customer_app/features/ride_booking/presentation/states/booking_state.dart';
@@ -17,6 +18,17 @@ import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 enum RideUIState { finding, confirming, pickupArrived, onTrip }
+
+/// The active job's own route polyline, decoded and memoised (recomputes only
+/// when the encoded string changes). The live ride draws this so the route
+/// follows the roads; the booking-flow polyline is empty by now.
+final _liveRideRoutePointsProvider = Provider.autoDispose<List<LatLng>>((ref) {
+  final encoded = ref.watch(
+    liveRideControllerProvider.select((s) => s.driverProfile?.polyline),
+  );
+  if (encoded == null || encoded.isEmpty) return const [];
+  return PolylineDecoder.decodePolyline(encoded);
+});
 
 class LiveRideScreen extends ConsumerStatefulWidget {
   final String? jobId;
@@ -133,8 +145,14 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
     );
     final bookingAsync = ref.watch(bookingControllerProvider);
     final bookingState = bookingAsync.value ?? const BookingState();
-    // Cached decode of the route polyline (shared with BookingMapWidget).
-    final routePoints = ref.watch(decodedPolylineProvider);
+    // Prefer the active job's own route polyline (follows the roads); fall back
+    // to the booking-estimate polyline, which is empty once the booking flow
+    // has ended — that fallback is what left the map drawing a straight
+    // pickup→dropoff line.
+    final jobRoutePoints = ref.watch(_liveRideRoutePointsProvider);
+    final routePoints = jobRoutePoints.isNotEmpty
+        ? jobRoutePoints
+        : ref.watch(decodedPolylineProvider);
     // App-wide cached marker bitmaps (rasterised once per session).
     final pickupIcon = ref.watch(pickupMarkerProvider).value;
     final dropoffIcon = ref.watch(dropoffMarkerProvider).value;

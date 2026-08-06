@@ -663,7 +663,7 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
                     }
                   },
                   icon: const Icon(Icons.chat_bubble_outline, size: 18),
-                  label: const Text('Chat'),
+                  label: const Text('แชท'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.accentRedDeep,
                     side: BorderSide(color: Colors.grey.shade200),
@@ -679,7 +679,7 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
                 child: OutlinedButton.icon(
                   onPressed: () {},
                   icon: const Icon(Icons.phone_outlined, size: 18),
-                  label: const Text('Call'),
+                  label: const Text('โทร'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.accentRedDeep,
                     side: BorderSide(color: Colors.grey.shade200),
@@ -730,7 +730,7 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Pickup', style: AppTypography.label2),
+                    Text('จุดรับ', style: AppTypography.label2),
                     const SizedBox(height: 4),
                     Text(
                       pickupAddress ?? 'Pickup Location',
@@ -768,7 +768,7 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Drop-off', style: AppTypography.label2),
+                    Text('จุดส่ง', style: AppTypography.label2),
                     const SizedBox(height: 4),
                     Text(
                       dropoffAddress ?? 'Dropoff Location',
@@ -807,7 +807,7 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Ride Summary', style: AppTypography.label2),
+              Text('สรุปการเดินทาง', style: AppTypography.label2),
               GestureDetector(
                 onTap: () {
                   setState(() {
@@ -815,7 +815,7 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
                   });
                 },
                 child: Text(
-                  _isRideDetailsExpanded ? 'Hide' : 'View',
+                  _isRideDetailsExpanded ? 'ซ่อน' : 'ดู',
                   style: AppTypography.caption4.copyWith(
                     color: AppColors.accentRedDeep,
                     fontWeight: FontWeight.bold,
@@ -846,7 +846,7 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Total Price', style: AppTypography.label1),
+              Text('ราคารวม', style: AppTypography.label1),
               Text(
                 '฿${liveState.fare?.toStringAsFixed(0) ?? '--'}',
                 style: AppTypography.heading3.copyWith(
@@ -905,7 +905,7 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
               const Icon(Icons.payment, size: 20, color: Colors.grey),
               const SizedBox(width: 8),
               Text(
-                'Payment Method',
+                'วิธีชำระเงิน',
                 style: AppTypography.caption4.copyWith(
                   color: Colors.grey.shade700,
                 ),
@@ -921,7 +921,7 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
-                  'CASH',
+                  'เงินสด',
                   style: AppTypography.caption5.copyWith(
                     color: AppColors.foundationGreen700,
                     fontWeight: FontWeight.bold,

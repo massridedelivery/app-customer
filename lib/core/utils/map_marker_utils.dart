@@ -77,10 +77,20 @@ class MapMarkerUtils {
     );
   }
 
+  /// On-screen size of the pickup/dropoff pins, in logical pixels — the
+  /// compact pin agreed on in 0d6d475. Adjust here to resize; the raster
+  /// resolution follows automatically.
+  static const double _pinDisplaySize = 60;
+
+  /// The pin bitmap is rasterised at [_pinRasterScale]× [_pinDisplaySize] so it
+  /// stays crisp on high-DPI screens; the same value is handed to
+  /// [BitmapDescriptor.bytes] as `imagePixelRatio` to scale it back down.
+  static const double _pinRasterScale = 3;
+
   static Future<BitmapDescriptor> _createCompositeMarker({
     required Color backgroundColor,
     required Color iconColor,
-    double size = 60, // Compact pin so it doesn't dominate the map
+    double size = _pinDisplaySize * _pinRasterScale,
   }) async {
     final ui.PictureRecorder pictureRecorder = ui.PictureRecorder();
     final ui.Canvas canvas = ui.Canvas(pictureRecorder);
@@ -130,12 +140,14 @@ class MapMarkerUtils {
     pictureInfo.picture.dispose();
 
     if (byteData == null) return BitmapDescriptor.defaultMarker;
-    // BitmapDescriptor.bytes replaces the deprecated fromBytes. imagePixelRatio
-    // 1.0 preserves the previous raw-pixel sizing — the bitmap is already
-    // rendered at explicit pixel dimensions above, so no extra DPI scaling.
+    // The bitmap is rasterised at [_pinRasterScale]× its intended on-screen
+    // size; passing that same value as imagePixelRatio makes the map draw it at
+    // [_pinDisplaySize] logical pixels. With the previous 1.0 the map drew one
+    // bitmap pixel per logical pixel, so the raster size *was* the on-screen
+    // size — shrinking the pin also cost it its resolution.
     return BitmapDescriptor.bytes(
       byteData.buffer.asUint8List(),
-      imagePixelRatio: 1.0,
+      imagePixelRatio: _pinRasterScale,
     );
   }
 }

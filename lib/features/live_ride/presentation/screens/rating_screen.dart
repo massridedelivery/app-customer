@@ -11,7 +11,16 @@ class RatingScreen extends ConsumerStatefulWidget {
   final String jobId;
   final DriverProfileModel? driverProfile;
 
-  const RatingScreen({super.key, required this.jobId, this.driverProfile});
+  /// Tip chosen on the payment-summary screen (shown before this one). Carried
+  /// through and submitted with the rating.
+  final int? tip;
+
+  const RatingScreen({
+    super.key,
+    required this.jobId,
+    this.driverProfile,
+    this.tip,
+  });
 
   @override
   ConsumerState<RatingScreen> createState() => _RatingScreenState();
@@ -20,7 +29,6 @@ class RatingScreen extends ConsumerStatefulWidget {
 class _RatingScreenState extends ConsumerState<RatingScreen> {
   int _rating = 0;
   final Set<String> _selectedTags = {};
-  int? _selectedTip;
   final _commentController = TextEditingController();
 
   static const _feedbackTags = [
@@ -30,8 +38,6 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
     'ตรงเวลา',
     'ขับขี่ปลอดภัย',
   ];
-
-  static const _tipOptions = [10, 20, 50];
 
   @override
   void dispose() {
@@ -46,7 +52,7 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
           jobId: widget.jobId,
           rating: _rating,
           tags: _selectedTags.toList(),
-          tip: _selectedTip,
+          tip: widget.tip,
           comment: _commentController.text,
         );
   }
@@ -207,78 +213,6 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
                                 : _selectedTags.add(tag);
                           });
                         },
-                      );
-                    }).toList(),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 12),
-
-            // Tip Section
-            _buildSection(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.volunteer_activism,
-                        color: AppColors.foundationGreen500,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'ให้ทิปคนขับ (ไม่บังคับ)',
-                        style: AppTypography.label2,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'ทิปจะถูกหักจากช่องทางชำระเงินที่คุณเลือก',
-                    style: AppTypography.caption5.copyWith(
-                      color: AppColors.semanticGrayNeutralFgLowOnWhite,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: _tipOptions.map((tip) {
-                      final selected = _selectedTip == tip;
-                      return Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.only(right: 8),
-                          child: GestureDetector(
-                            onTap: () => setState(() {
-                              _selectedTip = selected ? null : tip;
-                            }),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              decoration: BoxDecoration(
-                                color: selected
-                                    ? AppColors.foundationGreen500
-                                    : AppColors.white,
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(
-                                  color: selected
-                                      ? AppColors.foundationGreen500
-                                      : AppColors.grey300,
-                                ),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  '+฿$tip',
-                                  style: AppTypography.label2.copyWith(
-                                    color: selected
-                                        ? AppColors.white
-                                        : AppColors.semanticGrayNeutralFgHigh,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
                       );
                     }).toList(),
                   ),

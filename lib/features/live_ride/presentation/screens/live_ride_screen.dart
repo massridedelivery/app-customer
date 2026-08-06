@@ -170,7 +170,7 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
           if (context.mounted) {
             if (isCompleted && next.jobId != null) {
               context.pushReplacement(
-                '/rating/${next.jobId}',
+                '/payment-summary/${next.jobId}',
                 extra: next.driverProfile,
               );
             } else {

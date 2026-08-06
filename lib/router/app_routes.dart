@@ -27,6 +27,7 @@ import 'package:customer_app/features/home/presentation/screens/transport/place_
 import 'package:customer_app/features/home/presentation/screens/transport/ride_landing_screen.dart';
 import 'package:customer_app/features/chat/presentation/screens/chat_screen.dart';
 import 'package:customer_app/features/live_ride/presentation/screens/live_ride_screen.dart';
+import 'package:customer_app/features/live_ride/presentation/screens/payment_summary_screen.dart';
 import 'package:customer_app/features/live_ride/presentation/screens/rating_screen.dart';
 import 'package:customer_app/features/messenger/presentation/screens/messenger_booking_screen.dart';
 import 'package:customer_app/features/messenger/presentation/screens/messenger_chat_screen.dart';
@@ -484,11 +485,27 @@ final routerProvider = Provider<GoRouter>((ref) {
         },
       ),
       GoRoute(
+        path: '/payment-summary/:id',
+        builder: (context, state) {
+          final jobId = state.pathParameters['id']!;
+          final driverProfile = state.extra as DriverProfileModel?;
+          return PaymentSummaryScreen(
+            jobId: jobId,
+            driverProfile: driverProfile,
+          );
+        },
+      ),
+      GoRoute(
         path: '/rating/:id',
         builder: (context, state) {
           final jobId = state.pathParameters['id']!;
           final driverProfile = state.extra as DriverProfileModel?;
-          return RatingScreen(jobId: jobId, driverProfile: driverProfile);
+          final tip = int.tryParse(state.uri.queryParameters['tip'] ?? '');
+          return RatingScreen(
+            jobId: jobId,
+            driverProfile: driverProfile,
+            tip: tip,
+          );
         },
       ),
       GoRoute(path: '/trips', builder: (context, state) => const TripsScreen()),

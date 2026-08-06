@@ -27,18 +27,24 @@ class AppPillTab extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         onTap: onTap,
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          height: 38,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
           decoration: BoxDecoration(
             color: selected ? AppColors.primary : Colors.transparent,
             borderRadius: BorderRadius.circular(20),
           ),
-          child: Text(
-            label,
-            style: AppTypography.label1.copyWith(
-              color: selected
-                  ? AppColors.white
-                  : AppColors.semanticGrayNeutralFgMidOnWhite,
-              fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+          // Fixed height + Center keeps the label vertically centred regardless
+          // of Thai glyph metrics (tone marks reserve extra space above on iOS).
+          child: Center(
+            widthFactor: 1,
+            child: Text(
+              label,
+              style: AppTypography.label1.copyWith(
+                color: selected
+                    ? AppColors.white
+                    : AppColors.semanticGrayNeutralFgMidOnWhite,
+                fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+              ),
             ),
           ),
         ),

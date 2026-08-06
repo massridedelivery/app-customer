@@ -171,13 +171,13 @@ class _TripsFilterBar extends StatelessWidget implements PreferredSizeWidget {
             thickness: 1,
             color: AppColors.foundationGrayscale200,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
           // Bottom Row: Type Chips
           SizedBox(
-            height: 48,
+            height: 42,
             child: ListView(
               scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               children: [
                 _buildTypeChip(HistoryType.food, 'ส่งอาหาร'),
                 const SizedBox(width: 8),

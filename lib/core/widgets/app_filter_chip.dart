@@ -23,7 +23,8 @@ class AppFilterChip extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        height: 34,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         decoration: BoxDecoration(
           color: selected ? AppColors.foundationRed100 : AppColors.white,
           borderRadius: BorderRadius.circular(20),
@@ -32,11 +33,16 @@ class AppFilterChip extends StatelessWidget {
             width: 1,
           ),
         ),
-        child: Text(
-          label,
-          style: AppTypography.label2.copyWith(
-            color: selected ? themeRed : AppColors.semanticGrayNeutralFgHigh,
-            fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+        // Fixed height + Center keeps the label vertically centred regardless of
+        // Thai glyph metrics (tone marks reserve extra space above on iOS).
+        child: Center(
+          widthFactor: 1,
+          child: Text(
+            label,
+            style: AppTypography.label2.copyWith(
+              color: selected ? themeRed : AppColors.semanticGrayNeutralFgHigh,
+              fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+            ),
           ),
         ),
       ),

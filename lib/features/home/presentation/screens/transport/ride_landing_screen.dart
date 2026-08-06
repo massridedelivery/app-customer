@@ -4,6 +4,7 @@ import 'package:customer_app/core/constants/app_icons.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/features/home/domain/models/place.dart';
 import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
+import 'package:customer_app/features/home/presentation/states/home_state.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -29,6 +30,20 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
     context.push('/booking');
   }
 
+  // "แผนที่": pick the pickup point on the map, then the dropoff point. The
+  // dropoff screen's confirm continues to the vehicle-selection screen
+  // (/booking), so the map button walks pickup -> dropoff -> เลือกรถ.
+  Future<void> _openMapSelection() async {
+    final notifier = ref.read(homeControllerProvider.notifier);
+    notifier.startSelection(mode: RideSelectionMode.pickup);
+    await context.push('/select-pickup');
+    if (!mounted) return;
+    // Bail out if the user backed out of the pickup step without confirming.
+    if (ref.read(homeControllerProvider).pickupLocation == null) return;
+    notifier.startSelection(mode: RideSelectionMode.dropoff);
+    context.push('/select-dropoff');
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -43,8 +58,6 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
             _buildHeader(context, l10n),
             const SizedBox(height: 20),
             _buildQuickActions(context, l10n, homeState.savedPlaces),
-            const SizedBox(height: 24),
-            _buildPromoBanner(context),
             const SizedBox(height: 28),
             // Recent trips — driven by homeState.recentPlaces
             // (GET /api/customer/places/recent). Hidden when empty so there's no
@@ -91,7 +104,7 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
                   ),
                   const Spacer(),
                   InkWell(
-                    onTap: () => context.push('/place-search'),
+                    onTap: _openMapSelection,
                     borderRadius: BorderRadius.circular(20),
                     child: Container(
                       padding: const EdgeInsets.symmetric(
@@ -142,129 +155,42 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
               ),
               const SizedBox(height: 20),
 
-              // Search bar + schedule button.
-              Row(
-                children: [
-                  Expanded(
-                    child: InkWell(
-                      onTap: () => context.push('/place-search'),
-                      borderRadius: BorderRadius.circular(16),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 16,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Row(
-                          children: [
-                            AppIcons.asset(
-                              AppAssets.icLocationPinLine,
-                              color: AppColors.primary,
-                              width: 20,
-                              height: 20,
-                            ),
-                            const SizedBox(width: 12),
-                            Text(
-                              l10n.whereTo,
-                              style: AppTypography.body2.copyWith(
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+              // Search bar.
+              InkWell(
+                onTap: () => context.push('/place-search'),
+                borderRadius: BorderRadius.circular(16),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 16,
                   ),
-                  const SizedBox(width: 10),
-                  InkWell(
-                    onTap: () => context.push('/place-search'),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
                     borderRadius: BorderRadius.circular(16),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 14,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.calendar_today_outlined,
-                            color: AppColors.primary,
-                            size: 18,
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            'ภายหลัง',
-                            style: AppTypography.label2.copyWith(
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
                   ),
-                ],
+                  child: Row(
+                    children: [
+                      AppIcons.asset(
+                        AppAssets.icLocationPinLine,
+                        color: AppColors.primary,
+                        width: 20,
+                        height: 20,
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        l10n.whereTo,
+                        style: AppTypography.body2.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-              const SizedBox(height: 16),
-
-              // Promo strip.
-              _buildGroupRidePromo(),
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildGroupRidePromo() {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.14),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.25)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.18),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(Icons.groups_rounded, color: Colors.white),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Group Ride',
-                  style: AppTypography.label1.copyWith(color: Colors.white),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  'รวมแก๊งครบ 4 คน ลดเพิ่มสูงสุด 20%',
-                  style: AppTypography.caption4.copyWith(
-                    color: Colors.white.withValues(alpha: 0.9),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const Icon(
-            Icons.arrow_forward_ios_rounded,
-            color: Colors.white,
-            size: 16,
-          ),
-        ],
       ),
     );
   }
@@ -367,81 +293,6 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
                   textAlign: TextAlign.center,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  // ---------------------------------------------------------------------------
-  // Promo banner (keeps the layout from filling out even with no recent trips).
-  // ---------------------------------------------------------------------------
-  Widget _buildPromoBanner(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: InkWell(
-        onTap: () => context.push('/place-search'),
-        borderRadius: BorderRadius.circular(20),
-        child: Container(
-          padding: const EdgeInsets.all(18),
-          decoration: BoxDecoration(
-            color: AppColors.softRedBg,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: AppColors.foundationRed200),
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'มีแผนเดินทางล่วงหน้า?',
-                      style: AppTypography.label1.copyWith(
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'จองรถล่วงหน้าไว้ ไม่ต้องรีบ ไม่พลาดเวลา',
-                      style: AppTypography.caption4.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        'จองล่วงหน้า',
-                        style: AppTypography.label2.copyWith(
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 12),
-              Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.event_available_rounded,
-                  color: AppColors.primary,
-                  size: 30,
                 ),
               ),
             ],

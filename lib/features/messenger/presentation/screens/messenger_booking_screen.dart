@@ -1,5 +1,6 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
+import 'package:customer_app/core/widgets/app_filter_chip.dart';
 import 'package:customer_app/core/constants/feature_flags.dart';
 import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
 import 'package:customer_app/features/home/presentation/states/home_state.dart';
@@ -300,19 +301,12 @@ class _MessengerBookingScreenState
                   .map<Widget>(
                     (v) => Padding(
                       padding: const EdgeInsets.only(right: 8),
-                      child: ChoiceChip(
-                        label: Text(
-                          v.displayName.isNotEmpty ? v.displayName : v.name,
-                        ),
+                      child: AppFilterChip(
+                        label: v.displayName.isNotEmpty
+                            ? v.displayName
+                            : v.name,
                         selected: v.id == bookingState.vehicleTypeId,
-                        selectedColor: AppColors.primary.withValues(alpha: 0.15),
-                        labelStyle: AppTypography.caption4.copyWith(
-                          color: v.id == bookingState.vehicleTypeId
-                              ? AppColors.primary
-                              : AppColors.textSecondary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        onSelected: (_) => ref
+                        onTap: () => ref
                             .read(messengerBookingControllerProvider.notifier)
                             .selectVehicle(v.id),
                       ),

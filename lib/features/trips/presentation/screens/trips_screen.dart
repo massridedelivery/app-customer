@@ -1,5 +1,6 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
+import 'package:customer_app/core/widgets/app_filter_chip.dart';
 import 'package:customer_app/features/messenger/domain/models/messenger_order.dart';
 import 'package:customer_app/features/messenger/presentation/controllers/messenger_history_controller.dart';
 import 'package:customer_app/features/trips/domain/models/history_order.dart';
@@ -156,11 +157,11 @@ class _TripsFilterBar extends StatelessWidget implements PreferredSizeWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
               children: [
-                _buildStatusTab(HistoryStatus.ongoing, 'Ongoing'),
+                _buildStatusTab(HistoryStatus.ongoing, 'กำลังดำเนินการ'),
                 const SizedBox(width: 24),
-                _buildStatusTab(HistoryStatus.completed, 'Completed'),
+                _buildStatusTab(HistoryStatus.completed, 'เสร็จสิ้น'),
                 const SizedBox(width: 24),
-                _buildStatusTab(HistoryStatus.canceled, 'Canceled/Failed'),
+                _buildStatusTab(HistoryStatus.canceled, 'ยกเลิก/ไม่สำเร็จ'),
               ],
             ),
           ),
@@ -177,11 +178,11 @@ class _TripsFilterBar extends StatelessWidget implements PreferredSizeWidget {
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               children: [
-                _buildTypeChip(HistoryType.food, 'Food Delivery'),
+                _buildTypeChip(HistoryType.food, 'ส่งอาหาร'),
                 const SizedBox(width: 8),
-                _buildTypeChip(HistoryType.ride, 'Ride'),
+                _buildTypeChip(HistoryType.ride, 'เรียกรถ'),
                 const SizedBox(width: 8),
-                _buildTypeChip(HistoryType.messenger, 'Messenger'),
+                _buildTypeChip(HistoryType.messenger, 'ส่งของ'),
               ],
             ),
           ),
@@ -235,34 +236,10 @@ class _TripsFilterBar extends StatelessWidget implements PreferredSizeWidget {
 
   Widget _buildTypeChip(HistoryType type, String label) {
     final isSelected = selectedType == type;
-    const themeRed = AppColors.primary;
-
-    return GestureDetector(
-      onTap: () {
-        onTypeChanged(isSelected ? null : type);
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.foundationRed100 : AppColors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected ? themeRed : AppColors.foundationGrayscale300,
-            width: 1,
-          ),
-        ),
-        child: Center(
-          child: Text(
-            label,
-            style: AppTypography.label2.copyWith(
-              color: isSelected
-                  ? themeRed
-                  : AppColors.semanticGrayNeutralFgHigh,
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-            ),
-          ),
-        ),
-      ),
+    return AppFilterChip(
+      label: label,
+      selected: isSelected,
+      onTap: () => onTypeChanged(isSelected ? null : type),
     );
   }
 }

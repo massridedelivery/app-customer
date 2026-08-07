@@ -1,3 +1,4 @@
+import 'package:customer_app/core/constants/map_defaults.dart';
 import 'package:customer_app/core/constants/app_assets.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_icons.dart';
@@ -87,7 +88,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
 
     Set<Marker> markers = {};
     Set<Polyline> polylines = {};
-    LatLng centerLatLng = const LatLng(13.7563, 100.5018); // Default Bangkok
+    LatLng centerLatLng = MapDefaults.bangkokCenter; // Default Bangkok
 
     if (state.rideDetails != null) {
       final ride = state.rideDetails!;

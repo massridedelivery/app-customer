@@ -20,7 +20,6 @@ class RideLandingScreen extends ConsumerStatefulWidget {
 class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
   // Recent list shows the first few by default; "see more" reveals the rest.
   static const _recentCollapsedCount = 3;
-  bool _recentExpanded = false;
 
   void _openDropoff(Place place) {
     ref
@@ -29,293 +28,547 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
     context.push('/booking');
   }
 
+  // "แผนที่" opens the place-search flow, which orchestrates pickup + dropoff
+  // selection (each openable on the map) and then continues to the
+  // vehicle-selection screen. The earlier approach chained /select-pickup ->
+  // /select-dropoff manually from here, but that fought the shared
+  // RideSelectionView flow (whose pickup confirm pops back to its caller),
+  // leaving the dropoff step to pop back to this screen instead of reaching
+  // /booking — an apparent pickup→dropoff→landing loop.
+  void _openMapSelection() => context.push('/place-search');
+
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final homeState = ref.watch(homeControllerProvider);
     return Scaffold(
-      backgroundColor: AppColors.semanticGrayNeutralFgWhite,
-      appBar: AppBar(
-        backgroundColor: AppColors.semanticGrayNeutralFgWhite,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
+      backgroundColor: AppColors.foundationGrayscale75,
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.only(bottom: 40),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildHeader(context, l10n),
+            const SizedBox(height: 20),
+            _buildQuickActions(context, l10n, homeState.savedPlaces),
+            const SizedBox(height: 28),
+            // Recent trips — driven by homeState.recentPlaces
+            // (GET /api/customer/places/frequent). Hidden when empty so there's
+            // no dangling header while the endpoint returns nothing.
+            if (homeState.recentPlaces.isNotEmpty) ...[
+              _buildRecentTrips(l10n, homeState.recentPlaces),
+              const SizedBox(height: 28),
+            ],
+            _buildExperienceSection(l10n),
+          ],
         ),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Stack(
-              children: [
-                Container(
-                  width: double.infinity,
-                  decoration: const BoxDecoration(
-                    color: AppColors
-                        .semanticGrayNeutralFgWhite, // Light mint background
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Header: brand-red rounded card with title, search bar, schedule button and
+  // a promo strip (Grab-style layout, MassMove brand colours).
+  // ---------------------------------------------------------------------------
+  Widget _buildHeader(BuildContext context, AppLocalizations l10n) {
+    return ClipPath(
+      clipper: _HeaderWaveClipper(),
+      child: Container(
+      width: double.infinity,
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [AppColors.foundationRed700, AppColors.foundationRed900],
+        ),
+      ),
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 4, 20, 52),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Top row: back button + map pill.
+              Row(
+                children: [
+                  _circleIconButton(
+                    icon: Icons.arrow_back,
+                    onTap: () => context.pop(),
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(24, 20, 24, 40),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Mass Move',
-                          style: AppTypography.heading2.copyWith(),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          AppLocalizations.of(context)!.newPriceSure,
-                          style: AppTypography.caption2,
-                        ),
-                        const SizedBox(height: 4),
-                        Row(
-                          children: [
-                            Text(
-                              AppLocalizations.of(context)!.gelPromo,
-                              style: AppTypography.caption2,
+                  const Spacer(),
+                  InkWell(
+                    onTap: _openMapSelection,
+                    borderRadius: BorderRadius.circular(20),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.16),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.map_outlined,
+                            color: Colors.white,
+                            size: 18,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            l10n.map,
+                            style: AppTypography.label2.copyWith(
+                              color: Colors.white,
                             ),
-                          ],
-                        ),
-                      ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Mass Move',
+                style: AppTypography.heading2.copyWith(color: Colors.white),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                l10n.newPriceSure,
+                style: AppTypography.caption3.copyWith(
+                  color: Colors.white.withValues(alpha: 0.9),
                 ),
-              ],
-            ),
+              ),
+              Text(
+                l10n.gelPromo,
+                style: AppTypography.caption3.copyWith(
+                  color: Colors.white.withValues(alpha: 0.9),
+                ),
+              ),
+              const SizedBox(height: 20),
 
-            // 2. Search Card
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: InkWell(
+              // Search bar.
+              InkWell(
                 onTap: () => context.push('/place-search'),
+                borderRadius: BorderRadius.circular(16),
                 child: Container(
+                  width: double.infinity,
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
+                    horizontal: 16,
                     vertical: 16,
                   ),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.2),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
                   ),
                   child: Row(
                     children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary,
-                          shape: BoxShape.circle,
-                        ),
-                        child: AppIcons.asset(
-                          AppAssets.icLocationPinLine,
-                          color: AppColors.white,
-                          width: 20,
-                          height: 20,
-                        ),
+                      AppIcons.asset(
+                        AppAssets.icLocationPinLine,
+                        color: AppColors.primary,
+                        width: 20,
+                        height: 20,
                       ),
-                      const SizedBox(width: 16),
+                      const SizedBox(width: 12),
                       Text(
-                        AppLocalizations.of(context)!.whereToToday,
-                        style: AppTypography.caption3.copyWith(
-                          color: Colors.black,
+                        l10n.whereTo,
+                        style: AppTypography.body2.copyWith(
+                          color: AppColors.textSecondary,
                         ),
                       ),
                     ],
                   ),
                 ),
               ),
+            ],
+          ),
+        ),
+      ),
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Quick actions: saved places + add address.
+  // ---------------------------------------------------------------------------
+  Widget _buildQuickActions(
+    BuildContext context,
+    AppLocalizations l10n,
+    List<Place> savedPlaces,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Row(
+        children: [
+          ...savedPlaces.take(2).map(
+            (place) => Expanded(
+              child: _quickActionChip(
+                label: place.name,
+                icon: AppAssets.icLocationPinLine,
+                onTap: () {
+                  ref
+                      .read(homeControllerProvider.notifier)
+                      .setDropoffLocation(
+                        LatLng(place.lat, place.lng),
+                        place.name,
+                      );
+                  context.push('/booking');
+                },
+              ),
             ),
+          ),
+          Expanded(
+            child: _quickActionChip(
+              label: l10n.addAddress,
+              icon: AppAssets.icPlus,
+              muted: true,
+              onTap: () async {
+                await context.push('/add-address');
+                if (!mounted) return;
+                ref.read(homeControllerProvider.notifier).refreshSavedPlaces();
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-            const SizedBox(height: 32),
-
-            // 3. Saved Places Grid
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  ...homeState.savedPlaces
-                      .take(2)
-                      .map(
-                        (place) => InkWell(
-                          onTap: () {
-                            ref
-                                .read(homeControllerProvider.notifier)
-                                .setDropoffLocation(
-                                  LatLng(place.lat, place.lng),
-                                  place.name,
-                                );
-                            context.push('/booking');
-                          },
-                          child: _buildSavedPlaceItem(
-                            place.name,
-                            place.address ?? '',
-                            AppAssets.icLocationPinLine,
-                          ),
-                        ),
-                      ),
-                  InkWell(
-                    onTap: () async {
-                      // Open the address form directly (same flow as the Saved
-                      // Places screen); refresh the grid so a newly added place
-                      // shows up on return.
-                      await context.push('/add-address');
-                      if (!mounted) return;
-                      ref
-                          .read(homeControllerProvider.notifier)
-                          .refreshSavedPlaces();
-                    },
-                    child: _buildSavedPlaceItem(
-                      AppLocalizations.of(context)!.addAddress,
-                      ' ',
-                      AppAssets.icPlus,
-                      isAction: false,
-                    ),
+  Widget _quickActionChip({
+    required String label,
+    required String icon,
+    required VoidCallback onTap,
+    bool muted = false,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: muted ? AppColors.foundationGrayscale100 : AppColors.softRedBg,
+                  shape: BoxShape.circle,
+                ),
+                child: AppIcons.asset(
+                  icon,
+                  color: muted
+                      ? AppColors.foundationGrayscale600
+                      : AppColors.primary,
+                  width: 20,
+                  height: 20,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: Text(
+                  label,
+                  style: AppTypography.label2.copyWith(
+                    color: AppColors.textPrimary,
                   ),
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Recent trips.
+  // ---------------------------------------------------------------------------
+  Widget _buildRecentTrips(AppLocalizations l10n, List<Place> places) {
+    // Show at most the first few recent places — no "see more".
+    final visible = places.take(_recentCollapsedCount).toList();
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.recentUsage,
+            style: AppTypography.heading5.copyWith(
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                for (var i = 0; i < visible.length; i++) ...[
+                  if (i > 0)
+                    const Divider(height: 1, indent: 60, endIndent: 16),
+                  _buildRecentItem(visible[i]),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRecentItem(Place place) {
+    final hasAddress = place.address?.isNotEmpty == true;
+    return InkWell(
+      onTap: () => _openDropoff(place),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppColors.foundationGrayscale100,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.history,
+                color: AppColors.foundationGrayscale700,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    place.name,
+                    style: AppTypography.label1.copyWith(
+                      color: AppColors.textPrimary,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (hasAddress) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      place.address!,
+                      style: AppTypography.caption4.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ],
               ),
             ),
-
-            const SizedBox(height: 32),
-
-            // 4. Recent List — driven by homeState.recentPlaces
-            // (GET /api/customer/places/recent). Hidden entirely when empty so
-            // there's no dangling header while the endpoint returns nothing.
-            if (homeState.recentPlaces.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: _buildRecentList(homeState.recentPlaces),
-              ),
-            const SizedBox(height: 40),
+            const Icon(
+              Icons.chevron_right,
+              color: AppColors.foundationGrayscale500,
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildSavedPlaceItem(
-    String title,
-    String subtitle,
-    String icon, {
-    bool isAction = false,
+  Widget _circleIconButton({
+    required IconData icon,
+    required VoidCallback onTap,
   }) {
-    return SizedBox(
-      width: 100,
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: AppColors.primary,
-              shape: BoxShape.circle,
-            ),
-            child: AppIcons.asset(
-              icon,
-              color: isAction ? Colors.grey : AppColors.white,
-              width: 24,
-              height: 24,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            title,
-            style: AppTypography.label2,
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          if (subtitle.isNotEmpty)
-            Text(
-              subtitle,
-              style: AppTypography.caption4.copyWith(color: Colors.grey),
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-        ],
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.16),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(icon, color: Colors.white, size: 22),
       ),
     );
   }
 
-  Widget _buildRecentList(List<Place> places) {
-    final visible = _recentExpanded
-        ? places
-        : places.take(_recentCollapsedCount).toList();
+  // ---------------------------------------------------------------------------
+  // "สัมผัสประสบการณ์ใหม่กับ Mass Move" — horizontal feature cards that fill out
+  // the lower half of the screen.
+  // ---------------------------------------------------------------------------
+  Widget _buildExperienceSection(AppLocalizations l10n) {
+    final items = <({
+      IconData icon,
+      String title,
+      String subtitle,
+      List<Color> colors,
+    })>[
+      (
+        icon: Icons.workspace_premium_rounded,
+        title: l10n.experiencePremiumTitle,
+        subtitle: l10n.experiencePremiumSubtitle,
+        colors: [AppColors.foundationRed600, AppColors.foundationRed800],
+      ),
+      (
+        icon: Icons.flight_takeoff_rounded,
+        title: l10n.experienceAirportTitle,
+        subtitle: l10n.experienceAirportSubtitle,
+        colors: [const Color(0xFF3B82F6), const Color(0xFF1D4ED8)],
+      ),
+      (
+        icon: Icons.verified_user_rounded,
+        title: l10n.experienceSafetyTitle,
+        subtitle: l10n.experienceSafetySubtitle,
+        colors: [AppColors.success, const Color(0xFF059669)],
+      ),
+      (
+        icon: Icons.savings_rounded,
+        title: l10n.experienceValueTitle,
+        subtitle: l10n.experienceValueSubtitle,
+        colors: [
+          AppColors.foundationOrange500,
+          AppColors.foundationOrange700,
+        ],
+      ),
+    ];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          AppLocalizations.of(context)!.recentUsage,
-          style: AppTypography.heading5.copyWith(fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 16),
-        for (var i = 0; i < visible.length; i++) ...[
-          if (i > 0) const Divider(height: 32),
-          _buildRecentItem(
-            visible[i].address?.isNotEmpty == true
-                ? visible[i].address!
-                : visible[i].name,
-            Icons.history,
-            onTap: () => _openDropoff(visible[i]),
-          ),
-        ],
-        if (places.length > _recentCollapsedCount) ...[
-          const SizedBox(height: 24),
-          Center(
-            child: TextButton.icon(
-              onPressed: () =>
-                  setState(() => _recentExpanded = !_recentExpanded),
-              icon: Text(
-                AppLocalizations.of(context)!.seeMore,
-                style: AppTypography.label1.copyWith(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              label: Icon(
-                _recentExpanded
-                    ? Icons.keyboard_arrow_up
-                    : Icons.keyboard_arrow_down,
-                color: AppColors.primary,
-              ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Text(
+            l10n.experienceTitle,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary,
             ),
           ),
-        ],
+        ),
+        const SizedBox(height: 14),
+        SizedBox(
+          height: 180,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            itemCount: items.length,
+            separatorBuilder: (_, _) => const SizedBox(width: 14),
+            itemBuilder: (context, i) => _experienceCard(items[i]),
+          ),
+        ),
       ],
     );
   }
 
-  Widget _buildRecentItem(
-    String address,
-    IconData icon, {
-    VoidCallback? onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
-        child: Row(
-          children: [
-            Icon(icon, color: Colors.grey, size: 20),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Text(
-                address,
-                style: AppTypography.body1.copyWith(color: Colors.black87),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
+  Widget _experienceCard(
+    ({IconData icon, String title, String subtitle, List<Color> colors}) item,
+  ) {
+    return Container(
+      width: 210,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            height: 88,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: item.colors,
+              ),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(16),
               ),
             ),
-          ],
-        ),
+            child: Icon(item.icon, color: Colors.white, size: 40),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.title,
+                  style: AppTypography.label1.copyWith(
+                    color: AppColors.textPrimary,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  item.subtitle,
+                  style: AppTypography.caption4.copyWith(
+                    color: AppColors.textSecondary,
+                    height: 1.35,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
+}
+
+// Gives the red header a soft double-wave bottom edge (see reference design).
+class _HeaderWaveClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    final w = size.width;
+    final h = size.height;
+    final path = Path()
+      ..lineTo(0, h - 36)
+      ..quadraticBezierTo(w * 0.25, h, w * 0.52, h - 16)
+      ..quadraticBezierTo(w * 0.80, h - 40, w, h - 6)
+      ..lineTo(w, 0)
+      ..close();
+    return path;
+  }
+
+  @override
+  bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
 }

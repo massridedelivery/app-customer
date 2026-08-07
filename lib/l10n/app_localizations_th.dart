@@ -229,6 +229,10 @@ class AppLocalizationsTh extends AppLocalizations {
   String get currentLocation => 'ตำแหน่งปัจจุบัน';
 
   @override
+  String get pickupNotReady =>
+      'กำลังหาตำแหน่งจุดรับ — เปิดตำแหน่งหรือเลือกจุดรับก่อน';
+
+  @override
   String get tripCompleted => 'การเดินทางสำเร็จ';
 
   @override
@@ -471,6 +475,41 @@ class AppLocalizationsTh extends AppLocalizations {
   String get alreadyHaveAccount => 'มีบัญชีอยู่แล้วใช่ไหม? ';
 
   @override
+  String get fullNameHint => 'ชื่อ - นามสกุล';
+
+  @override
+  String get forgotPasswordSubtitle =>
+      'ไม่ต้องกังวล! เพียงกรอกอีเมลของคุณเพื่อรับรหัสยืนยันการตั้งค่ารหัสผ่านใหม่';
+
+  @override
+  String get sendResetCode => 'ส่งรหัสยืนยัน';
+
+  @override
+  String resetOtpSentMsg(String email) {
+    return 'รหัสยืนยัน (OTP) ถูกส่งไปที่อีเมล\n$email';
+  }
+
+  @override
+  String get setNewPassword => 'ตั้งรหัสผ่านใหม่';
+
+  @override
+  String get setNewPasswordSubtitle =>
+      'กรุณาตั้งรหัสผ่านใหม่ที่คาดเดาได้ยากเพื่อความปลอดภัยของบัญชีคุณ';
+
+  @override
+  String get newPasswordLabel => 'รหัสผ่านใหม่';
+
+  @override
+  String get confirmNewPasswordLabel => 'ยืนยันรหัสผ่านใหม่';
+
+  @override
+  String get changePassword => 'เปลี่ยนรหัสผ่าน';
+
+  @override
+  String get passwordChangedSuccess =>
+      'เปลี่ยนรหัสผ่านสำเร็จแล้ว กรุณาเข้าสู่ระบบด้วยรหัสผ่านใหม่';
+
+  @override
   String get secureRegistration => 'การลงทะเบียนที่ปลอดภัย';
 
   @override
@@ -623,4 +662,34 @@ class AppLocalizationsTh extends AppLocalizations {
   String requestRideWith(String vehicle, String fare) {
     return 'เรียก $vehicle · ฿$fare';
   }
+
+  @override
+  String get map => 'แผนที่';
+
+  @override
+  String get experienceTitle => 'สัมผัสประสบการณ์ใหม่กับ Mass Move';
+
+  @override
+  String get experiencePremiumTitle => 'การเดินทางระดับพรีเมียม';
+
+  @override
+  String get experiencePremiumSubtitle => 'รถพร้อมสิ่งอำนวยความสะดวกครบครัน';
+
+  @override
+  String get experienceAirportTitle => 'ไปสนามบิน ตรงเวลา';
+
+  @override
+  String get experienceAirportSubtitle => 'จองล่วงหน้า ไม่พลาดไฟลต์';
+
+  @override
+  String get experienceSafetyTitle => 'ปลอดภัยทุกเส้นทาง';
+
+  @override
+  String get experienceSafetySubtitle => 'แชร์ตำแหน่งเรียลไทม์ + ปุ่ม SOS';
+
+  @override
+  String get experienceValueTitle => 'ราคาคุ้มค่า ถูกกว่าชัวร์';
+
+  @override
+  String get experienceValueSubtitle => 'ค่าโดยสารโปร่งใส รู้ราคาก่อนเรียก';
 }

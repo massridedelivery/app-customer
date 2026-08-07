@@ -1,18 +1,20 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 
-/// A network image that **downsizes its decode** to the display size.
+/// A network image that is **disk-cached and decode-downsized**.
 ///
-/// Plain `Image.network` decodes the full-resolution source into memory even
-/// when it's rendered into a small slot, which spikes memory and drops frames
-/// while scrolling a list of thumbnails. This widget passes `cacheWidth` (in
-/// physical pixels = logical width × devicePixelRatio) so the engine decodes at
-/// the size actually shown. It also renders a consistent grey fallback for a
-/// null/empty URL or a load error, replacing the boilerplate `errorBuilder`
-/// containers that were copy-pasted across the food/restaurant screens.
+/// Backed by [CachedNetworkImage]: the source is cached on disk (so it isn't
+/// re-downloaded across scrolls or app restarts) and decoded at the display
+/// size — `memCacheWidth`/`maxWidthDiskCache` = logical width × devicePixelRatio
+/// — instead of at full resolution, which is what spikes memory and drops
+/// frames when scrolling a list of thumbnails. A consistent grey placeholder
+/// shows while loading and a grey icon on error or a null/empty URL, replacing
+/// the boilerplate `errorBuilder` containers that were copy-pasted across the
+/// food/restaurant screens.
 ///
 /// Pass a finite [width] for fixed thumbnails; leave it null for a full-bleed
-/// image (the decode target then falls back to the screen width).
+/// image (the decode/cache target then falls back to the screen width).
 class AppNetworkImage extends StatelessWidget {
   final String? url;
   final double? width;
@@ -38,19 +40,33 @@ class AppNetworkImage extends StatelessWidget {
 
     final dpr = MediaQuery.devicePixelRatioOf(context);
     final w = width;
-    // Decode to the box width when bounded, else the screen width — so a
-    // full-bleed hero still downsizes instead of decoding at source resolution.
+    // Decode/cache to the box width when bounded, else the screen width — so a
+    // full-bleed hero still downsizes instead of at source resolution.
     final logicalTarget = (w != null && w.isFinite)
         ? w
         : MediaQuery.sizeOf(context).width;
+    final cachePx = (logicalTarget * dpr).round();
 
-    return Image.network(
-      u,
+    return CachedNetworkImage(
+      imageUrl: u,
       width: width,
       height: height,
       fit: fit,
-      cacheWidth: (logicalTarget * dpr).round(),
-      errorBuilder: (_, _, _) => _fallback(),
+      memCacheWidth: cachePx,
+      maxWidthDiskCache: cachePx,
+      fadeInDuration: const Duration(milliseconds: 200),
+      placeholder: (_, _) => _placeholder(),
+      errorWidget: (_, _, _) => _fallback(),
+    );
+  }
+
+  /// Neutral box shown while the image loads (no icon — distinguishes loading
+  /// from the error state).
+  Widget _placeholder() {
+    return Container(
+      width: width,
+      height: height,
+      color: AppColors.semanticGrayNeutralBgLightgray,
     );
   }
 

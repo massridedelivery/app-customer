@@ -71,13 +71,21 @@ class PlaceDataSourceImpl implements PlaceDataSource {
 
   @override
   Future<List<dynamic>> getRecentPlaces() async {
-    // TODO(backend): confirm the recent-places endpoint path.
+    // Recent/frequent destinations. The path is `/places/frequent` per plan.md
+    // ("Frequent Travel: GET /api/customer/places/frequent"); the earlier
+    // `/places/recent` guess hit 405 because the BFF matched it as
+    // `/places/{id}` (which only serves POST/DELETE).
     try {
-      final response = await _apiService.dio.get('/api/customer/places/recent');
+      final response = await _apiService.dio.get(
+        '/api/customer/places/frequent',
+      );
       return response.data as List<dynamic>;
     } on DioException catch (e) {
-      // Endpoint may not exist yet — degrade gracefully instead of breaking UI.
-      if (e.response?.statusCode == 404) return const [];
+      // Recent places are a non-critical convenience list. If the endpoint is
+      // unavailable (404) or method-mismatched while the BFF is still settling
+      // (405), degrade to an empty list instead of breaking the home screen.
+      final code = e.response?.statusCode;
+      if (code == 404 || code == 405) return const [];
       rethrow;
     }
   }
@@ -102,14 +110,14 @@ class PlaceDataSourceImpl implements PlaceDataSource {
     final response = await _apiService.dio.post(
       '/api/customer/places',
       data: {
-        if (id != null) 'id': id,
+        'id': ?id,
         'name': name,
-        if (address != null) 'address': address,
+        'address': ?address,
         'lat': lat,
         'lng': lng,
-        if (note != null) 'note': note,
-        if (isDefault != null) 'is_default': isDefault,
-        if (phoneNumber != null) 'phone_number': phoneNumber,
+        'note': ?note,
+        'is_default': ?isDefault,
+        'phone_number': ?phoneNumber,
       },
     );
     return response.data as Map<String, dynamic>;

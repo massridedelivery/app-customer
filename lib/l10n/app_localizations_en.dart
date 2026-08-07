@@ -229,6 +229,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get currentLocation => 'Current Location';
 
   @override
+  String get pickupNotReady =>
+      'Finding your pickup location — enable location or set a pickup point first.';
+
+  @override
   String get tripCompleted => 'Trip Completed';
 
   @override
@@ -471,6 +475,41 @@ class AppLocalizationsEn extends AppLocalizations {
   String get alreadyHaveAccount => 'Already have an account? ';
 
   @override
+  String get fullNameHint => 'First name - Last name';
+
+  @override
+  String get forgotPasswordSubtitle =>
+      'Don\'t worry! Just enter your email and we\'ll send you a code to reset your password.';
+
+  @override
+  String get sendResetCode => 'Send Code';
+
+  @override
+  String resetOtpSentMsg(String email) {
+    return 'A verification code (OTP) has been sent to your email\n$email';
+  }
+
+  @override
+  String get setNewPassword => 'Set New Password';
+
+  @override
+  String get setNewPasswordSubtitle =>
+      'Please choose a strong, hard-to-guess password to keep your account secure.';
+
+  @override
+  String get newPasswordLabel => 'New Password';
+
+  @override
+  String get confirmNewPasswordLabel => 'Confirm New Password';
+
+  @override
+  String get changePassword => 'Change Password';
+
+  @override
+  String get passwordChangedSuccess =>
+      'Your password has been changed. Please sign in with your new password.';
+
+  @override
   String get secureRegistration => 'SECURE REGISTRATION';
 
   @override
@@ -623,4 +662,35 @@ class AppLocalizationsEn extends AppLocalizations {
   String requestRideWith(String vehicle, String fare) {
     return 'Request $vehicle · ฿$fare';
   }
+
+  @override
+  String get map => 'Map';
+
+  @override
+  String get experienceTitle => 'A new experience with Mass Move';
+
+  @override
+  String get experiencePremiumTitle => 'Premium rides';
+
+  @override
+  String get experiencePremiumSubtitle => 'Cars with every comfort on board';
+
+  @override
+  String get experienceAirportTitle => 'To the airport, on time';
+
+  @override
+  String get experienceAirportSubtitle => 'Book ahead and never miss a flight';
+
+  @override
+  String get experienceSafetyTitle => 'Safe on every route';
+
+  @override
+  String get experienceSafetySubtitle => 'Live location sharing + SOS button';
+
+  @override
+  String get experienceValueTitle => 'Great value, cheaper for sure';
+
+  @override
+  String get experienceValueSubtitle =>
+      'Transparent fares — know the price before you ride';
 }

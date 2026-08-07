@@ -536,6 +536,12 @@ abstract class AppLocalizations {
   /// **'Current Location'**
   String get currentLocation;
 
+  /// No description provided for @pickupNotReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Finding your pickup location — enable location or set a pickup point first.'**
+  String get pickupNotReady;
+
   /// No description provided for @tripCompleted.
   ///
   /// In en, this message translates to:
@@ -1004,6 +1010,66 @@ abstract class AppLocalizations {
   /// **'Already have an account? '**
   String get alreadyHaveAccount;
 
+  /// No description provided for @fullNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'First name - Last name'**
+  String get fullNameHint;
+
+  /// No description provided for @forgotPasswordSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t worry! Just enter your email and we\'ll send you a code to reset your password.'**
+  String get forgotPasswordSubtitle;
+
+  /// No description provided for @sendResetCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Code'**
+  String get sendResetCode;
+
+  /// No description provided for @resetOtpSentMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'A verification code (OTP) has been sent to your email\n{email}'**
+  String resetOtpSentMsg(String email);
+
+  /// No description provided for @setNewPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Set New Password'**
+  String get setNewPassword;
+
+  /// No description provided for @setNewPasswordSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Please choose a strong, hard-to-guess password to keep your account secure.'**
+  String get setNewPasswordSubtitle;
+
+  /// No description provided for @newPasswordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'New Password'**
+  String get newPasswordLabel;
+
+  /// No description provided for @confirmNewPasswordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm New Password'**
+  String get confirmNewPasswordLabel;
+
+  /// No description provided for @changePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Change Password'**
+  String get changePassword;
+
+  /// No description provided for @passwordChangedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Your password has been changed. Please sign in with your new password.'**
+  String get passwordChangedSuccess;
+
   /// No description provided for @secureRegistration.
   ///
   /// In en, this message translates to:
@@ -1303,6 +1369,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Request {vehicle} · ฿{fare}'**
   String requestRideWith(String vehicle, String fare);
+
+  /// No description provided for @map.
+  ///
+  /// In en, this message translates to:
+  /// **'Map'**
+  String get map;
+
+  /// No description provided for @experienceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A new experience with Mass Move'**
+  String get experienceTitle;
+
+  /// No description provided for @experiencePremiumTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Premium rides'**
+  String get experiencePremiumTitle;
+
+  /// No description provided for @experiencePremiumSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cars with every comfort on board'**
+  String get experiencePremiumSubtitle;
+
+  /// No description provided for @experienceAirportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'To the airport, on time'**
+  String get experienceAirportTitle;
+
+  /// No description provided for @experienceAirportSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Book ahead and never miss a flight'**
+  String get experienceAirportSubtitle;
+
+  /// No description provided for @experienceSafetyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Safe on every route'**
+  String get experienceSafetyTitle;
+
+  /// No description provided for @experienceSafetySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Live location sharing + SOS button'**
+  String get experienceSafetySubtitle;
+
+  /// No description provided for @experienceValueTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Great value, cheaper for sure'**
+  String get experienceValueTitle;
+
+  /// No description provided for @experienceValueSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Transparent fares — know the price before you ride'**
+  String get experienceValueSubtitle;
 }
 
 class _AppLocalizationsDelegate

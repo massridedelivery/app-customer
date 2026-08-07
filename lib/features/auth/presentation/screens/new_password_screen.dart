@@ -1,6 +1,8 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:customer_app/features/auth/presentation/widgets/gradient_auth_button.dart';
+import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -61,10 +63,8 @@ class _NewPasswordScreenState extends ConsumerState<NewPasswordScreen> {
 
     if (mounted && success) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'เปลี่ยนรหัสผ่านสำเร็จแล้ว กรุณาเข้าสู่ระบบด้วยรหัสผ่านใหม่',
-          ),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.passwordChangedSuccess),
           backgroundColor: AppColors.success,
         ),
       );
@@ -78,6 +78,7 @@ class _NewPasswordScreenState extends ConsumerState<NewPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final authState = ref.watch(authControllerProvider);
 
     return Scaffold(
@@ -97,14 +98,14 @@ class _NewPasswordScreenState extends ConsumerState<NewPasswordScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'ตั้งรหัสผ่านใหม่',
+                l10n.setNewPassword,
                 style: AppTypography.heading3.copyWith(
                   color: const Color(0xFF0F172A),
                 ),
               ),
               const SizedBox(height: 12),
               Text(
-                'กรุณาตั้งรหัสผ่านใหม่ที่คาดเดาได้ยากเพื่อความปลอดภัยของบัญชีคุณ',
+                l10n.setNewPasswordSubtitle,
                 style: AppTypography.caption4.copyWith(
                   color: const Color(0xFF64748B),
                 ),
@@ -112,7 +113,7 @@ class _NewPasswordScreenState extends ConsumerState<NewPasswordScreen> {
               const SizedBox(height: 40),
 
               // Password Field
-              _buildLabel('รหัสผ่านใหม่'),
+              _buildLabel(l10n.newPasswordLabel),
               _buildTextField(
                 controller: _passwordController,
                 hintText: '••••••••',
@@ -131,7 +132,7 @@ class _NewPasswordScreenState extends ConsumerState<NewPasswordScreen> {
               const SizedBox(height: 24),
 
               // Confirm Password Field
-              _buildLabel('ยืนยันรหัสผ่านใหม่'),
+              _buildLabel(l10n.confirmNewPasswordLabel),
               _buildTextField(
                 controller: _confirmPasswordController,
                 hintText: '••••••••',
@@ -152,42 +153,10 @@ class _NewPasswordScreenState extends ConsumerState<NewPasswordScreen> {
               const SizedBox(height: 40),
 
               // Submit Button
-              GestureDetector(
-                onTap: (authState.isLoading || !_isValid) ? null : _submit,
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  decoration: BoxDecoration(
-                    gradient: _isValid
-                        ? const LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [AppColors.primary, AppColors.secondaryRed],
-                          )
-                        : null,
-                    color: _isValid ? null : const Color(0xFFE2E8F0),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Center(
-                    child: authState.isLoading
-                        ? const SizedBox(
-                            height: 24,
-                            width: 24,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2,
-                            ),
-                          )
-                        : Text(
-                            'เปลี่ยนรหัสผ่าน',
-                            style: AppTypography.label2.copyWith(
-                              color: _isValid
-                                  ? Colors.white
-                                  : const Color(0xFF94A3B8),
-                            ),
-                          ),
-                  ),
-                ),
+              GradientAuthButton(
+                label: l10n.changePassword,
+                isLoading: authState.isLoading,
+                onPressed: _isValid ? _submit : null,
               ),
             ],
           ),

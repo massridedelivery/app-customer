@@ -1,4 +1,4 @@
-import 'package:customer_app/features/profile/domain/entities/ProfileEntity.dart';
+import 'package:customer_app/features/profile/domain/entities/profile_entity.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 

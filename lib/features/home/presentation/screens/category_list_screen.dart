@@ -1,3 +1,4 @@
+import 'package:customer_app/core/constants/map_defaults.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/features/food_delivery/data/repositories/food_discovery_repository_impl.dart';
@@ -21,8 +22,8 @@ final categoryRestaurantsProvider =
               state.currentLocation,
         ),
       );
-      final lat = location?.latitude ?? 13.7563;
-      final lng = location?.longitude ?? 100.5018;
+      final lat = location?.latitude ?? MapDefaults.bangkokLat;
+      final lng = location?.longitude ?? MapDefaults.bangkokLng;
 
       final repo = ref.watch(foodDiscoveryRepositoryProvider);
       return await repo.getCategoryRestaurants(

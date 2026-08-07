@@ -4,10 +4,12 @@ import 'package:customer_app/core/error/api_error.dart';
 import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
 import 'package:customer_app/features/ride_booking/presentation/controllers/booking_controller.dart';
 import 'package:customer_app/features/ride_booking/presentation/states/booking_state.dart';
-import 'package:customer_app/features/ride_booking/presentation/widgets/BookingMapWidget.dart';
+import 'package:customer_app/features/ride_booking/presentation/widgets/booking_map_widget.dart';
 import 'package:customer_app/features/ride_booking/presentation/screens/ride_coupon_screen.dart';
 import 'package:customer_app/features/ride_booking/presentation/widgets/vehicle_selection_sheet.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
+import 'package:flutter/foundation.dart'
+    show defaultTargetPlatform, TargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -51,15 +53,22 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
         final pickup = homeState.pickupLocation;
         final dropoff = homeState.dropoffLocation;
 
-        final pixelRatio = MediaQuery.of(context).devicePixelRatio;
+        // getScreenCoordinate returns PHYSICAL pixels on Android but LOGICAL
+        // points on iOS. Divide by the device pixel ratio only on Android —
+        // dividing on iOS shrank every coordinate ~3x, collapsing the address
+        // bubbles into the top-left corner (the reported bug). Emulator testing
+        // on Android never surfaced it.
+        final divisor = defaultTargetPlatform == TargetPlatform.android
+            ? MediaQuery.of(context).devicePixelRatio
+            : 1.0;
 
         if (pickup != null) {
           final pickupScreen = await _mapController!.getScreenCoordinate(pickup);
           if (!mounted) return;
           setState(() {
             _pickupPos = Offset(
-              pickupScreen.x.toDouble() / pixelRatio,
-              pickupScreen.y.toDouble() / pixelRatio,
+              pickupScreen.x.toDouble() / divisor,
+              pickupScreen.y.toDouble() / divisor,
             );
           });
         }
@@ -70,8 +79,8 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
           if (!mounted) return;
           setState(() {
             _dropoffPos = Offset(
-              dropoffScreen.x.toDouble() / pixelRatio,
-              dropoffScreen.y.toDouble() / pixelRatio,
+              dropoffScreen.x.toDouble() / divisor,
+              dropoffScreen.y.toDouble() / divisor,
             );
           });
         }
@@ -83,39 +92,79 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
     }
   }
 
-  /// Places an address bubble anchored to a marker. Sits above the marker by
-  /// default, but flips below it when there isn't room above (marker near the
-  /// top safe area) so the bubble never gets clipped by the status bar.
+  /// Places an address bubble anchored to a marker. Centred over the marker,
+  /// it flips below when there isn't room above (marker near the top safe area)
+  /// and is clamped to the screen edges so it never gets clipped by the status
+  /// bar or run off the sides. The clamping uses the bubble's *measured* size
+  /// (via [_BubbleLayoutDelegate]) rather than an estimate, so a wide two-line
+  /// address near a screen edge stays fully on-screen.
   Widget _buildLocationOverlay({
     required Offset pos,
     required String label,
     required Color labelColor,
     required String address,
   }) {
+    return Positioned.fill(
+      child: CustomSingleChildLayout(
+        delegate: _BubbleLayoutDelegate(
+          anchor: pos,
+          safeTop: MediaQuery.of(context).padding.top,
+        ),
+        child: _LocationOverlay(
+          label: label,
+          labelColor: labelColor,
+          address: address,
+        ),
+      ),
+    );
+  }
+
+  /// The trip's total duration + distance, centred on the midpoint between the
+  /// pickup and dropoff pins. The centre is clamped by a conservative half-size
+  /// so the pill can never spill past a screen edge or hide under the status bar
+  /// — regardless of where the route sits or how close the two pins are.
+  Widget _buildRouteMetricTag(BookingState state, AppLocalizations l10n) {
     final media = MediaQuery.of(context);
-    final safeTop = media.padding.top;
+    final size = media.size;
 
-    // Rough max height of a two-line bubble — only used to decide the flip
-    // side, so an estimate is fine.
-    const estimatedHeight = 64.0;
-    const gapAbove = 45.0;
-    const gapBelow = 12.0;
+    final midX = (_pickupPos!.dx + _dropoffPos!.dx) / 2;
+    final midY = (_pickupPos!.dy + _dropoffPos!.dy) / 2;
 
-    final placeAbove = pos.dy - gapAbove - estimatedHeight > safeTop + 8;
-    final anchorTop = placeAbove ? pos.dy - gapAbove : pos.dy + gapBelow;
+    const halfW = 80.0;
+    const halfH = 18.0;
+    const margin = 12.0;
+    final left = midX
+        .clamp(margin + halfW, size.width - margin - halfW)
+        .toDouble();
+    final top = midY
+        .clamp(media.padding.top + margin + halfH, size.height - margin - halfH)
+        .toDouble();
 
     return Positioned(
-      left: pos.dx,
-      top: anchorTop,
+      left: left,
+      top: top,
       child: FractionalTranslation(
-        // -1.0 = bubble sits above the anchor; 0.0 = below it.
-        translation: Offset(-0.5, placeAbove ? -1.0 : 0.0),
+        // Centre the pill on the (clamped) midpoint.
+        translation: const Offset(-0.5, -0.5),
         child: Container(
-          constraints: BoxConstraints(maxWidth: media.size.width * 0.6),
-          child: _LocationOverlay(
-            label: label,
-            labelColor: labelColor,
-            address: address,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: AppColors.semanticGrayNeutralFgHigh,
+            borderRadius: BorderRadius.circular(8),
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black26,
+                blurRadius: 4,
+                offset: Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Text(
+            "${(state.durationMin ?? 0).toStringAsFixed(0)} ${l10n.minutes} · ${(state.distanceKm ?? 0).toStringAsFixed(1)} ${l10n.km}",
+            style: AppTypography.numericMedium4.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
       ),
@@ -239,43 +288,19 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                 labelColor: AppColors.foundationGreen500,
                 address: pickupAddress ?? l10n.currentLocation,
               ),
-            if (_dropoffPos != null) ...[
+            if (_dropoffPos != null)
               _buildLocationOverlay(
                 pos: _dropoffPos!,
                 label: "2",
                 labelColor: AppColors.foundationRed600,
                 address: dropoffAddress ?? l10n.dropoffPoint,
               ),
-              // Duration & Distance tag attached to dropoff marker
-              Positioned(
-                left: _dropoffPos!.dx + 16,
-                top: _dropoffPos!.dy - 20,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.semanticGrayNeutralFgHigh,
-                    borderRadius: BorderRadius.circular(8),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Colors.black26,
-                        blurRadius: 4,
-                        offset: Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Text(
-                    "${(bookingState.durationMin ?? 0).toStringAsFixed(0)} ${l10n.minutes} · ${(bookingState.distanceKm ?? 0).toStringAsFixed(1)} ${l10n.km}",
-                    style: AppTypography.numericMedium4.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-            ],
+            // Total-trip duration + distance. Anchored to the route midpoint
+            // (not the dropoff pin): the value covers the whole pickup→dropoff
+            // trip, and pinning it to one endpoint both mislabelled it and let
+            // it collide with the dropoff bubble or run off the screen edge.
+            if (_pickupPos != null && _dropoffPos != null)
+              _buildRouteMetricTag(bookingState, l10n),
           ],
 
           // Top Back Arrow Button
@@ -312,10 +337,16 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
               ),
             ),
 
-          // Bottom Vehicle Selection Sheet
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: VehicleSelectionSheet(
+          // Bottom Vehicle Selection Sheet — draggable, snapping to ~1 row,
+          // ~3 rows and almost-full-screen.
+          DraggableScrollableSheet(
+            initialChildSize: 0.48,
+            minChildSize: 0.32,
+            maxChildSize: 0.92,
+            snap: true,
+            snapSizes: const [0.32, 0.48, 0.92],
+            builder: (context, scrollController) => VehicleSelectionSheet(
+              scrollController: scrollController,
               estimations: bookingState.estimations,
               onVehicleSelected: (id) {
                 ref
@@ -391,6 +422,55 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
       ),
     );
   }
+}
+
+/// Lays out an address bubble relative to a marker's screen position, using the
+/// bubble's measured size to keep it fully on-screen. Vertically it sits above
+/// the marker, flipping below when there isn't room under the status bar.
+/// Horizontally it centres on the marker, then clamps so neither edge is
+/// clipped — the piece the plain `left: pos.dx` + `FractionalTranslation(-0.5)`
+/// approach was missing.
+class _BubbleLayoutDelegate extends SingleChildLayoutDelegate {
+  final Offset anchor;
+  final double safeTop;
+
+  // Gap between the marker and the bubble on each flip side, and the minimum
+  // breathing room to keep from any screen edge.
+  static const double _gapAbove = 45.0;
+  static const double _gapBelow = 12.0;
+  static const double _margin = 12.0;
+
+  const _BubbleLayoutDelegate({required this.anchor, required this.safeTop});
+
+  @override
+  BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
+    // Keep the existing 60%-of-width cap so long addresses wrap instead of
+    // stretching across the whole map.
+    return constraints.copyWith(
+      minWidth: 0,
+      minHeight: 0,
+      maxWidth: constraints.maxWidth * 0.6,
+    );
+  }
+
+  @override
+  Offset getPositionForChild(Size size, Size childSize) {
+    final placeAbove = anchor.dy - _gapAbove - childSize.height > safeTop + 8;
+    final top = placeAbove
+        ? anchor.dy - _gapAbove - childSize.height
+        : anchor.dy + _gapBelow;
+
+    final left = anchor.dx - childSize.width / 2;
+
+    return Offset(
+      left.clamp(_margin, size.width - childSize.width - _margin),
+      top.clamp(safeTop + 8, size.height - childSize.height - _margin),
+    );
+  }
+
+  @override
+  bool shouldRelayout(_BubbleLayoutDelegate oldDelegate) =>
+      anchor != oldDelegate.anchor || safeTop != oldDelegate.safeTop;
 }
 
 class _LocationOverlay extends StatelessWidget {

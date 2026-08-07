@@ -38,9 +38,22 @@ class AuthController extends _$AuthController {
     if (hasToken) {
       // Small delay to allow build to finish before calling async check
       Future.microtask(() => checkActiveJob());
+      _openSocket();
       return const AuthState(isAuthenticated: true);
     }
     return const AuthState(isAuthenticated: false);
+  }
+
+  /// Brings the real-time socket up now that a valid token exists.
+  ///
+  /// [SocketService.connect] bails out when there is no token, and the
+  /// controllers that would otherwise call it (live ride, chat, tracking) are
+  /// built once — LiveRideController as early as this controller's `build`.
+  /// So without an explicit call here a socket that was skipped for lack of a
+  /// token at startup would never come up for the rest of the session, leaving
+  /// the app on its REST polling fallback.
+  void _openSocket() {
+    ref.read(socketServiceProvider).ensureConnected();
   }
 
   Future<void> checkActiveJob() async {
@@ -76,6 +89,7 @@ class AuthController extends _$AuthController {
             .read(tokenStorageProvider)
             .saveTokens(accessToken: accessToken, refreshToken: refreshToken);
         state = state.copyWith(isLoading: false, isAuthenticated: true);
+        _openSocket();
 
         // Check for active job after login
         await checkActiveJob();
@@ -178,6 +192,7 @@ class AuthController extends _$AuthController {
             .read(tokenStorageProvider)
             .saveTokens(accessToken: accessToken, refreshToken: refreshToken);
         state = state.copyWith(isLoading: false, isAuthenticated: true);
+        _openSocket();
         await checkActiveJob();
       } else {
         state = state.copyWith(isLoading: false, error: 'Invalid OTP response');
@@ -306,6 +321,7 @@ class AuthController extends _$AuthController {
 
           if (isRegistered) {
             state = state.copyWith(isLoading: false, isAuthenticated: true);
+            _openSocket();
             await checkActiveJob(); // Keep existing behavior
           } else {
             state = state.copyWith(isLoading: false);
@@ -320,7 +336,9 @@ class AuthController extends _$AuthController {
     }
   }
 
+  /// Entry point for flows that save their own tokens (e.g. registration).
   void setAuthenticated() {
     state = state.copyWith(isAuthenticated: true);
+    _openSocket();
   }
 }

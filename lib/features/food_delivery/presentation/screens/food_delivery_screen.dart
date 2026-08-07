@@ -29,9 +29,10 @@ class _FoodDeliveryScreenState extends ConsumerState<FoodDeliveryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // The cart is intentionally NOT watched here: a cart edit must not rebuild
+    // this whole CustomScrollView + restaurant feed. The floating cart bar
+    // (_FoodCartBar) watches the cart in isolation and rebuilds by itself.
     final discoveryState = ref.watch(foodDiscoveryProvider);
-    ref.watch(foodCartControllerProvider);
-    final cartNotifier = ref.read(foodCartControllerProvider.notifier);
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -192,14 +193,12 @@ class _FoodDeliveryScreenState extends ConsumerState<FoodDeliveryScreen> {
             ),
           ),
 
-          // Floating Cart
+          // Floating Cart — self-contained; watches the cart on its own so cart
+          // edits don't rebuild the feed above.
           Positioned(
             right: 16,
             bottom: _showBottomPromo ? 100 : 32,
-            child: _buildFloatingCart(
-              cartNotifier.totalQuantity,
-              cartNotifier.foodTotal,
-            ),
+            child: const _FoodCartBar(),
           ),
 
           // Bottom Promo Banner — hardcoded promo claims, no provider.
@@ -398,49 +397,6 @@ class _FoodDeliveryScreenState extends ConsumerState<FoodDeliveryScreen> {
     );
   }
 
-  Widget _buildFloatingCart(int cartCount, double cartTotal) {
-    if (cartCount == 0) return const SizedBox.shrink();
-    return InkWell(
-      onTap: () {
-        Navigator.of(
-          context,
-        ).push(MaterialPageRoute(builder: (context) => const CheckoutScreen()));
-      },
-      child: Container(
-        height: 56,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        decoration: BoxDecoration(
-          color: AppColors.foundationGreen500,
-          borderRadius: BorderRadius.circular(28),
-          boxShadow: const [
-            BoxShadow(
-              color: Colors.black26,
-              blurRadius: 8,
-              offset: Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(
-              Icons.shopping_cart_outlined,
-              color: Colors.white,
-              size: 24,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              '$cartCount รายการ • ฿${cartTotal.toStringAsFixed(0)}',
-              style: AppTypography.caption3.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   Widget _buildBottomPromoBanner() {
     return Container(
@@ -714,6 +670,58 @@ class _FoodDeliveryScreenState extends ConsumerState<FoodDeliveryScreen> {
                     ],
                   ),
                 ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Floating cart pill. Watches only the derived `(count, total)` from the cart
+/// controller via `.select`, so it rebuilds in isolation on cart edits without
+/// touching the restaurant feed above it.
+class _FoodCartBar extends ConsumerWidget {
+  const _FoodCartBar();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final (cartCount, cartTotal) = ref.watch(
+      foodCartControllerProvider.select((s) => (s.totalQuantity, s.foodTotal)),
+    );
+    if (cartCount == 0) return const SizedBox.shrink();
+
+    return InkWell(
+      onTap: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (context) => const CheckoutScreen()),
+        );
+      },
+      child: Container(
+        height: 56,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        decoration: BoxDecoration(
+          color: AppColors.foundationGreen500,
+          borderRadius: BorderRadius.circular(28),
+          boxShadow: const [
+            BoxShadow(color: Colors.black26, blurRadius: 8, offset: Offset(0, 4)),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.shopping_cart_outlined,
+              color: Colors.white,
+              size: 24,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              '$cartCount รายการ • ฿${cartTotal.toStringAsFixed(0)}',
+              style: AppTypography.caption3.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
               ),
             ),
           ],

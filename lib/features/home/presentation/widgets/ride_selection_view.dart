@@ -18,16 +18,27 @@ class RideSelectionView extends ConsumerWidget {
     final isSavePlace = homeState.selectionMode == RideSelectionMode.savePlace;
     final l10n = AppLocalizations.of(context)!;
 
-    final currentAddress =
-        homeState.tempAddress ??
-        (isPickup
-            ? homeState.pickupAddress
-            : isSavePlace
-            ? homeState.dropoffAddress
-            : homeState.selectionMode == RideSelectionMode.food
-            ? homeState.foodAddress
-            : homeState.dropoffAddress) ??
-        l10n.movingMap;
+    // A settled centre with no address yet means the reverse geocode is still
+    // out. Show the "moving map" placeholder rather than the previous pin's
+    // address, which would read as if this spot were already resolved.
+    final isResolving =
+        homeState.tempLocation != null && homeState.tempAddress == null;
+    final currentAddress = isResolving
+        ? l10n.movingMap
+        : homeState.tempAddress ??
+              (isPickup
+                  ? homeState.pickupAddress
+                  : isSavePlace
+                  ? homeState.dropoffAddress
+                  : homeState.selectionMode == RideSelectionMode.food
+                  ? homeState.foodAddress
+                  : homeState.dropoffAddress) ??
+              l10n.movingMap;
+
+    // Confirming before both halves land used to commit a null location over
+    // the existing pickup/dropoff, so the action stays disabled until then.
+    final canConfirm =
+        homeState.tempLocation != null && homeState.tempAddress != null;
 
     return Stack(
       children: [
@@ -197,27 +208,35 @@ class RideSelectionView extends ConsumerWidget {
                     width: double.infinity,
                     height: 56,
                     child: ElevatedButton(
-                      onPressed: () {
-                        final notifier = ref.read(
-                          homeControllerProvider.notifier,
-                        );
-                        if (homeState.selectionMode ==
-                            RideSelectionMode.dropoff) {
-                          notifier.confirmSelection();
-                          context.push('/booking');
-                        } else if (homeState.selectionMode ==
-                            RideSelectionMode.savePlace) {
-                          _showAddPlaceDialog(context, ref, homeState);
-                        } else {
-                          notifier.confirmSelection();
-                          context.pop();
-                        }
-                      },
+                      onPressed: !canConfirm
+                          ? null
+                          : () {
+                              final notifier = ref.read(
+                                homeControllerProvider.notifier,
+                              );
+                              if (homeState.selectionMode ==
+                                  RideSelectionMode.savePlace) {
+                                _showAddPlaceDialog(context, ref, homeState);
+                                return;
+                              }
+                              // Refused (nothing settled) — stay put rather
+                              // than navigate on with a half-written selection.
+                              if (!notifier.confirmSelection()) return;
+                              if (homeState.selectionMode ==
+                                  RideSelectionMode.dropoff) {
+                                context.push('/booking');
+                              } else {
+                                context.pop();
+                              }
+                            },
                        style: ElevatedButton.styleFrom(
                         backgroundColor: isFromAddAddress
                             ? AppColors.primary
                             : AppColors.foundationGreen500,
                         foregroundColor: Colors.white,
+                        disabledBackgroundColor:
+                            AppColors.semanticGrayNeutralBorderLightgray,
+                        disabledForegroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(28),
                         ),

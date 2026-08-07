@@ -1,4 +1,4 @@
-import 'package:customer_app/core/config/app_env.dart';
+import 'package:customer_app/core/configs/app_env.dart';
 import 'package:flutter/foundation.dart';
 
 /// Configuration for direct Google Maps Platform (Places API) calls.

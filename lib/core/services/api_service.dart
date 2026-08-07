@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:customer_app/core/config/app_env.dart';
+import 'package:customer_app/core/configs/app_env.dart';
 import 'package:talker_dio_logger/talker_dio_logger.dart';
 import 'package:customer_app/core/data/token_storage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

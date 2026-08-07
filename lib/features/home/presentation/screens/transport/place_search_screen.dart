@@ -3,6 +3,7 @@ import 'package:customer_app/core/constants/app_assets.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_icons.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
+import 'package:customer_app/core/widgets/app_pill_tab.dart';
 import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
 import 'package:customer_app/features/home/presentation/controllers/place_search_controller.dart';
 import 'package:customer_app/features/home/presentation/states/home_state.dart';
@@ -335,31 +336,10 @@ class _PlaceSearchScreenState extends ConsumerState<PlaceSearchScreen>
   }
 
   Widget _buildTabItem(int index, String text) {
-    final isSelected = _tabController.index == index;
-    return Semantics(
-      button: true,
-      selected: isSelected,
+    return AppPillTab(
       label: text,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(20),
-        onTap: () => _tabController.animateTo(index),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          decoration: BoxDecoration(
-            color: isSelected ? AppColors.primary : Colors.transparent,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Text(
-            text,
-            style: AppTypography.label1.copyWith(
-              color: isSelected
-                  ? AppColors.white
-                  : AppColors.semanticGrayNeutralFgMidOnWhite,
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-            ),
-          ),
-        ),
-      ),
+      selected: _tabController.index == index,
+      onTap: () => _tabController.animateTo(index),
     );
   }
 

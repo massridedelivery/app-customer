@@ -1,7 +1,7 @@
 import 'package:customer_app/core/error/server_exception.dart';
 import 'package:customer_app/features/profile/data/datasources/profile_remote_data_source.dart';
 import 'package:customer_app/features/profile/data/models/profile_model.dart';
-import 'package:customer_app/features/profile/domain/entities/ProfileEntity.dart';
+import 'package:customer_app/features/profile/domain/entities/profile_entity.dart';
 import 'package:customer_app/features/profile/domain/repositories/profile_repository.dart';
 import 'package:dio/dio.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';

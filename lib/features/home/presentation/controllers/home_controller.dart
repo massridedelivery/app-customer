@@ -1,3 +1,5 @@
+import 'package:customer_app/core/constants/map_defaults.dart';
+import 'package:customer_app/core/utils/address_formatter.dart';
 import 'package:customer_app/features/home/domain/usecases/add_saved_place_usecase_impl.dart';
 import 'package:customer_app/features/home/domain/usecases/get_default_place_usecase_impl.dart';
 import 'package:customer_app/features/home/domain/usecases/get_recent_places_usecase_impl.dart';
@@ -11,6 +13,17 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'home_controller.g.dart';
 
+/// Camera-only fallback (central Bangkok), used purely as the initial map
+/// centre until the device location resolves. It is deliberately NOT seeded
+/// into [HomeState.pickupLocation]/[HomeState.currentLocation]: doing so let a
+/// ride be booked from the city centre when GPS was slow or denied.
+const LatLng _kMapCameraFallback = MapDefaults.bangkokCenter;
+
+/// Stands in for the address when reverse geocoding returns nothing or fails.
+/// Never null: a null [HomeState.tempAddress] means "still resolving", and
+/// [HomeController.confirmSelection] blocks on it.
+const String _kFallbackPlaceName = 'Selected Location';
+
 @Riverpod(keepAlive: true)
 class HomeController extends _$HomeController {
   final Location _location = Location();
@@ -19,18 +32,24 @@ class HomeController extends _$HomeController {
   /// per-frame camera events don't rebuild every watcher.
   LatLng? _liveMapCenter;
 
+  /// Sequence number of the newest reverse-geocode lookup, so a slow response
+  /// for an abandoned map position can't overwrite a newer one.
+  int _geocodeLookup = 0;
+
   @override
   HomeState build() {
     _initLocation();
     _loadSavedPlaces();
     _loadDefaultPlace();
     _loadRecentPlaces();
-    // Start with default BKK coordinates and no loading screen
+    // Only seed the map camera. currentLocation and pickupLocation stay null
+    // until a real source resolves them (GPS in _initLocation, the user's
+    // default saved place, or a manual pick) — so a null pickup means
+    // "not resolved yet" and callers can gate booking on it instead of
+    // silently using the Bangkok fallback.
     return const HomeState(
       isLoading: false,
-      currentLocation: LatLng(13.7563, 100.5018),
-      mapCenter: LatLng(13.7563, 100.5018),
-      pickupLocation: LatLng(13.7563, 100.5018),
+      mapCenter: _kMapCameraFallback,
     );
   }
 
@@ -100,26 +119,43 @@ class HomeController extends _$HomeController {
     final latLng = _liveMapCenter ?? state.mapCenter;
     if (latLng == null) return;
 
-    // Commit the final center so save-place / selection read the settled value.
-    state = state.copyWith(mapCenter: latLng);
+    // Publish the coordinate BEFORE the reverse geocode below. That lookup is a
+    // network call and used to be the only thing that set tempLocation, so
+    // confirming while it was in flight committed a null location over a
+    // perfectly good pickup/dropoff. Clearing tempAddress marks the pair as
+    // "resolving" — [confirmSelection] refuses until the address lands.
+    final int lookup = ++_geocodeLookup;
+    state = state.copyWith(
+      mapCenter: latLng,
+      tempLocation: latLng,
+      tempAddress: null,
+    );
 
-    String? address;
+    String address;
     try {
       List<geocoding.Placemark> placemarks = await geocoding
           .placemarkFromCoordinates(latLng.latitude, latLng.longitude);
-      if (placemarks.isNotEmpty) {
+      if (placemarks.isEmpty) {
+        address = _kFallbackPlaceName;
+      } else {
         final p = placemarks.first;
-        address = '${p.name}, ${p.street}, ${p.subLocality}, ${p.locality}';
-        // Clean up "Unknown" or empty parts
-        address = address
-            .replaceAll('Unnamed Road, ', '')
-            .replaceAll(', ,', ',');
+        final formatted = formatAddressParts([
+          p.name,
+          p.street,
+          p.subLocality,
+          p.locality,
+        ]);
+        address = formatted.isEmpty ? _kFallbackPlaceName : formatted;
       }
     } catch (e) {
-      address = 'Selected Location';
+      address = _kFallbackPlaceName;
     }
 
-    state = state.copyWith(tempAddress: address, tempLocation: latLng);
+    // The user panned again while this lookup was out — a newer one owns the
+    // state now, and this stale address must not overwrite it.
+    if (lookup != _geocodeLookup) return;
+
+    state = state.copyWith(tempAddress: address);
   }
 
   void startSelection({RideSelectionMode mode = RideSelectionMode.pickup}) {
@@ -129,7 +165,14 @@ class HomeController extends _$HomeController {
     );
   }
 
-  void confirmSelection() {
+  /// Commits the map's current centre as the pickup/dropoff/… for the active
+  /// [HomeState.selectionMode]. Returns false — writing nothing — when the
+  /// selection hasn't settled yet, i.e. the camera has not come to rest or the
+  /// reverse geocode is still out. Callers must not navigate on false: the
+  /// previous, valid location is still in place and the user has to wait a beat.
+  bool confirmSelection() {
+    if (state.tempLocation == null || state.tempAddress == null) return false;
+
     if (state.selectionMode == RideSelectionMode.pickup) {
       state = state.copyWith(
         pickupAddress: state.tempAddress,
@@ -168,7 +211,12 @@ class HomeController extends _$HomeController {
         tempAddress: null,
         tempLocation: null,
       );
+    } else {
+      // none / savePlace — nothing to commit (save-place goes through
+      // [savePlace] with the map centre instead).
+      return false;
     }
+    return true;
   }
 
   void cancelSelection() {
@@ -204,7 +252,11 @@ class HomeController extends _$HomeController {
             foodLocation: LatLng(defaultPlace.lat, defaultPlace.lng),
           );
         }
-        if (state.pickupAddress == null || state.pickupAddress == 'Unknown Address' || state.pickupAddress == 'Failed to locate') {
+        // Fall back to the default saved place whenever GPS hasn't produced a
+        // real pickup yet — covers permission-denied/location-disabled/failed
+        // and the still-pending case. A non-null pickupLocation means GPS (or a
+        // manual pick) already won, so we don't clobber it.
+        if (state.pickupLocation == null) {
           state = state.copyWith(
             pickupAddress: defaultPlace.address ?? defaultPlace.name,
             pickupLocation: LatLng(defaultPlace.lat, defaultPlace.lng),
@@ -226,7 +278,11 @@ class HomeController extends _$HomeController {
             foodLocation: LatLng(place.lat, place.lng),
           );
         }
-        if (state.pickupAddress == null || state.pickupAddress == 'Unknown Address' || state.pickupAddress == 'Failed to locate') {
+        // Fall back to the default saved place whenever GPS hasn't produced a
+        // real pickup yet — covers permission-denied/location-disabled/failed
+        // and the still-pending case. A non-null pickupLocation means GPS (or a
+        // manual pick) already won, so we don't clobber it.
+        if (state.pickupLocation == null) {
           state = state.copyWith(
             pickupAddress: place.address ?? place.name,
             pickupLocation: LatLng(place.lat, place.lng),

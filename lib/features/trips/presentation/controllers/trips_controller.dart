@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:customer_app/core/managers/providers.dart';
 import 'package:customer_app/features/trips/domain/models/trip.dart';
@@ -6,6 +7,11 @@ import 'package:customer_app/features/trips/data/repositories/trips_repository_i
 import 'package:customer_app/features/trips/domain/models/history_order.dart';
 
 part 'trips_controller.g.dart';
+
+// Parsed off the UI isolate via compute() — see the repository for the same
+// rationale on the (larger) history payload.
+List<Trip> _parseTrips(List<dynamic> data) =>
+    data.map((item) => Trip.fromJson(item as Map<String, dynamic>)).toList();
 
 @riverpod
 class TripsController extends _$TripsController {
@@ -24,7 +30,14 @@ class TripsController extends _$TripsController {
 
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data['data'] ?? [];
-        final trips = data.map((item) => Trip.fromJson(item)).toList();
+        // Offload to a background isolate; fall back to a local parse if the
+        // model can't be sent across the isolate boundary.
+        List<Trip> trips;
+        try {
+          trips = await compute(_parseTrips, data);
+        } catch (_) {
+          trips = _parseTrips(data);
+        }
         state = state.copyWith(trips: trips, isLoading: false);
       } else {
         state = state.copyWith(

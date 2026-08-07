@@ -72,6 +72,7 @@
   "saved": "ที่บันทึกไว้",
   "selectOnMaps": "เลือกบน MassMaps",
   "currentLocation": "ตำแหน่งปัจจุบัน",
+  "pickupNotReady": "กำลังหาตำแหน่งจุดรับ — เปิดตำแหน่งหรือเลือกจุดรับก่อน",
   "tripCompleted": "การเดินทางสำเร็จ",
   "rideCompleted": "การเดินทางสำเร็จ",
   "completed": "สำเร็จ",
@@ -166,6 +167,23 @@
   "fullName": "ชื่อ-นามสกุล",
   "createAccount": "สร้างบัญชี",
   "alreadyHaveAccount": "มีบัญชีอยู่แล้วใช่ไหม? ",
+  "fullNameHint": "ชื่อ - นามสกุล",
+  "forgotPasswordSubtitle": "ไม่ต้องกังวล! เพียงกรอกอีเมลของคุณเพื่อรับรหัสยืนยันการตั้งค่ารหัสผ่านใหม่",
+  "sendResetCode": "ส่งรหัสยืนยัน",
+  "resetOtpSentMsg": "รหัสยืนยัน (OTP) ถูกส่งไปที่อีเมล\n{email}",
+  "@resetOtpSentMsg": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "setNewPassword": "ตั้งรหัสผ่านใหม่",
+  "setNewPasswordSubtitle": "กรุณาตั้งรหัสผ่านใหม่ที่คาดเดาได้ยากเพื่อความปลอดภัยของบัญชีคุณ",
+  "newPasswordLabel": "รหัสผ่านใหม่",
+  "confirmNewPasswordLabel": "ยืนยันรหัสผ่านใหม่",
+  "changePassword": "เปลี่ยนรหัสผ่าน",
+  "passwordChangedSuccess": "เปลี่ยนรหัสผ่านสำเร็จแล้ว กรุณาเข้าสู่ระบบด้วยรหัสผ่านใหม่",
   "secureRegistration": "การลงทะเบียนที่ปลอดภัย",
   "fillAllFields": "โปรดกรอกข้อมูลให้ครบทุกช่อง",
   "inProgress": "กำลังดำเนินการอยู่",
@@ -226,5 +244,15 @@
       "vehicle": { "type": "String" },
       "fare": { "type": "String" }
     }
-  }
+  },
+  "map": "แผนที่",
+  "experienceTitle": "สัมผัสประสบการณ์ใหม่กับ Mass Move",
+  "experiencePremiumTitle": "การเดินทางระดับพรีเมียม",
+  "experiencePremiumSubtitle": "รถพร้อมสิ่งอำนวยความสะดวกครบครัน",
+  "experienceAirportTitle": "ไปสนามบิน ตรงเวลา",
+  "experienceAirportSubtitle": "จองล่วงหน้า ไม่พลาดไฟลต์",
+  "experienceSafetyTitle": "ปลอดภัยทุกเส้นทาง",
+  "experienceSafetySubtitle": "แชร์ตำแหน่งเรียลไทม์ + ปุ่ม SOS",
+  "experienceValueTitle": "ราคาคุ้มค่า ถูกกว่าชัวร์",
+  "experienceValueSubtitle": "ค่าโดยสารโปร่งใส รู้ราคาก่อนเรียก"
 }

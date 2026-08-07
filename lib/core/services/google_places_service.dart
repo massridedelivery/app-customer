@@ -47,7 +47,7 @@ class GooglePlacesService {
           'components': GoogleConfig.components,
           if (lat != null && lng != null) 'location': '$lat,$lng',
           if (lat != null && lng != null) 'radius': 30000,
-          if (sessionToken != null) 'sessiontoken': sessionToken,
+          'sessiontoken': ?sessionToken,
         },
       );
 
@@ -77,7 +77,7 @@ class GooglePlacesService {
           'key': GoogleConfig.placesApiKey,
           'language': GoogleConfig.language,
           'fields': 'place_id,name,formatted_address,geometry/location',
-          if (sessionToken != null) 'sessiontoken': sessionToken,
+          'sessiontoken': ?sessionToken,
         },
       );
 

@@ -27,6 +27,7 @@ import 'package:customer_app/features/home/presentation/screens/transport/place_
 import 'package:customer_app/features/home/presentation/screens/transport/ride_landing_screen.dart';
 import 'package:customer_app/features/chat/presentation/screens/chat_screen.dart';
 import 'package:customer_app/features/live_ride/presentation/screens/live_ride_screen.dart';
+import 'package:customer_app/features/live_ride/presentation/screens/payment_summary_screen.dart';
 import 'package:customer_app/features/live_ride/presentation/screens/rating_screen.dart';
 import 'package:customer_app/features/messenger/presentation/screens/messenger_booking_screen.dart';
 import 'package:customer_app/features/messenger/presentation/screens/messenger_chat_screen.dart';
@@ -34,7 +35,6 @@ import 'package:customer_app/features/messenger/presentation/screens/messenger_r
 import 'package:customer_app/features/messenger/presentation/screens/messenger_tracking_screen.dart';
 import 'package:customer_app/features/main/presentation/screens/main_screen.dart'
     as customer_app_main;
-import 'package:customer_app/features/onboarding/presentation/screens/location_setup_screen.dart';
 import 'package:customer_app/features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'package:customer_app/features/onboarding/presentation/screens/splash_screen.dart';
 import 'package:customer_app/features/payment/presentation/screens/add_card_screen.dart';
@@ -116,8 +116,7 @@ final routerProvider = Provider<GoRouter>((ref) {
 
       final isAuthPath = currentPath.startsWith('/auth');
       final isSplash = currentPath == '/splash';
-      final isOnboarding =
-          currentPath == '/onboarding' || currentPath == '/location_setup';
+      final isOnboarding = currentPath == '/onboarding';
 
       final hasCompletedOnboarding = ref
           .read(appStorageProvider)
@@ -219,10 +218,6 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/onboarding',
         builder: (context, state) => const OnboardingScreen(),
-      ),
-      GoRoute(
-        path: '/location_setup',
-        builder: (context, state) => const LocationSetupScreen(),
       ),
       GoRoute(
         path: '/auth',
@@ -490,11 +485,27 @@ final routerProvider = Provider<GoRouter>((ref) {
         },
       ),
       GoRoute(
+        path: '/payment-summary/:id',
+        builder: (context, state) {
+          final jobId = state.pathParameters['id']!;
+          final driverProfile = state.extra as DriverProfileModel?;
+          return PaymentSummaryScreen(
+            jobId: jobId,
+            driverProfile: driverProfile,
+          );
+        },
+      ),
+      GoRoute(
         path: '/rating/:id',
         builder: (context, state) {
           final jobId = state.pathParameters['id']!;
           final driverProfile = state.extra as DriverProfileModel?;
-          return RatingScreen(jobId: jobId, driverProfile: driverProfile);
+          final tip = int.tryParse(state.uri.queryParameters['tip'] ?? '');
+          return RatingScreen(
+            jobId: jobId,
+            driverProfile: driverProfile,
+            tip: tip,
+          );
         },
       ),
       GoRoute(path: '/trips', builder: (context, state) => const TripsScreen()),

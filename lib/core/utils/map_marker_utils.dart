@@ -52,7 +52,13 @@ class MapMarkerUtils {
       return BitmapDescriptor.defaultMarker;
     }
 
-    return BitmapDescriptor.fromBytes(byteData.buffer.asUint8List());
+    // BitmapDescriptor.bytes replaces the deprecated fromBytes. imagePixelRatio
+    // 1.0 preserves the previous raw-pixel sizing — the bitmap is already
+    // rendered at explicit pixel dimensions above, so no extra DPI scaling.
+    return BitmapDescriptor.bytes(
+      byteData.buffer.asUint8List(),
+      imagePixelRatio: 1.0,
+    );
   }
 
   /// Centralized Pickup Marker (Green pin with white hole)
@@ -71,10 +77,20 @@ class MapMarkerUtils {
     );
   }
 
+  /// On-screen size of the pickup/dropoff pins, in logical pixels — the
+  /// compact pin agreed on in 0d6d475. Adjust here to resize; the raster
+  /// resolution follows automatically.
+  static const double _pinDisplaySize = 44;
+
+  /// The pin bitmap is rasterised at [_pinRasterScale]× [_pinDisplaySize] so it
+  /// stays crisp on high-DPI screens; the same value is handed to
+  /// [BitmapDescriptor.bytes] as `imagePixelRatio` to scale it back down.
+  static const double _pinRasterScale = 3;
+
   static Future<BitmapDescriptor> _createCompositeMarker({
     required Color backgroundColor,
     required Color iconColor,
-    double size = 120, // Slightly larger for better detail
+    double size = _pinDisplaySize * _pinRasterScale,
   }) async {
     final ui.PictureRecorder pictureRecorder = ui.PictureRecorder();
     final ui.Canvas canvas = ui.Canvas(pictureRecorder);
@@ -124,6 +140,14 @@ class MapMarkerUtils {
     pictureInfo.picture.dispose();
 
     if (byteData == null) return BitmapDescriptor.defaultMarker;
-    return BitmapDescriptor.fromBytes(byteData.buffer.asUint8List());
+    // The bitmap is rasterised at [_pinRasterScale]× its intended on-screen
+    // size; passing that same value as imagePixelRatio makes the map draw it at
+    // [_pinDisplaySize] logical pixels. With the previous 1.0 the map drew one
+    // bitmap pixel per logical pixel, so the raster size *was* the on-screen
+    // size — shrinking the pin also cost it its resolution.
+    return BitmapDescriptor.bytes(
+      byteData.buffer.asUint8List(),
+      imagePixelRatio: _pinRasterScale,
+    );
   }
 }

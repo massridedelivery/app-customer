@@ -13,6 +13,9 @@ const Color _kSuccessFg = AppColors.semanticSuccessFgHigh;
 const Color _kSuccessBg = AppColors.semanticSuccessBgLow;
 
 class VehicleSelectionSheet extends ConsumerWidget {
+  // Provided by the parent DraggableScrollableSheet; the list scrolls with it,
+  // so dragging the list resizes/snaps the sheet.
+  final ScrollController scrollController;
   final List<VehicleEstimation> estimations;
   final Function(String id) onVehicleSelected;
   final VoidCallback onRequest;
@@ -20,6 +23,7 @@ class VehicleSelectionSheet extends ConsumerWidget {
 
   const VehicleSelectionSheet({
     super.key,
+    required this.scrollController,
     required this.estimations,
     required this.onRequest,
     required this.onPromoTap,
@@ -61,10 +65,10 @@ class VehicleSelectionSheet extends ConsumerWidget {
         ],
       ),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
         children: [
+          // Grabber. Drag anywhere on the sheet/list to resize; the parent
+          // DraggableScrollableSheet snaps to 1 row / 3 rows / almost full.
           const SizedBox(height: 12),
-          // Grabber
           Container(
             width: 40,
             height: 4,
@@ -75,25 +79,32 @@ class VehicleSelectionSheet extends ConsumerWidget {
           ),
           const SizedBox(height: 16),
 
-          // Vehicle list. Caps at 40% of the screen and scrolls beyond that, so
-          // more vehicles or a larger accessibility font can't push the payment
-          // row and CTA off-screen (the old fixed 230px height clipped them).
-          ConstrainedBox(
-            constraints: BoxConstraints(
-              maxHeight: MediaQuery.of(context).size.height * 0.4,
-            ),
+          // Vehicle list — fills the draggable sheet and scrolls with its
+          // ScrollController, so dragging it drives the sheet's snap. The
+          // loading/empty states are still scrollable so the drag keeps working.
+          Expanded(
             child: bookingAsync.isLoading
-                ? const SizedBox(
-                    height: 120,
-                    child: Center(child: CircularProgressIndicator()),
+                ? ListView(
+                    controller: scrollController,
+                    children: const [
+                      SizedBox(
+                        height: 160,
+                        child: Center(child: CircularProgressIndicator()),
+                      ),
+                    ],
                   )
                 : estimations.isEmpty
-                ? SizedBox(
-                    height: 120,
-                    child: Center(child: Text(l10n.calculatingPrice)),
+                ? ListView(
+                    controller: scrollController,
+                    children: [
+                      SizedBox(
+                        height: 160,
+                        child: Center(child: Text(l10n.calculatingPrice)),
+                      ),
+                    ],
                   )
                 : ListView.builder(
-                    shrinkWrap: true,
+                    controller: scrollController,
                     padding: EdgeInsets.zero,
                     itemCount: estimations.length,
                     itemBuilder: (context, index) {

@@ -1,3 +1,4 @@
+import 'package:customer_app/core/constants/map_defaults.dart';
 import 'package:customer_app/core/constants/app_assets.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_icons.dart';
@@ -65,7 +66,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               initialCameraPosition: CameraPosition(
                 target:
                     currentLocation ??
-                    const LatLng(13.7563, 100.5018),
+                    MapDefaults.bangkokCenter,
                 zoom: 15.0,
               ),
               onMapCreated: (controller) => _mapController = controller,

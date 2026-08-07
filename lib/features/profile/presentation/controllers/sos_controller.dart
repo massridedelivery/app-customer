@@ -1,3 +1,4 @@
+import 'package:customer_app/core/constants/map_defaults.dart';
 import 'package:customer_app/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:customer_app/features/profile/data/datasources/sos_remote_data_source.dart';
 import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
@@ -14,8 +15,8 @@ Future<List<dynamic>> sosHistory(Ref ref) async {
 }
 
 /// Bangkok fallback used only when no location can be resolved at all.
-const _fallbackLat = 13.7563;
-const _fallbackLng = 100.5018;
+const _fallbackLat = MapDefaults.bangkokLat;
+const _fallbackLng = MapDefaults.bangkokLng;
 
 /// Handles triggering an emergency SOS. State is `isTriggering`.
 @riverpod
@@ -33,7 +34,7 @@ class SosController extends _$SosController {
 
       // Body shape per POST /api/customer/sos: flat lat/lng (not nested).
       await ref.read(sosRemoteDataSourceProvider).trigger({
-        if (jobId != null) 'job_id': jobId,
+        'job_id': ?jobId,
         'lat': lat,
         'lng': lng,
         'reason': 'ผู้ใช้กดปุ่ม SOS ฉุกเฉิน',

@@ -123,6 +123,17 @@ class HomeController extends _$HomeController {
     }
   }
 
+  /// Fired once when the user starts moving the map. Clear the resolved address
+  /// so the pin no longer matches a stale spot — this flips `tempAddress` to
+  /// null, which the selection view reads as "resolving" and greys out the
+  /// confirm button until [onCameraIdle] geocodes the new centre.
+  void onCameraMoveStarted() {
+    if (state.selectionMode == RideSelectionMode.none) return;
+    if (state.tempAddress != null) {
+      state = state.copyWith(tempAddress: null);
+    }
+  }
+
   void onCameraMove(CameraPosition position) {
     // Do NOT write state here: this fires every frame while panning (~60/s)
     // and a HomeState mutation rebuilds every watcher — including the map

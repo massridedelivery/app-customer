@@ -97,122 +97,138 @@ class _MessengerReviewScreenState
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            _buildSection(
+      body: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  Container(
-                    width: 56,
-                    height: 56,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: AppColors.primary.withValues(alpha: 0.1),
-                    ),
-                    child: const Icon(
-                      Icons.sports_motorsports,
-                      color: AppColors.primary,
-                      size: 28,
+                  _buildSection(
+                    child: Column(
+                      children: [
+                        Container(
+                          width: 56,
+                          height: 56,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: AppColors.primary.withValues(alpha: 0.1),
+                          ),
+                          child: const Icon(
+                            Icons.sports_motorsports,
+                            color: AppColors.primary,
+                            size: 28,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'คนขับของคุณเป็นอย่างไรบ้าง?',
+                          style: AppTypography.label2.copyWith(
+                            color: AppColors.semanticGrayNeutralFgHigh,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'ให้คะแนนการจัดส่งพัสดุครั้งนี้',
+                          style: AppTypography.caption5.copyWith(
+                            color: AppColors.semanticGrayNeutralFgLowOnWhite,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        _buildStarRow(),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 12),
-                  Text(
-                    'คนขับของคุณเป็นอย่างไรบ้าง?',
-                    style: AppTypography.label2.copyWith(
-                      color: AppColors.semanticGrayNeutralFgHigh,
+                  _buildSection(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('ความคิดเห็นเพิ่มเติม (ไม่บังคับ)',
+                            style: AppTypography.label2),
+                        const SizedBox(height: 12),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: AppColors.grey50,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: TextField(
+                            controller: _commentController,
+                            maxLines: 4,
+                            maxLength: 1000,
+                            decoration: InputDecoration(
+                              hintText: 'เล่าประสบการณ์การจัดส่งให้เราฟัง...',
+                              hintStyle: AppTypography.caption4.copyWith(
+                                color: AppColors.semanticGrayNeutralFgLowOnWhite,
+                              ),
+                              border: InputBorder.none,
+                              contentPadding: const EdgeInsets.all(14),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'ให้คะแนนการจัดส่งพัสดุครั้งนี้',
-                    style: AppTypography.caption5.copyWith(
-                      color: AppColors.semanticGrayNeutralFgLowOnWhite,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  _buildStarRow(),
                 ],
               ),
             ),
-            const SizedBox(height: 12),
-            _buildSection(
+          ),
+          // Pinned action bar at the bottom.
+          SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text('ความคิดเห็นเพิ่มเติม (ไม่บังคับ)',
-                      style: AppTypography.label2),
-                  const SizedBox(height: 12),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: AppColors.grey50,
-                      borderRadius: BorderRadius.circular(10),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: ElevatedButton(
+                      onPressed: isSubmitting ? null : _submit,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: AppColors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: isSubmitting
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: AppColors.white,
+                              ),
+                            )
+                          : Text(
+                              'ส่งรีวิว',
+                              style: AppTypography.label1.copyWith(
+                                color: AppColors.white,
+                              ),
+                            ),
                     ),
-                    child: TextField(
-                      controller: _commentController,
-                      maxLines: 4,
-                      maxLength: 1000,
-                      decoration: InputDecoration(
-                        hintText: 'เล่าประสบการณ์การจัดส่งให้เราฟัง...',
-                        hintStyle: AppTypography.caption4.copyWith(
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: TextButton(
+                      onPressed: () => context.go('/main'),
+                      child: Text(
+                        'ข้ามไปก่อน',
+                        style: AppTypography.label2.copyWith(
                           color: AppColors.semanticGrayNeutralFgLowOnWhite,
                         ),
-                        border: InputBorder.none,
-                        contentPadding: const EdgeInsets.all(14),
                       ),
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              height: 52,
-              child: ElevatedButton(
-                onPressed: isSubmitting ? null : _submit,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: AppColors.white,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: isSubmitting
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: AppColors.white,
-                        ),
-                      )
-                    : Text(
-                        'ส่งรีวิว',
-                        style: AppTypography.label1.copyWith(
-                          color: AppColors.white,
-                        ),
-                      ),
-              ),
-            ),
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              child: TextButton(
-                onPressed: () => context.go('/main'),
-                child: Text(
-                  'ข้ามไปก่อน',
-                  style: AppTypography.label2.copyWith(
-                    color: AppColors.semanticGrayNeutralFgLowOnWhite,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

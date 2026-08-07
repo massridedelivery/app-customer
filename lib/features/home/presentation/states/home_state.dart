@@ -22,6 +22,9 @@ abstract class HomeState with _$HomeState {
     String? foodAddress,
     String? tempAddress,
     LatLng? tempLocation,
+    // Bumped whenever a snap-to-road moves [mapCenter] off the user's raw pin;
+    // the selection screens watch it to animate the camera onto the road.
+    @Default(0) int mapSnapNonce,
     @Default([]) List<Place> savedPlaces,
     @Default([]) List<Place> recentPlaces,
     String? error,

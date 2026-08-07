@@ -1,4 +1,7 @@
+import 'dart:math' as math;
+
 import 'package:customer_app/core/constants/map_defaults.dart';
+import 'package:customer_app/core/services/google_roads_service.dart';
 import 'package:customer_app/core/utils/address_formatter.dart';
 import 'package:customer_app/features/home/domain/usecases/add_saved_place_usecase_impl.dart';
 import 'package:customer_app/features/home/domain/usecases/get_default_place_usecase_impl.dart';
@@ -24,6 +27,15 @@ const LatLng _kMapCameraFallback = MapDefaults.bangkokCenter;
 /// [HomeController.confirmSelection] blocks on it.
 const String _kFallbackPlaceName = 'Selected Location';
 
+/// Snap-to-road tuning (metres). Under [_kSnapMinMeters] the pin is already on a
+/// road — leave it. Over [_kSnapMaxMeters] the nearest road is too far (e.g. the
+/// middle of a park) — keep the user's point rather than yanking it across the
+/// map. Within [_kSnapSkipMeters] of the last snapped point we treat the pin as
+/// already snapped and skip another Roads API call.
+const double _kSnapMinMeters = 8;
+const double _kSnapMaxMeters = 120;
+const double _kSnapSkipMeters = 12;
+
 @Riverpod(keepAlive: true)
 class HomeController extends _$HomeController {
   final Location _location = Location();
@@ -35,6 +47,11 @@ class HomeController extends _$HomeController {
   /// Sequence number of the newest reverse-geocode lookup, so a slow response
   /// for an abandoned map position can't overwrite a newer one.
   int _geocodeLookup = 0;
+
+  /// The last road point we snapped to. When the camera settles again within
+  /// [_kSnapSkipMeters] of it — e.g. right after we animated there — we skip
+  /// re-calling the Roads API and re-animating.
+  LatLng? _lastSnapResult;
 
   @override
   HomeState build() {
@@ -116,25 +133,52 @@ class HomeController extends _$HomeController {
   Future<void> onCameraIdle() async {
     if (state.selectionMode == RideSelectionMode.none) return;
 
-    final latLng = _liveMapCenter ?? state.mapCenter;
-    if (latLng == null) return;
+    final raw = _liveMapCenter ?? state.mapCenter;
+    if (raw == null) return;
+
+    // Snap the pin onto the nearest drivable road so a point dropped inside a
+    // building/soi is reachable by the driver. Best-effort: on failure (incl.
+    // the Roads API being disabled on the iOS key) we keep the raw point. Skip
+    // when we're already sitting on a freshly snapped point, so animating there
+    // doesn't trigger a redundant Roads call / second animation.
+    LatLng target = raw;
+    bool movedBySnap = false;
+    final alreadySnapped =
+        _lastSnapResult != null &&
+        _metersBetween(raw, _lastSnapResult!) < _kSnapSkipMeters;
+    if (!alreadySnapped) {
+      final snapped = await ref
+          .read(googleRoadsServiceProvider)
+          .nearestRoad(raw);
+      if (snapped != null) {
+        final distance = _metersBetween(snapped, raw);
+        if (distance >= _kSnapMinMeters && distance <= _kSnapMaxMeters) {
+          target = snapped;
+          movedBySnap = true;
+        }
+        _lastSnapResult = target;
+      }
+    }
 
     // Publish the coordinate BEFORE the reverse geocode below. That lookup is a
     // network call and used to be the only thing that set tempLocation, so
     // confirming while it was in flight committed a null location over a
     // perfectly good pickup/dropoff. Clearing tempAddress marks the pair as
-    // "resolving" — [confirmSelection] refuses until the address lands.
+    // "resolving" — [confirmSelection] refuses until the address lands. Bumping
+    // mapSnapNonce tells the selection screen to animate the camera onto the
+    // snapped road point.
     final int lookup = ++_geocodeLookup;
     state = state.copyWith(
-      mapCenter: latLng,
-      tempLocation: latLng,
+      mapCenter: target,
+      tempLocation: target,
       tempAddress: null,
+      mapSnapNonce: movedBySnap ? state.mapSnapNonce + 1 : state.mapSnapNonce,
     );
 
     String address;
     try {
       List<geocoding.Placemark> placemarks = await geocoding
-          .placemarkFromCoordinates(latLng.latitude, latLng.longitude);
+          .placemarkFromCoordinates(target.latitude, target.longitude);
       if (placemarks.isEmpty) {
         address = _kFallbackPlaceName;
       } else {
@@ -156,6 +200,18 @@ class HomeController extends _$HomeController {
     if (lookup != _geocodeLookup) return;
 
     state = state.copyWith(tempAddress: address);
+  }
+
+  /// Approximate great-circle distance in metres (equirectangular projection —
+  /// accurate enough at the tens-of-metres scale we snap over).
+  static double _metersBetween(LatLng a, LatLng b) {
+    const double earthRadius = 6371000;
+    const double degToRad = math.pi / 180;
+    final double dLat = (b.latitude - a.latitude) * degToRad;
+    final double dLng = (b.longitude - a.longitude) * degToRad;
+    final double meanLat = ((a.latitude + b.latitude) / 2) * degToRad;
+    final double x = dLng * math.cos(meanLat);
+    return earthRadius * math.sqrt(dLat * dLat + x * x);
   }
 
   void startSelection({RideSelectionMode mode = RideSelectionMode.pickup}) {

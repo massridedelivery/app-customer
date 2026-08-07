@@ -21,6 +21,7 @@ class ProfileController extends _$ProfileController {
     return ProfileState(
       profile: AsyncData(profile),
       editName: profile.fullName,
+      phone: profile.phone,
       editAvatarUrl: profile.avatarUrl,
     );
   }
@@ -79,8 +80,10 @@ class ProfileController extends _$ProfileController {
 
     state = AsyncData(currentState.copyWith(isUpdating: true));
 
+    // PUT echoes back the full profile, so use its response directly instead of
+    // issuing a follow-up GET.
     final result = await AsyncValue.guard(() async {
-      await ref
+      return ref
           .read(profileRepositoryProvider)
           .updateProfile(
             fullName: fullName,
@@ -89,7 +92,6 @@ class ProfileController extends _$ProfileController {
             email: email,
             avatarUrl: currentState.editAvatarUrl,
           );
-      return ref.read(profileRepositoryProvider).getProfile();
     });
 
     state = AsyncData(

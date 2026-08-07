@@ -3,6 +3,7 @@ import 'package:customer_app/features/profile/data/datasources/profile_remote_da
 import 'package:customer_app/features/profile/data/models/profile_model.dart';
 import 'package:customer_app/features/profile/domain/entities/profile_entity.dart';
 import 'package:customer_app/features/profile/domain/repositories/profile_repository.dart';
+import 'package:customer_app/features/home/domain/models/place.dart';
 import 'package:dio/dio.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -22,32 +23,41 @@ class ProfileRepositoryImpl implements ProfileRepository {
   @override
   Future<ProfileEntity> getProfile() async {
     final data = await _remoteDataSource.getProfile();
-    final model = ProfileModel.fromJson(data);
-    return ProfileEntity(
-      userId: model.userId,
-      fullName: model.fullName,
-      phone: model.phone,
-      rating: model.rating,
-      avatarUrl: model.avatarUrl,
-    );
+    return _toEntity(ProfileModel.fromJson(data));
   }
 
   @override
-  Future<void> updateProfile({
+  Future<ProfileEntity> updateProfile({
     required String fullName,
     String? emergencyContact,
     Map<String, dynamic>? preferences,
     String? email,
     String? avatarUrl,
   }) async {
-    return _remoteDataSource.updateProfile(
+    final data = await _remoteDataSource.updateProfile(
       fullName: fullName,
       emergencyContact: emergencyContact,
       preferences: preferences,
       email: email,
       avatarUrl: avatarUrl,
     );
+    return _toEntity(ProfileModel.fromJson(data));
   }
+
+  ProfileEntity _toEntity(ProfileModel model) => ProfileEntity(
+    userId: model.userId,
+    fullName: model.fullName,
+    phone: model.phone,
+    rating: model.rating,
+    avatarUrl: model.avatarUrl,
+    email: model.email,
+    emergencyContact: model.emergencyContact,
+    preferences: model.preferences,
+    totalTrips: model.totalTrips,
+    createdAt: model.createdAt,
+    joinedDateThai: model.joinedDateThai,
+    savedPlaces: model.savedPlaces ?? const <Place>[],
+  );
 
   @override
   Future<void> logout() async {

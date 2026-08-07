@@ -410,6 +410,9 @@ class _MessengerBookingScreenState
           TextFormField(
             controller: _weightController,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            // Show the "over the size limit" error live as they type, not only
+            // on submit.
+            autovalidateMode: AutovalidateMode.onUserInteraction,
             decoration: _inputDecoration(
               label: 'น้ำหนัก (กก.) *',
               hint: tier != null ? 'ไม่เกิน ${tier.maxWeightKg} กก.' : null,
@@ -512,18 +515,26 @@ class _MessengerBookingScreenState
           TextFormField(
             controller: _recipientNameController,
             maxLength: 200,
-            decoration: _inputDecoration(label: 'ชื่อผู้รับ', counter: false),
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            decoration: _inputDecoration(label: 'ชื่อผู้รับ *', counter: false),
+            validator: (value) =>
+                (value == null || value.trim().isEmpty)
+                ? 'กรุณาระบุชื่อผู้รับ'
+                : null,
           ),
           const SizedBox(height: 8),
           TextFormField(
             controller: _recipientPhoneController,
             keyboardType: TextInputType.phone,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
             decoration: _inputDecoration(
-              label: 'เบอร์โทรผู้รับ',
+              label: 'เบอร์โทรผู้รับ *',
               hint: 'เช่น 0812345678',
             ),
             validator: (value) {
-              if (value == null || value.trim().isEmpty) return null;
+              if (value == null || value.trim().isEmpty) {
+                return 'กรุณาระบุเบอร์โทรผู้รับ';
+              }
               if (!_thaiPhoneRegex.hasMatch(value.trim())) {
                 return 'รูปแบบเบอร์โทรไม่ถูกต้อง';
               }

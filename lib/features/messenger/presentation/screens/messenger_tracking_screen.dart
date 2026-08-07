@@ -556,13 +556,13 @@ class _MessengerTrackingScreenState
           ),
           const SizedBox(height: 8),
           _infoRow(
-            Icons.location_on,
+            Icons.circle,
             AppColors.foundationGreen500,
             order.pickupAddress.isNotEmpty ? order.pickupAddress : 'จุดรับพัสดุ',
           ),
           const SizedBox(height: 8),
           _infoRow(
-            Icons.location_on,
+            Icons.circle,
             AppColors.foundationRed700,
             order.dropoffAddress.isNotEmpty
                 ? order.dropoffAddress

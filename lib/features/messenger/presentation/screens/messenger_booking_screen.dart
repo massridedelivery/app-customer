@@ -166,7 +166,7 @@ class _MessengerBookingScreenState
       child: Column(
         children: [
           _locationRow(
-            icon: Icons.location_on,
+            icon: Icons.circle,
             iconColor: AppColors.foundationGreen500,
             label: 'จุดรับพัสดุ',
             address: homeState.pickupAddress ?? 'เลือกจุดรับพัสดุ',
@@ -179,7 +179,7 @@ class _MessengerBookingScreenState
           ),
           const Divider(height: 16, color: AppColors.foundationGrayscale200),
           _locationRow(
-            icon: Icons.location_on,
+            icon: Icons.circle,
             iconColor: AppColors.foundationRed700,
             label: 'จุดส่งพัสดุ',
             address: homeState.dropoffAddress ?? 'เลือกจุดส่งพัสดุ',

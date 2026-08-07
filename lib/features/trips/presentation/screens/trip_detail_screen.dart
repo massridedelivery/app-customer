@@ -1,7 +1,5 @@
 import 'package:customer_app/core/constants/map_defaults.dart';
-import 'package:customer_app/core/constants/app_assets.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
-import 'package:customer_app/core/constants/app_icons.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/utils/map_marker_providers.dart';
 import 'package:customer_app/core/utils/thai_date_formatter.dart';
@@ -470,15 +468,15 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
           ),
           const SizedBox(height: 20),
           _buildLocationRow(
-            icon: AppAssets.icLocationFill,
-            color: AppColors.foundationRed700,
+            icon: Icons.circle,
+            color: AppColors.foundationGreen500,
             location: pickupLocation,
             time: pickupTime,
             isFirst: true,
           ),
           _buildLocationRow(
-            icon: AppAssets.icLocationFill,
-            color: AppColors.foundationGreen600,
+            icon: Icons.circle,
+            color: AppColors.foundationRed700,
             location: dropoffLocation,
             time: dropoffTime,
             isLast: true,
@@ -674,7 +672,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
   }
 
   Widget _buildLocationRow({
-    required String icon,
+    required IconData icon,
     required Color color,
     required String location,
     required String time,
@@ -687,7 +685,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
         children: [
           Column(
             children: [
-              AppIcons.asset(icon, width: 20, height: 20, color: color),
+              Icon(icon, size: 20, color: color),
               if (!isLast)
                 Expanded(
                   child: Container(

@@ -68,67 +68,82 @@ class _AddCardScreenState extends ConsumerState<AddCardScreen> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('เพิ่มบัตรใหม่')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            TextField(
-              controller: _nameController,
-              decoration: const InputDecoration(
-                labelText: 'ชื่อบนบัตร',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _cardNumberController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'หมายเลขบัตร',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _expiryController,
-                    keyboardType: TextInputType.datetime,
+      body: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  TextField(
+                    controller: _nameController,
                     decoration: const InputDecoration(
-                      labelText: 'MM/YY',
+                      labelText: 'ชื่อบนบัตร',
                       border: OutlineInputBorder(),
                     ),
                   ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: TextField(
-                    controller: _cvvController,
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: _cardNumberController,
                     keyboardType: TextInputType.number,
-                    obscureText: true,
                     decoration: const InputDecoration(
-                      labelText: 'เลข CVV',
+                      labelText: 'หมายเลขบัตร',
                       border: OutlineInputBorder(),
                     ),
                   ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _expiryController,
+                          keyboardType: TextInputType.datetime,
+                          decoration: const InputDecoration(
+                            labelText: 'MM/YY',
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: TextField(
+                          controller: _cvvController,
+                          keyboardType: TextInputType.number,
+                          obscureText: true,
+                          decoration: const InputDecoration(
+                            labelText: 'เลข CVV',
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+          // Pinned to the bottom.
+          SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: paymentState.isLoading ? null : _onSavePressed,
+                  child: paymentState.isLoading
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Text('บันทึกบัตร'),
                 ),
-              ],
+              ),
             ),
-            const SizedBox(height: 32),
-            ElevatedButton(
-              onPressed: paymentState.isLoading ? null : _onSavePressed,
-              child: paymentState.isLoading
-                  ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Text('บันทึกบัตร'),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

@@ -163,12 +163,18 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
                 _buildPaymentCard(state),
                 _buildRatingCard(),
                 const SizedBox(height: 24),
-                _buildActionButtons(),
-                const SizedBox(height: 48),
               ],
             ),
           ),
         ],
+      ),
+      // Pinned action bar at the bottom.
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
+          child: _buildActionButtons(),
+        ),
       ),
     );
   }

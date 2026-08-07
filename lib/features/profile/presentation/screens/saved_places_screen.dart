@@ -214,47 +214,61 @@ class _EmptyPlaces extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.location_off_rounded,
-              size: 72,
-              color: Color(0xFFCFD1D9),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'ยังไม่มีที่อยู่ที่บันทึก',
-              style: AppTypography.heading4.copyWith(
-                color: AppColors.textSecondary,
+    return Column(
+      children: [
+        Expanded(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.location_off_rounded,
+                    size: 72,
+                    color: Color(0xFFCFD1D9),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'ยังไม่มีที่อยู่ที่บันทึก',
+                    style: AppTypography.heading4.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'เพิ่มที่อยู่เพื่อส่งได้รวดเร็วขึ้น',
+                    style: AppTypography.body2.copyWith(
+                      color: AppColors.textDisabled,
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 8),
-            Text(
-              'เพิ่มที่อยู่เพื่อส่งได้รวดเร็วขึ้น',
-              style: AppTypography.body2.copyWith(
-                color: AppColors.textDisabled,
-              ),
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton.icon(
-              onPressed: onAdd,
-              icon: const Icon(Icons.add),
-              label: const Text('เพิ่มที่อยู่', style: AppTypography.label2),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        // Pinned to the bottom.
+        SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+            child: Center(
+              child: ElevatedButton.icon(
+                onPressed: onAdd,
+                icon: const Icon(Icons.add),
+                label: const Text('เพิ่มที่อยู่', style: AppTypography.label2),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
               ),
             ),
-          ],
+          ),
         ),
-      ),
+      ],
     );
   }
 }

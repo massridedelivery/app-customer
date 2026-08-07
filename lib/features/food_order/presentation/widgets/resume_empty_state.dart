@@ -8,39 +8,52 @@ class ResumeEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
+    return Column(
+      children: [
+        Expanded(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(32.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 120,
+                    height: 120,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.no_food_outlined,
+                      size: 64,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    'ไม่มีคำสั่งซื้อที่กำลังดำเนินการ',
+                    style: AppTypography.heading4,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'คุณไม่มีรายการอาหารที่กำลังจัดส่งในขณะนี้\nสั่งอาหารจานอร่อยของคุณได้เลย!',
+                    style:
+                        AppTypography.body2.copyWith(color: AppColors.textSecondary),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ),
-              child: const Icon(
-                Icons.no_food_outlined,
-                size: 64,
-                color: AppColors.primary,
-              ),
             ),
-            const SizedBox(height: 24),
-            Text(
-              'ไม่มีคำสั่งซื้อที่กำลังดำเนินการ',
-              style: AppTypography.heading4,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'คุณไม่มีรายการอาหารที่กำลังจัดส่งในขณะนี้\nสั่งอาหารจานอร่อยของคุณได้เลย!',
-              style: AppTypography.body2.copyWith(color: AppColors.textSecondary),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 32),
-            ElevatedButton(
+          ),
+        ),
+        // Pinned to the bottom.
+        SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+            child: ElevatedButton(
               onPressed: () => context.go('/food-delivery'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
@@ -56,9 +69,9 @@ class ResumeEmptyState extends StatelessWidget {
                 style: AppTypography.heading5.copyWith(color: Colors.white),
               ),
             ),
-          ],
+          ),
         ),
-      ),
+      ],
     );
   }
 }

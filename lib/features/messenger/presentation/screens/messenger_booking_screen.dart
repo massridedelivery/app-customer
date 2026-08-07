@@ -7,6 +7,7 @@ import 'package:customer_app/features/home/presentation/states/home_state.dart';
 import 'package:customer_app/features/messenger/domain/models/messenger_vehicle_type.dart';
 import 'package:customer_app/features/messenger/presentation/controllers/messenger_booking_controller.dart';
 import 'package:customer_app/features/messenger/presentation/states/messenger_booking_state.dart';
+import 'package:customer_app/features/messenger/presentation/screens/messenger_coupon_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -639,22 +640,60 @@ class _MessengerBookingScreenState
             ),
           ],
           const SizedBox(height: 12),
-          TextFormField(
-            controller: _promoController,
-            maxLength: 40,
-            decoration: _inputDecoration(
-              label: 'โค้ดส่วนลด (ไม่บังคับ)',
-              counter: false,
-            ),
-            onFieldSubmitted: (value) => ref
-                .read(messengerBookingControllerProvider.notifier)
-                .setPromoCode(value.trim()),
-            onTapOutside: (_) {
-              FocusManager.instance.primaryFocus?.unfocus();
-              ref
-                  .read(messengerBookingControllerProvider.notifier)
-                  .setPromoCode(_promoController.text.trim());
+          // Tap to pick a discount code (or type one) on the coupon screen.
+          InkWell(
+            borderRadius: BorderRadius.circular(12),
+            onTap: () async {
+              final current = ref
+                  .read(messengerBookingControllerProvider)
+                  .promoCode;
+              final code = await Navigator.of(context).push<String>(
+                MaterialPageRoute(
+                  builder: (_) =>
+                      MessengerCouponScreen(initialCode: current),
+                ),
+              );
+              if (code != null) {
+                setState(() => _promoController.text = code);
+                ref
+                    .read(messengerBookingControllerProvider.notifier)
+                    .setPromoCode(code.trim());
+              }
             },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              decoration: BoxDecoration(
+                color: AppColors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.foundationGrayscale300),
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.local_offer_outlined,
+                    color: AppColors.primary,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      _promoController.text.isNotEmpty
+                          ? _promoController.text
+                          : 'เลือกโค้ดส่วนลด (ไม่บังคับ)',
+                      style: AppTypography.body2.copyWith(
+                        color: _promoController.text.isNotEmpty
+                            ? AppColors.textPrimary
+                            : AppColors.textSecondary,
+                      ),
+                    ),
+                  ),
+                  const Icon(
+                    Icons.chevron_right,
+                    color: AppColors.foundationGrayscale400,
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),

@@ -127,59 +127,114 @@ class _MessengerTrackingScreenState
     });
 
     return Scaffold(
-      backgroundColor: AppColors.foundationGrayscale100,
-      appBar: AppBar(
-        backgroundColor: AppColors.white,
-        elevation: 0,
-        centerTitle: true,
-        title: Text(
-          'ติดตามพัสดุ',
-          style: AppTypography.heading4.copyWith(
-            fontWeight: FontWeight.bold,
-            color: AppColors.semanticGrayNeutralFgHigh,
-          ),
-        ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.black),
-          onPressed: () {
-            if (context.canPop()) {
-              context.pop();
-            } else {
-              context.go('/main');
-            }
-          },
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh, color: AppColors.black),
-            onPressed: () => ref
-                .read(messengerTrackingControllerProvider.notifier)
-                .refresh(),
-          ),
-        ],
-      ),
+      backgroundColor: AppColors.white,
       body: order == null
-          ? _buildLoadingOrError(state.isLoading, state.error)
+          ? SafeArea(child: _buildLoadingOrError(state.isLoading, state.error))
           : Stack(
               children: [
-                Column(
-                  children: [
-                    SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.32,
-                      child: _buildMap(order),
-                    ),
-                    Expanded(child: _buildDetailPanel(order)),
-                  ],
+                // Full-bleed map with a draggable sheet over it (ride-style).
+                Positioned.fill(child: _buildMap(order)),
+                DraggableScrollableSheet(
+                  initialChildSize: 0.5,
+                  minChildSize: 0.5,
+                  maxChildSize: 0.85,
+                  snap: true,
+                  snapSizes: const [0.5, 0.85],
+                  builder: (context, scrollController) {
+                    return Container(
+                      decoration: _sheetDecoration,
+                      child: ListView(
+                        controller: scrollController,
+                        padding: const EdgeInsets.only(bottom: 24),
+                        children: [
+                          _grabHandle(),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: _buildDetailPanel(order),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+                // Floating back / refresh controls over the map.
+                Positioned(
+                  top: MediaQuery.of(context).padding.top + 8,
+                  left: 12,
+                  right: 12,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _circleButton(Icons.arrow_back, () {
+                        if (context.canPop()) {
+                          context.pop();
+                        } else {
+                          context.go('/main');
+                        }
+                      }),
+                      _circleButton(
+                        Icons.refresh,
+                        () => ref
+                            .read(messengerTrackingControllerProvider.notifier)
+                            .refresh(),
+                      ),
+                    ],
+                  ),
                 ),
                 if (state.isCancelling)
-                  Container(
-                    color: Colors.black.withValues(alpha: 0.3),
-                    child: const Center(
-                      child: CircularProgressIndicator(color: AppColors.primary),
+                  Positioned.fill(
+                    child: Container(
+                      color: Colors.black.withValues(alpha: 0.3),
+                      child: const Center(
+                        child: CircularProgressIndicator(
+                          color: AppColors.primary,
+                        ),
+                      ),
                     ),
                   ),
               ],
             ),
+    );
+  }
+
+  static const BoxDecoration _sheetDecoration = BoxDecoration(
+    color: AppColors.white,
+    borderRadius: BorderRadius.only(
+      topLeft: Radius.circular(24),
+      topRight: Radius.circular(24),
+    ),
+    boxShadow: [
+      BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(0, -2)),
+    ],
+  );
+
+  Widget _grabHandle() {
+    return Center(
+      child: Container(
+        margin: const EdgeInsets.only(top: 10, bottom: 8),
+        width: 40,
+        height: 4,
+        decoration: BoxDecoration(
+          color: Colors.grey.shade300,
+          borderRadius: BorderRadius.circular(2),
+        ),
+      ),
+    );
+  }
+
+  Widget _circleButton(IconData icon, VoidCallback onTap) {
+    return Material(
+      color: AppColors.white,
+      shape: const CircleBorder(),
+      elevation: 2,
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(8),
+          child: Icon(icon, color: AppColors.black, size: 22),
+        ),
+      ),
     );
   }
 
@@ -228,6 +283,11 @@ class _MessengerTrackingScreenState
 
     return GoogleMap(
       initialCameraPosition: CameraPosition(target: pickup, zoom: 13),
+      // Keep the fitted route in the visible top half, above the sheet.
+      padding: EdgeInsets.only(
+        top: MediaQuery.of(context).padding.top + 56,
+        bottom: MediaQuery.of(context).size.height * 0.5,
+      ),
       onMapCreated: (controller) {
         _mapController = controller;
         _fitCamera(order);
@@ -258,11 +318,9 @@ class _MessengerTrackingScreenState
   }
 
   Widget _buildDetailPanel(MessengerOrder order) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
           _buildStatusCard(order),
           const SizedBox(height: 12),
           _buildPackageCard(order),
@@ -334,9 +392,7 @@ class _MessengerTrackingScreenState
               ),
             ),
           ],
-          const SizedBox(height: 24),
         ],
-      ),
     );
   }
 

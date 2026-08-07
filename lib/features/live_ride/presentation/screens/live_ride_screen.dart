@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 enum RideUIState { finding, confirming, pickupArrived, onTrip }
 
@@ -636,6 +637,21 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
     );
   }
 
+  /// Opens the phone dialer with the driver's number (free, uses the mobile
+  /// network). No masked/VoIP layer yet — the rider sees the real number.
+  Future<void> _callDriver(String? phone) async {
+    final number = (phone ?? '').trim();
+    if (number.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('ไม่พบเบอร์โทรของคนขับ')),
+        );
+      }
+      return;
+    }
+    await launchUrl(Uri(scheme: 'tel', path: number));
+  }
+
   Widget _buildRiderSection(dynamic liveState) {
     final avatarUrl = liveState.driverProfile?.driverInfo.avatarUrl;
     final hasAvatar = avatarUrl != null && avatarUrl.isNotEmpty;
@@ -729,7 +745,8 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
               const SizedBox(width: 12),
               Expanded(
                 child: OutlinedButton.icon(
-                  onPressed: () {},
+                  onPressed: () =>
+                      _callDriver(liveState.driverProfile?.driverInfo.phone),
                   icon: const Icon(Icons.phone_outlined, size: 18),
                   label: const Text('โทร'),
                   style: OutlinedButton.styleFrom(

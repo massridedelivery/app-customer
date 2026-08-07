@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:customer_app/core/constants/feature_flags.dart';
 import 'package:customer_app/core/constants/map_defaults.dart';
 import 'package:customer_app/core/services/google_roads_service.dart';
 import 'package:customer_app/core/utils/address_formatter.dart';
@@ -146,7 +147,7 @@ class HomeController extends _$HomeController {
     final alreadySnapped =
         _lastSnapResult != null &&
         _metersBetween(raw, _lastSnapResult!) < _kSnapSkipMeters;
-    if (!alreadySnapped) {
+    if (FeatureFlags.snapPickupDropoffToRoad && !alreadySnapped) {
       final snapped = await ref
           .read(googleRoadsServiceProvider)
           .nearestRoad(raw);

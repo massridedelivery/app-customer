@@ -45,4 +45,13 @@ abstract class FeatureFlags {
   /// Decorative hardcoded promo banners on the food-delivery screen
   /// (quick-promos band, floating bottom banner). No provider behind them.
   static const bool foodPromoBanners = false;
+
+  // ─── Maps ────────────────────────────────────────────────────────────────
+
+  /// Snap the pickup/dropoff pin onto the nearest road (Google Roads API) when
+  /// the map settles. Off by default: the Roads API is a paid API and is not
+  /// enabled on the iOS Places key yet (returns 403), so while off we make no
+  /// Roads calls at all. Flip on once Roads API is enabled on the iOS key and
+  /// the billing is acceptable.
+  static const bool snapPickupDropoffToRoad = false;
 }

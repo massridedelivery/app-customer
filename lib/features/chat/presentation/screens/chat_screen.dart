@@ -71,14 +71,26 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final chatState = ref.watch(chatControllerProvider((id: widget.jobId, kind: ChatKind.ride)));
     // Only the two fields the header needs — a whole-state watch rebuilt the
     // entire chat on every ~2s driver-location socket tick.
-    final (rideJobId, rideDriverName) = ref.watch(
-      liveRideControllerProvider.select((s) => (s.jobId, s.driverName)),
-    );
+    final (rideJobId, rideDriverName, rideVehicleType, rideVehiclePlate) = ref
+        .watch(
+          liveRideControllerProvider.select(
+            (s) => (s.jobId, s.driverName, s.vehicleType, s.vehiclePlate),
+          ),
+        );
 
-    // Get driver name from live ride controller if active jobId matches, else default
-    final driverName = (rideJobId == widget.jobId)
-        ? (rideDriverName ?? 'Driver')
-        : 'Driver';
+    final isActiveJob = rideJobId == widget.jobId;
+    final driverName = isActiveJob ? (rideDriverName ?? 'คนขับ') : 'คนขับ';
+    // Header subtitle: car model + plate (e.g. "Honda City • กภ1234"), falling
+    // back to a generic label until the driver details arrive.
+    final vehicleInfo = isActiveJob
+        ? [
+            rideVehicleType,
+            rideVehiclePlate,
+          ].where((e) => (e ?? '').trim().isNotEmpty).join('  •  ')
+        : '';
+    final headerSubtitle = vehicleInfo.isNotEmpty
+        ? vehicleInfo
+        : 'แชทระหว่างเดินทาง';
 
     // Automatically scroll to bottom when new messages arrive
     ref.listen(chatControllerProvider((id: widget.jobId, kind: ChatKind.ride)), (previous, next) {
@@ -110,7 +122,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     ),
                   ),
                   Text(
-                    'Active Trip Chat',
+                    headerSubtitle,
                     style: AppTypography.caption5.copyWith(
                       color: AppColors.white.withValues(alpha: 0.8),
                     ),
@@ -146,7 +158,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Failed to load messages',
+                      'โหลดข้อความไม่สำเร็จ',
                       style: AppTypography.label2.copyWith(
                         color: AppColors.error,
                       ),
@@ -158,7 +170,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                             .read(chatControllerProvider((id: widget.jobId, kind: ChatKind.ride)).notifier)
                             .fetchChatHistory();
                       },
-                      child: const Text('Retry'),
+                      child: const Text('ลองใหม่'),
                     ),
                   ],
                 ),
@@ -230,7 +242,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     child: TextField(
                       controller: _controller,
                       decoration: InputDecoration(
-                        hintText: 'Type a message...',
+                        hintText: 'พิมพ์ข้อความ...',
                         hintStyle: AppTypography.caption4.copyWith(
                           color: AppColors.semanticGrayNeutralFgLowOnWhite,
                         ),

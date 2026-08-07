@@ -433,111 +433,113 @@ class _MessengerTrackingScreenState
 
     final int activeStep = _statusStep(order.status);
 
+    // Ride-style header: green title + supporting subtitle, then an icon
+    // timeline with an animated current segment.
     return _card(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: order.isDelivered
-                      ? AppColors.foundationGreen500.withValues(alpha: 0.1)
-                      : AppColors.primary.withValues(alpha: 0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  order.isDelivered
-                      ? Icons.check_circle
-                      : Icons.local_shipping,
-                  color: order.isDelivered
-                      ? AppColors.foundationGreen500
-                      : AppColors.primary,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      _statusText(order.status),
-                      style: AppTypography.heading5.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: order.isDelivered
-                            ? AppColors.foundationGreen500
-                            : AppColors.primary,
-                      ),
-                    ),
-                    if (order.hasDriver) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        'คนขับ #${order.driverId.substring(0, order.driverId.length.clamp(0, 6))}',
-                        style: AppTypography.caption4.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            ],
+          Text(
+            _statusText(order.status),
+            style: AppTypography.heading4.copyWith(
+              color: AppColors.foundationGreen700,
+            ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 4),
+          Text(
+            _statusSubtitle(order.status),
+            style: AppTypography.caption4.copyWith(
+              color: AppColors.semanticGrayNeutralFgHigh,
+            ),
+          ),
+          if (order.hasDriver) ...[
+            const SizedBox(height: 4),
+            Text(
+              'คนขับ #${order.driverId.substring(0, order.driverId.length.clamp(0, 6))}',
+              style: AppTypography.caption4.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
+          const SizedBox(height: 18),
           _buildTimeline(activeStep),
         ],
       ),
     );
   }
 
+  String _statusSubtitle(String status) {
+    switch (status.toUpperCase()) {
+      case 'PENDING':
+        return 'กำลังหาคนขับที่อยู่ใกล้คุณ...';
+      case 'ACCEPTED':
+        return 'คนขับกำลังเดินทางไปรับพัสดุ';
+      case 'ARRIVED_AT_PICKUP':
+        return 'คนขับถึงจุดรับพัสดุแล้ว';
+      case 'PICKED_UP':
+        return 'กำลังนำส่งพัสดุถึงปลายทาง';
+      case 'DELIVERED':
+        return 'ส่งพัสดุถึงปลายทางเรียบร้อย';
+      default:
+        return 'กำลังดำเนินการ...';
+    }
+  }
+
+  // Ride-style icon timeline: find driver → pickup → in transit → delivered,
+  // with the active segment animating (mirrors live_ride_screen).
   Widget _buildTimeline(int activeStep) {
-    const labels = ['รอคนขับ', 'รับงานแล้ว', 'ถึงจุดรับ', 'กำลังส่ง', 'สำเร็จ'];
     return Row(
       children: [
-        for (int i = 0; i < labels.length; i++) ...[
-          if (i > 0)
-            Expanded(
-              child: Container(
-                height: 2,
-                margin: const EdgeInsets.only(bottom: 18),
-                color: activeStep >= i
-                    ? AppColors.foundationGreen500
-                    : AppColors.foundationGrayscale200,
-              ),
-            ),
-          _timelineStep(labels[i], activeStep >= i),
-        ],
+        _tlIcon(Icons.person_search, activeStep >= 0, isBox: true),
+        _tlLine(done: activeStep >= 1, animating: activeStep == 0),
+        _tlIcon(Icons.two_wheeler, activeStep >= 1),
+        _tlLine(done: activeStep >= 3, animating: activeStep == 1 || activeStep == 2),
+        _tlIcon(Icons.inventory_2, activeStep >= 3),
+        _tlLine(done: activeStep >= 4, animating: activeStep == 3),
+        _tlIcon(Icons.location_on, activeStep >= 4),
       ],
     );
   }
 
-  Widget _timelineStep(String title, bool isActive) {
+  Widget _tlIcon(IconData icon, bool isActive, {bool isBox = false}) {
     final color = isActive
-        ? AppColors.foundationGreen500
-        : AppColors.foundationGrayscale300;
-    return Column(
-      children: [
-        Container(
-          width: 14,
-          height: 14,
-          decoration: BoxDecoration(
-            color: isActive ? color : AppColors.white,
-            border: Border.all(color: color, width: isActive ? 0 : 2),
-            shape: BoxShape.circle,
-          ),
+        ? AppColors.foundationGreen600
+        : Colors.grey.shade400;
+    if (isBox) {
+      return Container(
+        width: 24,
+        height: 24,
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(6),
         ),
-        const SizedBox(height: 4),
-        Text(
-          title,
-          style: AppTypography.support2.copyWith(
-            color: isActive
-                ? AppColors.textPrimary
-                : AppColors.foundationGrayscale500,
-            fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-          ),
+        child: Icon(icon, size: 14, color: Colors.white),
+      );
+    }
+    return Icon(icon, size: 24, color: color);
+  }
+
+  Widget _tlLine({required bool done, bool animating = false}) {
+    return Expanded(
+      child: Container(
+        height: 3,
+        margin: const EdgeInsets.symmetric(horizontal: 4),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(2),
+          child: animating
+              ? LinearProgressIndicator(
+                  backgroundColor: Colors.grey.shade200,
+                  valueColor: const AlwaysStoppedAnimation<Color>(
+                    AppColors.foundationGreen600,
+                  ),
+                )
+              : Container(
+                  color: done
+                      ? AppColors.foundationGreen600
+                      : Colors.grey.shade200,
+                ),
         ),
-      ],
+      ),
     );
   }
 

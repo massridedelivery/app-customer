@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:customer_app/core/constants/app_assets.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
+import 'package:customer_app/core/constants/app_icons.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/features/food_order/presentation/controllers/live_food_tracking_controller.dart';
 
@@ -73,7 +75,8 @@ class LiveFoodTrackingLocationDetails extends ConsumerWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(Icons.circle, color: AppColors.foundationRed700, size: 20),
+              AppIcons.asset(AppAssets.icLocationFill,
+                  color: AppColors.foundationRed700, width: 20, height: 20),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(

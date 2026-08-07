@@ -1,4 +1,6 @@
+import 'package:customer_app/core/constants/app_assets.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
+import 'package:customer_app/core/constants/app_icons.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/features/messenger/domain/models/messenger_order.dart';
 import 'package:customer_app/features/messenger/presentation/controllers/messenger_tracking_controller.dart';
@@ -556,17 +558,19 @@ class _MessengerTrackingScreenState
           ),
           const SizedBox(height: 8),
           _infoRow(
-            Icons.circle,
+            Icons.location_on,
             AppColors.foundationGreen500,
             order.pickupAddress.isNotEmpty ? order.pickupAddress : 'จุดรับพัสดุ',
+            asset: true,
           ),
           const SizedBox(height: 8),
           _infoRow(
-            Icons.circle,
+            Icons.location_on,
             AppColors.foundationRed700,
             order.dropoffAddress.isNotEmpty
                 ? order.dropoffAddress
                 : 'จุดส่งพัสดุ',
+            asset: true,
           ),
           const Divider(height: 20, color: AppColors.foundationGrayscale200),
           Wrap(
@@ -662,11 +666,15 @@ class _MessengerTrackingScreenState
     );
   }
 
-  Widget _infoRow(IconData icon, Color color, String text) {
+  Widget _infoRow(IconData icon, Color color, String text,
+      {bool asset = false}) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 18, color: color),
+        asset
+            ? AppIcons.asset(AppAssets.icLocationFill,
+                color: color, width: 20, height: 20)
+            : Icon(icon, size: 18, color: color),
         const SizedBox(width: 8),
         Expanded(
           child: Text(

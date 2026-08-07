@@ -1,4 +1,6 @@
+import 'package:customer_app/core/constants/app_assets.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
+import 'package:customer_app/core/constants/app_icons.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/widgets/app_filter_chip.dart';
 import 'package:customer_app/core/constants/feature_flags.dart';
@@ -166,7 +168,6 @@ class _MessengerBookingScreenState
       child: Column(
         children: [
           _locationRow(
-            icon: Icons.circle,
             iconColor: AppColors.foundationGreen500,
             label: 'จุดรับพัสดุ',
             address: homeState.pickupAddress ?? 'เลือกจุดรับพัสดุ',
@@ -179,7 +180,6 @@ class _MessengerBookingScreenState
           ),
           const Divider(height: 16, color: AppColors.foundationGrayscale200),
           _locationRow(
-            icon: Icons.circle,
             iconColor: AppColors.foundationRed700,
             label: 'จุดส่งพัสดุ',
             address: homeState.dropoffAddress ?? 'เลือกจุดส่งพัสดุ',
@@ -197,7 +197,6 @@ class _MessengerBookingScreenState
   }
 
   Widget _locationRow({
-    required IconData icon,
     required Color iconColor,
     required String label,
     required String address,
@@ -210,7 +209,8 @@ class _MessengerBookingScreenState
         padding: const EdgeInsets.symmetric(vertical: 4),
         child: Row(
           children: [
-            Icon(icon, color: iconColor, size: 20),
+            AppIcons.asset(AppAssets.icLocationFill,
+                color: iconColor, width: 20, height: 20),
             const SizedBox(width: 12),
             Expanded(
               child: Column(

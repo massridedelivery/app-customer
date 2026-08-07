@@ -6,6 +6,7 @@ import 'package:customer_app/core/constants/feature_flags.dart';
 import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
 import 'package:customer_app/features/home/presentation/states/home_state.dart';
 import 'package:customer_app/features/home/presentation/widgets/app_drawer.dart';
+import 'package:customer_app/features/home/presentation/widgets/home_promo_banner.dart';
 import 'package:customer_app/features/active_orders/presentation/widgets/active_orders_banner.dart';
 import 'package:flutter/material.dart';
 import 'package:customer_app/core/widgets/app_network_image.dart';
@@ -97,6 +98,10 @@ class _ServiceSelectionScreenState
                     children: [
                       const ActiveOrdersBanner(),
                       _buildServiceGrid(context),
+                      const SizedBox(height: 20),
+                      // Real promotions from GET /api/customer/promo/list —
+                      // hides itself when there are none.
+                      const HomePromoBanner(),
                       // Hardcoded promo/restaurant sections with fake ids — see
                       // FeatureFlags.foodHomePromoSections. Hidden until wired
                       // to the discovery feed.

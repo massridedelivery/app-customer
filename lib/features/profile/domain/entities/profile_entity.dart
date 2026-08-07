@@ -9,5 +9,6 @@ abstract class ProfileEntity with _$ProfileEntity {
     required String fullName,
     required String phone,
     required double rating,
+    String? avatarUrl,
   }) = _ProfileEntity;
 }

@@ -11,6 +11,11 @@ abstract class ProfileState with _$ProfileState {
     @Default('') String editName,
     @Default('') String phone,
     @Default(false) bool isUpdating,
+    // Current avatar URL being edited (from the profile, or a freshly uploaded
+    // one). [pickedAvatarPath] is a just-picked local file shown as a preview
+    // before/without a successful upload.
+    String? editAvatarUrl,
+    String? pickedAvatarPath,
     String? error,
   }) = _ProfileState;
 }

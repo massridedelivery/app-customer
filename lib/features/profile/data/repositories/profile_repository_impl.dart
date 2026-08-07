@@ -28,6 +28,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
       fullName: model.fullName,
       phone: model.phone,
       rating: model.rating,
+      avatarUrl: model.avatarUrl,
     );
   }
 
@@ -37,12 +38,14 @@ class ProfileRepositoryImpl implements ProfileRepository {
     String? emergencyContact,
     Map<String, dynamic>? preferences,
     String? email,
+    String? avatarUrl,
   }) async {
     return _remoteDataSource.updateProfile(
       fullName: fullName,
       emergencyContact: emergencyContact,
       preferences: preferences,
       email: email,
+      avatarUrl: avatarUrl,
     );
   }
 

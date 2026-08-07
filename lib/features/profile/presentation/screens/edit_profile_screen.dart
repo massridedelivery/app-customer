@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/features/profile/presentation/controllers/profile_controller.dart';
@@ -10,6 +12,18 @@ class EditProfileScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(profileControllerProvider);
+
+    // Surface avatar-upload / update errors as a snackbar.
+    ref.listen(profileControllerProvider.select((s) => s.value?.error), (
+      prev,
+      next,
+    ) {
+      if (next != null && next.isNotEmpty) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(next)));
+      }
+    });
 
     return Scaffold(
       backgroundColor: AppColors.semanticGrayNeutralBgWhite,
@@ -30,7 +44,13 @@ class EditProfileScreen extends ConsumerWidget {
           children: [
             const SizedBox(height: 32),
             // Profile Picture Section
-            _ProfileImageSection(name: state.value?.editName ?? ''),
+            _ProfileImageSection(
+              name: state.value?.editName ?? '',
+              imageUrl: state.value?.editAvatarUrl,
+              pickedPath: state.value?.pickedAvatarPath,
+              onEdit: () =>
+                  ref.read(profileControllerProvider.notifier).pickAvatar(),
+            ),
             const SizedBox(height: 40),
 
             // Form Fields
@@ -70,52 +90,75 @@ class EditProfileScreen extends ConsumerWidget {
 
 class _ProfileImageSection extends StatelessWidget {
   final String name;
-  const _ProfileImageSection({required this.name});
+  final String? imageUrl;
+  final String? pickedPath;
+  final VoidCallback onEdit;
+  const _ProfileImageSection({
+    required this.name,
+    required this.onEdit,
+    this.imageUrl,
+    this.pickedPath,
+  });
 
   @override
   Widget build(BuildContext context) {
+    ImageProvider? image;
+    if (pickedPath != null && pickedPath!.isNotEmpty) {
+      image = FileImage(File(pickedPath!));
+    } else if (imageUrl != null && imageUrl!.isNotEmpty) {
+      image = NetworkImage(imageUrl!);
+    }
+
     return Center(
-      child: Stack(
-        children: [
-          Container(
-            width: 100,
-            height: 100,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppColors.foundationGrayscale100,
-              border: Border.all(
-                color: AppColors.foundationGrayscale200,
-                width: 2,
+      child: GestureDetector(
+        onTap: onEdit,
+        child: Stack(
+          children: [
+            Container(
+              width: 100,
+              height: 100,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.foundationGrayscale100,
+                border: Border.all(
+                  color: AppColors.foundationGrayscale200,
+                  width: 2,
+                ),
+                image: image != null
+                    ? DecorationImage(image: image, fit: BoxFit.cover)
+                    : null,
               ),
+              child: image != null
+                  ? null
+                  : Center(
+                      child: Text(
+                        name.isNotEmpty ? name[0].toUpperCase() : '?',
+                        style: AppTypography.heading1.copyWith(
+                          color: AppColors.primary,
+                          fontSize: 40,
+                        ),
+                      ),
+                    ),
             ),
-            child: Center(
-              child: Text(
-                name.isNotEmpty ? name[0].toUpperCase() : '?',
-                style: AppTypography.heading1.copyWith(
+            Positioned(
+              right: 0,
+              bottom: 0,
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
                   color: AppColors.primary,
-                  fontSize: 40,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 2),
+                ),
+                child: const Icon(
+                  Icons.camera_alt_rounded,
+                  color: Colors.white,
+                  size: 18,
                 ),
               ),
             ),
-          ),
-          Positioned(
-            right: 0,
-            bottom: 0,
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: AppColors.primary,
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.white, width: 2),
-              ),
-              child: const Icon(
-                Icons.camera_alt_rounded,
-                color: Colors.white,
-                size: 18,
-              ),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

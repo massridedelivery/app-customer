@@ -7,6 +7,7 @@ abstract class ProfileRepository {
     String? emergencyContact,
     Map<String, dynamic>? preferences,
     String? email,
+    String? avatarUrl,
   });
   Future<void> logout();
 }

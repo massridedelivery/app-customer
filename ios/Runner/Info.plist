@@ -90,5 +90,9 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>ใช้เพื่อเลือกรูปโปรไฟล์ของคุณ</string>
+	<key>NSCameraUsageDescription</key>
+	<string>ใช้เพื่อถ่ายรูปโปรไฟล์ของคุณ</string>
 </dict>
 </plist>

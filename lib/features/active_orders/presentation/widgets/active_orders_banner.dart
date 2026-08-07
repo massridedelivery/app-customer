@@ -90,7 +90,7 @@ class ActiveOrdersBanner extends ConsumerWidget {
                     ),
                     const SizedBox(width: 12),
 
-                    // Center Details
+                    // Center details — service name on top, live status below.
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -100,10 +100,10 @@ class ActiveOrdersBanner extends ConsumerWidget {
                             children: [
                               Flexible(
                                 child: Text(
-                                  statusText,
-                                  style: AppTypography.heading6.copyWith(
+                                  title,
+                                  style: AppTypography.label1.copyWith(
                                     fontWeight: FontWeight.bold,
-                                    color: AppColors.primary,
+                                    color: AppColors.textPrimary,
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
@@ -112,7 +112,10 @@ class ActiveOrdersBanner extends ConsumerWidget {
                               if (orders.length > 1) ...[
                                 const SizedBox(width: 6),
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 2,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: AppColors.primary,
                                     borderRadius: BorderRadius.circular(10),
@@ -129,15 +132,30 @@ class ActiveOrdersBanner extends ConsumerWidget {
                               ],
                             ],
                           ),
-                          const SizedBox(height: 2),
-                          Text(
-                            title,
-                            style: AppTypography.caption4.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.textPrimary,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                          const SizedBox(height: 3),
+                          Row(
+                            children: [
+                              Container(
+                                width: 7,
+                                height: 7,
+                                decoration: const BoxDecoration(
+                                  color: AppColors.primary,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Flexible(
+                                child: Text(
+                                  statusText,
+                                  style: AppTypography.caption5.copyWith(
+                                    color: AppColors.primary,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),

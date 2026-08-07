@@ -93,12 +93,15 @@ class _PaymentSummaryScreenState extends ConsumerState<PaymentSummaryScreen> {
         ),
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Fare breakdown
+      body: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Fare breakdown
             _buildSection(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -245,31 +248,38 @@ class _PaymentSummaryScreenState extends ConsumerState<PaymentSummaryScreen> {
               ),
             ),
 
-            const SizedBox(height: 24),
-
-            // Continue
-            SizedBox(
-              width: double.infinity,
-              height: 52,
-              child: ElevatedButton(
-                onPressed: _continueToReview,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: AppColors.white,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                  const SizedBox(height: 8),
+                ],
+              ),
+            ),
+          ),
+          // Pinned action bar at the bottom of the screen.
+          SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+              child: SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: ElevatedButton(
+                  onPressed: _continueToReview,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: AppColors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
-                ),
-                child: Text(
-                  'ยืนยันและให้คะแนน',
-                  style: AppTypography.label1.copyWith(color: AppColors.white),
+                  child: Text(
+                    'ยืนยันและให้คะแนน',
+                    style: AppTypography.label1.copyWith(color: AppColors.white),
+                  ),
                 ),
               ),
             ),
-            const SizedBox(height: 16),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

@@ -1,5 +1,7 @@
 import 'package:customer_app/core/constants/map_defaults.dart';
+import 'package:customer_app/core/constants/app_assets.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
+import 'package:customer_app/core/constants/app_icons.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/utils/map_marker_providers.dart';
 import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
@@ -787,10 +789,11 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(
-                Icons.circle,
+              AppIcons.asset(
+                AppAssets.icLocationFill,
                 color: AppColors.foundationGreen500,
-                size: 20,
+                width: 20,
+                height: 20,
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -824,10 +827,11 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(
-                Icons.circle,
+              AppIcons.asset(
+                AppAssets.icLocationFill,
                 color: AppColors.foundationRed700,
-                size: 20,
+                width: 20,
+                height: 20,
               ),
               const SizedBox(width: 12),
               Expanded(

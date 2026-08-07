@@ -156,6 +156,7 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
     // App-wide cached marker bitmaps (rasterised once per session).
     final pickupIcon = ref.watch(pickupMarkerProvider).value;
     final dropoffIcon = ref.watch(dropoffMarkerProvider).value;
+    final driverIcon = ref.watch(vehicleMarkerProvider).value;
     final hasDriver = liveState.driverId?.isNotEmpty ?? false;
     final uiState = _getUIState(liveState.jobStatus, hasDriver: hasDriver);
 
@@ -214,6 +215,7 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
                     dropoff: dropoff,
                     pickupIcon: pickupIcon,
                     dropoffIcon: dropoffIcon,
+                    driverIcon: driverIcon,
                     routePoints: routePoints,
                     onMapCreated: (controller) {
                       _mapController = controller;
@@ -964,6 +966,7 @@ class _LiveRideMap extends ConsumerWidget {
   final LatLng dropoff;
   final BitmapDescriptor? pickupIcon;
   final BitmapDescriptor? dropoffIcon;
+  final BitmapDescriptor? driverIcon;
   final List<LatLng> routePoints;
   final void Function(GoogleMapController) onMapCreated;
 
@@ -972,6 +975,7 @@ class _LiveRideMap extends ConsumerWidget {
     required this.dropoff,
     required this.pickupIcon,
     required this.dropoffIcon,
+    required this.driverIcon,
     required this.routePoints,
     required this.onMapCreated,
   });
@@ -1008,9 +1012,12 @@ class _LiveRideMap extends ConsumerWidget {
           Marker(
             markerId: const MarkerId('driver'),
             position: driverLocation,
-            icon: BitmapDescriptor.defaultMarkerWithHue(
-              BitmapDescriptor.hueOrange,
-            ), // Car
+            anchor: const Offset(0.5, 0.5),
+            icon:
+                driverIcon ??
+                BitmapDescriptor.defaultMarkerWithHue(
+                  BitmapDescriptor.hueOrange,
+                ),
           ),
       },
       polylines: {

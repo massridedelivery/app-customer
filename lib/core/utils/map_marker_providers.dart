@@ -12,3 +12,8 @@ final pickupMarkerProvider = FutureProvider<BitmapDescriptor>((ref) async {
 final dropoffMarkerProvider = FutureProvider<BitmapDescriptor>((ref) async {
   return MapMarkerUtils.createDropoffMarker();
 });
+
+/// The driver's live-location marker (car icon).
+final vehicleMarkerProvider = FutureProvider<BitmapDescriptor>((ref) async {
+  return MapMarkerUtils.createVehicleMarker();
+});

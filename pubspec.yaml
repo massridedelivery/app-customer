@@ -50,6 +50,7 @@ dependencies:
   google_maps_flutter: ^2.14.2
   location: ^8.0.1
   geocoding: ^4.0.0
+  url_launcher: ^6.3.1
 
   flutter_localizations:
     sdk: flutter

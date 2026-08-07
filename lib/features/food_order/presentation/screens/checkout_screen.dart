@@ -102,7 +102,18 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       return;
     }
 
-    final address = homeState.foodAddress ?? 'ที่อยู่ปัจจุบัน';
+    // A delivery address is required — never ship to a fallback/guessed spot.
+    if (homeState.foodAddress == null ||
+        homeState.foodAddress!.trim().isEmpty ||
+        homeState.foodLocation == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('กรุณาเลือกสถานที่จัดส่งก่อนสั่งอาหาร')),
+      );
+      context.push('/food-place-search');
+      return;
+    }
+
+    final address = homeState.foodAddress!;
 
     ref.read(checkoutProvider.notifier).submitOrder(
           restaurantId: cart.restaurantId!,

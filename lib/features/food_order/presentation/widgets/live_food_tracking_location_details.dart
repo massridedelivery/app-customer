@@ -73,7 +73,7 @@ class LiveFoodTrackingLocationDetails extends ConsumerWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(Icons.location_on, color: Colors.blue, size: 20),
+              const Icon(Icons.location_on, color: AppColors.primary, size: 20),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(

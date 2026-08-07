@@ -35,13 +35,13 @@ class CheckoutDeliveryAddress extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.red.withValues(alpha: 0.1),
+                    color: AppColors.primary.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
                     Icons.location_on,
                     size: 20,
-                    color: Colors.red,
+                    color: AppColors.primary,
                   ),
                 ),
                 const SizedBox(width: 12),

@@ -25,10 +25,11 @@ class ProfileController extends _$ProfileController {
     );
   }
 
-  /// Lets the user pick a profile photo. The picked file previews immediately;
-  /// then we try to upload it for a hosted URL. The upload endpoint isn't wired
-  /// yet (see [AvatarUploadService]), so for now this only previews and reports
-  /// that saving the photo isn't available — the rest of the profile still saves.
+  /// Lets the user pick a profile photo. The picked file previews immediately,
+  /// then uploads to storage (via the presigned-URL flow in
+  /// [AvatarUploadService]) to obtain a hosted `avatar_url`, which is persisted
+  /// on the next profile save. If the upload fails the local preview stays and
+  /// we surface an error; the rest of the profile still saves.
   Future<void> pickAvatar() async {
     final picker = ImagePicker();
     final XFile? image = await picker.pickImage(
@@ -42,8 +43,10 @@ class ProfileController extends _$ProfileController {
     final current = state.value;
     if (current == null) return;
 
-    // Show the picked image right away.
-    state = AsyncData(current.copyWith(pickedAvatarPath: image.path));
+    // Show the picked image right away and mark the upload as in flight.
+    state = AsyncData(
+      current.copyWith(pickedAvatarPath: image.path, isUploadingAvatar: true),
+    );
 
     final url = await ref.read(avatarUploadServiceProvider).uploadAvatar(image);
     final after = state.value;
@@ -51,8 +54,9 @@ class ProfileController extends _$ProfileController {
     state = AsyncData(
       after.copyWith(
         editAvatarUrl: url ?? after.editAvatarUrl,
+        isUploadingAvatar: false,
         error: url == null
-            ? 'อัปโหลดรูปยังไม่พร้อมใช้งาน (รอ backend) — รูปแสดงตัวอย่างเท่านั้น'
+            ? 'อัปโหลดรูปไม่สำเร็จ กรุณาลองใหม่อีกครั้ง'
             : null,
       ),
     );

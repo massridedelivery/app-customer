@@ -48,6 +48,7 @@ class EditProfileScreen extends ConsumerWidget {
               name: state.value?.editName ?? '',
               imageUrl: state.value?.editAvatarUrl,
               pickedPath: state.value?.pickedAvatarPath,
+              isUploading: state.value?.isUploadingAvatar ?? false,
               onEdit: () =>
                   ref.read(profileControllerProvider.notifier).pickAvatar(),
             ),
@@ -70,7 +71,7 @@ class EditProfileScreen extends ConsumerWidget {
               padding: const EdgeInsets.all(24),
               child: _SaveButton(
                 isUpdating: state.value?.isUpdating ?? false,
-                isValid: true,
+                isValid: !(state.value?.isUploadingAvatar ?? false),
                 onPressed: () {
                   ref
                       .read(profileControllerProvider.notifier)
@@ -92,12 +93,14 @@ class _ProfileImageSection extends StatelessWidget {
   final String name;
   final String? imageUrl;
   final String? pickedPath;
+  final bool isUploading;
   final VoidCallback onEdit;
   const _ProfileImageSection({
     required this.name,
     required this.onEdit,
     this.imageUrl,
     this.pickedPath,
+    this.isUploading = false,
   });
 
   @override
@@ -111,7 +114,7 @@ class _ProfileImageSection extends StatelessWidget {
 
     return Center(
       child: GestureDetector(
-        onTap: onEdit,
+        onTap: isUploading ? null : onEdit,
         child: Stack(
           children: [
             Container(
@@ -128,7 +131,18 @@ class _ProfileImageSection extends StatelessWidget {
                     ? DecorationImage(image: image, fit: BoxFit.cover)
                     : null,
               ),
-              child: image != null
+              child: isUploading
+                  ? const Center(
+                      child: SizedBox(
+                        width: 28,
+                        height: 28,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2.5,
+                        ),
+                      ),
+                    )
+                  : image != null
                   ? null
                   : Center(
                       child: Text(

@@ -11,6 +11,8 @@ abstract class ProfileState with _$ProfileState {
     @Default('') String editName,
     @Default('') String phone,
     @Default(false) bool isUpdating,
+    // True while a picked avatar is being uploaded to storage.
+    @Default(false) bool isUploadingAvatar,
     // Current avatar URL being edited (from the profile, or a freshly uploaded
     // one). [pickedAvatarPath] is a just-picked local file shown as a preview
     // before/without a successful upload.

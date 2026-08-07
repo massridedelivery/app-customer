@@ -85,7 +85,7 @@ class _ServiceSelectionScreenState
           ),
           SliverToBoxAdapter(
             child: Transform.translate(
-              offset: const Offset(0, -25),
+              offset: const Offset(0, -12),
               child: Container(
                 decoration: BoxDecoration(
                   color: AppColors.semanticGrayNeutralBgWhite,
@@ -94,9 +94,10 @@ class _ServiceSelectionScreenState
                   ),
                 ),
                 child: Padding(
-                  // Top padding clears the red S-curve header, which was
-                  // overlapping the active-order banner (content is pulled up 25).
-                  padding: EdgeInsets.only(top: 24, bottom: bottomPadding + 20),
+                  // Small symmetric top padding so the gap above the banner
+                  // (below the header) matches the gap below it (to the grid),
+                  // while still clearing the red S-curve.
+                  padding: EdgeInsets.only(top: 12, bottom: bottomPadding + 20),
                   child: Column(
                     children: [
                       const ActiveOrdersBanner(),

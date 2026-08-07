@@ -74,11 +74,15 @@ class _PaymentSummaryScreenState extends ConsumerState<PaymentSummaryScreen> {
   @override
   Widget build(BuildContext context) {
     final profile = widget.driverProfile;
+    final method = (profile?.paymentMethod ?? '').toUpperCase();
+    // Cash / cash-on-delivery has no channel to deduct a tip from, so the tip
+    // selector only makes sense for card / PromptPay.
+    final canTip = method != 'CASH' && method != 'COD';
     final fare = profile?.fare ?? 0;
     final discount = profile?.discount ?? 0;
     final tollFee = profile?.tollFee ?? 0;
     final waitingFee = profile?.waitingFee ?? 0;
-    final tip = (_selectedTip ?? 0).toDouble();
+    final tip = (canTip ? (_selectedTip ?? 0) : 0).toDouble();
     final total = fare + tollFee + waitingFee - discount + tip;
 
     return Scaffold(
@@ -179,6 +183,7 @@ class _PaymentSummaryScreenState extends ConsumerState<PaymentSummaryScreen> {
               ),
             ),
 
+            if (canTip) ...[
             const SizedBox(height: 12),
 
             // Tip
@@ -247,6 +252,7 @@ class _PaymentSummaryScreenState extends ConsumerState<PaymentSummaryScreen> {
                 ],
               ),
             ),
+            ],
 
                   const SizedBox(height: 8),
                 ],

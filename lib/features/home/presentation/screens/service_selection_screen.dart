@@ -5,6 +5,7 @@ import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/constants/feature_flags.dart';
 import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
 import 'package:customer_app/features/home/presentation/states/home_state.dart';
+import 'package:customer_app/features/active_orders/presentation/controllers/active_orders_controller.dart';
 import 'package:customer_app/features/home/presentation/widgets/app_drawer.dart';
 import 'package:customer_app/features/home/presentation/widgets/home_promo_banner.dart';
 import 'package:customer_app/features/active_orders/presentation/widgets/active_orders_banner.dart';
@@ -350,7 +351,16 @@ class _ServiceSelectionScreenState
             AppColors.foundationViolet800,
             AppColors.foundationViolet100,
             onTap: () {
-              context.push('/messenger-booking');
+              // If a messenger order is already running, resume it instead of
+              // letting the customer start a second one.
+              final active =
+                  ref.read(activeOrdersControllerProvider).value ?? const [];
+              final ongoing = active.where((o) => o.isMessenger);
+              if (ongoing.isNotEmpty) {
+                context.push('/messenger/tracking/${ongoing.first.id}');
+              } else {
+                context.push('/messenger-booking');
+              }
             },
           ),
         ],

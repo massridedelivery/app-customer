@@ -166,7 +166,7 @@ class _MessengerBookingScreenState
       child: Column(
         children: [
           _locationRow(
-            icon: Icons.circle,
+            icon: Icons.location_on,
             iconColor: AppColors.foundationGreen500,
             label: 'จุดรับพัสดุ',
             address: homeState.pickupAddress ?? 'เลือกจุดรับพัสดุ',

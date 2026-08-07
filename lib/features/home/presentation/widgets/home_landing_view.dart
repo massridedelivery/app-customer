@@ -92,7 +92,7 @@ class _HomeLandingViewState extends ConsumerState<HomeLandingView> {
                               width: 24,
                               child: Center(
                                 child: Icon(
-                                  Icons.radio_button_checked,
+                                  Icons.circle,
                                   color: AppColors.foundationGreen500,
                                   size: 20,
                                 ),
@@ -184,8 +184,8 @@ class _HomeLandingViewState extends ConsumerState<HomeLandingView> {
                               width: 24,
                               child: Center(
                                 child: Icon(
-                                  Icons.radio_button_checked,
-                                  color: AppColors.foundationOrange600,
+                                  Icons.circle,
+                                  color: AppColors.foundationRed700,
                                   size: 20,
                                 ),
                               ),

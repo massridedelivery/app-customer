@@ -105,6 +105,9 @@ class _FoodLocationSelectionScreenState
             myLocationButtonEnabled: false,
             zoomControlsEnabled: true,
             mapType: MapType.normal,
+            onCameraMoveStarted: () => ref
+                .read(homeControllerProvider.notifier)
+                .onCameraMoveStarted(),
             onCameraMove: (position) {
               ref.read(homeControllerProvider.notifier).onCameraMove(position);
             },

@@ -227,7 +227,10 @@ class _ProfileHeader extends StatelessWidget {
           padding: const EdgeInsets.all(12.0),
           child: Column(
             children: [
-              Row(
+              GestureDetector(
+                onTap: () => context.push('/edit-profile'),
+                behavior: HitTestBehavior.opaque,
+                child: Row(
                 children: [
                   // Avatar
                   Container(
@@ -271,15 +274,13 @@ class _ProfileHeader extends StatelessWidget {
                       ],
                     ),
                   ),
-                  IconButton(
-                    onPressed: () {},
-                    icon: const Icon(
-                      Icons.navigate_next_rounded,
-                      color: AppColors.foundationGrayscale400,
-                      size: 28,
-                    ),
+                  const Icon(
+                    Icons.navigate_next_rounded,
+                    color: AppColors.foundationGrayscale400,
+                    size: 28,
                   ),
                 ],
+                ),
               ),
               if (loyalty != null) ...[
                 if (_showLoyaltySummary) ...[

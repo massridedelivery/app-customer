@@ -10,6 +10,7 @@ abstract class ProfileModel with _$ProfileModel {
     @JsonKey(name: 'full_name') required String fullName,
     required String phone,
     required double rating,
+    @JsonKey(name: 'avatar_url') String? avatarUrl,
   }) = _ProfileModel;
 
   factory ProfileModel.fromJson(Map<String, dynamic> json) =>

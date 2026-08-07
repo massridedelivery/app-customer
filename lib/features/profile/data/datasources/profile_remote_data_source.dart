@@ -11,6 +11,7 @@ abstract class ProfileRemoteDataSource {
     String? emergencyContact,
     Map<String, dynamic>? preferences,
     String? email,
+    String? avatarUrl,
   });
   Future<void> logout();
 }
@@ -38,6 +39,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
     String? emergencyContact,
     Map<String, dynamic>? preferences,
     String? email,
+    String? avatarUrl,
   }) async {
     await _apiService.dio.put(
       '/api/customer/profile',
@@ -48,6 +50,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
           'emergency_contact': emergencyContact,
         if (preferences != null && preferences.isNotEmpty)
           'preferences': preferences,
+        if (avatarUrl != null && avatarUrl.isNotEmpty) 'avatar_url': avatarUrl,
       },
     );
   }

@@ -94,7 +94,9 @@ class _ServiceSelectionScreenState
                   ),
                 ),
                 child: Padding(
-                  padding: EdgeInsets.only(bottom: bottomPadding + 20),
+                  // Top padding clears the red S-curve header, which was
+                  // overlapping the active-order banner (content is pulled up 25).
+                  padding: EdgeInsets.only(top: 24, bottom: bottomPadding + 20),
                   child: Column(
                     children: [
                       const ActiveOrdersBanner(),

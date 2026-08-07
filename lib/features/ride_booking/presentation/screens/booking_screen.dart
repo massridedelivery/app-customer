@@ -308,7 +308,10 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
             top: MediaQuery.of(context).padding.top + 12,
             left: 16,
             child: InkWell(
-              onTap: () => context.pop(),
+              // Back from vehicle selection returns to the place-search
+              // (booking details) so the trip can be edited, rather than the
+              // bare map picker.
+              onTap: () => context.go('/place-search'),
               child: Container(
                 width: 44,
                 height: 44,

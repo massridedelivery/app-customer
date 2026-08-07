@@ -38,37 +38,47 @@ class EditProfileScreen extends ConsumerWidget {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        child: Column(
-          children: [
-            const SizedBox(height: 32),
-            // Profile Picture Section
-            _ProfileImageSection(
-              name: state.value?.editName ?? '',
-              imageUrl: state.value?.editAvatarUrl,
-              pickedPath: state.value?.pickedAvatarPath,
-              isUploading: state.value?.isUploadingAvatar ?? false,
-              onEdit: () =>
-                  ref.read(profileControllerProvider.notifier).pickAvatar(),
-            ),
-            const SizedBox(height: 40),
+      body: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Column(
+                children: [
+                  const SizedBox(height: 32),
+                  // Profile Picture Section
+                  _ProfileImageSection(
+                    name: state.value?.editName ?? '',
+                    imageUrl: state.value?.editAvatarUrl,
+                    pickedPath: state.value?.pickedAvatarPath,
+                    isUploading: state.value?.isUploadingAvatar ?? false,
+                    onEdit: () => ref
+                        .read(profileControllerProvider.notifier)
+                        .pickAvatar(),
+                  ),
+                  const SizedBox(height: 40),
 
-            // Form Fields
-            const _FieldLabel(label: 'ชื่อ-นามสกุล'),
-            const SizedBox(height: 8),
-            _CustomTextField(
-              controller: TextEditingController(
-                text: state.value?.editName ?? '',
+                  // Form Fields
+                  const _FieldLabel(label: 'ชื่อ-นามสกุล'),
+                  const SizedBox(height: 8),
+                  _CustomTextField(
+                    controller: TextEditingController(
+                      text: state.value?.editName ?? '',
+                    ),
+                    onChanged: (value) => ref
+                        .read(profileControllerProvider.notifier)
+                        .updateEditName(value),
+                    hint: 'กรอกชื่อ-นามสกุล',
+                  ),
+                ],
               ),
-              onChanged: (value) => ref
-                  .read(profileControllerProvider.notifier)
-                  .updateEditName(value),
-              hint: 'กรอกชื่อ-นามสกุล',
             ),
-            const SizedBox(height: 48),
-            Padding(
-              padding: const EdgeInsets.all(24),
+          ),
+          // Pinned to the bottom.
+          SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(24, 8, 24, 16),
               child: _SaveButton(
                 isUpdating: state.value?.isUpdating ?? false,
                 isValid: !(state.value?.isUploadingAvatar ?? false),
@@ -79,9 +89,8 @@ class EditProfileScreen extends ConsumerWidget {
                 },
               ),
             ),
-            const SizedBox(height: 40),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

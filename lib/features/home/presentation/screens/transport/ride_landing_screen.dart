@@ -364,29 +364,12 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
               color: AppColors.textPrimary,
             ),
           ),
-          const SizedBox(height: 12),
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, 3),
-                ),
-              ],
-            ),
-            child: Column(
-              children: [
-                for (var i = 0; i < visible.length; i++) ...[
-                  if (i > 0)
-                    const Divider(height: 1, indent: 60, endIndent: 16),
-                  _buildRecentItem(visible[i]),
-                ],
-              ],
-            ),
-          ),
+          const SizedBox(height: 4),
+          // Plain list (no card), like the place-search results.
+          for (var i = 0; i < visible.length; i++) ...[
+            if (i > 0) const Divider(height: 1, indent: 52),
+            _buildRecentItem(visible[i]),
+          ],
         ],
       ),
     );
@@ -397,8 +380,9 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
     return InkWell(
       onTap: () => _openDropoff(place),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        padding: const EdgeInsets.symmetric(vertical: 12),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
               padding: const EdgeInsets.all(8),
@@ -422,7 +406,7 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
                     style: AppTypography.label1.copyWith(
                       color: AppColors.textPrimary,
                     ),
-                    maxLines: 1,
+                    maxLines: hasAddress ? 1 : 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   if (hasAddress) ...[
@@ -432,16 +416,12 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
                       style: AppTypography.caption4.copyWith(
                         color: AppColors.textSecondary,
                       ),
-                      maxLines: 1,
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ],
               ),
-            ),
-            const Icon(
-              Icons.chevron_right,
-              color: AppColors.foundationGrayscale500,
             ),
           ],
         ),

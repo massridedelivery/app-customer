@@ -556,7 +556,7 @@ class _MessengerTrackingScreenState
           ),
           const SizedBox(height: 8),
           _infoRow(
-            Icons.trip_origin,
+            Icons.circle,
             AppColors.foundationGreen500,
             order.pickupAddress.isNotEmpty ? order.pickupAddress : 'จุดรับพัสดุ',
           ),

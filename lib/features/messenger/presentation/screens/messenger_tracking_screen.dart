@@ -4,6 +4,7 @@ import 'package:customer_app/features/messenger/domain/models/messenger_order.da
 import 'package:customer_app/features/messenger/presentation/controllers/messenger_tracking_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:customer_app/core/utils/map_marker_providers.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -94,13 +95,16 @@ class _MessengerTrackingScreenState
     final success = await ref
         .read(messengerTrackingControllerProvider.notifier)
         .cancelOrder(reason: reasonController.text.trim());
-    if (mounted && success) {
+    if (!mounted) return;
+    if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('ยกเลิกการส่งพัสดุแล้ว'),
           backgroundColor: AppColors.success,
         ),
       );
+      // Was hanging on the tracking screen after a successful cancel — go home.
+      context.go('/main');
     }
   }
 
@@ -217,6 +221,10 @@ class _MessengerTrackingScreenState
   Widget _buildMap(MessengerOrder order) {
     final pickup = LatLng(order.pickupLat, order.pickupLng);
     final dropoff = LatLng(order.dropoffLat, order.dropoffLng);
+    // Shared pickup/dropoff pins (same as the ride flow) instead of the default
+    // green/red teardrops.
+    final pickupIcon = ref.watch(pickupMarkerProvider).value;
+    final dropoffIcon = ref.watch(dropoffMarkerProvider).value;
 
     return GoogleMap(
       initialCameraPosition: CameraPosition(target: pickup, zoom: 13),
@@ -228,15 +236,17 @@ class _MessengerTrackingScreenState
         Marker(
           markerId: const MarkerId('pickup'),
           position: pickup,
-          icon: BitmapDescriptor.defaultMarkerWithHue(
-            BitmapDescriptor.hueGreen,
-          ),
+          icon:
+              pickupIcon ??
+              BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
           infoWindow: const InfoWindow(title: 'จุดรับพัสดุ'),
         ),
         Marker(
           markerId: const MarkerId('dropoff'),
           position: dropoff,
-          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+          icon:
+              dropoffIcon ??
+              BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
           infoWindow: const InfoWindow(title: 'จุดส่งพัสดุ'),
         ),
       },

@@ -43,7 +43,7 @@ class ActiveOrdersBanner extends ConsumerWidget {
 
         return AnimatedContainer(
           duration: const Duration(milliseconds: 300),
-          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
           decoration: BoxDecoration(
             gradient: const LinearGradient(
               colors: [

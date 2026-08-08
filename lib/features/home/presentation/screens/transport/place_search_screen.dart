@@ -160,7 +160,7 @@ class _PlaceSearchScreenState extends ConsumerState<PlaceSearchScreen>
             if (context.canPop()) {
               context.pop();
             } else {
-              context.go('/ride-landing');
+              context.go('/main');
             }
           },
         ),

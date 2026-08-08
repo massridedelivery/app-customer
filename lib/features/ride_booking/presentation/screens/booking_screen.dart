@@ -308,10 +308,16 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
             top: MediaQuery.of(context).padding.top + 12,
             left: 16,
             child: InkWell(
-              // Back from vehicle selection returns to the place-search
-              // (booking details) so the trip can be edited, rather than the
-              // bare map picker.
-              onTap: () => context.go('/place-search'),
+              // Pop back through the stack (place-search → landing → home) so
+              // the user can always reach the home screen. Using context.go
+              // here reset the stack and trapped later back presses.
+              onTap: () {
+                if (context.canPop()) {
+                  context.pop();
+                } else {
+                  context.go('/main');
+                }
+              },
               child: Container(
                 width: 44,
                 height: 44,

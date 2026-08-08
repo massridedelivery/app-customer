@@ -41,7 +41,7 @@ class _ServiceSelectionScreenState
           SliverAppBar(
             pinned: true,
             stretch: true,
-            expandedHeight: 180,
+            expandedHeight: 155,
             collapsedHeight: 65 + statusPadding,
             scrolledUnderElevation: 0.0,
             backgroundColor: Colors.transparent,
@@ -50,7 +50,7 @@ class _ServiceSelectionScreenState
             flexibleSpace: LayoutBuilder(
               builder: (context, constraints) {
                 final double top = constraints.biggest.height;
-                final double expandedHeight = 180;
+                final double expandedHeight = 155;
                 final double collapsedHeight = 65 + statusPadding;
                 final double t =
                     ((top - collapsedHeight) /
@@ -94,10 +94,7 @@ class _ServiceSelectionScreenState
                   ),
                 ),
                 child: Padding(
-                  // Small symmetric top padding so the gap above the banner
-                  // (below the header) matches the gap below it (to the grid),
-                  // while still clearing the red S-curve.
-                  padding: EdgeInsets.only(top: 12, bottom: bottomPadding + 20),
+                  padding: EdgeInsets.only(top: 6, bottom: bottomPadding + 20),
                   child: Column(
                     children: [
                       const ActiveOrdersBanner(),

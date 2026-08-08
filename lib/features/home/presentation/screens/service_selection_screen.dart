@@ -41,7 +41,7 @@ class _ServiceSelectionScreenState
           SliverAppBar(
             pinned: true,
             stretch: true,
-            expandedHeight: 155,
+            expandedHeight: 175,
             collapsedHeight: 65 + statusPadding,
             scrolledUnderElevation: 0.0,
             backgroundColor: Colors.transparent,
@@ -50,7 +50,7 @@ class _ServiceSelectionScreenState
             flexibleSpace: LayoutBuilder(
               builder: (context, constraints) {
                 final double top = constraints.biggest.height;
-                final double expandedHeight = 155;
+                final double expandedHeight = 175;
                 final double collapsedHeight = 65 + statusPadding;
                 final double t =
                     ((top - collapsedHeight) /
@@ -94,7 +94,7 @@ class _ServiceSelectionScreenState
                   ),
                 ),
                 child: Padding(
-                  padding: EdgeInsets.only(top: 6, bottom: bottomPadding + 20),
+                  padding: EdgeInsets.only(top: 2, bottom: bottomPadding + 20),
                   child: Column(
                     children: [
                       const ActiveOrdersBanner(),

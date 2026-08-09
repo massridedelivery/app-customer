@@ -49,14 +49,19 @@ class ProfileController extends _$ProfileController {
       current.copyWith(pickedAvatarPath: image.path, isUploadingAvatar: true),
     );
 
-    final url = await ref.read(avatarUploadServiceProvider).uploadAvatar(image);
+    // uploadAvatar returns the file_key to persist as avatar_url on save; the
+    // just-picked local file (pickedAvatarPath) covers the on-screen preview
+    // until the backend echoes back a resolved URL.
+    final fileKey = await ref
+        .read(avatarUploadServiceProvider)
+        .uploadAvatar(image);
     final after = state.value;
     if (after == null) return;
     state = AsyncData(
       after.copyWith(
-        editAvatarUrl: url ?? after.editAvatarUrl,
+        pendingAvatarFileKey: fileKey ?? after.pendingAvatarFileKey,
         isUploadingAvatar: false,
-        error: url == null
+        error: fileKey == null
             ? 'อัปโหลดรูปไม่สำเร็จ กรุณาลองใหม่อีกครั้ง'
             : null,
       ),
@@ -90,7 +95,11 @@ class ProfileController extends _$ProfileController {
             emergencyContact: '',
             preferences: {},
             email: email,
-            avatarUrl: currentState.editAvatarUrl,
+            // Send the freshly-uploaded file_key when present; the backend
+            // resolves it to a URL. Fall back to the existing avatar so an
+            // unchanged avatar isn't dropped.
+            avatarUrl:
+                currentState.pendingAvatarFileKey ?? currentState.editAvatarUrl,
           );
     });
 

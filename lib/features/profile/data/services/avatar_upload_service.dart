@@ -10,7 +10,7 @@ final avatarUploadServiceProvider = Provider<AvatarUploadService>((ref) {
 });
 
 /// Uploads a picked profile image via the MinIO-native media protocol and
-/// returns the public URL to store in the customer's `avatar_url`.
+/// returns the `file_key` to persist on the customer's profile.
 ///
 /// Follows the 3-step protocol from SCRUM-16 (Media System Architecture),
 /// category `avatar` (Public, ≤2MB, jpeg/png/webp):
@@ -21,10 +21,11 @@ final avatarUploadServiceProvider = Provider<AvatarUploadService>((ref) {
 ///      MinIO signature).
 ///   3. `POST /api/media/confirm { file_key }` to finalize the object.
 ///
-/// `avatar` is a Public asset, so the stored value is the object's http(s) URL
-/// (the presigned URL minus its signature query) which the app renders directly
-/// with `NetworkImage`. Returns null if any step fails; the caller keeps the
-/// local preview and surfaces an "upload failed" message.
+/// Returns the `file_key`, which is what `PUT /api/customer/profile` expects for
+/// `avatar_url`: the backend owns URL resolution and echoes back a readable
+/// avatar URL, so the client never reconstructs one from the presigned link.
+/// Returns null if any step fails; the caller keeps the local preview and
+/// surfaces an "upload failed" message.
 class AvatarUploadService {
   AvatarUploadService(this._apiService);
 
@@ -80,9 +81,9 @@ class AvatarUploadService {
         data: {'file_key': fileKey},
       );
 
-      // Public avatar → the readable URL is the presigned URL minus its
-      // signature query string.
-      return uploadUrl.split('?').first;
+      // Hand the file_key back to the profile update; the backend resolves it
+      // to a readable avatar URL.
+      return fileKey;
     } catch (e) {
       if (kDebugMode) {
         debugPrint('Avatar upload failed: $e');

@@ -13,11 +13,15 @@ abstract class ProfileState with _$ProfileState {
     @Default(false) bool isUpdating,
     // True while a picked avatar is being uploaded to storage.
     @Default(false) bool isUploadingAvatar,
-    // Current avatar URL being edited (from the profile, or a freshly uploaded
-    // one). [pickedAvatarPath] is a just-picked local file shown as a preview
-    // before/without a successful upload.
+    // Current avatar URL being edited (from the profile). Used for display via
+    // NetworkImage. [pickedAvatarPath] is a just-picked local file shown as a
+    // preview before/without a successful upload.
     String? editAvatarUrl,
     String? pickedAvatarPath,
+    // file_key of a freshly uploaded avatar, sent to the backend on save as
+    // `avatar_url`. Null until an upload succeeds; the backend resolves it to a
+    // readable URL and echoes that back on the profile response.
+    String? pendingAvatarFileKey,
     String? error,
   }) = _ProfileState;
 }

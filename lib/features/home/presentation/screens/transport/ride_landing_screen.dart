@@ -4,6 +4,8 @@ import 'package:customer_app/core/constants/app_icons.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/features/home/domain/models/place.dart';
 import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
+import 'package:customer_app/features/trips/domain/models/history_order.dart';
+import 'package:customer_app/features/trips/presentation/controllers/trips_controller.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -20,6 +22,22 @@ class RideLandingScreen extends ConsumerStatefulWidget {
 class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
   // Recent list shows the first few by default; "see more" reveals the rest.
   static const _recentCollapsedCount = 3;
+
+  @override
+  void initState() {
+    super.initState();
+    // Warm the ride history so the "การเดินทางล่าสุด" section has data on first
+    // paint. The Trips screen re-fetches with its own filter when opened, so
+    // pulling rides here doesn't leave a stale filter behind.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final trips = ref.read(tripsControllerProvider);
+      if (trips.historyOrders.isEmpty && !trips.isHistoryLoading) {
+        ref
+            .read(tripsControllerProvider.notifier)
+            .fetchHistoryOrders(type: HistoryType.ride);
+      }
+    });
+  }
 
   void _openDropoff(Place place) {
     ref
@@ -41,6 +59,15 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final homeState = ref.watch(homeControllerProvider);
+    // Prefer the customer's most-recent ride destinations; fall back to their
+    // frequent places when there's no ride history yet.
+    final historyOrders = ref.watch(
+      tripsControllerProvider.select((s) => s.historyOrders),
+    );
+    final recentTrips = _recentRidePlaces(historyOrders);
+    final recentPlaces = recentTrips.isNotEmpty
+        ? recentTrips
+        : homeState.recentPlaces;
     return Scaffold(
       backgroundColor: AppColors.foundationGrayscale75,
       body: SingleChildScrollView(
@@ -52,11 +79,11 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
             const SizedBox(height: 20),
             _buildQuickActions(context, l10n, homeState.savedPlaces),
             const SizedBox(height: 28),
-            // Recent trips — driven by homeState.recentPlaces
-            // (GET /api/customer/places/frequent). Hidden when empty so there's
-            // no dangling header while the endpoint returns nothing.
-            if (homeState.recentPlaces.isNotEmpty) ...[
-              _buildRecentTrips(l10n, homeState.recentPlaces),
+            // Recent trips — the customer's latest ride destinations (from
+            // order history), falling back to frequent places. Hidden when both
+            // are empty so there's no dangling header.
+            if (recentPlaces.isNotEmpty) ...[
+              _buildRecentTrips('การเดินทางล่าสุด', recentPlaces),
               const SizedBox(height: 28),
             ],
             _buildExperienceSection(l10n),
@@ -300,7 +327,28 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
   // ---------------------------------------------------------------------------
   // Recent trips.
   // ---------------------------------------------------------------------------
-  Widget _buildRecentTrips(AppLocalizations l10n, List<Place> places) {
+  // Most-recent ride destinations from order history, de-duplicated by address,
+  // as tappable Places (tapping one re-opens booking with that dropoff).
+  List<Place> _recentRidePlaces(List<HistoryOrder> orders) {
+    final seen = <String>{};
+    final places = <Place>[];
+    for (final order in orders) {
+      if (order.type.toUpperCase() != 'RIDE') continue;
+      final ride = order.rideDetails;
+      if (ride == null || ride.dropoffLat == null || ride.dropoffLng == null) {
+        continue;
+      }
+      final address = (ride.dropoffAddress ?? '').trim();
+      if (address.isEmpty || !seen.add(address)) continue;
+      places.add(
+        Place(name: address, lat: ride.dropoffLat!, lng: ride.dropoffLng!),
+      );
+      if (places.length >= _recentCollapsedCount) break;
+    }
+    return places;
+  }
+
+  Widget _buildRecentTrips(String title, List<Place> places) {
     // Show at most the first few recent places — no "see more".
     final visible = places.take(_recentCollapsedCount).toList();
 
@@ -310,35 +358,18 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            l10n.recentUsage,
+            title,
             style: AppTypography.heading5.copyWith(
               fontWeight: FontWeight.bold,
               color: AppColors.textPrimary,
             ),
           ),
-          const SizedBox(height: 12),
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, 3),
-                ),
-              ],
-            ),
-            child: Column(
-              children: [
-                for (var i = 0; i < visible.length; i++) ...[
-                  if (i > 0)
-                    const Divider(height: 1, indent: 60, endIndent: 16),
-                  _buildRecentItem(visible[i]),
-                ],
-              ],
-            ),
-          ),
+          const SizedBox(height: 4),
+          // Plain list (no card), like the place-search results.
+          for (var i = 0; i < visible.length; i++) ...[
+            if (i > 0) const Divider(height: 1, indent: 52),
+            _buildRecentItem(visible[i]),
+          ],
         ],
       ),
     );
@@ -349,8 +380,9 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
     return InkWell(
       onTap: () => _openDropoff(place),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        padding: const EdgeInsets.symmetric(vertical: 12),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
               padding: const EdgeInsets.all(8),
@@ -374,7 +406,7 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
                     style: AppTypography.label1.copyWith(
                       color: AppColors.textPrimary,
                     ),
-                    maxLines: 1,
+                    maxLines: hasAddress ? 1 : 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   if (hasAddress) ...[
@@ -384,16 +416,12 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
                       style: AppTypography.caption4.copyWith(
                         color: AppColors.textSecondary,
                       ),
-                      maxLines: 1,
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ],
               ),
-            ),
-            const Icon(
-              Icons.chevron_right,
-              color: AppColors.foundationGrayscale500,
             ),
           ],
         ),

@@ -1,9 +1,12 @@
+import 'package:customer_app/core/constants/app_assets.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
+import 'package:customer_app/core/constants/app_icons.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/features/messenger/domain/models/messenger_order.dart';
 import 'package:customer_app/features/messenger/presentation/controllers/messenger_tracking_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:customer_app/core/utils/map_marker_providers.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -94,13 +97,16 @@ class _MessengerTrackingScreenState
     final success = await ref
         .read(messengerTrackingControllerProvider.notifier)
         .cancelOrder(reason: reasonController.text.trim());
-    if (mounted && success) {
+    if (!mounted) return;
+    if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('ยกเลิกการส่งพัสดุแล้ว'),
           backgroundColor: AppColors.success,
         ),
       );
+      // Was hanging on the tracking screen after a successful cancel — go home.
+      context.go('/main');
     }
   }
 
@@ -123,59 +129,114 @@ class _MessengerTrackingScreenState
     });
 
     return Scaffold(
-      backgroundColor: AppColors.foundationGrayscale100,
-      appBar: AppBar(
-        backgroundColor: AppColors.white,
-        elevation: 0,
-        centerTitle: true,
-        title: Text(
-          'ติดตามพัสดุ',
-          style: AppTypography.heading4.copyWith(
-            fontWeight: FontWeight.bold,
-            color: AppColors.semanticGrayNeutralFgHigh,
-          ),
-        ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.black),
-          onPressed: () {
-            if (context.canPop()) {
-              context.pop();
-            } else {
-              context.go('/main');
-            }
-          },
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh, color: AppColors.black),
-            onPressed: () => ref
-                .read(messengerTrackingControllerProvider.notifier)
-                .refresh(),
-          ),
-        ],
-      ),
+      backgroundColor: AppColors.white,
       body: order == null
-          ? _buildLoadingOrError(state.isLoading, state.error)
+          ? SafeArea(child: _buildLoadingOrError(state.isLoading, state.error))
           : Stack(
               children: [
-                Column(
-                  children: [
-                    SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.32,
-                      child: _buildMap(order),
-                    ),
-                    Expanded(child: _buildDetailPanel(order)),
-                  ],
+                // Full-bleed map with a draggable sheet over it (ride-style).
+                Positioned.fill(child: _buildMap(order)),
+                DraggableScrollableSheet(
+                  initialChildSize: 0.5,
+                  minChildSize: 0.5,
+                  maxChildSize: 0.85,
+                  snap: true,
+                  snapSizes: const [0.5, 0.85],
+                  builder: (context, scrollController) {
+                    return Container(
+                      decoration: _sheetDecoration,
+                      child: ListView(
+                        controller: scrollController,
+                        padding: const EdgeInsets.only(bottom: 24),
+                        children: [
+                          _grabHandle(),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: _buildDetailPanel(order),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+                // Floating back / refresh controls over the map.
+                Positioned(
+                  top: MediaQuery.of(context).padding.top + 8,
+                  left: 12,
+                  right: 12,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _circleButton(Icons.arrow_back, () {
+                        if (context.canPop()) {
+                          context.pop();
+                        } else {
+                          context.go('/main');
+                        }
+                      }),
+                      _circleButton(
+                        Icons.refresh,
+                        () => ref
+                            .read(messengerTrackingControllerProvider.notifier)
+                            .refresh(),
+                      ),
+                    ],
+                  ),
                 ),
                 if (state.isCancelling)
-                  Container(
-                    color: Colors.black.withValues(alpha: 0.3),
-                    child: const Center(
-                      child: CircularProgressIndicator(color: AppColors.primary),
+                  Positioned.fill(
+                    child: Container(
+                      color: Colors.black.withValues(alpha: 0.3),
+                      child: const Center(
+                        child: CircularProgressIndicator(
+                          color: AppColors.primary,
+                        ),
+                      ),
                     ),
                   ),
               ],
             ),
+    );
+  }
+
+  static const BoxDecoration _sheetDecoration = BoxDecoration(
+    color: AppColors.white,
+    borderRadius: BorderRadius.only(
+      topLeft: Radius.circular(24),
+      topRight: Radius.circular(24),
+    ),
+    boxShadow: [
+      BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(0, -2)),
+    ],
+  );
+
+  Widget _grabHandle() {
+    return Center(
+      child: Container(
+        margin: const EdgeInsets.only(top: 10, bottom: 8),
+        width: 40,
+        height: 4,
+        decoration: BoxDecoration(
+          color: Colors.grey.shade300,
+          borderRadius: BorderRadius.circular(2),
+        ),
+      ),
+    );
+  }
+
+  Widget _circleButton(IconData icon, VoidCallback onTap) {
+    return Material(
+      color: AppColors.white,
+      shape: const CircleBorder(),
+      elevation: 2,
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(8),
+          child: Icon(icon, color: AppColors.black, size: 22),
+        ),
+      ),
     );
   }
 
@@ -217,9 +278,18 @@ class _MessengerTrackingScreenState
   Widget _buildMap(MessengerOrder order) {
     final pickup = LatLng(order.pickupLat, order.pickupLng);
     final dropoff = LatLng(order.dropoffLat, order.dropoffLng);
+    // Shared pickup/dropoff pins (same as the ride flow) instead of the default
+    // green/red teardrops.
+    final pickupIcon = ref.watch(pickupMarkerProvider).value;
+    final dropoffIcon = ref.watch(dropoffMarkerProvider).value;
 
     return GoogleMap(
       initialCameraPosition: CameraPosition(target: pickup, zoom: 13),
+      // Keep the fitted route in the visible top half, above the sheet.
+      padding: EdgeInsets.only(
+        top: MediaQuery.of(context).padding.top + 56,
+        bottom: MediaQuery.of(context).size.height * 0.5,
+      ),
       onMapCreated: (controller) {
         _mapController = controller;
         _fitCamera(order);
@@ -228,15 +298,17 @@ class _MessengerTrackingScreenState
         Marker(
           markerId: const MarkerId('pickup'),
           position: pickup,
-          icon: BitmapDescriptor.defaultMarkerWithHue(
-            BitmapDescriptor.hueGreen,
-          ),
+          icon:
+              pickupIcon ??
+              BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
           infoWindow: const InfoWindow(title: 'จุดรับพัสดุ'),
         ),
         Marker(
           markerId: const MarkerId('dropoff'),
           position: dropoff,
-          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+          icon:
+              dropoffIcon ??
+              BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
           infoWindow: const InfoWindow(title: 'จุดส่งพัสดุ'),
         ),
       },
@@ -248,11 +320,9 @@ class _MessengerTrackingScreenState
   }
 
   Widget _buildDetailPanel(MessengerOrder order) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
           _buildStatusCard(order),
           const SizedBox(height: 12),
           _buildPackageCard(order),
@@ -324,9 +394,7 @@ class _MessengerTrackingScreenState
               ),
             ),
           ],
-          const SizedBox(height: 24),
         ],
-      ),
     );
   }
 
@@ -367,111 +435,113 @@ class _MessengerTrackingScreenState
 
     final int activeStep = _statusStep(order.status);
 
+    // Ride-style header: green title + supporting subtitle, then an icon
+    // timeline with an animated current segment.
     return _card(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: order.isDelivered
-                      ? AppColors.foundationGreen500.withValues(alpha: 0.1)
-                      : AppColors.primary.withValues(alpha: 0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  order.isDelivered
-                      ? Icons.check_circle
-                      : Icons.local_shipping,
-                  color: order.isDelivered
-                      ? AppColors.foundationGreen500
-                      : AppColors.primary,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      _statusText(order.status),
-                      style: AppTypography.heading5.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: order.isDelivered
-                            ? AppColors.foundationGreen500
-                            : AppColors.primary,
-                      ),
-                    ),
-                    if (order.hasDriver) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        'คนขับ #${order.driverId.substring(0, order.driverId.length.clamp(0, 6))}',
-                        style: AppTypography.caption4.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            ],
+          Text(
+            _statusText(order.status),
+            style: AppTypography.heading4.copyWith(
+              color: AppColors.foundationGreen700,
+            ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 4),
+          Text(
+            _statusSubtitle(order.status),
+            style: AppTypography.caption4.copyWith(
+              color: AppColors.semanticGrayNeutralFgHigh,
+            ),
+          ),
+          if (order.hasDriver) ...[
+            const SizedBox(height: 4),
+            Text(
+              'คนขับ #${order.driverId.substring(0, order.driverId.length.clamp(0, 6))}',
+              style: AppTypography.caption4.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
+          const SizedBox(height: 18),
           _buildTimeline(activeStep),
         ],
       ),
     );
   }
 
+  String _statusSubtitle(String status) {
+    switch (status.toUpperCase()) {
+      case 'PENDING':
+        return 'กำลังหาคนขับที่อยู่ใกล้คุณ...';
+      case 'ACCEPTED':
+        return 'คนขับกำลังเดินทางไปรับพัสดุ';
+      case 'ARRIVED_AT_PICKUP':
+        return 'คนขับถึงจุดรับพัสดุแล้ว';
+      case 'PICKED_UP':
+        return 'กำลังนำส่งพัสดุถึงปลายทาง';
+      case 'DELIVERED':
+        return 'ส่งพัสดุถึงปลายทางเรียบร้อย';
+      default:
+        return 'กำลังดำเนินการ...';
+    }
+  }
+
+  // Ride-style icon timeline: find driver → pickup → in transit → delivered,
+  // with the active segment animating (mirrors live_ride_screen).
   Widget _buildTimeline(int activeStep) {
-    const labels = ['รอคนขับ', 'รับงานแล้ว', 'ถึงจุดรับ', 'กำลังส่ง', 'สำเร็จ'];
     return Row(
       children: [
-        for (int i = 0; i < labels.length; i++) ...[
-          if (i > 0)
-            Expanded(
-              child: Container(
-                height: 2,
-                margin: const EdgeInsets.only(bottom: 18),
-                color: activeStep >= i
-                    ? AppColors.foundationGreen500
-                    : AppColors.foundationGrayscale200,
-              ),
-            ),
-          _timelineStep(labels[i], activeStep >= i),
-        ],
+        _tlIcon(Icons.person_search, activeStep >= 0, isBox: true),
+        _tlLine(done: activeStep >= 1, animating: activeStep == 0),
+        _tlIcon(Icons.two_wheeler, activeStep >= 1),
+        _tlLine(done: activeStep >= 3, animating: activeStep == 1 || activeStep == 2),
+        _tlIcon(Icons.inventory_2, activeStep >= 3),
+        _tlLine(done: activeStep >= 4, animating: activeStep == 3),
+        _tlIcon(Icons.location_on, activeStep >= 4),
       ],
     );
   }
 
-  Widget _timelineStep(String title, bool isActive) {
+  Widget _tlIcon(IconData icon, bool isActive, {bool isBox = false}) {
     final color = isActive
-        ? AppColors.foundationGreen500
-        : AppColors.foundationGrayscale300;
-    return Column(
-      children: [
-        Container(
-          width: 14,
-          height: 14,
-          decoration: BoxDecoration(
-            color: isActive ? color : AppColors.white,
-            border: Border.all(color: color, width: isActive ? 0 : 2),
-            shape: BoxShape.circle,
-          ),
+        ? AppColors.foundationGreen600
+        : Colors.grey.shade400;
+    if (isBox) {
+      return Container(
+        width: 24,
+        height: 24,
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(6),
         ),
-        const SizedBox(height: 4),
-        Text(
-          title,
-          style: AppTypography.support2.copyWith(
-            color: isActive
-                ? AppColors.textPrimary
-                : AppColors.foundationGrayscale500,
-            fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-          ),
+        child: Icon(icon, size: 14, color: Colors.white),
+      );
+    }
+    return Icon(icon, size: 24, color: color);
+  }
+
+  Widget _tlLine({required bool done, bool animating = false}) {
+    return Expanded(
+      child: Container(
+        height: 3,
+        margin: const EdgeInsets.symmetric(horizontal: 4),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(2),
+          child: animating
+              ? LinearProgressIndicator(
+                  backgroundColor: Colors.grey.shade200,
+                  valueColor: const AlwaysStoppedAnimation<Color>(
+                    AppColors.foundationGreen600,
+                  ),
+                )
+              : Container(
+                  color: done
+                      ? AppColors.foundationGreen600
+                      : Colors.grey.shade200,
+                ),
         ),
-      ],
+      ),
     );
   }
 
@@ -488,9 +558,10 @@ class _MessengerTrackingScreenState
           ),
           const SizedBox(height: 8),
           _infoRow(
-            Icons.trip_origin,
+            Icons.location_on,
             AppColors.foundationGreen500,
             order.pickupAddress.isNotEmpty ? order.pickupAddress : 'จุดรับพัสดุ',
+            asset: true,
           ),
           const SizedBox(height: 8),
           _infoRow(
@@ -499,6 +570,7 @@ class _MessengerTrackingScreenState
             order.dropoffAddress.isNotEmpty
                 ? order.dropoffAddress
                 : 'จุดส่งพัสดุ',
+            asset: true,
           ),
           const Divider(height: 20, color: AppColors.foundationGrayscale200),
           Wrap(
@@ -594,11 +666,15 @@ class _MessengerTrackingScreenState
     );
   }
 
-  Widget _infoRow(IconData icon, Color color, String text) {
+  Widget _infoRow(IconData icon, Color color, String text,
+      {bool asset = false}) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 18, color: color),
+        asset
+            ? AppIcons.asset(AppAssets.icLocationFill,
+                color: color, width: 20, height: 20)
+            : Icon(icon, size: 18, color: color),
         const SizedBox(width: 8),
         Expanded(
           child: Text(

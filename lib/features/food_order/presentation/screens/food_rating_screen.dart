@@ -144,11 +144,14 @@ class _FoodRatingScreenState extends ConsumerState<FoodRatingScreen> {
     final driverName = stateInfo.order?.driverName ?? 'คนขับของคุณ';
     final vehiclePlate = stateInfo.order?.vehiclePlate ?? '';
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          // Driver rating + tip are never submitted — the review API accepts
+    return Column(
+      children: [
+        Expanded(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                // Driver rating + tip are never submitted — the review API accepts
           // only rating + comment (SCRUM-44). Hidden behind a flag.
           if (FeatureFlags.foodReviewDriverExtras) ...[
           // Rider Rating Card
@@ -438,58 +441,69 @@ class _FoodRatingScreenState extends ConsumerState<FoodRatingScreen> {
             ),
           ),
 
-          const SizedBox(height: 24),
-
-          // Submit button
-          SizedBox(
-            width: double.infinity,
-            height: 52,
-            child: ElevatedButton(
-              onPressed: stateInfo.isSubmitting ? null : () => _submit(stateInfo),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.foundationGreen500,
-                foregroundColor: AppColors.white,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: stateInfo.isSubmitting
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: AppColors.white,
-                      ),
-                    )
-                  : Text(
-                      'ส่งรีวิว',
-                      style: AppTypography.label1.copyWith(
-                        color: AppColors.white,
+                const SizedBox(height: 8),
+              ],
+            ),
+          ),
+        ),
+        // Pinned action bar at the bottom.
+        SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: ElevatedButton(
+                    onPressed: stateInfo.isSubmitting
+                        ? null
+                        : () => _submit(stateInfo),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.foundationGreen500,
+                      foregroundColor: AppColors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-            ),
-          ),
-
-          const SizedBox(height: 12),
-
-          // Skip button
-          SizedBox(
-            width: double.infinity,
-            child: TextButton(
-              onPressed: () => context.go('/main'),
-              child: Text(
-                'ข้ามไปก่อน',
-                style: AppTypography.label2.copyWith(
-                  color: AppColors.semanticGrayNeutralFgLowOnWhite,
+                    child: stateInfo.isSubmitting
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: AppColors.white,
+                            ),
+                          )
+                        : Text(
+                            'ส่งรีวิว',
+                            style: AppTypography.label1.copyWith(
+                              color: AppColors.white,
+                            ),
+                          ),
+                  ),
                 ),
-              ),
+                const SizedBox(height: 4),
+                SizedBox(
+                  width: double.infinity,
+                  child: TextButton(
+                    onPressed: () => context.go('/main'),
+                    child: Text(
+                      'ข้ามไปก่อน',
+                      style: AppTypography.label2.copyWith(
+                        color: AppColors.semanticGrayNeutralFgLowOnWhite,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 16),
-        ],
-      ),
+        ),
+      ],
     );
   }
 

@@ -1,4 +1,6 @@
+import 'package:customer_app/core/constants/app_assets.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
+import 'package:customer_app/core/constants/app_icons.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/widgets/app_filter_chip.dart';
 import 'package:customer_app/core/constants/feature_flags.dart';
@@ -7,6 +9,7 @@ import 'package:customer_app/features/home/presentation/states/home_state.dart';
 import 'package:customer_app/features/messenger/domain/models/messenger_vehicle_type.dart';
 import 'package:customer_app/features/messenger/presentation/controllers/messenger_booking_controller.dart';
 import 'package:customer_app/features/messenger/presentation/states/messenger_booking_state.dart';
+import 'package:customer_app/features/messenger/presentation/screens/messenger_coupon_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -165,7 +168,6 @@ class _MessengerBookingScreenState
       child: Column(
         children: [
           _locationRow(
-            icon: Icons.trip_origin,
             iconColor: AppColors.foundationGreen500,
             label: 'จุดรับพัสดุ',
             address: homeState.pickupAddress ?? 'เลือกจุดรับพัสดุ',
@@ -178,7 +180,6 @@ class _MessengerBookingScreenState
           ),
           const Divider(height: 16, color: AppColors.foundationGrayscale200),
           _locationRow(
-            icon: Icons.location_on,
             iconColor: AppColors.foundationRed700,
             label: 'จุดส่งพัสดุ',
             address: homeState.dropoffAddress ?? 'เลือกจุดส่งพัสดุ',
@@ -196,7 +197,6 @@ class _MessengerBookingScreenState
   }
 
   Widget _locationRow({
-    required IconData icon,
     required Color iconColor,
     required String label,
     required String address,
@@ -209,7 +209,8 @@ class _MessengerBookingScreenState
         padding: const EdgeInsets.symmetric(vertical: 4),
         child: Row(
           children: [
-            Icon(icon, color: iconColor, size: 20),
+            AppIcons.asset(AppAssets.icLocationFill,
+                color: iconColor, width: 20, height: 20),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -410,6 +411,9 @@ class _MessengerBookingScreenState
           TextFormField(
             controller: _weightController,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            // Show the "over the size limit" error live as they type, not only
+            // on submit.
+            autovalidateMode: AutovalidateMode.onUserInteraction,
             decoration: _inputDecoration(
               label: 'น้ำหนัก (กก.) *',
               hint: tier != null ? 'ไม่เกิน ${tier.maxWeightKg} กก.' : null,
@@ -512,18 +516,26 @@ class _MessengerBookingScreenState
           TextFormField(
             controller: _recipientNameController,
             maxLength: 200,
-            decoration: _inputDecoration(label: 'ชื่อผู้รับ', counter: false),
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            decoration: _inputDecoration(label: 'ชื่อผู้รับ *', counter: false),
+            validator: (value) =>
+                (value == null || value.trim().isEmpty)
+                ? 'กรุณาระบุชื่อผู้รับ'
+                : null,
           ),
           const SizedBox(height: 8),
           TextFormField(
             controller: _recipientPhoneController,
             keyboardType: TextInputType.phone,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
             decoration: _inputDecoration(
-              label: 'เบอร์โทรผู้รับ',
+              label: 'เบอร์โทรผู้รับ *',
               hint: 'เช่น 0812345678',
             ),
             validator: (value) {
-              if (value == null || value.trim().isEmpty) return null;
+              if (value == null || value.trim().isEmpty) {
+                return 'กรุณาระบุเบอร์โทรผู้รับ';
+              }
               if (!_thaiPhoneRegex.hasMatch(value.trim())) {
                 return 'รูปแบบเบอร์โทรไม่ถูกต้อง';
               }
@@ -628,22 +640,60 @@ class _MessengerBookingScreenState
             ),
           ],
           const SizedBox(height: 12),
-          TextFormField(
-            controller: _promoController,
-            maxLength: 40,
-            decoration: _inputDecoration(
-              label: 'โค้ดส่วนลด (ไม่บังคับ)',
-              counter: false,
-            ),
-            onFieldSubmitted: (value) => ref
-                .read(messengerBookingControllerProvider.notifier)
-                .setPromoCode(value.trim()),
-            onTapOutside: (_) {
-              FocusManager.instance.primaryFocus?.unfocus();
-              ref
-                  .read(messengerBookingControllerProvider.notifier)
-                  .setPromoCode(_promoController.text.trim());
+          // Tap to pick a discount code (or type one) on the coupon screen.
+          InkWell(
+            borderRadius: BorderRadius.circular(12),
+            onTap: () async {
+              final current = ref
+                  .read(messengerBookingControllerProvider)
+                  .promoCode;
+              final code = await Navigator.of(context).push<String>(
+                MaterialPageRoute(
+                  builder: (_) =>
+                      MessengerCouponScreen(initialCode: current),
+                ),
+              );
+              if (code != null) {
+                setState(() => _promoController.text = code);
+                ref
+                    .read(messengerBookingControllerProvider.notifier)
+                    .setPromoCode(code.trim());
+              }
             },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              decoration: BoxDecoration(
+                color: AppColors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.foundationGrayscale300),
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.local_offer_outlined,
+                    color: AppColors.primary,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      _promoController.text.isNotEmpty
+                          ? _promoController.text
+                          : 'เลือกโค้ดส่วนลด (ไม่บังคับ)',
+                      style: AppTypography.body2.copyWith(
+                        color: _promoController.text.isNotEmpty
+                            ? AppColors.textPrimary
+                            : AppColors.textSecondary,
+                      ),
+                    ),
+                  ),
+                  const Icon(
+                    Icons.chevron_right,
+                    color: AppColors.foundationGrayscale400,
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),

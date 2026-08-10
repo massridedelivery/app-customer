@@ -74,11 +74,15 @@ class _PaymentSummaryScreenState extends ConsumerState<PaymentSummaryScreen> {
   @override
   Widget build(BuildContext context) {
     final profile = widget.driverProfile;
+    final method = (profile?.paymentMethod ?? '').toUpperCase();
+    // Cash / cash-on-delivery has no channel to deduct a tip from, so the tip
+    // selector only makes sense for card / PromptPay.
+    final canTip = method != 'CASH' && method != 'COD';
     final fare = profile?.fare ?? 0;
     final discount = profile?.discount ?? 0;
     final tollFee = profile?.tollFee ?? 0;
     final waitingFee = profile?.waitingFee ?? 0;
-    final tip = (_selectedTip ?? 0).toDouble();
+    final tip = (canTip ? (_selectedTip ?? 0) : 0).toDouble();
     final total = fare + tollFee + waitingFee - discount + tip;
 
     return Scaffold(
@@ -93,12 +97,15 @@ class _PaymentSummaryScreenState extends ConsumerState<PaymentSummaryScreen> {
         ),
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Fare breakdown
+      body: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Fare breakdown
             _buildSection(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -176,6 +183,7 @@ class _PaymentSummaryScreenState extends ConsumerState<PaymentSummaryScreen> {
               ),
             ),
 
+            if (canTip) ...[
             const SizedBox(height: 12),
 
             // Tip
@@ -244,32 +252,40 @@ class _PaymentSummaryScreenState extends ConsumerState<PaymentSummaryScreen> {
                 ],
               ),
             ),
+            ],
 
-            const SizedBox(height: 24),
-
-            // Continue
-            SizedBox(
-              width: double.infinity,
-              height: 52,
-              child: ElevatedButton(
-                onPressed: _continueToReview,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: AppColors.white,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                  const SizedBox(height: 8),
+                ],
+              ),
+            ),
+          ),
+          // Pinned action bar at the bottom of the screen.
+          SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+              child: SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: ElevatedButton(
+                  onPressed: _continueToReview,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: AppColors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
-                ),
-                child: Text(
-                  'ยืนยันและให้คะแนน',
-                  style: AppTypography.label1.copyWith(color: AppColors.white),
+                  child: Text(
+                    'ยืนยันและให้คะแนน',
+                    style: AppTypography.label1.copyWith(color: AppColors.white),
+                  ),
                 ),
               ),
             ),
-            const SizedBox(height: 16),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

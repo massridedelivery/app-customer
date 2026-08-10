@@ -102,7 +102,18 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       return;
     }
 
-    final address = homeState.foodAddress ?? 'ที่อยู่ปัจจุบัน';
+    // A delivery address is required — never ship to a fallback/guessed spot.
+    if (homeState.foodAddress == null ||
+        homeState.foodAddress!.trim().isEmpty ||
+        homeState.foodLocation == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('กรุณาเลือกสถานที่จัดส่งก่อนสั่งอาหาร')),
+      );
+      context.push('/food-place-search');
+      return;
+    }
+
+    final address = homeState.foodAddress!;
 
     ref.read(checkoutProvider.notifier).submitOrder(
           restaurantId: cart.restaurantId!,
@@ -159,18 +170,48 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     if (cart.items.isEmpty) {
       return Scaffold(
         appBar: AppBar(title: const Text('เช็คเอาท์')),
-        body: Center(
+        body: SafeArea(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.shopping_cart_outlined, size: 64, color: Colors.grey),
-              const SizedBox(height: 16),
-              Text('ไม่มีสินค้าในตะกร้าของคุณ', style: AppTypography.heading4),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () => Navigator.of(context).pop(),
-                style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
-                child: const Text('กลับไปสั่งอาหาร', style: TextStyle(color: Colors.white)),
+              Expanded(
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.shopping_cart_outlined,
+                        size: 64,
+                        color: Colors.grey,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'ไม่มีสินค้าในตะกร้าของคุณ',
+                        style: AppTypography.heading4,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              // Pinned to the bottom.
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      'กลับไปสั่งอาหาร',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ),
               ),
             ],
           ),

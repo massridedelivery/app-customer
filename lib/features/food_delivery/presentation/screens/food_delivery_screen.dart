@@ -24,7 +24,6 @@ class FoodDeliveryScreen extends ConsumerStatefulWidget {
 }
 
 class _FoodDeliveryScreenState extends ConsumerState<FoodDeliveryScreen> {
-  int _selectedTab = 0; // 0: จัดส่ง, 1: รับที่ร้าน, 2: ดีลทานที่ร้าน
   bool _showBottomPromo = true;
 
   @override
@@ -71,9 +70,12 @@ class _FoodDeliveryScreenState extends ConsumerState<FoodDeliveryScreen> {
                             categories: data.categories,
                           ),
                         ),
-                        for (final section in data.sections) ...[
-                          if (section.title != null &&
-                              section.title!.isNotEmpty)
+                        for (final section in data.sections)
+                          // Hide a section entirely (incl. its header) when it
+                          // has no items.
+                          if (section.items.isNotEmpty) ...[
+                            if (section.title != null &&
+                                section.title!.isNotEmpty)
                             SliverToBoxAdapter(
                               child: Padding(
                                 padding: const EdgeInsets.only(
@@ -87,7 +89,7 @@ class _FoodDeliveryScreenState extends ConsumerState<FoodDeliveryScreen> {
                                       MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
-                                      section.title!,
+                                      _sectionTitleTh(section.title!),
                                       style: AppTypography.heading4,
                                     ),
                                     if (section.layout != 'GRID_VERTICAL')
@@ -193,12 +195,13 @@ class _FoodDeliveryScreenState extends ConsumerState<FoodDeliveryScreen> {
             ),
           ),
 
-          // Floating Cart — self-contained; watches the cart on its own so cart
-          // edits don't rebuild the feed above.
-          Positioned(
-            right: 16,
-            bottom: _showBottomPromo ? 100 : 32,
-            child: const _FoodCartBar(),
+          // Bottom cart bar — self-contained; watches the cart on its own so
+          // cart edits don't rebuild the feed above.
+          const Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: _FoodCartBar(),
           ),
 
           // Bottom Promo Banner — hardcoded promo claims, no provider.
@@ -212,6 +215,16 @@ class _FoodDeliveryScreenState extends ConsumerState<FoodDeliveryScreen> {
         ],
       ),
     );
+  }
+
+  /// Localise the (often English) feed section titles to Thai.
+  String _sectionTitleTh(String title) {
+    final t = title.toLowerCase();
+    if (t.contains('popular') || t.contains('ยอดนิยม')) return 'ร้านยอดนิยม';
+    if (t.contains('nearby') || t.contains('near you')) return 'ร้านใกล้คุณ';
+    if (t.contains('again') || t.contains('ล่าสุด')) return 'สั่งอีกครั้ง';
+    if (t.contains('recommend')) return 'แนะนำสำหรับคุณ';
+    return title;
   }
 
   SliverAppBar _buildSliverAppBar() {
@@ -300,35 +313,6 @@ class _FoodDeliveryScreenState extends ConsumerState<FoodDeliveryScreen> {
                 ),
               ),
               const SizedBox(height: 12),
-              // Delivery Tabs
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: _buildTab(0, 'จัดส่ง', Icons.delivery_dining),
-                    ),
-                    // Backend is delivery-only; these tabs never filtered the
-                    // feed (SCRUM-44). Hidden until pickup/dine-in is supported.
-                    if (FeatureFlags.foodPickupDineInTabs) ...[
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: _buildTab(1, 'รับที่ร้าน', Icons.storefront),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: _buildTab(
-                          2,
-                          'ดีลทานที่ร้าน',
-                          Icons.local_activity,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              const SizedBox(height: 12),
               // Rounded bottom edge
               Container(
                 height: 20,
@@ -346,57 +330,6 @@ class _FoodDeliveryScreenState extends ConsumerState<FoodDeliveryScreen> {
       ),
     );
   }
-
-  Widget _buildTab(int index, String text, IconData icon) {
-    final isSelected = _selectedTab == index;
-    return GestureDetector(
-      onTap: () => setState(() => _selectedTab = index),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? Colors.white
-              : Colors.white.withValues(alpha: 0.15),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected
-                ? Colors.white
-                : Colors.white.withValues(alpha: 0.3),
-            width: 1,
-          ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ]
-              : null,
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              size: 16,
-              color: isSelected ? AppColors.primary : Colors.white,
-            ),
-            const SizedBox(width: 6),
-            Text(
-              text,
-              style: AppTypography.caption5.copyWith(
-                color: isSelected ? AppColors.primary : Colors.white,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
 
   Widget _buildBottomPromoBanner() {
     return Container(
@@ -692,39 +625,63 @@ class _FoodCartBar extends ConsumerWidget {
     );
     if (cartCount == 0) return const SizedBox.shrink();
 
-    return InkWell(
-      onTap: () {
-        Navigator.of(context).push(
-          MaterialPageRoute(builder: (context) => const CheckoutScreen()),
-        );
-      },
-      child: Container(
-        height: 56,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        decoration: BoxDecoration(
-          color: AppColors.foundationGreen500,
-          borderRadius: BorderRadius.circular(28),
-          boxShadow: const [
-            BoxShadow(color: Colors.black26, blurRadius: 8, offset: Offset(0, 4)),
-          ],
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(
-              Icons.shopping_cart_outlined,
-              color: Colors.white,
-              size: 24,
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => const CheckoutScreen()),
+            );
+          },
+          child: Container(
+            height: 56,
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            decoration: BoxDecoration(
+              color: AppColors.foundationGreen500,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: const [
+                BoxShadow(
+                  color: Colors.black26,
+                  blurRadius: 8,
+                  offset: Offset(0, 4),
+                ),
+              ],
             ),
-            const SizedBox(width: 8),
-            Text(
-              '$cartCount รายการ • ฿${cartTotal.toStringAsFixed(0)}',
-              style: AppTypography.caption3.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.shopping_cart_outlined,
+                  color: Colors.white,
+                  size: 24,
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  '$cartCount รายการ',
+                  style: AppTypography.caption3.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  '฿${cartTotal.toStringAsFixed(0)}',
+                  style: AppTypography.caption3.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                const Icon(
+                  Icons.chevron_right,
+                  color: Colors.white,
+                  size: 20,
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );

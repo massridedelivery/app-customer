@@ -77,6 +77,30 @@ class MapMarkerUtils {
     );
   }
 
+  /// The driver's live position on the map — a car icon instead of a plain pin.
+  /// Rasterised at [_pinRasterScale]× the on-screen size (as the pins are) so it
+  /// stays crisp on high-DPI screens.
+  static Future<BitmapDescriptor> createVehicleMarker({
+    double size = _pinDisplaySize * _pinRasterScale,
+  }) async {
+    final ByteData data = await rootBundle.load(
+      'assets/images/icons/ic_taxi_custom.png',
+    );
+    final ui.Codec codec = await ui.instantiateImageCodec(
+      data.buffer.asUint8List(),
+      targetWidth: size.toInt(),
+    );
+    final ui.FrameInfo frame = await codec.getNextFrame();
+    final ByteData? byteData = await frame.image.toByteData(
+      format: ui.ImageByteFormat.png,
+    );
+    if (byteData == null) return BitmapDescriptor.defaultMarker;
+    return BitmapDescriptor.bytes(
+      byteData.buffer.asUint8List(),
+      imagePixelRatio: _pinRasterScale,
+    );
+  }
+
   /// On-screen size of the pickup/dropoff pins, in logical pixels — the
   /// compact pin agreed on in 0d6d475. Adjust here to resize; the raster
   /// resolution follows automatically.

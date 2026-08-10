@@ -10,6 +10,7 @@ import 'package:customer_app/features/trips/presentation/controllers/trip_detail
 import 'package:customer_app/features/trips/presentation/states/trip_detail_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -40,6 +41,34 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
     } else {
       notifier.fetchFoodOrderDetail(widget.tripId);
     }
+  }
+
+  /// "ทำรายการอีกครั้ง": rides re-open booking with the same route; food re-opens
+  /// the restaurant (or the food home).
+  void _rebook() {
+    final state = ref.read(tripDetailControllerProvider);
+    final ride = state.rideDetails;
+    if (ride != null && ride.dropoffLat != null && ride.dropoffLng != null) {
+      final home = ref.read(homeControllerProvider.notifier);
+      if (ride.pickupLat != null && ride.pickupLng != null) {
+        home.setPickupLocation(
+          LatLng(ride.pickupLat!, ride.pickupLng!),
+          ride.pickupAddress ?? '',
+        );
+      }
+      home.setDropoffLocation(
+        LatLng(ride.dropoffLat!, ride.dropoffLng!),
+        ride.dropoffAddress ?? '',
+      );
+      context.push('/booking');
+      return;
+    }
+    final restaurantId = state.foodDetails?.restaurantId;
+    if (restaurantId != null && restaurantId.isNotEmpty) {
+      context.push('/restaurant/$restaurantId');
+      return;
+    }
+    context.push('/food-delivery');
   }
 
   @override
@@ -163,12 +192,18 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
                 _buildPaymentCard(state),
                 _buildRatingCard(),
                 const SizedBox(height: 24),
-                _buildActionButtons(),
-                const SizedBox(height: 48),
               ],
             ),
           ),
         ],
+      ),
+      // Pinned action bar at the bottom.
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
+          child: _buildActionButtons(),
+        ),
       ),
     );
   }
@@ -435,15 +470,13 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
           ),
           const SizedBox(height: 20),
           _buildLocationRow(
-            icon: AppAssets.icLocationFill,
-            color: AppColors.foundationRed700,
+            color: AppColors.foundationGreen500,
             location: pickupLocation,
             time: pickupTime,
             isFirst: true,
           ),
           _buildLocationRow(
-            icon: AppAssets.icLocationFill,
-            color: AppColors.foundationGreen600,
+            color: AppColors.foundationRed700,
             location: dropoffLocation,
             time: dropoffTime,
             isLast: true,
@@ -639,7 +672,6 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
   }
 
   Widget _buildLocationRow({
-    required String icon,
     required Color color,
     required String location,
     required String time,
@@ -652,7 +684,8 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
         children: [
           Column(
             children: [
-              AppIcons.asset(icon, width: 20, height: 20, color: color),
+              AppIcons.asset(AppAssets.icLocationFill,
+                  width: 20, height: 20, color: color),
               if (!isLast)
                 Expanded(
                   child: Container(
@@ -805,11 +838,14 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
+        // Without this the Column tries to fill the bottomNavigationBar's height
+        // and pushes the page content off-screen (blank detail page).
+        mainAxisSize: MainAxisSize.min,
         children: [
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: () {},
+              onPressed: _rebook,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,

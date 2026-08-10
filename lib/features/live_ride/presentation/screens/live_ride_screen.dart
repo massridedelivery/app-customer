@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 enum RideUIState { finding, confirming, pickupArrived, onTrip }
 
@@ -156,6 +157,7 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
     // App-wide cached marker bitmaps (rasterised once per session).
     final pickupIcon = ref.watch(pickupMarkerProvider).value;
     final dropoffIcon = ref.watch(dropoffMarkerProvider).value;
+    final driverIcon = ref.watch(vehicleMarkerProvider).value;
     final hasDriver = liveState.driverId?.isNotEmpty ?? false;
     final uiState = _getUIState(liveState.jobStatus, hasDriver: hasDriver);
 
@@ -200,6 +202,39 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
     final dropoff =
         dropoffLocation ?? const LatLng(13.7650, 100.5100);
 
+    // Shared bottom-sheet content, reused by both the fixed finding-mode panel
+    // and the draggable confirmed-mode sheet.
+    final sheetInner = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildHeaderTitle(uiState, liveState.jobStatus),
+        const SizedBox(height: 16),
+        _buildTimeline(uiState),
+        const SizedBox(height: 16),
+        Text(
+          'เลขการเดินทาง-${_getJobIdLabel()}', // Job ID
+          style: AppTypography.caption5.copyWith(
+            color: AppColors.semanticGrayNeutralFgLowOnWhite,
+          ),
+        ),
+        const SizedBox(height: 16),
+        if (uiState == RideUIState.finding)
+          _buildFindingModeContent(
+            pickupAddress,
+            dropoffAddress,
+            bookingState,
+            liveState,
+          )
+        else
+          _buildConfirmedModeContent(
+            pickupAddress,
+            dropoffAddress,
+            bookingState,
+            liveState,
+          ),
+      ],
+    );
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
@@ -214,6 +249,7 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
                     dropoff: dropoff,
                     pickupIcon: pickupIcon,
                     dropoffIcon: dropoffIcon,
+                    driverIcon: driverIcon,
                     routePoints: routePoints,
                     onMapCreated: (controller) {
                       _mapController = controller;
@@ -233,86 +269,59 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
               child: _buildTopIllustration(),
             ),
 
-          // Bottom Sheet Layer
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Container(
-              height: uiState != RideUIState.finding
-                  ? MediaQuery.of(context).size.height * 0.55
-                  : MediaQuery.of(context).size.height * 0.85,
-              decoration: const BoxDecoration(
-                color: AppColors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(24),
-                  topRight: Radius.circular(24),
+          // Bottom Sheet Layer. While finding a driver it's a fixed tall panel
+          // (the illustration sits above it). Once a driver is confirmed it
+          // becomes a draggable sheet the rider can snap between 50% and 80% of
+          // the screen height.
+          if (uiState == RideUIState.finding)
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Container(
+                height: MediaQuery.of(context).size.height * 0.85,
+                decoration: _sheetDecoration,
+                child: Column(
+                  children: [
+                    _buildGrabHandle(),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.only(
+                          left: 20,
+                          right: 20,
+                          bottom: 30,
+                        ),
+                        child: sheetInner,
+                      ),
+                    ),
+                  ],
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 10,
-                    offset: Offset(0, -2),
-                  ),
-                ],
               ),
-              child: Column(
-                children: [
-                  // Grab Handle
-                  Center(
-                    child: Container(
-                      margin: const EdgeInsets.only(top: 10, bottom: 6),
-                      width: 40,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade300,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
+            )
+          else
+            Positioned.fill(
+              child: DraggableScrollableSheet(
+                initialChildSize: 0.5,
+                minChildSize: 0.5,
+                maxChildSize: 0.8,
+                snap: true,
+                snapSizes: const [0.5, 0.8],
+                builder: (context, scrollController) {
+                  return Container(
+                    decoration: _sheetDecoration,
+                    child: ListView(
+                      controller: scrollController,
+                      padding: const EdgeInsets.only(bottom: 30),
+                      children: [
+                        _buildGrabHandle(),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: sheetInner,
+                        ),
+                      ],
                     ),
-                  ),
-                  Expanded(
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.only(
-                        left: 20,
-                        right: 20,
-                        bottom: 30,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildHeaderTitle(uiState, liveState.jobStatus),
-                          const SizedBox(height: 16),
-                          _buildTimeline(uiState),
-                          const SizedBox(height: 16),
-                          Text(
-                            'เลขการเดินทาง-${_getJobIdLabel()}', // Job ID
-                            style: AppTypography.caption5.copyWith(
-                              color: AppColors.semanticGrayNeutralFgLowOnWhite,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-
-                          // Dynamic Content
-                          if (uiState == RideUIState.finding)
-                            _buildFindingModeContent(
-                              pickupAddress,
-                              dropoffAddress,
-                              bookingState,
-                              liveState,
-                            )
-                          else
-                            _buildConfirmedModeContent(
-                              pickupAddress,
-                              dropoffAddress,
-                              bookingState,
-                              liveState,
-                            ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
+                  );
+                },
               ),
             ),
-          ),
 
           // Top action buttons (Close & Cancel)
           Positioned(
@@ -443,6 +452,32 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  // Shared white, rounded-top sheet surface with a soft top shadow.
+  static const BoxDecoration _sheetDecoration = BoxDecoration(
+    color: AppColors.white,
+    borderRadius: BorderRadius.only(
+      topLeft: Radius.circular(24),
+      topRight: Radius.circular(24),
+    ),
+    boxShadow: [
+      BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(0, -2)),
+    ],
+  );
+
+  Widget _buildGrabHandle() {
+    return Center(
+      child: Container(
+        margin: const EdgeInsets.only(top: 10, bottom: 6),
+        width: 40,
+        height: 4,
+        decoration: BoxDecoration(
+          color: Colors.grey.shade300,
+          borderRadius: BorderRadius.circular(2),
+        ),
       ),
     );
   }
@@ -602,6 +637,21 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
     );
   }
 
+  /// Opens the phone dialer with the driver's number (free, uses the mobile
+  /// network). No masked/VoIP layer yet — the rider sees the real number.
+  Future<void> _callDriver(String? phone) async {
+    final number = (phone ?? '').trim();
+    if (number.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('ไม่พบเบอร์โทรของคนขับ')),
+        );
+      }
+      return;
+    }
+    await launchUrl(Uri(scheme: 'tel', path: number));
+  }
+
   Widget _buildRiderSection(dynamic liveState) {
     final avatarUrl = liveState.driverProfile?.driverInfo.avatarUrl;
     final hasAvatar = avatarUrl != null && avatarUrl.isNotEmpty;
@@ -695,7 +745,8 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
               const SizedBox(width: 12),
               Expanded(
                 child: OutlinedButton.icon(
-                  onPressed: () {},
+                  onPressed: () =>
+                      _callDriver(liveState.driverProfile?.driverInfo.phone),
                   icon: const Icon(Icons.phone_outlined, size: 18),
                   label: const Text('โทร'),
                   style: OutlinedButton.styleFrom(
@@ -738,10 +789,11 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(
-                Icons.radio_button_checked,
-                color: AppColors.aberGreen,
-                size: 20,
+              AppIcons.asset(
+                AppAssets.icLocationFill,
+                color: AppColors.foundationGreen500,
+                width: 20,
+                height: 20,
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -777,9 +829,9 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
             children: [
               AppIcons.asset(
                 AppAssets.icLocationFill,
+                color: AppColors.foundationRed700,
                 width: 20,
                 height: 20,
-                color: AppColors.foundationOrange700,
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -964,6 +1016,7 @@ class _LiveRideMap extends ConsumerWidget {
   final LatLng dropoff;
   final BitmapDescriptor? pickupIcon;
   final BitmapDescriptor? dropoffIcon;
+  final BitmapDescriptor? driverIcon;
   final List<LatLng> routePoints;
   final void Function(GoogleMapController) onMapCreated;
 
@@ -972,6 +1025,7 @@ class _LiveRideMap extends ConsumerWidget {
     required this.dropoff,
     required this.pickupIcon,
     required this.dropoffIcon,
+    required this.driverIcon,
     required this.routePoints,
     required this.onMapCreated,
   });
@@ -1008,9 +1062,12 @@ class _LiveRideMap extends ConsumerWidget {
           Marker(
             markerId: const MarkerId('driver'),
             position: driverLocation,
-            icon: BitmapDescriptor.defaultMarkerWithHue(
-              BitmapDescriptor.hueOrange,
-            ), // Car
+            anchor: const Offset(0.5, 0.5),
+            icon:
+                driverIcon ??
+                BitmapDescriptor.defaultMarkerWithHue(
+                  BitmapDescriptor.hueOrange,
+                ),
           ),
       },
       polylines: {

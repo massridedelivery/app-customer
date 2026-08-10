@@ -88,13 +88,14 @@ class _HomeLandingViewState extends ConsumerState<HomeLandingView> {
                         },
                         child: Row(
                           children: [
-                            const SizedBox(
+                            SizedBox(
                               width: 24,
                               child: Center(
-                                child: Icon(
-                                  Icons.radio_button_checked,
+                                child: AppIcons.asset(
+                                  AppAssets.icLocationFill,
                                   color: AppColors.foundationGreen500,
-                                  size: 20,
+                                  width: 20,
+                                  height: 20,
                                 ),
                               ),
                             ),
@@ -180,13 +181,14 @@ class _HomeLandingViewState extends ConsumerState<HomeLandingView> {
                         },
                         child: Row(
                           children: [
-                            const SizedBox(
+                            SizedBox(
                               width: 24,
                               child: Center(
-                                child: Icon(
-                                  Icons.radio_button_checked,
-                                  color: AppColors.foundationOrange600,
-                                  size: 20,
+                                child: AppIcons.asset(
+                                  AppAssets.icLocationFill,
+                                  color: AppColors.foundationRed700,
+                                  width: 20,
+                                  height: 20,
                                 ),
                               ),
                             ),

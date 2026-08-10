@@ -47,6 +47,19 @@ class _PickupSelectionScreenState extends ConsumerState<PickupSelectionScreen> {
       },
     );
 
+    // Snap-to-road can move the pin off the user's raw point; follow it with
+    // the camera so the centre marker ends up sitting on the road.
+    ref.listen(homeControllerProvider.select((s) => s.mapSnapNonce), (
+      prev,
+      next,
+    ) {
+      if (prev == next) return;
+      final center = ref.read(homeControllerProvider).mapCenter;
+      if (center != null && _mapController != null) {
+        _mapController!.animateCamera(CameraUpdate.newLatLng(center));
+      }
+    });
+
     return Scaffold(
       body: Stack(
         children: [
@@ -76,6 +89,9 @@ class _PickupSelectionScreenState extends ConsumerState<PickupSelectionScreen> {
             myLocationButtonEnabled: false,
             zoomControlsEnabled: true,
             mapType: MapType.normal,
+            onCameraMoveStarted: () => ref
+                .read(homeControllerProvider.notifier)
+                .onCameraMoveStarted(),
             onCameraMove: (position) {
               ref.read(homeControllerProvider.notifier).onCameraMove(position);
             },

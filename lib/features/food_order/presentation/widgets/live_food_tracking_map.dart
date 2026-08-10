@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:customer_app/core/utils/map_marker_providers.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/utils/polyline_decoder.dart';
@@ -133,9 +134,10 @@ class _LiveFoodTrackingMapState extends ConsumerState<LiveFoodTrackingMap> {
         Marker(
           markerId: const MarkerId('rider'),
           position: riderPos,
-          icon: BitmapDescriptor.defaultMarkerWithHue(
-            BitmapDescriptor.hueOrange,
-          ),
+          anchor: const Offset(0.5, 0.5),
+          icon:
+              ref.watch(vehicleMarkerProvider).value ??
+              BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
         ),
       },
       polylines: {

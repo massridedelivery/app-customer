@@ -1,0 +1,98 @@
+name: Deploy Dev to TestFlight (iOS)
+
+# Build the DEV flavor (com.massdrive.customerApp.develop) and upload it to the
+# "Customer Dev" TestFlight app. Lets anyone (incl. Windows users, who cannot
+# build iOS locally) ship a dev build by triggering this on GitHub — the runner
+# is macOS.
+#
+# Requires (same as the prod deploy-ios.yml, plus one extra):
+#   - match repo also holds an App Store profile for com.massdrive.customerApp.develop
+#     (bootstrap once locally:
+#       cd ios && bundle exec fastlane match appstore \
+#         --app_identifier com.massdrive.customerApp.develop --readonly false)
+#   - the same MATCH_* / ASC_* repo secrets as prod
+# env/dev.json is committed, so no PROD_ENV_JSON-style secret is needed here.
+on:
+  workflow_dispatch:
+  push:
+    # Auto-deploy dev when a dev/x.x.x tag is pushed.
+    tags:
+      - 'dev/*'
+
+concurrency:
+  group: deploy-ios-dev
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    runs-on: macos-15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # App Store Connect rejects builds made with an older iOS SDK
+      # ("must be built with the iOS 26 SDK or later"). The macos-15 image
+      # defaults to an older Xcode, so select the newest stable one installed.
+      - name: Select latest Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.41.6
+          channel: stable
+          cache: true
+
+      - name: Set up Ruby (for fastlane)
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+          working-directory: ios
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      # Generated sources (*.g.dart, *.freezed.dart) are gitignored, so they
+      # must be regenerated on a fresh checkout before the build can compile.
+      - name: Generate code (freezed / riverpod / json_serializable)
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      # --config-only compiles no binary; it writes the dart-defines, version
+      # name (from pubspec.yaml) and build number into ios/Flutter/Generated.xcconfig
+      # so the subsequent fastlane/gym archive picks them up.
+      # --flavor dev selects the `dev` scheme / Release-dev configuration, which
+      # resolves BUNDLE_ID_SUFFIX to .develop -> com.massdrive.customerApp.develop.
+      # env/dev.json is committed, so it is read straight from the checkout.
+      # Build number = run number + 10 (dev app has its own build-number
+      # sequence, independent of prod). If a first upload is rejected with
+      # "bundle version must be higher", raise this offset.
+      - name: Configure iOS build (dart-defines + version + build number)
+        run: |
+          # On a dev/x.x.x tag, take x.x.x as the app version; on manual
+          # dispatch (a branch ref) fall back to pubspec.yaml's version.
+          BUILD_NAME_ARG=""
+          if [ "$GITHUB_REF_TYPE" = "tag" ]; then
+            BUILD_NAME_ARG="--build-name=${GITHUB_REF_NAME##*/}"
+          fi
+          flutter build ios --config-only --release --flavor dev \
+            --dart-define-from-file=env/dev.json \
+            $BUILD_NAME_ARG \
+            --build-number=$((GITHUB_RUN_NUMBER + 10))
+
+      - name: Install CocoaPods
+        working-directory: ios
+        run: bundle exec pod install
+
+      - name: Build & upload to TestFlight (dev)
+        working-directory: ios
+        env:
+          MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8_BASE64: ${{ secrets.ASC_KEY_P8_BASE64 }}
+        run: bundle exec fastlane dev

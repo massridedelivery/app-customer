@@ -5,7 +5,9 @@ import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/constants/feature_flags.dart';
 import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
 import 'package:customer_app/features/home/presentation/states/home_state.dart';
+import 'package:customer_app/features/active_orders/presentation/controllers/active_orders_controller.dart';
 import 'package:customer_app/features/home/presentation/widgets/app_drawer.dart';
+import 'package:customer_app/features/home/presentation/widgets/home_promo_banner.dart';
 import 'package:customer_app/features/active_orders/presentation/widgets/active_orders_banner.dart';
 import 'package:flutter/material.dart';
 import 'package:customer_app/core/widgets/app_network_image.dart';
@@ -39,7 +41,7 @@ class _ServiceSelectionScreenState
           SliverAppBar(
             pinned: true,
             stretch: true,
-            expandedHeight: 180,
+            expandedHeight: 175,
             collapsedHeight: 65 + statusPadding,
             scrolledUnderElevation: 0.0,
             backgroundColor: Colors.transparent,
@@ -48,7 +50,7 @@ class _ServiceSelectionScreenState
             flexibleSpace: LayoutBuilder(
               builder: (context, constraints) {
                 final double top = constraints.biggest.height;
-                final double expandedHeight = 180;
+                final double expandedHeight = 175;
                 final double collapsedHeight = 65 + statusPadding;
                 final double t =
                     ((top - collapsedHeight) /
@@ -83,7 +85,7 @@ class _ServiceSelectionScreenState
           ),
           SliverToBoxAdapter(
             child: Transform.translate(
-              offset: const Offset(0, -25),
+              offset: const Offset(0, -12),
               child: Container(
                 decoration: BoxDecoration(
                   color: AppColors.semanticGrayNeutralBgWhite,
@@ -92,11 +94,15 @@ class _ServiceSelectionScreenState
                   ),
                 ),
                 child: Padding(
-                  padding: EdgeInsets.only(bottom: bottomPadding + 20),
+                  padding: EdgeInsets.only(top: 2, bottom: bottomPadding + 20),
                   child: Column(
                     children: [
                       const ActiveOrdersBanner(),
                       _buildServiceGrid(context),
+                      const SizedBox(height: 20),
+                      // Real promotions from GET /api/customer/promo/list —
+                      // hides itself when there are none.
+                      const HomePromoBanner(),
                       // Hardcoded promo/restaurant sections with fake ids — see
                       // FeatureFlags.foodHomePromoSections. Hidden until wired
                       // to the discovery feed.
@@ -345,7 +351,16 @@ class _ServiceSelectionScreenState
             AppColors.foundationViolet800,
             AppColors.foundationViolet100,
             onTap: () {
-              context.push('/messenger-booking');
+              // If a messenger order is already running, resume it instead of
+              // letting the customer start a second one.
+              final active =
+                  ref.read(activeOrdersControllerProvider).value ?? const [];
+              final ongoing = active.where((o) => o.isMessenger);
+              if (ongoing.isNotEmpty) {
+                context.push('/messenger/tracking/${ongoing.first.id}');
+              } else {
+                context.push('/messenger-booking');
+              }
             },
           ),
         ],

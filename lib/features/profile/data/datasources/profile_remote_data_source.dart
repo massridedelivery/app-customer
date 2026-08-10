@@ -6,11 +6,15 @@ part 'profile_remote_data_source.g.dart';
 
 abstract class ProfileRemoteDataSource {
   Future<Map<String, dynamic>> getProfile();
-  Future<void> updateProfile({
+
+  /// Returns the updated profile body. `PUT /api/customer/profile` echoes back
+  /// the full profile, so callers can use it directly without a follow-up GET.
+  Future<Map<String, dynamic>> updateProfile({
     required String fullName,
     String? emergencyContact,
     Map<String, dynamic>? preferences,
     String? email,
+    String? avatarUrl,
   });
   Future<void> logout();
 }
@@ -33,13 +37,16 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
   }
 
   @override
-  Future<void> updateProfile({
+  Future<Map<String, dynamic>> updateProfile({
     required String fullName,
     String? emergencyContact,
     Map<String, dynamic>? preferences,
     String? email,
+    String? avatarUrl,
   }) async {
-    await _apiService.dio.put(
+    // Partial update: only send fields the caller actually provided so blank
+    // values don't overwrite existing server data.
+    final response = await _apiService.dio.put(
       '/api/customer/profile',
       data: {
         'full_name': fullName,
@@ -48,8 +55,10 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
           'emergency_contact': emergencyContact,
         if (preferences != null && preferences.isNotEmpty)
           'preferences': preferences,
+        if (avatarUrl != null && avatarUrl.isNotEmpty) 'avatar_url': avatarUrl,
       },
     );
+    return response.data as Map<String, dynamic>;
   }
 
   @override

@@ -30,6 +30,7 @@ class ProfileScreen extends ConsumerWidget {
               data: (p) => _ProfileHeader(
                 name: p.editName,
                 phone: p.phone,
+                avatarUrl: p.editAvatarUrl,
                 loyalty: null,
               ),
             ),
@@ -189,6 +190,7 @@ class ProfileScreen extends ConsumerWidget {
 class _ProfileHeader extends StatelessWidget {
   final String name;
   final String phone;
+  final String? avatarUrl;
   final Map<String, dynamic>? loyalty;
 
   // The loyalty summary is fully built but parked until the backend returns a
@@ -203,6 +205,7 @@ class _ProfileHeader extends StatelessWidget {
     required this.name,
     required this.phone,
     required this.loyalty,
+    this.avatarUrl,
   });
 
   @override
@@ -227,7 +230,10 @@ class _ProfileHeader extends StatelessWidget {
           padding: const EdgeInsets.all(12.0),
           child: Column(
             children: [
-              Row(
+              GestureDetector(
+                onTap: () => context.push('/edit-profile'),
+                behavior: HitTestBehavior.opaque,
+                child: Row(
                 children: [
                   // Avatar
                   Container(
@@ -240,15 +246,23 @@ class _ProfileHeader extends StatelessWidget {
                         color: AppColors.foundationGrayscale200,
                         width: 1.5,
                       ),
+                      image: (avatarUrl != null && avatarUrl!.isNotEmpty)
+                          ? DecorationImage(
+                              image: NetworkImage(avatarUrl!),
+                              fit: BoxFit.cover,
+                            )
+                          : null,
                     ),
-                    child: Center(
-                      child: Text(
-                        name.isNotEmpty ? name[0].toUpperCase() : '?',
-                        style: AppTypography.heading3.copyWith(
-                          color: AppColors.primary,
-                        ),
-                      ),
-                    ),
+                    child: (avatarUrl != null && avatarUrl!.isNotEmpty)
+                        ? null
+                        : Center(
+                            child: Text(
+                              name.isNotEmpty ? name[0].toUpperCase() : '?',
+                              style: AppTypography.heading3.copyWith(
+                                color: AppColors.primary,
+                              ),
+                            ),
+                          ),
                   ),
                   const SizedBox(width: 20),
                   Expanded(
@@ -271,15 +285,13 @@ class _ProfileHeader extends StatelessWidget {
                       ],
                     ),
                   ),
-                  IconButton(
-                    onPressed: () {},
-                    icon: const Icon(
-                      Icons.navigate_next_rounded,
-                      color: AppColors.foundationGrayscale400,
-                      size: 28,
-                    ),
+                  const Icon(
+                    Icons.navigate_next_rounded,
+                    color: AppColors.foundationGrayscale400,
+                    size: 28,
                   ),
                 ],
+                ),
               ),
               if (loyalty != null) ...[
                 if (_showLoyaltySummary) ...[

@@ -154,7 +154,15 @@ class _PlaceSearchScreenState extends ConsumerState<PlaceSearchScreen>
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.of(context).pop(),
+          // Guard against an empty stack (e.g. when reached via `context.go`,
+          // which resets the stack): popping nothing left a black screen.
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/main');
+            }
+          },
         ),
       ),
       body: SafeArea(

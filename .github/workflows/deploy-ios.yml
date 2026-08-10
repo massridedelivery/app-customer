@@ -12,8 +12,11 @@ name: Deploy to TestFlight (iOS)
 # automatically on merges to main.
 on:
   workflow_dispatch:
-  # push:
-  #   branches: [main]
+  push:
+    # Auto-deploy prod when a release/x.x.x tag is pushed. `*` does not match
+    # `/`, so this matches release/1.2.3 (one segment after the slash).
+    tags:
+      - 'release/*'
 
 concurrency:
   group: deploy-ios
@@ -25,6 +28,14 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      # App Store Connect rejects builds made with an older iOS SDK
+      # ("must be built with the iOS 26 SDK or later"). The macos-15 image
+      # defaults to an older Xcode, so select the newest stable one installed.
+      - name: Select latest Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -61,10 +72,17 @@ jobs:
       # --flavor prod selects the `prod` scheme / Release-prod configuration,
       # which resolves BUNDLE_ID_SUFFIX to empty -> com.massdrive.customerApp.
       # Build number = run number + 10, matching the Android pipeline's scheme.
-      - name: Configure iOS build (dart-defines + build number)
+      - name: Configure iOS build (dart-defines + version + build number)
         run: |
+          # On a release/x.x.x tag, take x.x.x as the app version (CFBundleShortVersionString);
+          # on manual dispatch (a branch ref) fall back to pubspec.yaml's version.
+          BUILD_NAME_ARG=""
+          if [ "$GITHUB_REF_TYPE" = "tag" ]; then
+            BUILD_NAME_ARG="--build-name=${GITHUB_REF_NAME##*/}"
+          fi
           flutter build ios --config-only --release --flavor prod \
             --dart-define-from-file=env/prod.json \
+            $BUILD_NAME_ARG \
             --build-number=$((GITHUB_RUN_NUMBER + 10))
 
       - name: Install CocoaPods

@@ -1,3 +1,6 @@
+require "base64"
+require "fileutils"
+
 default_platform(:ios)
 
 # The prod flavor resolves BUNDLE_ID_SUFFIX to empty, so the shipped id is the
@@ -16,21 +19,15 @@ platform :ios do
     # No-op on a normal developer machine.
     setup_ci
 
-    api_key = app_store_connect_api_key(
-      key_id: ENV["ASC_KEY_ID"],
-      issuer_id: ENV["ASC_ISSUER_ID"],
-      key_content: ENV["ASC_KEY_P8_BASE64"],
-      is_key_content_base64: true,
-      in_house: false,
-    )
-
-    # Pull the distribution cert + App Store provisioning profile from the
-    # match repo (read-only) into the keychain.
+    # match READ-ONLY: pull the distribution cert + App Store profile from the
+    # match git repo. No api_key here on purpose — readonly match only reads the
+    # git repo (auth via MATCH_GIT_BASIC_AUTHORIZATION), so it never invokes
+    # spaceship, which crashes signing the App Store Connect JWT on the runner's
+    # OpenSSL 3 with "invalid curve name (OpenSSL::PKey::ECError)".
     match(
       type: "appstore",
       readonly: true,
       app_identifier: [APP_IDENTIFIER],
-      api_key: api_key,
     )
 
     # The project ships with automatic signing; force manual signing against
@@ -63,9 +60,21 @@ platform :ios do
       },
     )
 
-    upload_to_testflight(
-      api_key: api_key,
-      skip_waiting_for_build_processing: true,
+    # Upload with altool, not pilot/upload_to_testflight: altool signs the App
+    # Store Connect API JWT natively (not through Ruby's OpenSSL), dodging the
+    # same spaceship OpenSSL 3 curve crash. Materialize the .p8 from the base64
+    # secret into the location altool looks in first.
+    key_id    = ENV["ASC_KEY_ID"]
+    issuer_id = ENV["ASC_ISSUER_ID"]
+    key_dir   = File.expand_path("~/.appstoreconnect/private_keys")
+    FileUtils.mkdir_p(key_dir)
+    File.write(
+      File.join(key_dir, "AuthKey_#{key_id}.p8"),
+      Base64.decode64(ENV["ASC_KEY_P8_BASE64"]),
     )
+
+    ipa_path = lane_context[SharedValues::IPA_OUTPUT_PATH]
+    sh("xcrun altool --upload-app --type ios -f '#{ipa_path}' " \
+       "--apiKey #{key_id} --apiIssuer #{issuer_id}")
   end
 end

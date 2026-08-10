@@ -92,3 +92,10 @@ bump:
 # 🍏 build IPA dev พร้อมขึ้น TestFlight (App Store distribution)
 ipa_dev:
 	flutter build ipa --flavor dev --dart-define-from-file=env/dev.json --export-method app-store
+
+# 🚀 bump + build + upload dev ขึ้น TestFlight ในคำสั่งเดียว (ไม่ต้องเปิด Transporter)
+# ใช้ App Store Connect API key M4PPU86374 (.p8 อยู่ใน ~/.appstoreconnect/private_keys/)
+deploy_dev: bump ipa_dev
+	xcrun altool --upload-app --type ios \
+		-f build/ios/ipa/customer_app.ipa \
+		--apiKey M4PPU86374 --apiIssuer 03750a9c-5c4e-4be1-bb27-546000146161

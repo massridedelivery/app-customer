@@ -3,45 +3,63 @@ require "fileutils"
 
 default_platform(:ios)
 
-# The prod flavor resolves BUNDLE_ID_SUFFIX to empty, so the shipped id is the
-# bare one below (dev builds are com.massdrive.customerApp.develop).
-APP_IDENTIFIER = "com.massdrive.customerApp"
-TEAM_ID        = "Q7742Z74Q3"
-SCHEME         = "prod"
-CONFIGURATION  = "Release-prod"
-# Profile name that `match(type: "appstore")` creates for this app id.
-PROFILE_NAME   = "match AppStore #{APP_IDENTIFIER}"
+TEAM_ID = "Q7742Z74Q3"
 
 platform :ios do
-  desc "Build the Runner scheme and upload it to TestFlight"
+  desc "Build the prod flavor (com.massdrive.customerApp) and upload to TestFlight"
   lane :beta do
+    build_and_upload(
+      app_identifier: "com.massdrive.customerApp",
+      scheme: "prod",
+      configuration: "Release-prod",
+    )
+  end
+
+  desc "Build the dev flavor (com.massdrive.customerApp.develop) and upload to TestFlight"
+  lane :dev do
+    build_and_upload(
+      app_identifier: "com.massdrive.customerApp.develop",
+      scheme: "dev",
+      configuration: "Release-dev",
+    )
+  end
+
+  # Shared archive + upload for both flavors. Each flavor has its own
+  # match-managed App Store profile ("match AppStore <app_identifier>"), both
+  # signed by the same Q7742Z74Q3 Apple Distribution cert.
+  private_lane :build_and_upload do |options|
+    app_identifier = options[:app_identifier]
+    scheme         = options[:scheme]
+    configuration  = options[:configuration]
+    profile_name   = "match AppStore #{app_identifier}"
+
     # Creates a temporary keychain on CI and makes match import into it.
     # No-op on a normal developer machine.
     setup_ci
 
     # match READ-ONLY: pull the distribution cert + App Store profile from the
-    # match git repo. No api_key here on purpose — readonly match only reads the
-    # git repo (auth via MATCH_GIT_BASIC_AUTHORIZATION), so it never invokes
+    # match git repo. No api_key on purpose — readonly match only reads the git
+    # repo (auth via MATCH_GIT_BASIC_AUTHORIZATION), so it never invokes
     # spaceship, which crashes signing the App Store Connect JWT on the runner's
     # OpenSSL 3 with "invalid curve name (OpenSSL::PKey::ECError)".
     match(
       type: "appstore",
       readonly: true,
-      app_identifier: [APP_IDENTIFIER],
+      app_identifier: [app_identifier],
     )
 
-    # The project ships with automatic signing; force manual signing against
-    # the match-managed profile so the archive is reproducible on CI.
-    # Scoped to Release-prod only, and deliberately WITHOUT bundle_identifier so
-    # the project's "com.massdrive.customerApp$(BUNDLE_ID_SUFFIX)" pattern (which
-    # the dev flavor relies on) is left intact.
+    # The project ships with automatic signing; force manual signing against the
+    # match-managed profile so the archive is reproducible on CI. Scoped to this
+    # flavor's build configuration only, and deliberately WITHOUT
+    # bundle_identifier so the project's "com.massdrive.customerApp$(BUNDLE_ID_SUFFIX)"
+    # pattern is left intact.
     update_code_signing_settings(
       use_automatic_signing: false,
       path: "Runner.xcodeproj",
       team_id: TEAM_ID,
       targets: ["Runner"],
-      build_configurations: [CONFIGURATION],
-      profile_name: PROFILE_NAME,
+      build_configurations: [configuration],
+      profile_name: profile_name,
       code_sign_identity: "Apple Distribution",
     )
 
@@ -50,12 +68,12 @@ platform :ios do
     # dart-defines, version name and build number into Generated.xcconfig.
     build_app(
       workspace: "Runner.xcworkspace",
-      scheme: SCHEME,
-      configuration: CONFIGURATION,
+      scheme: scheme,
+      configuration: configuration,
       export_method: "app-store",
       export_options: {
         provisioningProfiles: {
-          APP_IDENTIFIER => PROFILE_NAME,
+          app_identifier => profile_name,
         },
       },
     )

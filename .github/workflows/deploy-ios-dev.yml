@@ -14,8 +14,10 @@ name: Deploy Dev to TestFlight (iOS)
 # env/dev.json is committed, so no PROD_ENV_JSON-style secret is needed here.
 on:
   workflow_dispatch:
-  # push:
-  #   branches: [develop]
+  push:
+    # Auto-deploy dev when a dev/x.x.x tag is pushed.
+    tags:
+      - 'dev/*'
 
 concurrency:
   group: deploy-ios-dev
@@ -67,10 +69,17 @@ jobs:
       # Build number = run number + 10 (dev app has its own build-number
       # sequence, independent of prod). If a first upload is rejected with
       # "bundle version must be higher", raise this offset.
-      - name: Configure iOS build (dart-defines + build number)
+      - name: Configure iOS build (dart-defines + version + build number)
         run: |
+          # On a dev/x.x.x tag, take x.x.x as the app version; on manual
+          # dispatch (a branch ref) fall back to pubspec.yaml's version.
+          BUILD_NAME_ARG=""
+          if [ "$GITHUB_REF_TYPE" = "tag" ]; then
+            BUILD_NAME_ARG="--build-name=${GITHUB_REF_NAME##*/}"
+          fi
           flutter build ios --config-only --release --flavor dev \
             --dart-define-from-file=env/dev.json \
+            $BUILD_NAME_ARG \
             --build-number=$((GITHUB_RUN_NUMBER + 10))
 
       - name: Install CocoaPods

@@ -621,7 +621,7 @@ class AppLocalizationsTh extends AppLocalizations {
   String get setAsDefaultAddress => 'ตั้งเป็นที่อยู่เริ่มต้น';
 
   @override
-  String get noRecentSearches => 'ยังไม่มีการค้นหาล่าสุด';
+  String get noRecentSearches => 'ยังไม่มีการเดินทางล่าสุด';
 
   @override
   String get recommendedEmpty => 'ยังไม่มีรายการแนะนำ';

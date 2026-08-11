@@ -4,6 +4,8 @@ import 'package:customer_app/features/home/presentation/controllers/home_control
 import 'package:customer_app/features/home/presentation/controllers/place_search_controller.dart';
 import 'package:customer_app/features/home/domain/models/place.dart';
 import 'package:customer_app/features/home/domain/models/place_prediction.dart';
+import 'package:customer_app/features/trips/domain/recent_ride_places.dart';
+import 'package:customer_app/features/trips/presentation/controllers/trips_controller.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -124,9 +126,9 @@ class PlaceSearchMainContent extends ConsumerWidget {
         controller: tabController,
         children: [
           PlaceSearchPlaceList(
-            places: ref.watch(
-              homeControllerProvider.select((s) => s.recentPlaces),
-            ),
+            // Prefer real ride history (reliable) and fall back to the flaky
+            // frequent-places list only when there's no trip history yet.
+            places: _recentPlaces(ref),
             emptyMessage: l10n.noRecentSearches,
             emptyIcon: Icons.history,
             icon: Icons.access_time_filled,
@@ -149,6 +151,18 @@ class PlaceSearchMainContent extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  /// Recent destinations for the "ล่าสุด" tab: the customer's real ride
+  /// history first (kept warm by the screens that open this), falling back to
+  /// the frequent-places convenience list when there's no history yet.
+  List<Place> _recentPlaces(WidgetRef ref) {
+    final history = ref.watch(
+      tripsControllerProvider.select((s) => s.historyOrders),
+    );
+    final fromHistory = recentRidePlaces(history);
+    if (fromHistory.isNotEmpty) return fromHistory;
+    return ref.watch(homeControllerProvider.select((s) => s.recentPlaces));
   }
 
   Future<void> _selectPrediction(WidgetRef ref, PlacePrediction p) async {

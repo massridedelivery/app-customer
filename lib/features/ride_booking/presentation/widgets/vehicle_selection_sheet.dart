@@ -127,6 +127,12 @@ class VehicleSelectionSheet extends ConsumerWidget {
                   ),
           ),
 
+          const Divider(
+            height: 1,
+            thickness: 1,
+            color: AppColors.semanticGrayNeutralBorderLightgray,
+          ),
+
           // Payment and Promo section
           IntrinsicHeight(
             child: Row(
@@ -241,10 +247,16 @@ class VehicleSelectionSheet extends ConsumerWidget {
             ),
           ),
 
-          // Coupon discount summary
+          // Coupon discount summary — a soft success chip with its own breathing
+          // room so it doesn't read as cramped against the payment row / button.
           if (bookingState.promoDiscount > 0)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+            Container(
+              margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: _kSuccessBg,
+                borderRadius: BorderRadius.circular(12),
+              ),
               child: Row(
                 children: [
                   const Icon(
@@ -282,6 +294,7 @@ class VehicleSelectionSheet extends ConsumerWidget {
             padding: EdgeInsets.only(
               left: 16,
               right: 16,
+              top: 12,
               bottom: bottomPadding > 0 ? bottomPadding : 16,
             ),
             child: SizedBox(

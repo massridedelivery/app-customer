@@ -105,6 +105,13 @@ class AppAssets {
 
   // Location Icon
   static const String locationIcon = 'icons/ic_location';
+  // 3D service icons (Microsoft Fluent Emoji, MIT license) — rendered via
+  // Image.asset, not AppIcons.asset (which is SVG-only).
+  static const String ic3dRide = 'assets/images/icons/3d/ic3d_ride.png';
+  static const String ic3dFood = 'assets/images/icons/3d/ic3d_food.png';
+  static const String ic3dMessenger =
+      'assets/images/icons/3d/ic3d_messenger.png';
+
   static const String icLocationFill =
       'assets/images/icons/ic_location_fill.svg';
   static const String icLocationPinLine =

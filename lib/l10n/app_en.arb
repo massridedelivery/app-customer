@@ -221,7 +221,7 @@
   "noteToRiderHint": "e.g. White house with green roof",
   "cannotSaveAddress": "Cannot save address at this time",
   "setAsDefaultAddress": "Set as default address",
-  "noRecentSearches": "No recent searches yet",
+  "noRecentSearches": "No recent trips yet",
   "recommendedEmpty": "No recommendations yet",
   "searchError": "Search failed. Tap to retry.",
   "selectPickupFirst": "Please choose a pickup point first",

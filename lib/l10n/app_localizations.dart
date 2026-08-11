@@ -1295,7 +1295,7 @@ abstract class AppLocalizations {
   /// No description provided for @noRecentSearches.
   ///
   /// In en, this message translates to:
-  /// **'No recent searches yet'**
+  /// **'No recent trips yet'**
   String get noRecentSearches;
 
   /// No description provided for @recommendedEmpty.

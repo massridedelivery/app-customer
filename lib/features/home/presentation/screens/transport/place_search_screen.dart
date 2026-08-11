@@ -8,6 +8,8 @@ import 'package:customer_app/features/home/presentation/controllers/home_control
 import 'package:customer_app/features/home/presentation/controllers/place_search_controller.dart';
 import 'package:customer_app/features/home/presentation/states/home_state.dart';
 import 'package:customer_app/features/home/presentation/widgets/place_search_widgets.dart';
+import 'package:customer_app/features/trips/domain/models/history_order.dart';
+import 'package:customer_app/features/trips/presentation/controllers/trips_controller.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -40,6 +42,16 @@ class _PlaceSearchScreenState extends ConsumerState<PlaceSearchScreen>
           state.pickupAddress ?? AppLocalizations.of(context)!.currentLocation;
       _dropoffController.text = state.dropoffAddress ?? '';
       _dropoffFocusNode.requestFocus();
+
+      // Warm ride history so the "ล่าสุด" tab has a reliable source. The
+      // frequent-places endpoint was flaky (recent appearing/disappearing);
+      // the recent tab now prefers real trip history, which we fetch here.
+      final trips = ref.read(tripsControllerProvider);
+      if (trips.historyOrders.isEmpty && !trips.isHistoryLoading) {
+        ref
+            .read(tripsControllerProvider.notifier)
+            .fetchHistoryOrders(type: HistoryType.ride);
+      }
     });
 
     _pickupFocusNode.addListener(() {

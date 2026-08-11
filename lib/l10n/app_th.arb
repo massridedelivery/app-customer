@@ -221,7 +221,7 @@
   "noteToRiderHint": "เช่น บ้านสีขาวหลังคาเขียว",
   "cannotSaveAddress": "ไม่สามารถบันทึกที่อยู่ได้ในขณะนี้",
   "setAsDefaultAddress": "ตั้งเป็นที่อยู่เริ่มต้น",
-  "noRecentSearches": "ยังไม่มีการค้นหาล่าสุด",
+  "noRecentSearches": "ยังไม่มีการเดินทางล่าสุด",
   "recommendedEmpty": "ยังไม่มีรายการแนะนำ",
   "searchError": "ค้นหาไม่สำเร็จ แตะเพื่อลองใหม่",
   "selectPickupFirst": "กรุณาเลือกจุดรับก่อน",

@@ -621,7 +621,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get setAsDefaultAddress => 'Set as default address';
 
   @override
-  String get noRecentSearches => 'No recent searches yet';
+  String get noRecentSearches => 'No recent trips yet';
 
   @override
   String get recommendedEmpty => 'No recommendations yet';

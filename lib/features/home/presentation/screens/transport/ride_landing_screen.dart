@@ -5,6 +5,7 @@ import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/features/home/domain/models/place.dart';
 import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
 import 'package:customer_app/features/trips/domain/models/history_order.dart';
+import 'package:customer_app/features/trips/domain/recent_ride_places.dart';
 import 'package:customer_app/features/trips/presentation/controllers/trips_controller.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -64,7 +65,10 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
     final historyOrders = ref.watch(
       tripsControllerProvider.select((s) => s.historyOrders),
     );
-    final recentTrips = _recentRidePlaces(historyOrders);
+    final recentTrips = recentRidePlaces(
+      historyOrders,
+      limit: _recentCollapsedCount,
+    );
     final recentPlaces = recentTrips.isNotEmpty
         ? recentTrips
         : homeState.recentPlaces;
@@ -218,36 +222,48 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
   }
 
   // ---------------------------------------------------------------------------
-  // Quick actions: saved places + add address.
+  // Quick actions: saved places + add address, as a compact card of rows
+  // (smaller and tidier than the old oversized chips).
   // ---------------------------------------------------------------------------
   Widget _buildQuickActions(
     BuildContext context,
     AppLocalizations l10n,
     List<Place> savedPlaces,
   ) {
+    final saved = savedPlaces.take(2).toList();
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Row(
-        children: [
-          ...savedPlaces.take(2).map(
-            (place) => Expanded(
-              child: _quickActionChip(
-                label: place.name,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            for (var i = 0; i < saved.length; i++) ...[
+              _quickActionRow(
+                label: saved[i].name,
                 icon: AppAssets.icLocationPinLine,
                 onTap: () {
                   ref
                       .read(homeControllerProvider.notifier)
                       .setDropoffLocation(
-                        LatLng(place.lat, place.lng),
-                        place.name,
+                        LatLng(saved[i].lat, saved[i].lng),
+                        saved[i].name,
                       );
                   context.push('/booking');
                 },
               ),
-            ),
-          ),
-          Expanded(
-            child: _quickActionChip(
+              const Divider(height: 1, indent: 56),
+            ],
+            _quickActionRow(
               label: l10n.addAddress,
               icon: AppAssets.icPlus,
               muted: true,
@@ -257,68 +273,59 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
                 ref.read(homeControllerProvider.notifier).refreshSavedPlaces();
               },
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
-  Widget _quickActionChip({
+  Widget _quickActionRow({
     required String label,
     required String icon,
     required VoidCallback onTap,
     bool muted = false,
   }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 3),
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: muted
+                    ? AppColors.foundationGrayscale100
+                    : AppColors.softRedBg,
+                shape: BoxShape.circle,
               ),
-            ],
-          ),
-          child: Column(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: muted ? AppColors.foundationGrayscale100 : AppColors.softRedBg,
-                  shape: BoxShape.circle,
-                ),
-                child: AppIcons.asset(
-                  icon,
-                  color: muted
-                      ? AppColors.foundationGrayscale600
-                      : AppColors.primary,
-                  width: 20,
-                  height: 20,
-                ),
+              child: AppIcons.asset(
+                icon,
+                color: muted
+                    ? AppColors.foundationGrayscale600
+                    : AppColors.primary,
+                width: 18,
+                height: 18,
               ),
-              const SizedBox(height: 8),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: Text(
-                  label,
-                  style: AppTypography.label2.copyWith(
-                    color: AppColors.textPrimary,
-                  ),
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                label,
+                style: AppTypography.label2.copyWith(
+                  color: AppColors.textPrimary,
                 ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
-            ],
-          ),
+            ),
+            const Icon(
+              Icons.chevron_right,
+              size: 18,
+              color: AppColors.foundationGrayscale400,
+            ),
+          ],
         ),
       ),
     );
@@ -327,27 +334,6 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
   // ---------------------------------------------------------------------------
   // Recent trips.
   // ---------------------------------------------------------------------------
-  // Most-recent ride destinations from order history, de-duplicated by address,
-  // as tappable Places (tapping one re-opens booking with that dropoff).
-  List<Place> _recentRidePlaces(List<HistoryOrder> orders) {
-    final seen = <String>{};
-    final places = <Place>[];
-    for (final order in orders) {
-      if (order.type.toUpperCase() != 'RIDE') continue;
-      final ride = order.rideDetails;
-      if (ride == null || ride.dropoffLat == null || ride.dropoffLng == null) {
-        continue;
-      }
-      final address = (ride.dropoffAddress ?? '').trim();
-      if (address.isEmpty || !seen.add(address)) continue;
-      places.add(
-        Place(name: address, lat: ride.dropoffLat!, lng: ride.dropoffLng!),
-      );
-      if (places.length >= _recentCollapsedCount) break;
-    }
-    return places;
-  }
-
   Widget _buildRecentTrips(String title, List<Place> places) {
     // Show at most the first few recent places — no "see more".
     final visible = places.take(_recentCollapsedCount).toList();

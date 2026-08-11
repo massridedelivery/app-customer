@@ -305,9 +305,7 @@ class _ServiceSelectionScreenState
             'เรียกครั้งแรก',
             'ลด ฿100*',
             Colors.red,
-            Icons.directions_car,
-            AppColors.foundationBlue800,
-            AppColors.foundationBlue100,
+            AppAssets.ic3dRide,
             onTap: () {
               context.push('/ride-landing');
               // ref
@@ -321,9 +319,7 @@ class _ServiceSelectionScreenState
             'ถูกสุดทุกวัน',
             'ลด ฿100*',
             Colors.red,
-            Icons.fastfood,
-            AppColors.foundationGreen800,
-            AppColors.foundationGreen100,
+            AppAssets.ic3dFood,
             onTap: () {
               context.push('/food-delivery');
               // ref
@@ -331,25 +327,13 @@ class _ServiceSelectionScreenState
               //     .startSelection(mode: RideSelectionMode.dropoff);
             },
           ),
-          // _buildServiceCard(
-          //   context,
-          //   'สั่งของ',
-          //   'ครบ โค้ดเยอะ ส่งฟรี*',
-          //   'ลด ฿400*',
-          //   Colors.orange,
-          //   Icons.shopping_bag,
-          //   AppColors.foundationOrange800,
-          //   AppColors.foundationOrange100,
-          // ),
           _buildServiceCard(
             context,
             'เมสเซนเจอร์',
             'ส่งของ พัสดุ',
             null,
             null,
-            Icons.delivery_dining,
-            AppColors.foundationViolet800,
-            AppColors.foundationViolet100,
+            AppAssets.ic3dMessenger,
             onTap: () {
               // If a messenger order is already running, resume it instead of
               // letting the customer start a second one.
@@ -374,9 +358,7 @@ class _ServiceSelectionScreenState
     String subtitle,
     String? promo,
     Color? promoColor,
-    IconData icon,
-    Color iconColor,
-    Color iconBgColor, {
+    String iconAsset, {
     VoidCallback? onTap,
   }) {
     return InkWell(
@@ -441,15 +423,12 @@ class _ServiceSelectionScreenState
             ),
             Positioned(
               right: -4,
-              bottom: -4,
-              child: Container(
-                width: 52,
-                height: 52,
-                decoration: BoxDecoration(
-                  color: iconBgColor,
-                  shape: BoxShape.circle,
-                ),
-                child: Center(child: Icon(icon, size: 28, color: iconColor)),
+              bottom: -6,
+              child: Image.asset(
+                iconAsset,
+                width: 62,
+                height: 62,
+                fit: BoxFit.contain,
               ),
             ),
           ],

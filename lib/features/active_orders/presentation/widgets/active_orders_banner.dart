@@ -43,7 +43,7 @@ class ActiveOrdersBanner extends ConsumerWidget {
 
         return AnimatedContainer(
           duration: const Duration(milliseconds: 300),
-          margin: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+          margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
           decoration: BoxDecoration(
             gradient: const LinearGradient(
               colors: [
@@ -55,12 +55,12 @@ class ActiveOrdersBanner extends ConsumerWidget {
             ),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: AppColors.primary.withValues(alpha: 0.15),
+              color: AppColors.primary.withValues(alpha: 0),
               width: 1.5,
             ),
             boxShadow: [
               BoxShadow(
-                color: AppColors.primary.withValues(alpha: 0.06),
+                color: AppColors.black.withValues(alpha: 0.2),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),

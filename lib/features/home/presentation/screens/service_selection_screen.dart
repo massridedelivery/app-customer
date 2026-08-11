@@ -85,7 +85,7 @@ class _ServiceSelectionScreenState
           ),
           SliverToBoxAdapter(
             child: Transform.translate(
-              offset: const Offset(0, -12),
+              offset: const Offset(0, -6),
               child: Container(
                 decoration: BoxDecoration(
                   color: AppColors.semanticGrayNeutralBgWhite,
@@ -94,12 +94,16 @@ class _ServiceSelectionScreenState
                   ),
                 ),
                 child: Padding(
-                  padding: EdgeInsets.only(top: 2, bottom: bottomPadding + 20),
+                  padding: EdgeInsets.only(top: 2, bottom: bottomPadding + 28),
                   child: Column(
                     children: [
-                      const ActiveOrdersBanner(),
-                      _buildServiceGrid(context),
-                      const SizedBox(height: 20),
+                      ActiveOrdersBanner(),
+                      // ดัน grid ขึ้นให้ชิดด้านบนอีก — ปรับเลข -8 (ยิ่งลบมากยิ่งขึ้น)
+                      Transform.translate(
+                        offset: const Offset(0, -12),
+                        child: _buildServiceGrid(context),
+                      ),
+                      const SizedBox(height: 12),
                       // Real promotions from GET /api/customer/promo/list —
                       // hides itself when there are none.
                       const HomePromoBanner(),
@@ -296,8 +300,8 @@ class _ServiceSelectionScreenState
         physics: const NeverScrollableScrollPhysics(),
         crossAxisCount: 2,
         childAspectRatio: 1.5,
-        mainAxisSpacing: 12,
-        crossAxisSpacing: 12,
+        mainAxisSpacing: 14,
+        crossAxisSpacing: 14,
         children: [
           _buildServiceCard(
             context,

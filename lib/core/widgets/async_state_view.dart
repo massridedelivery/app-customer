@@ -1,5 +1,6 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
+import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:flutter/material.dart';
 
 /// Centered progress spinner for full-screen loading states.
@@ -13,7 +14,7 @@ class LoadingView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: CircularProgressIndicator(color: color ?? AppColors.primary),
+      child: MassLoadingM(size: 76, color: color ?? AppColors.primary),
     );
   }
 }

@@ -1,9 +1,8 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
-import 'package:customer_app/core/widgets/promo_card.dart';
+import 'package:customer_app/core/widgets/coupon_card.dart';
 import 'package:customer_app/features/ride_booking/presentation/controllers/booking_controller.dart';
 import 'package:customer_app/features/ride_booking/presentation/providers/discover_promos_provider.dart';
-import 'package:customer_app/features/ride_booking/domain/models/ride_promo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -285,11 +284,11 @@ class _RideCouponScreenState extends ConsumerState<RideCouponScreen> {
 
                             final promo = promos[promoIndex];
                             final isSelected = appliedPromoCode == promo.code;
-                            return _RidePromoCard(
-                              promo: promo,
+                            return CouponCard(
+                              data: CouponCardData.fromRidePromo(promo),
                               isSelected: isSelected,
-                              onApplyTap: () => _applyPromo(promo.code),
-                              onCancelTap: _cancelPromo,
+                              onApply: () => _applyPromo(promo.code),
+                              onCancel: _cancelPromo,
                             );
                           },
                         ),
@@ -304,95 +303,3 @@ class _RideCouponScreenState extends ConsumerState<RideCouponScreen> {
   }
 }
 
-class _RidePromoCard extends StatelessWidget {
-  final RidePromo promo;
-  final bool isSelected;
-  final VoidCallback onApplyTap;
-  final VoidCallback onCancelTap;
-
-  const _RidePromoCard({
-    required this.promo,
-    required this.isSelected,
-    required this.onApplyTap,
-    required this.onCancelTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return PromoCardShell(
-      isSelected: isSelected,
-      accentColor: AppColors.primary,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const PromoIconTile(),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Flexible(
-                      child: Text(
-                        promo.code,
-                        style: AppTypography.label2.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    if (promo.minSpend > 0)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 2,
-                        ),
-                        decoration: const BoxDecoration(
-                          color: Color(0xFFFFF8E1),
-                          borderRadius: BorderRadius.all(Radius.circular(4)),
-                        ),
-                        child: Text(
-                          'ขั้นต่ำ ฿${promo.minSpend.toStringAsFixed(0)}',
-                          style: const TextStyle(
-                            fontSize: 9,
-                            color: Color(0xFFFF8F00),
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  promo.name,
-                  style: AppTypography.caption4.copyWith(
-                    color: Colors.black87,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  promo.description,
-                  style: AppTypography.caption5.copyWith(
-                    color: Colors.grey[600],
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: PromoApplyButton(
-                    isSelected: isSelected,
-                    onApply: onApplyTap,
-                    onCancel: onCancelTap,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}

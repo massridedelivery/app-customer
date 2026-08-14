@@ -1,5 +1,6 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
+import 'package:customer_app/core/widgets/coupon_card.dart';
 import 'package:customer_app/features/profile/presentation/screens/promo_list_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -130,15 +131,38 @@ class _MessengerCouponScreenState extends ConsumerState<MessengerCouponScreen> {
                     ),
                   );
                 }
-                return ListView.separated(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: promos.length,
-                  separatorBuilder: (context, index) =>
-                      const SizedBox(height: 12),
-                  itemBuilder: (context, i) => _CouponTile(
-                    promo: promos[i],
-                    onTap: (code) => _apply(code),
-                  ),
+                // Same list flow as the ride "ใช้คูปอง" screen: a header, the
+                // shared ticket CouponCard with an apply/cancel toggle, and a
+                // selected highlight for the currently-applied code.
+                return ListView.builder(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                  itemCount: promos.length + 2,
+                  itemBuilder: (context, index) {
+                    if (index == 0) {
+                      return Padding(
+                        padding: const EdgeInsets.only(top: 16, bottom: 12),
+                        child: Text(
+                          'คูปองส่วนลดที่มี',
+                          style: AppTypography.label1.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      );
+                    }
+                    if (index == promos.length + 1) {
+                      return const SizedBox(height: 20);
+                    }
+                    final data = CouponCardData.fromMap(promos[index - 1]);
+                    final selected = data.code.isNotEmpty &&
+                        data.code == widget.initialCode;
+                    return CouponCard(
+                      data: data,
+                      isSelected: selected,
+                      onApply: () => _apply(data.code),
+                      onCancel: () => Navigator.of(context).pop(''),
+                      applyLabel: 'ใช้โค้ด',
+                    );
+                  },
                 );
               },
             ),
@@ -149,86 +173,3 @@ class _MessengerCouponScreenState extends ConsumerState<MessengerCouponScreen> {
   }
 }
 
-class _CouponTile extends StatelessWidget {
-  final Map<String, dynamic> promo;
-  final ValueChanged<String> onTap;
-  const _CouponTile({required this.promo, required this.onTap});
-
-  String get _title =>
-      (promo['title'] ?? promo['name'] ?? 'โปรโมชั่น').toString();
-  String get _code => (promo['code'] ?? '').toString();
-  num get _minSpend {
-    final v = promo['min_order'] ?? promo['min_spend'] ?? 0;
-    return v is num ? v : num.tryParse(v.toString()) ?? 0;
-  }
-
-  String get _headline {
-    final type = (promo['discount_type'] ?? '').toString().toLowerCase();
-    final rawVal = promo['discount_value'] ?? promo['discount'] ?? 0;
-    final num value = rawVal is num
-        ? rawVal
-        : num.tryParse(rawVal.toString()) ?? 0;
-    if (value <= 0) return _title;
-    if (type == 'percentage') return 'ลด ${value.toStringAsFixed(0)}%';
-    return 'ลด ฿${value.toStringAsFixed(0)}';
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: _code.isEmpty ? null : () => onTap(_code),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.foundationGrayscale200),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: AppColors.foundationRed100,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.local_offer,
-                color: AppColors.primary,
-                size: 20,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    _headline,
-                    style: AppTypography.label1.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    [
-                      if (_code.isNotEmpty) _code,
-                      if (_minSpend > 0) 'ขั้นต่ำ ฿${_minSpend.toStringAsFixed(0)}',
-                    ].join('  •  '),
-                    style: AppTypography.caption5.copyWith(
-                      color: AppColors.semanticGrayNeutralFgLowOnWhite,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Text(
-              'ใช้โค้ด',
-              style: AppTypography.label2.copyWith(color: AppColors.primary),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}

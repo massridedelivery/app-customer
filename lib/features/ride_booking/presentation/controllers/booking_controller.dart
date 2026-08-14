@@ -120,13 +120,12 @@ class BookingController extends _$BookingController {
     );
   }
 
-  // 3/4 top-down vehicle icons from Kenney "Car Kit" (CC0, no attribution
-  // required) under assets/images/icons/3d/. Motorbike keeps the existing
-  // custom asset (Car Kit has no motorcycle).
+  // Mass-liveried 3/4 vehicle icons (AI-rendered originals, brand-red with the
+  // Mass "M" door decal) under assets/images/icons/3d/.
   String getVehicleIcon(String typeName) {
     final n = typeName.toLowerCase();
     if (n.contains('bike') || n.contains('motorcycle')) {
-      return 'assets/images/icons/ic_bike_custom.png';
+      return 'assets/images/icons/3d/ic_car_scooter.png';
     }
     if (n.contains('luxury')) {
       return 'assets/images/icons/3d/ic_car_luxury.png';

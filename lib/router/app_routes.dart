@@ -42,6 +42,7 @@ import 'package:customer_app/features/payment/presentation/screens/promptpay_qr_
 import 'package:customer_app/features/profile/presentation/screens/profile_screen.dart';
 import 'package:customer_app/features/profile/presentation/screens/edit_profile_screen.dart';
 import 'package:customer_app/features/profile/presentation/screens/loyalty_screen.dart';
+import 'package:customer_app/features/food_delivery/presentation/screens/saved_restaurants_screen.dart';
 import 'package:customer_app/features/profile/presentation/screens/saved_places_screen.dart';
 import 'package:customer_app/features/profile/presentation/screens/address_form_screen.dart';
 import 'package:customer_app/features/profile/presentation/screens/promo_list_screen.dart';
@@ -438,6 +439,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/saved-places',
         builder: (context, state) => const SavedPlacesScreen(),
+      ),
+      GoRoute(
+        path: '/saved-restaurants',
+        builder: (context, state) => const SavedRestaurantsScreen(),
       ),
       GoRoute(
         path: '/add-address',

@@ -233,7 +233,11 @@ class _ServiceSelectionScreenState
           ),
         ),
         const SizedBox(width: 16),
-        _buildCircularButton(Icons.favorite_border_sharp),
+        // Heart → the customer's saved (favorited) restaurants.
+        _buildCircularButton(
+          Icons.favorite_border_sharp,
+          onTap: () => context.push('/saved-restaurants'),
+        ),
       ],
     );
   }
@@ -281,14 +285,18 @@ class _ServiceSelectionScreenState
     );
   }
 
-  Widget _buildCircularButton(IconData icon) {
-    return Container(
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
-        shape: BoxShape.circle,
+  Widget _buildCircularButton(IconData icon, {VoidCallback? onTap}) {
+    return InkWell(
+      onTap: onTap,
+      customBorder: const CircleBorder(),
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.15),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(icon, color: Colors.white, size: 20),
       ),
-      child: Icon(icon, color: Colors.white, size: 20),
     );
   }
 

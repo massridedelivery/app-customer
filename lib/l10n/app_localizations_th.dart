@@ -564,6 +564,9 @@ class AppLocalizationsTh extends AppLocalizations {
   String get wallet => 'วอลเล็ท';
 
   @override
+  String get creditCard => 'บัตรเครดิต';
+
+  @override
   String get support => 'ช่วยเหลือ';
 
   @override

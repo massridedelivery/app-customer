@@ -1178,6 +1178,12 @@ abstract class AppLocalizations {
   /// **'Wallet'**
   String get wallet;
 
+  /// No description provided for @creditCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Credit Card'**
+  String get creditCard;
+
   /// No description provided for @support.
   ///
   /// In en, this message translates to:

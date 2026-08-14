@@ -101,7 +101,14 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
   }
 
   String _getJobIdLabel() {
-    return widget.jobId?.toUpperCase() ?? 'UNKNOWN';
+    // jobId is a backend UUID; show only a short, readable tail rather than the
+    // whole string (falls back to a dash before the id is known).
+    final id = widget.jobId;
+    if (id == null || id.isEmpty) return '—';
+    final tail = id.replaceAll('-', '');
+    return tail.length <= 6
+        ? tail.toUpperCase()
+        : tail.substring(tail.length - 6).toUpperCase();
   }
 
   @override
@@ -199,8 +206,9 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
     });
 
     final pickup = pickupLocation ?? MapDefaults.bangkokCenter;
-    final dropoff =
-        dropoffLocation ?? const LatLng(13.7650, 100.5100);
+    // Fall back to the same named default as pickup instead of an arbitrary
+    // hardcoded coordinate when the destination isn't restored yet.
+    final dropoff = dropoffLocation ?? MapDefaults.bangkokCenter;
 
     // Shared bottom-sheet content, reused by both the fixed finding-mode panel
     // and the draggable confirmed-mode sheet.

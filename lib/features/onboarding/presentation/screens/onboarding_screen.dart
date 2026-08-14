@@ -6,8 +6,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-class OnboardingScreen extends ConsumerWidget {
+class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
+
+  @override
+  ConsumerState<OnboardingScreen> createState() => _OnboardingScreenState();
+}
+
+class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
+  // Owned once and disposed — not rebuilt on every provider change.
+  final PageController _pageController = PageController();
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
 
   static final List<Map<String, dynamic>> _pages = [
     {
@@ -42,13 +56,12 @@ class OnboardingScreen extends ConsumerWidget {
   ];
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final currentPageIndex = ref.watch(onboardingControllerProvider);
-    final pageController = PageController(initialPage: currentPageIndex);
 
     Future<void> onNextPressed() async {
       if (currentPageIndex < _pages.length - 1) {
-        pageController.nextPage(
+        _pageController.nextPage(
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeIn,
         );
@@ -69,7 +82,7 @@ class OnboardingScreen extends ConsumerWidget {
           children: [
             Expanded(
               child: PageView.builder(
-                controller: pageController,
+                controller: _pageController,
                 itemCount: _pages.length,
                 onPageChanged: (index) => ref
                     .read(onboardingControllerProvider.notifier)

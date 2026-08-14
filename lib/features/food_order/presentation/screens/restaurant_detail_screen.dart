@@ -124,7 +124,22 @@ class RestaurantDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final id = restaurantId ?? 'r1';
+    // Reached without a restaurant id: show an explicit empty state instead of
+    // silently loading a placeholder restaurant that won't exist in production.
+    if (restaurantId == null || restaurantId!.isEmpty) {
+      return Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.black),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ),
+        body: const Center(child: Text('ไม่พบร้านอาหาร')),
+      );
+    }
+    final id = restaurantId!;
     final detailState = ref.watch(restaurantDetailProvider(id));
 
     if (detailState.isLoading) {

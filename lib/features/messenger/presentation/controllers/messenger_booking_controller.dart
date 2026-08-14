@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
 import 'package:customer_app/features/messenger/data/repositories/messenger_repository_impl.dart';
+import 'package:customer_app/features/messenger/domain/models/messenger_vehicle_type.dart';
 import 'package:customer_app/features/messenger/presentation/states/messenger_booking_state.dart';
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -32,10 +33,14 @@ class MessengerBookingController extends _$MessengerBookingController {
     try {
       final vehicles =
           await ref.read(messengerRepositoryProvider).getMessengerVehicleTypes();
+      final first = vehicles.isEmpty ? null : vehicles.first;
       state = state.copyWith(
         isLoadingVehicles: false,
         vehicleTypes: vehicles,
-        vehicleTypeId: vehicles.isNotEmpty ? vehicles.first.id : '',
+        vehicleTypeId: first?.id ?? '',
+        // Reconcile the default tier ('S') to the loaded vehicle's real tiers,
+        // otherwise selectedSizeTier stays null and the estimate never fires.
+        sizeTier: _validTierFor(first, state.sizeTier),
       );
       _scheduleEstimate();
     } catch (e) {
@@ -49,8 +54,25 @@ class MessengerBookingController extends _$MessengerBookingController {
 
   void selectVehicle(String vehicleTypeId) {
     if (vehicleTypeId == state.vehicleTypeId) return;
-    state = state.copyWith(vehicleTypeId: vehicleTypeId, estimate: null);
+    final matches =
+        state.vehicleTypes.where((e) => e.id == vehicleTypeId).toList();
+    final v = matches.isEmpty ? null : matches.first;
+    state = state.copyWith(
+      vehicleTypeId: vehicleTypeId,
+      sizeTier: _validTierFor(v, state.sizeTier),
+      estimate: null,
+    );
     _scheduleEstimate();
+  }
+
+  /// Keeps the current tier if the vehicle offers it, otherwise falls back to
+  /// the vehicle's first tier (or the current value when tiers are unknown).
+  String _validTierFor(MessengerVehicleType? vehicle, String current) {
+    if (vehicle == null || vehicle.sizeTiers.isEmpty) return current;
+    final hasCurrent = vehicle.sizeTiers.any(
+      (t) => t.tier.toUpperCase() == current.toUpperCase(),
+    );
+    return hasCurrent ? current : vehicle.sizeTiers.first.tier;
   }
 
   void selectSizeTier(String tier) {

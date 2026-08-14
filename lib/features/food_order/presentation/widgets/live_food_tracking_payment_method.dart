@@ -42,30 +42,24 @@ class LiveFoodTrackingPaymentMethod extends ConsumerWidget {
               ),
             ],
           ),
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: AppColors.foundationGreen100,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  paymentMethod ?? 'CASH',
-                  style: AppTypography.caption5.copyWith(
-                    color: AppColors.foundationGreen700,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+            decoration: BoxDecoration(
+              color: AppColors.foundationGreen100,
+              borderRadius: BorderRadius.circular(6),
+            ),
+            // Localized label only — never surface the raw backend enum code.
+            child: Text(
+              switch ((paymentMethod ?? 'CASH').toUpperCase()) {
+                'CARD' => 'บัตรเครดิต',
+                'PROMPTPAY' => 'พร้อมเพย์',
+                _ => 'เงินสด',
+              },
+              style: AppTypography.caption4.copyWith(
+                color: AppColors.foundationGreen700,
+                fontWeight: FontWeight.bold,
               ),
-              const SizedBox(width: 8),
-              Text(
-                paymentMethod == 'CARD' ? 'บัตรเครดิต' : 'เงินสด',
-                style: AppTypography.caption4.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
+            ),
           ),
         ],
       ),

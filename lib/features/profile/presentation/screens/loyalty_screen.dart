@@ -4,6 +4,19 @@ import 'package:customer_app/features/profile/data/datasources/loyalty_remote_da
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+/// Safely take the YYYY-MM-DD prefix of an API date without assuming it is a
+/// non-null string of at least 10 chars (guards against crashing the list).
+String _safeDate(dynamic v) {
+  final s = v?.toString() ?? '';
+  return s.length >= 10 ? s.substring(0, 10) : s;
+}
+
+/// Format a possibly-null / non-num amount without throwing.
+String _safeAmount(dynamic v) {
+  final n = v is num ? v : num.tryParse(v?.toString() ?? '') ?? 0;
+  return n.toStringAsFixed(2);
+}
+
 class LoyaltyScreen extends ConsumerWidget {
   const LoyaltyScreen({super.key});
 
@@ -91,10 +104,10 @@ class LoyaltyScreen extends ConsumerWidget {
                     children: txns
                         .map<Widget>(
                           (t) => _TransactionTile(
-                            type: t['type'],
-                            desc: t['description'],
-                            points: t['points'],
-                            date: t['created_at'],
+                            type: (t['type'] ?? '').toString(),
+                            desc: (t['description'] ?? '').toString(),
+                            points: (t['points'] as num?)?.toInt() ?? 0,
+                            date: _safeDate(t['created_at']),
                           ),
                         )
                         .toList(),
@@ -387,7 +400,7 @@ class _TransactionTile extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  date.substring(0, 10),
+                  date,
                   style: AppTypography.caption5.copyWith(
                     color: AppColors.textSecondary,
                   ),
@@ -414,7 +427,7 @@ class _CashbackTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isEarn = item['type'] == 'EARN';
-    final amount = (item['amount'] as num).toStringAsFixed(2);
+    final amount = _safeAmount(item['amount']);
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
@@ -445,9 +458,12 @@ class _CashbackTile extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(item['description'], style: AppTypography.caption3),
                 Text(
-                  (item['created_at'] as String).substring(0, 10),
+                  (item['description'] ?? '').toString(),
+                  style: AppTypography.caption3,
+                ),
+                Text(
+                  _safeDate(item['created_at']),
                   style: AppTypography.caption5.copyWith(
                     color: AppColors.textSecondary,
                   ),

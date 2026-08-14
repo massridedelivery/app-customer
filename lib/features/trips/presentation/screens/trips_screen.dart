@@ -55,7 +55,11 @@ class _TripsScreenState extends ConsumerState<TripsScreen> {
     // Messenger history has its own source (/api/messenger/customer/orders);
     // the trips /history feed is ride+food only.
     if (_selectedType == HistoryType.messenger) {
-      ref.read(messengerHistoryControllerProvider.notifier).refresh();
+      // Messenger source isn't paginated — only (re)fetch on a real refresh,
+      // never on load-more scroll ticks.
+      if (isRefresh) {
+        ref.read(messengerHistoryControllerProvider.notifier).refresh();
+      }
       return;
     }
     // ALL (null) and ride/food both use the unified /history feed.
@@ -66,8 +70,9 @@ class _TripsScreenState extends ConsumerState<TripsScreen> {
           status: null, // all statuses combined
           isRefresh: isRefresh,
         );
-    // "ทั้งหมด" also merges in the separate messenger source.
-    if (_selectedType == null) {
+    // "ทั้งหมด" also merges in the separate (unpaginated) messenger source —
+    // only on refresh, not on every load-more page of the /history feed.
+    if (_selectedType == null && isRefresh) {
       ref.read(messengerHistoryControllerProvider.notifier).refresh();
     }
   }
@@ -549,13 +554,30 @@ class _MessengerHistoryBody extends ConsumerWidget {
   }
 }
 
-class _MessengerOrderListItem extends StatelessWidget {
+class _MessengerOrderListItem extends ConsumerWidget {
   final MessengerOrder order;
 
   const _MessengerOrderListItem({required this.order});
 
+  void _rebook(BuildContext context, WidgetRef ref) {
+    final home = ref.read(homeControllerProvider.notifier);
+    if (order.pickupLat != 0 && order.pickupLng != 0) {
+      home.setPickupLocation(
+        LatLng(order.pickupLat, order.pickupLng),
+        order.pickupAddress,
+      );
+    }
+    if (order.dropoffLat != 0 && order.dropoffLng != 0) {
+      home.setDropoffLocation(
+        LatLng(order.dropoffLat, order.dropoffLng),
+        order.dropoffAddress,
+      );
+    }
+    context.push('/messenger-booking');
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final dropoff = order.dropoffAddress.isNotEmpty
         ? order.dropoffAddress
         : 'จุดส่งพัสดุ';
@@ -605,6 +627,28 @@ class _MessengerOrderListItem extends StatelessWidget {
                     ),
                     const SizedBox(height: 6),
                     _MessengerStatusText(order: order),
+                    const SizedBox(height: 6),
+                    GestureDetector(
+                      onTap: () => _rebook(context, ref),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'จองอีกครั้ง',
+                            style: AppTypography.label2.copyWith(
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          const Icon(
+                            Icons.arrow_forward,
+                            size: 16,
+                            color: AppColors.primary,
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),

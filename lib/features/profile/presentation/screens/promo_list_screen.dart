@@ -242,64 +242,6 @@ class _PromoCard extends StatelessWidget {
                   ),
                 ),
               ),
-
-              // // Right Button Section
-              // Padding(
-              //   padding: const EdgeInsets.only(right: 12),
-              //   child: Center(
-              //     child: SizedBox(
-              //       height: 32,
-              //       child: ElevatedButton(
-              //         onPressed: () {
-              //           if (isCollected) {
-              //             // Navigate to service
-              //             final tag =
-              //                 promo['tag']?.toString().toLowerCase() ?? '';
-              //             if (tag.contains('ส่งฟรี') || tag.contains('food')) {
-              //               context.go('/food-delivery');
-              //             } else if (tag.contains('เดินทาง') ||
-              //                 tag.contains('ride')) {
-              //               context.go('/ride-landing');
-              //             } else {
-              //               context.go('/home');
-              //             }
-              //           } else {
-              //             // Collect action
-              //             ScaffoldMessenger.of(context).showSnackBar(
-              //               SnackBar(
-              //                 content: Text(
-              //                   'เก็บคูปอง ${promo['code']} สำเร็จแล้ว!',
-              //                 ),
-              //                 backgroundColor: barColor,
-              //                 behavior: SnackBarBehavior.floating,
-              //               ),
-              //             );
-              //           }
-              //         },
-              //         style: ElevatedButton.styleFrom(
-              //           backgroundColor: isCollected
-              //               ? Colors.grey.shade200
-              //               : barColor,
-              //           foregroundColor: isCollected
-              //               ? AppColors.textSecondary
-              //               : Colors.white,
-              //           elevation: 0,
-              //           padding: const EdgeInsets.symmetric(horizontal: 16),
-              //           shape: RoundedRectangleBorder(
-              //             borderRadius: BorderRadius.circular(6),
-              //           ),
-              //           side: isCollected
-              //               ? BorderSide(color: Colors.grey.shade300)
-              //               : null,
-              //         ),
-              //         child: Text(
-              //           isCollected ? 'ใช้' : 'เก็บ',
-              //           style: const TextStyle(fontWeight: FontWeight.bold),
-              //         ),
-              //       ),
-              //     ),
-              //   ),
-              // ),
             ],
           ),
         ),

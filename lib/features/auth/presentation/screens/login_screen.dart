@@ -64,7 +64,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color(0xFFF8FAFC), // Aber green
+        backgroundColor: Color(0xFFF8FAFC), // slate off-white
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),

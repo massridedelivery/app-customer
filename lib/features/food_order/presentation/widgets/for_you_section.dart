@@ -61,14 +61,26 @@ class ForYouSection extends StatelessWidget {
                       Container(
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(16),
-                          image: DecorationImage(
-                            image: NetworkImage(
-                              item.imageUrl ??
-                                  'https://plus.unsplash.com/premium_photo-1694141253763-209b4c8f8ace?w=400',
-                            ),
-                            fit: BoxFit.cover,
-                          ),
+                          color: Colors.grey[200],
+                          image:
+                              (item.imageUrl != null &&
+                                  item.imageUrl!.isNotEmpty)
+                              ? DecorationImage(
+                                  image: NetworkImage(item.imageUrl!),
+                                  fit: BoxFit.cover,
+                                )
+                              : null,
                         ),
+                        child:
+                            (item.imageUrl == null || item.imageUrl!.isEmpty)
+                            ? Center(
+                                child: Icon(
+                                  Icons.restaurant,
+                                  color: Colors.grey[400],
+                                  size: 32,
+                                ),
+                              )
+                            : null,
                       ),
                       Positioned(
                         bottom: 8,

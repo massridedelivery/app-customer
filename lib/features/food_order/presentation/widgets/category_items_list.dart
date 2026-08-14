@@ -34,14 +34,17 @@ class CategoryItemsList extends StatelessWidget {
                 height: 100,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
-                  image: DecorationImage(
-                    image: NetworkImage(
-                      item.imageUrl ??
-                          'https://plus.unsplash.com/premium_photo-1694141253763-209b4c8f8ace?w=400',
-                    ),
-                    fit: BoxFit.cover,
-                  ),
+                  color: Colors.grey[200],
+                  image: (item.imageUrl != null && item.imageUrl!.isNotEmpty)
+                      ? DecorationImage(
+                          image: NetworkImage(item.imageUrl!),
+                          fit: BoxFit.cover,
+                        )
+                      : null,
                 ),
+                child: (item.imageUrl == null || item.imageUrl!.isEmpty)
+                    ? Icon(Icons.restaurant, color: Colors.grey[400], size: 30)
+                    : null,
               ),
               const SizedBox(width: 16),
               Expanded(

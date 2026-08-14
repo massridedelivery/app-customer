@@ -249,14 +249,41 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
         ),
       ],
       flexibleSpace: FlexibleSpaceBar(
-        background: GoogleMap(
-          initialCameraPosition: CameraPosition(target: centerLatLng, zoom: 13),
-          markers: markers,
-          polylines: polylines,
-          zoomControlsEnabled: false,
-          myLocationButtonEnabled: false,
-          mapToolbarEnabled: false,
-        ),
+        // With no coordinates a live GoogleMap would just show a generic empty
+        // Bangkok view with no pins — show a neutral placeholder instead.
+        background: markers.isEmpty
+            ? Container(
+                color: AppColors.foundationBlue100,
+                alignment: Alignment.center,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.map_outlined,
+                      size: 40,
+                      color: AppColors.semanticGrayNeutralFgLowOnWhite,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'ไม่มีข้อมูลแผนที่',
+                      style: AppTypography.caption4.copyWith(
+                        color: AppColors.semanticGrayNeutralFgMidOnWhite,
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            : GoogleMap(
+                initialCameraPosition: CameraPosition(
+                  target: centerLatLng,
+                  zoom: 13,
+                ),
+                markers: markers,
+                polylines: polylines,
+                zoomControlsEnabled: false,
+                myLocationButtonEnabled: false,
+                mapToolbarEnabled: false,
+              ),
       ),
     );
   }
@@ -461,7 +488,9 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
       pickupLocation = 'ร้านอาหาร';
       pickupTime = ThaiDateFormatter.time(food.placedAt);
       dropoffLocation = food.deliveryAddress ?? '';
-      dropoffTime = ThaiDateFormatter.time(food.deliveredAt ?? food.delayQueueUntil);
+      // Only the real delivered time — never fall back to delayQueueUntil, an
+      // internal batching timestamp that isn't the customer's dropoff time.
+      dropoffTime = ThaiDateFormatter.time(food.deliveredAt);
     }
 
     return _buildThemeCard(
@@ -616,11 +645,6 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
             icon: Icons.account_balance_wallet_outlined,
             title: paymentMethod,
             subtitle: serviceName,
-            trailing: const Icon(
-              Icons.chevron_right,
-              size: 20,
-              color: AppColors.semanticGrayNeutralFgHigh,
-            ),
           ),
           if (breakdownRows.isNotEmpty) ...[
             const Padding(

@@ -58,7 +58,8 @@ class _MessengerTrackingScreenState
 
   Future<void> _confirmCancel() async {
     final reasonController = TextEditingController();
-    final confirmed = await showDialog<bool>(
+    try {
+      final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('ยกเลิกการส่งพัสดุ', style: AppTypography.heading4),
@@ -107,6 +108,9 @@ class _MessengerTrackingScreenState
       );
       // Was hanging on the tracking screen after a successful cancel — go home.
       context.go('/main');
+      }
+    } finally {
+      reasonController.dispose();
     }
   }
 

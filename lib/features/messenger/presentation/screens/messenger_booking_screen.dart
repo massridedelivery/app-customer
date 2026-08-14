@@ -297,23 +297,28 @@ class _MessengerBookingScreenState
           ),
           if (vehicles.length > 1) ...[
             const SizedBox(height: 12),
-            Row(
-              children: vehicles
-                  .map<Widget>(
-                    (v) => Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: AppFilterChip(
-                        label: v.displayName.isNotEmpty
-                            ? v.displayName
-                            : v.name,
-                        selected: v.id == bookingState.vehicleTypeId,
-                        onTap: () => ref
-                            .read(messengerBookingControllerProvider.notifier)
-                            .selectVehicle(v.id),
+            // Horizontally scrollable so 3+ vehicle types (or long names) never
+            // overflow the row.
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: vehicles
+                    .map<Widget>(
+                      (v) => Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: AppFilterChip(
+                          label: v.displayName.isNotEmpty
+                              ? v.displayName
+                              : v.name,
+                          selected: v.id == bookingState.vehicleTypeId,
+                          onTap: () => ref
+                              .read(messengerBookingControllerProvider.notifier)
+                              .selectVehicle(v.id),
+                        ),
                       ),
-                    ),
-                  )
-                  .toList(),
+                    )
+                    .toList(),
+              ),
             ),
           ],
           const SizedBox(height: 12),

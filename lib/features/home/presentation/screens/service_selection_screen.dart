@@ -270,15 +270,6 @@ class _ServiceSelectionScreenState
                 style: AppTypography.caption3.copyWith(color: Colors.black54),
               ),
             ),
-            if (t > 0.6) ...[
-              Container(
-                height: 24,
-                width: 1,
-                color: Colors.grey.withValues(alpha: 0.3),
-              ),
-              const SizedBox(width: 12),
-              const Icon(Icons.tune, color: Color(0xFF0038A8), size: 22),
-            ],
           ],
         ),
       ),
@@ -318,12 +309,7 @@ class _ServiceSelectionScreenState
             'ลด ฿100*',
             Colors.red,
             AppAssets.ic3dRide,
-            onTap: () {
-              context.push('/ride-landing');
-              // ref
-              //     .read(homeControllerProvider.notifier)
-              //     .startSelection(mode: RideSelectionMode.dropoff);
-            },
+            onTap: () => context.push('/ride-landing'),
           ),
           _buildServiceCard(
             context,
@@ -332,12 +318,7 @@ class _ServiceSelectionScreenState
             'ลด ฿100*',
             Colors.red,
             AppAssets.ic3dFood,
-            onTap: () {
-              context.push('/food-delivery');
-              // ref
-              //     .read(homeControllerProvider.notifier)
-              //     .startSelection(mode: RideSelectionMode.dropoff);
-            },
+            onTap: () => context.push('/food-delivery'),
           ),
           _buildServiceCard(
             context,

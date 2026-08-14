@@ -70,50 +70,6 @@ class RideSelectionView extends ConsumerWidget {
                   },
                 ),
               ),
-              const SizedBox(width: 8),
-              // Floating Search Bar
-              // Expanded(
-              //   child: Container(
-              //     height: 52,
-              //     padding: const EdgeInsets.symmetric(horizontal: 16),
-              //     decoration: BoxDecoration(
-              //       color: Colors.white,
-              //       borderRadius: BorderRadius.circular(30),
-              //       boxShadow: const [
-              //         BoxShadow(
-              //           color: Colors.black12,
-              //           blurRadius: 8,
-              //           offset: Offset(0, 2),
-              //         ),
-              //       ],
-              //     ),
-              //     child: Row(
-              //       children: [
-              //         Icon(
-              //           Icons.circle,
-              //           size: 14,
-              //           color: isPickup
-              //               ? AppColors.primary
-              //               : AppColors.foundationRed600,
-              //         ),
-              //         const SizedBox(width: 12),
-              //         Expanded(
-              //           child: Text(
-              //             isPickup ? 'รับที่ไหน?' : 'ไปที่ไหน?',
-              //             style: AppTypography.body1.copyWith(
-              //               color: Colors.grey.shade600,
-              //             ),
-              //           ),
-              //         ),
-              //         Icon(
-              //           Icons.camera_alt_outlined,
-              //           color: Colors.grey.shade600,
-              //           size: 20,
-              //         ),
-              //       ],
-              //     ),
-              //   ),
-              // ),
             ],
           ),
         ),

@@ -314,14 +314,27 @@ class _FoodRatingScreenState extends ConsumerState<FoodRatingScreen> {
                       height: 40,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(8),
-                        image: DecorationImage(
-                          image: NetworkImage(
-                            stateInfo.restaurant?.imageUrl ??
-                                'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200',
-                          ),
-                          fit: BoxFit.cover,
-                        ),
+                        color: Colors.grey[200],
+                        image:
+                            (stateInfo.restaurant?.imageUrl != null &&
+                                stateInfo.restaurant!.imageUrl!.isNotEmpty)
+                            ? DecorationImage(
+                                image: NetworkImage(
+                                  stateInfo.restaurant!.imageUrl!,
+                                ),
+                                fit: BoxFit.cover,
+                              )
+                            : null,
                       ),
+                      child:
+                          (stateInfo.restaurant?.imageUrl == null ||
+                              stateInfo.restaurant!.imageUrl!.isEmpty)
+                          ? Icon(
+                              Icons.restaurant,
+                              color: Colors.grey[400],
+                              size: 22,
+                            )
+                          : null,
                     ),
                     const SizedBox(width: 10),
                     Expanded(

@@ -120,21 +120,31 @@ class BookingController extends _$BookingController {
     );
   }
 
+  // 3/4 top-down vehicle icons from Kenney "Car Kit" (CC0, no attribution
+  // required) under assets/images/icons/3d/. Motorbike keeps the existing
+  // custom asset (Car Kit has no motorcycle).
   String getVehicleIcon(String typeName) {
-    final lowerName = typeName.toLowerCase();
-    if (lowerName.contains('bike') || lowerName.contains('motorcycle')) {
+    final n = typeName.toLowerCase();
+    if (n.contains('bike') || n.contains('motorcycle')) {
       return 'assets/images/icons/ic_bike_custom.png';
     }
-    if (lowerName.contains('eco') || lowerName.contains('saver')) {
-      return 'assets/images/icons/ic_ride_eco_custom.png';
+    if (n.contains('luxury')) {
+      return 'assets/images/icons/3d/ic_car_luxury.png';
     }
-    if (lowerName.contains('tuk')) {
-      return 'assets/images/icons/ic_ride_eco_custom.png'; // Fallback for Tuk-Tuk
+    if (n.contains('premium')) {
+      return 'assets/images/icons/3d/ic_car_premium.png';
     }
-    if (lowerName.contains('van')) {
-      return 'assets/images/icons/ic_taxi_custom.png'; // Fallback for Van
+    if (n.contains('xl') ||
+        n.contains('van') ||
+        n.contains('suv') ||
+        n.contains('6')) {
+      return 'assets/images/icons/3d/ic_car_xl.png';
     }
-    return 'assets/images/icons/ic_taxi_custom.png';
+    if (n.contains('comfort')) {
+      return 'assets/images/icons/3d/ic_car_comfort.png';
+    }
+    // economy / saver / eco / tuk-tuk and anything else → the clean sedan.
+    return 'assets/images/icons/3d/ic_car_economy.png';
   }
 
   void restoreFromActiveJob({

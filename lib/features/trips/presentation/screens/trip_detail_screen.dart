@@ -5,6 +5,7 @@ import 'package:customer_app/core/constants/app_icons.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/utils/map_marker_providers.dart';
 import 'package:customer_app/core/utils/thai_date_formatter.dart';
+import 'package:customer_app/features/live_ride/presentation/controllers/rating_controller.dart';
 import 'package:customer_app/features/trips/domain/models/history_order.dart';
 import 'package:customer_app/features/trips/presentation/controllers/trip_detail_controller.dart';
 import 'package:customer_app/features/trips/presentation/states/trip_detail_state.dart';
@@ -185,7 +186,14 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
                 if (state.foodDetails != null)
                   _buildFoodItemsCard(state.foodDetails!),
                 _buildPaymentCard(state),
-                _buildRatingCard(),
+                // Rating is ride-only and only for finished trips (food/messenger
+                // have their own review flows).
+                if (state.rideDetails != null &&
+                    state.rideDetails!.status.toUpperCase() == 'COMPLETED')
+                  _TripRatingCard(
+                    jobId: state.rideDetails!.id,
+                    existingRating: state.rideDetails!.ratingByCustomer,
+                  ),
                 const SizedBox(height: 24),
               ],
             ),
@@ -791,43 +799,6 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
     );
   }
 
-  Widget _buildRatingCard() {
-    return _buildThemeCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'ช่วยเราปรับปรุงประสบการณ์ให้ดียิ่งขึ้น',
-            style: AppTypography.body3.copyWith(
-              color: AppColors.semanticGrayNeutralFgHigh,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'โดยการให้คะแนนการเดินทางครั้งนี้',
-            style: AppTypography.caption4.copyWith(
-              color: AppColors.semanticGrayNeutralFgMidOnWhite,
-            ),
-          ),
-          const SizedBox(height: 20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(5, (index) {
-              return const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 6),
-                child: Icon(
-                  Icons.star_border_rounded,
-                  color: AppColors.foundationBlue300,
-                  size: 44,
-                ),
-              );
-            }),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildActionButtons() {
     return Padding(
@@ -878,4 +849,189 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
     );
   }
 
+}
+
+/// Post-trip rating card for the history detail screen. Submits to the same
+/// endpoint as the live-ride post-trip flow (`POST /api/customer/jobs/{id}/rate`
+/// via [RatingController]). Read-only once a rating already exists.
+class _TripRatingCard extends ConsumerStatefulWidget {
+  final String jobId;
+  final double? existingRating;
+
+  const _TripRatingCard({required this.jobId, this.existingRating});
+
+  @override
+  ConsumerState<_TripRatingCard> createState() => _TripRatingCardState();
+}
+
+class _TripRatingCardState extends ConsumerState<_TripRatingCard> {
+  int _selected = 0;
+  bool _submitted = false;
+
+  Future<void> _submit() async {
+    await ref
+        .read(ratingControllerProvider.notifier)
+        .submitRating(jobId: widget.jobId, rating: _selected, tags: const []);
+    if (!mounted) return;
+    // Errors are surfaced via the listener; only flip to the thank-you state on
+    // a clean submit.
+    if (!ref.read(ratingControllerProvider).hasError) {
+      setState(() => _submitted = true);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final alreadyRated = (widget.existingRating ?? 0) > 0 || _submitted;
+    final submitState = ref.watch(ratingControllerProvider);
+    final isSubmitting = submitState.isLoading;
+
+    ref.listen(ratingControllerProvider, (_, next) {
+      next.whenOrNull(
+        error: (e, _) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(e.toString().replaceFirst('Exception: ', '')),
+            ),
+          );
+        },
+      );
+    });
+
+    if (alreadyRated) {
+      final value = _submitted ? _selected : widget.existingRating!.round();
+      return _card(
+        title: 'ขอบคุณสำหรับรีวิว',
+        subtitle: 'คุณให้คะแนนการเดินทางนี้แล้ว',
+        child: _StarRow(value: value, size: 40),
+      );
+    }
+
+    return _card(
+      title: 'ช่วยเราปรับปรุงประสบการณ์ให้ดียิ่งขึ้น',
+      subtitle: 'โดยการให้คะแนนการเดินทางครั้งนี้',
+      child: Column(
+        children: [
+          _StarRow(
+            value: _selected,
+            size: 44,
+            onTap: isSubmitting
+                ? null
+                : (v) => setState(() => _selected = v),
+          ),
+          if (_selected > 0) ...[
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton(
+                onPressed: isSubmitting ? null : _submit,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  disabledBackgroundColor: AppColors.foundationGrayscale200,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+                child: isSubmitting
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : Text(
+                        'ส่งรีวิว',
+                        style: AppTypography.label1.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _card({
+    required String title,
+    required String subtitle,
+    required Widget child,
+  }) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.semanticGrayNeutralBgWhite,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withValues(alpha: 0.1),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: AppTypography.body3.copyWith(
+              color: AppColors.semanticGrayNeutralFgHigh,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            subtitle,
+            style: AppTypography.caption4.copyWith(
+              color: AppColors.semanticGrayNeutralFgMidOnWhite,
+            ),
+          ),
+          const SizedBox(height: 20),
+          child,
+        ],
+      ),
+    );
+  }
+}
+
+/// Row of five stars. Tappable when [onTap] is provided (1-based value),
+/// display-only otherwise.
+class _StarRow extends StatelessWidget {
+  final int value;
+  final double size;
+  final ValueChanged<int>? onTap;
+
+  const _StarRow({required this.value, required this.size, this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: List.generate(5, (i) {
+        final filled = i < value;
+        return GestureDetector(
+          onTap: onTap == null ? null : () => onTap!(i + 1),
+          behavior: HitTestBehavior.opaque,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 6),
+            child: Icon(
+              filled ? Icons.star_rounded : Icons.star_border_rounded,
+              color: filled ? Colors.amber : AppColors.foundationBlue300,
+              size: size,
+            ),
+          ),
+        );
+      }),
+    );
+  }
 }

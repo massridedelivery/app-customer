@@ -17,14 +17,19 @@ class SplashScreen extends ConsumerStatefulWidget {
 class _SplashScreenState extends ConsumerState<SplashScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _pulseController;
+  late Animation<double> _scale;
 
   @override
   void initState() {
     super.initState();
     _pulseController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 5),
+      duration: const Duration(milliseconds: 1800),
     )..repeat(reverse: true);
+    // Gentle breathing scale on the logo tile.
+    _scale = Tween<double>(begin: 0.97, end: 1.05).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
     _navigateToNextScreen();
   }
 
@@ -50,12 +55,12 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       backgroundColor: AppColors.foundationGrayscale75,
       body: Stack(
         children: [
-          // Aura Blurs
+          // Brand-red aura blurs for a soft, premium backdrop.
           Positioned(
             top: -MediaQuery.of(context).size.height * 0.1,
             left: -MediaQuery.of(context).size.width * 0.1,
             child: _AuraBlur(
-              color: AppColors.deepBlue,
+              color: AppColors.primary,
               size: MediaQuery.of(context).size.width * 0.8,
             ),
           ),
@@ -63,7 +68,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
             top: MediaQuery.of(context).size.height * 0.35,
             right: -MediaQuery.of(context).size.width * 0.2,
             child: _AuraBlur(
-              color: Colors.blue,
+              color: AppColors.accentRedDeep,
               size: MediaQuery.of(context).size.width * 0.7,
             ),
           ),
@@ -71,7 +76,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
             bottom: -MediaQuery.of(context).size.height * 0.05,
             left: MediaQuery.of(context).size.width * 0.1,
             child: _AuraBlur(
-              color: AppColors.lightBlue,
+              color: AppColors.primary,
               size: MediaQuery.of(context).size.width * 0.6,
             ),
           ),
@@ -81,43 +86,47 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Logo
-                Transform.rotate(
-                  angle: -6 * math.pi / 180,
-                  child: Container(
-                    width: 96,
-                    height: 96,
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [AppColors.deepBlue, AppColors.darkestBlue],
-                      ),
-                      borderRadius: BorderRadius.circular(24),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.15),
-                          blurRadius: 20,
-                          offset: const Offset(0, 10),
+                // App-icon tile: the real Mass "M" mark on a brand-red tile,
+                // gently breathing.
+                ScaleTransition(
+                  scale: _scale,
+                  child: Transform.rotate(
+                    angle: -4 * math.pi / 180,
+                    child: Container(
+                      width: 120,
+                      height: 120,
+                      padding: const EdgeInsets.all(22),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [AppColors.accentRedDeep, AppColors.primary],
                         ),
-                      ],
-                    ),
-                    child: const Icon(
-                      Icons.motion_photos_on_outlined,
-                      color: AppColors.white,
-                      size: 48,
+                        borderRadius: BorderRadius.circular(30),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primary.withValues(alpha: 0.35),
+                            blurRadius: 28,
+                            offset: const Offset(0, 14),
+                          ),
+                        ],
+                      ),
+                      child: Image.asset(
+                        'assets/icon/icon_m_mark.png',
+                        fit: BoxFit.contain,
+                      ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 48),
+                const SizedBox(height: 40),
                 // Title
                 Text(
-                  'MassMove',
+                  'Mass Move',
                   style: AppTypography.heading1.copyWith(
-                    fontSize: 48,
+                    fontSize: 44,
                     fontWeight: FontWeight.w900,
-                    color: AppColors.deepBlue,
-                    letterSpacing: 2,
+                    color: AppColors.primary,
+                    letterSpacing: 1.5,
                   ),
                 ),
                 const SizedBox(height: 8),

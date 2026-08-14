@@ -110,6 +110,7 @@ flutter:
     - assets/images/icons/
     - assets/images/icons/3d/
     - assets/animations/
+    - assets/icon/
 
   fonts:
     - family: Ibm

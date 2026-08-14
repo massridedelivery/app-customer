@@ -6,7 +6,6 @@ import 'package:customer_app/core/constants/feature_flags.dart';
 import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
 import 'package:customer_app/features/home/presentation/states/home_state.dart';
 import 'package:customer_app/features/active_orders/presentation/controllers/active_orders_controller.dart';
-import 'package:customer_app/features/home/presentation/widgets/app_drawer.dart';
 import 'package:customer_app/features/home/presentation/widgets/home_promo_banner.dart';
 import 'package:customer_app/features/active_orders/presentation/widgets/active_orders_banner.dart';
 import 'package:flutter/material.dart';
@@ -24,8 +23,6 @@ class ServiceSelectionScreen extends ConsumerStatefulWidget {
 
 class _ServiceSelectionScreenState
     extends ConsumerState<ServiceSelectionScreen> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
   @override
   Widget build(BuildContext context) {
     final homeState = ref.watch(homeControllerProvider);
@@ -33,9 +30,7 @@ class _ServiceSelectionScreenState
     final statusPadding = MediaQuery.of(context).padding.top;
 
     return Scaffold(
-      key: _scaffoldKey,
       backgroundColor: AppColors.semanticGrayNeutralBgWhite,
-      drawer: const AppDrawer(),
       body: CustomScrollView(
         slivers: [
           SliverAppBar(

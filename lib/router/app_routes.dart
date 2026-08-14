@@ -37,7 +37,6 @@ import 'package:customer_app/features/main/presentation/screens/main_screen.dart
     as customer_app_main;
 import 'package:customer_app/features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'package:customer_app/features/onboarding/presentation/screens/splash_screen.dart';
-import 'package:customer_app/features/payment/presentation/screens/add_card_screen.dart';
 import 'package:customer_app/features/payment/presentation/screens/promptpay_qr_screen.dart';
 import 'package:customer_app/features/profile/presentation/screens/profile_screen.dart';
 import 'package:customer_app/features/profile/presentation/screens/edit_profile_screen.dart';
@@ -472,10 +471,6 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/privacy',
         builder: (context, state) => const PrivacyPdpaScreen(),
-      ),
-      GoRoute(
-        path: '/add-card',
-        builder: (context, state) => const AddCardScreen(),
       ),
       GoRoute(
         path: '/credit-cards',

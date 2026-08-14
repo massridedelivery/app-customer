@@ -125,6 +125,10 @@ class _MessengerBookingScreenState
       backgroundColor: AppColors.foundationGrayscale100,
       appBar: AppBar(
         backgroundColor: AppColors.white,
+        // Keep the bar white when content scrolls under it (Material 3 would
+        // otherwise tint it with the surface colour).
+        surfaceTintColor: Colors.transparent,
+        scrolledUnderElevation: 0,
         elevation: 0,
         centerTitle: true,
         title: Text(
@@ -165,83 +169,112 @@ class _MessengerBookingScreenState
   // ─── Location ──────────────────────────────────────────────────────────────
 
   Widget _buildLocationCard(HomeState homeState) {
+    final bool hasPickup =
+        homeState.pickupAddress != null && homeState.pickupAddress!.isNotEmpty;
+    final bool hasDropoff = homeState.dropoffAddress != null &&
+        homeState.dropoffAddress!.isNotEmpty;
     return _card(
-      child: Column(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _locationRow(
-            iconColor: AppColors.foundationGreen500,
-            label: 'จุดรับพัสดุ',
-            address: homeState.pickupAddress ?? 'เลือกจุดรับพัสดุ',
-            onTap: () {
-              ref
-                  .read(homeControllerProvider.notifier)
-                  .startSelection(mode: RideSelectionMode.pickup);
-              context.push('/select-pickup');
-            },
+          // Pinned route column: green (pickup) → dotted line → red (dropoff),
+          // matching the ride booking-details layout.
+          Column(
+            children: [
+              const SizedBox(height: 18),
+              AppIcons.asset(
+                AppAssets.icLocationFill,
+                color: AppColors.foundationGreen500,
+                width: 22,
+                height: 22,
+              ),
+              ...List.generate(
+                3,
+                (i) => Container(
+                  margin: const EdgeInsets.symmetric(vertical: 4),
+                  width: 3,
+                  height: 3,
+                  decoration: const BoxDecoration(
+                    color: AppColors.foundationGrayscale400,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+              AppIcons.asset(
+                AppAssets.icLocationFill,
+                color: AppColors.foundationRed700,
+                width: 22,
+                height: 22,
+              ),
+            ],
           ),
-          const Divider(height: 16, color: AppColors.foundationGrayscale200),
-          _locationRow(
-            iconColor: AppColors.foundationRed700,
-            label: 'จุดส่งพัสดุ',
-            address: homeState.dropoffAddress ?? 'เลือกจุดส่งพัสดุ',
-            isPlaceholder: homeState.dropoffAddress == null,
-            onTap: () {
-              ref
-                  .read(homeControllerProvider.notifier)
-                  .startSelection(mode: RideSelectionMode.messengerDropoff);
-              context.push('/select-dropoff');
-            },
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              children: [
+                _addressPill(
+                  address: homeState.pickupAddress ?? 'เลือกจุดรับพัสดุ',
+                  isPlaceholder: !hasPickup,
+                  onTap: () {
+                    ref
+                        .read(homeControllerProvider.notifier)
+                        .startSelection(mode: RideSelectionMode.pickup);
+                    context.push('/select-pickup');
+                  },
+                ),
+                const SizedBox(height: 12),
+                _addressPill(
+                  address: homeState.dropoffAddress ?? 'เลือกจุดส่งพัสดุ',
+                  isPlaceholder: !hasDropoff,
+                  onTap: () {
+                    ref
+                        .read(homeControllerProvider.notifier)
+                        .startSelection(
+                          mode: RideSelectionMode.messengerDropoff,
+                        );
+                    context.push('/select-dropoff');
+                  },
+                ),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _locationRow({
-    required Color iconColor,
-    required String label,
+  Widget _addressPill({
     required String address,
+    required bool isPlaceholder,
     required VoidCallback onTap,
-    bool isPlaceholder = false,
   }) {
     return InkWell(
       onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppColors.foundationGrayscale300),
+        ),
         child: Row(
           children: [
-            AppIcons.asset(AppAssets.icLocationFill,
-                color: iconColor, width: 20, height: 20),
-            const SizedBox(width: 12),
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    label,
-                    style: AppTypography.caption5.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    address,
-                    style: AppTypography.body2.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: isPlaceholder
-                          ? AppColors.textSecondary
-                          : AppColors.textPrimary,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
+              child: Text(
+                address,
+                style: AppTypography.body2.copyWith(
+                  fontWeight: FontWeight.w500,
+                  color: isPlaceholder
+                      ? AppColors.textSecondary
+                      : AppColors.textPrimary,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
-            const Icon(
-              Icons.chevron_right,
-              color: AppColors.foundationGrayscale500,
-            ),
+            const SizedBox(width: 8),
+            const Icon(Icons.map_outlined, color: AppColors.primary, size: 20),
           ],
         ),
       ),

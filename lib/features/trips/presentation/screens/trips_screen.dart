@@ -1,3 +1,4 @@
+import 'package:customer_app/core/constants/app_assets.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/widgets/app_filter_chip.dart';
@@ -158,6 +159,7 @@ class _TripsFilterBar extends StatelessWidget implements PreferredSizeWidget {
                 AppFilterChip(
                   label: 'ทั้งหมด',
                   selected: selectedType == null,
+                  filled: true,
                   onTap: () => onTypeChanged(null),
                 ),
                 const SizedBox(width: 8),
@@ -180,6 +182,7 @@ class _TripsFilterBar extends StatelessWidget implements PreferredSizeWidget {
     return AppFilterChip(
       label: label,
       selected: isSelected,
+      filled: true,
       onTap: () => onTypeChanged(isSelected ? null : type),
     );
   }
@@ -313,13 +316,14 @@ class _OrderListItem extends ConsumerWidget {
         order.status.toUpperCase() == 'CANCELLED' ||
         order.status.toUpperCase() == 'FAILED';
 
-    IconData serviceIcon;
-    if (order.type.toUpperCase() == 'RIDE') {
-      serviceIcon = Icons.directions_car;
-    } else if (order.type.toUpperCase() == 'FOOD') {
-      serviceIcon = Icons.pedal_bike_sharp;
+    final String serviceAsset;
+    final typeUpper = order.type.toUpperCase();
+    if (typeUpper == 'RIDE') {
+      serviceAsset = AppAssets.ic3dRide;
+    } else if (typeUpper == 'FOOD' || typeUpper == 'MART') {
+      serviceAsset = AppAssets.ic3dFood;
     } else {
-      serviceIcon = Icons.shopping_basket;
+      serviceAsset = AppAssets.ic3dMessenger;
     }
 
     String title = '';
@@ -354,15 +358,8 @@ class _OrderListItem extends ConsumerWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Left Service Icon
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: const BoxDecoration(
-                  color: AppColors.primary,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(serviceIcon, color: AppColors.white, size: 24),
-              ),
+              // Left Service Icon (3D brand art)
+              Image.asset(serviceAsset, width: 44, height: 44),
               const SizedBox(width: 16),
               // Middle Content
               Expanded(
@@ -385,28 +382,35 @@ class _OrderListItem extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(height: 6),
-                    _StatusText(status: order.status),
-                    const SizedBox(height: 6),
-                    GestureDetector(
-                      onTap: () => _rebook(context, ref),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            'จองอีกครั้ง',
-                            style: AppTypography.label2.copyWith(
-                              color: AppColors.primary,
-                              fontWeight: FontWeight.bold,
-                            ),
+                    // Status on the left, "จองอีกครั้ง" pinned to the far right
+                    // of the same line.
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Flexible(child: _StatusText(status: order.status)),
+                        GestureDetector(
+                          onTap: () => _rebook(context, ref),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'จองอีกครั้ง',
+                                style: AppTypography.label2.copyWith(
+                                  color: AppColors.primary,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              const Icon(
+                                Icons.arrow_forward,
+                                size: 16,
+                                color: AppColors.primary,
+                              ),
+                            ],
                           ),
-                          const SizedBox(width: 4),
-                          const Icon(
-                            Icons.arrow_forward,
-                            size: 16,
-                            color: AppColors.primary,
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -594,18 +598,7 @@ class _MessengerOrderListItem extends ConsumerWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: const BoxDecoration(
-                  color: AppColors.primary,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.local_shipping,
-                  color: AppColors.white,
-                  size: 24,
-                ),
-              ),
+              Image.asset(AppAssets.ic3dMessenger, width: 44, height: 44),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
@@ -627,28 +620,33 @@ class _MessengerOrderListItem extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(height: 6),
-                    _MessengerStatusText(order: order),
-                    const SizedBox(height: 6),
-                    GestureDetector(
-                      onTap: () => _rebook(context, ref),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            'จองอีกครั้ง',
-                            style: AppTypography.label2.copyWith(
-                              color: AppColors.primary,
-                              fontWeight: FontWeight.bold,
-                            ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Flexible(child: _MessengerStatusText(order: order)),
+                        GestureDetector(
+                          onTap: () => _rebook(context, ref),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'จองอีกครั้ง',
+                                style: AppTypography.label2.copyWith(
+                                  color: AppColors.primary,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              const Icon(
+                                Icons.arrow_forward,
+                                size: 16,
+                                color: AppColors.primary,
+                              ),
+                            ],
                           ),
-                          const SizedBox(width: 4),
-                          const Icon(
-                            Icons.arrow_forward,
-                            size: 16,
-                            color: AppColors.primary,
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ],
                 ),

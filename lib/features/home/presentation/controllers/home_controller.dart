@@ -103,6 +103,11 @@ class HomeController extends _$HomeController {
         currentLocation: latLng,
         mapCenter: latLng,
         pickupLocation: latLng,
+        // No recent/default food location yet → default the food delivery point
+        // to the current location so the home shows a real place instead of the
+        // "โปรดเลือกสถานที่" prompt. A saved default place still wins if it
+        // resolves first (the guard below only fills a still-empty value).
+        foodLocation: state.foodLocation ?? latLng,
       );
 
       // 2. Get Address (Network call, can be slow)
@@ -112,7 +117,12 @@ class HomeController extends _$HomeController {
         if (placemarks.isNotEmpty) {
           final p = placemarks.first;
           final address = '${p.name}, ${p.locality}';
-          state = state.copyWith(pickupAddress: address);
+          state = state.copyWith(
+            pickupAddress: address,
+            // Fill the food address from current location only if nothing (a
+            // recent/default place) has claimed it yet.
+            foodAddress: state.foodAddress ?? address,
+          );
         }
       } catch (e) {
         state = state.copyWith(pickupAddress: 'Unknown Address');

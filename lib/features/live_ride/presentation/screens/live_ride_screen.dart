@@ -179,7 +179,7 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
               if (context.canPop()) {
                 context.pop();
               } else {
-                context.go('/home');
+                context.go('/main');
               }
             }
           }
@@ -336,7 +336,7 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
                     if (context.canPop()) {
                       context.pop();
                     } else {
-                      context.go('/home');
+                      context.go('/main');
                     }
                   },
                   child: Container(
@@ -953,6 +953,26 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
   }
 
   Widget _buildPaymentMethodSection() {
+    final method =
+        (ref.watch(bookingControllerProvider).value?.paymentMethod ?? 'CASH')
+            .toUpperCase();
+    final isPromptPay = method == 'PROMPTPAY';
+    final isCard = method == 'CARD';
+    final label = isPromptPay
+        ? 'พร้อมเพย์'
+        : isCard
+        ? 'บัตร'
+        : 'เงินสด';
+    final badgeBg = isPromptPay
+        ? AppColors.foundationBlue100
+        : isCard
+        ? AppColors.foundationViolet100
+        : AppColors.foundationGreen100;
+    final badgeFg = isPromptPay
+        ? AppColors.foundationBlue800
+        : isCard
+        ? AppColors.foundationViolet800
+        : AppColors.foundationGreen700;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -987,13 +1007,13 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                 decoration: BoxDecoration(
-                  color: AppColors.foundationGreen100,
+                  color: badgeBg,
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
-                  'เงินสด',
+                  label,
                   style: AppTypography.caption5.copyWith(
-                    color: AppColors.foundationGreen700,
+                    color: badgeFg,
                     fontWeight: FontWeight.bold,
                   ),
                 ),

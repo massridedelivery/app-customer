@@ -75,9 +75,9 @@ class ProfileScreen extends ConsumerWidget {
                         onTap: () => _showLangSelector(context, ref, l10n),
                       ),
                       _MenuTile(
-                        icon: Icons.notifications_none_rounded,
-                        title: l10n.notifications,
-                        onTap: () {},
+                        icon: Icons.card_giftcard_rounded,
+                        title: 'แต้มสะสม',
+                        onTap: () => context.push('/loyalty'),
                       ),
                     ],
                   ),
@@ -449,9 +449,9 @@ class _QuickActionsGrid extends StatelessWidget {
         color: Color(0xFFF5F3FF),
       ),
       _ActionItem(
-        icon: Icons.headset_mic_outlined,
-        label: l10n.support,
-        route: '#',
+        icon: Icons.group_add_rounded,
+        label: 'ชวนเพื่อน',
+        route: '/referral',
         color: Color(0xFFF0FDFA),
       ),
     ];

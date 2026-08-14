@@ -130,8 +130,18 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
           isRegistered: widget.isRegistered,
         );
 
-    if (success && mounted && !widget.isRegistered) {
-      context.push('/auth/register', extra: {'phone': widget.phone});
+    if (!mounted) return;
+    if (success) {
+      if (!widget.isRegistered) {
+        context.push('/auth/register', extra: {'phone': widget.phone});
+      }
+    } else {
+      // Wrong / expired code: clear the field and re-open the keyboard so the
+      // user can immediately retry (otherwise the box stays full at 6 digits,
+      // _autoSubmitted stays true, and there's no obvious way to correct it).
+      _otpController.clear();
+      _autoSubmitted = false;
+      _otpFocus.requestFocus();
     }
   }
 
@@ -263,23 +273,25 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
               );
             }),
           ),
-          // Transparent field on top captures typing, paste and SMS autofill.
+          // Invisible-but-LIVE field on top captures typing, paste and SMS
+          // autofill. Uses transparent text/cursor rather than Opacity(0):
+          // a fully transparent widget can drop the iOS text-input connection,
+          // so the keyboard wouldn't reopen and digits/backspace were lost
+          // (SCRUM-51).
           Positioned.fill(
-            child: Opacity(
-              opacity: 0,
-              child: TextField(
-                controller: _otpController,
-                focusNode: _otpFocus,
-                keyboardType: TextInputType.number,
-                maxLength: _otpLength,
-                autofillHints: const [AutofillHints.oneTimeCode],
-                showCursor: false,
-                cursorColor: Colors.transparent,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                decoration: const InputDecoration(
-                  counterText: '',
-                  border: InputBorder.none,
-                ),
+            child: TextField(
+              controller: _otpController,
+              focusNode: _otpFocus,
+              keyboardType: TextInputType.number,
+              maxLength: _otpLength,
+              autofillHints: const [AutofillHints.oneTimeCode],
+              showCursor: false,
+              cursorColor: Colors.transparent,
+              style: const TextStyle(color: Colors.transparent),
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              decoration: const InputDecoration(
+                counterText: '',
+                border: InputBorder.none,
               ),
             ),
           ),

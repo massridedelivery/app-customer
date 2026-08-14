@@ -28,7 +28,8 @@ class CheckoutDeliveryOptions extends ConsumerWidget {
         : '฿15';
     final standardPrice = standardTier != null
         ? (standardTier.deliveryFee == 0 ? 'ฟรี' : '฿${standardTier.deliveryFee.toStringAsFixed(0)}')
-        : 'ฟรี';
+        // Must match the ฿25 STANDARD fallback charged in checkout_screen.dart.
+        : '฿25';
     final priorityPrice = priorityTier != null
         ? (priorityTier.deliveryFee == 0 ? 'ฟรี' : '฿${priorityTier.deliveryFee.toStringAsFixed(0)}')
         : '฿45';

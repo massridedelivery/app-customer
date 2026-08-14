@@ -11,6 +11,12 @@ abstract class FeatureFlags {
   /// field; only CASH / PromptPay remain.
   static const bool messengerCodEnabled = false;
 
+  /// PromptPay (QR) for messenger parcels. Off for now: the backend gates
+  /// digital payment for messenger in phase 1 (SCRUM-41 accepts CASH | COD),
+  /// so selecting PromptPay + submitting always 400s. While off, only CASH is
+  /// offered; flip on once the messenger PromptPay create is accepted.
+  static const bool messengerPromptPayEnabled = false;
+
   // ─── Food delivery ─────────────────────────────────────────────────────────
   // These gate UI that has no backing API yet (SCRUM-44 audit). Flip on once
   // the matching endpoint/field exists.
@@ -45,6 +51,11 @@ abstract class FeatureFlags {
   /// Decorative hardcoded promo banners on the food-delivery screen
   /// (quick-promos band, floating bottom banner). No provider behind them.
   static const bool foodPromoBanners = false;
+
+  /// Credit/debit-card payment option at food checkout. Off for now: there is
+  /// no card-capture / gateway step, so a 'CARD' order is placed as if paid
+  /// without ever collecting a card. While off, food checkout offers CASH only.
+  static const bool foodCardPaymentEnabled = false;
 
   // ─── Maps ────────────────────────────────────────────────────────────────
 

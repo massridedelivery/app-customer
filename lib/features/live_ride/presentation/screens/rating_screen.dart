@@ -96,7 +96,7 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
             if (context.canPop()) {
               context.pop();
             } else {
-              context.go('/home');
+              context.go('/main');
             }
           },
         ),

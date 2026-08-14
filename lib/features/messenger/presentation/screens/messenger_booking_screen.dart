@@ -582,20 +582,19 @@ class _MessengerBookingScreenState
                   method == 'CASH',
                 ),
               ),
-              const SizedBox(width: 8),
-              // The QR/intent flow is wired (SCRUM-35 §3.3): PROMPTPAY orders
-              // route through /payment/promptpay. NOTE: backend still gates
-              // digital payment for messenger in phase 1 (SCRUM-41 accepts
-              // CASH | COD) — creates fail with 400 until it opens up; the
-              // error paths surface that gracefully.
-              Expanded(
-                child: _paymentOption(
-                  'PROMPTPAY',
-                  'พร้อมเพย์',
-                  Icons.qr_code_2_rounded,
-                  method == 'PROMPTPAY',
+              // PromptPay is gated off until the messenger backend accepts
+              // digital payment (SCRUM-41 phase 1 = CASH|COD; PROMPTPAY 400s).
+              if (FeatureFlags.messengerPromptPayEnabled) ...[
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _paymentOption(
+                    'PROMPTPAY',
+                    'พร้อมเพย์',
+                    Icons.qr_code_2_rounded,
+                    method == 'PROMPTPAY',
+                  ),
                 ),
-              ),
+              ],
               // COD hidden behind a flag until its collection/settlement flow
               // is finalised (FeatureFlags.messengerCodEnabled).
               if (FeatureFlags.messengerCodEnabled) ...[

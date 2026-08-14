@@ -1,5 +1,6 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
+import 'package:customer_app/core/constants/feature_flags.dart';
 import 'package:customer_app/features/food_order/presentation/controllers/checkout_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -68,15 +69,19 @@ class CheckoutPaymentSection extends ConsumerWidget {
               title: 'เงินสด',
               icon: Icons.attach_money,
             ),
-            const SizedBox(height: 12),
-            _buildPaymentOptionTile(
-              context: context,
-              ref: ref,
-              currentPaymentMethod: currentPaymentMethod,
-              id: 'CARD',
-              title: 'บัตรเครดิต/เดบิต',
-              icon: Icons.credit_card,
-            ),
+            // Card payment hidden until a real capture/gateway step exists —
+            // otherwise a CARD order is placed without collecting a card.
+            if (FeatureFlags.foodCardPaymentEnabled) ...[
+              const SizedBox(height: 12),
+              _buildPaymentOptionTile(
+                context: context,
+                ref: ref,
+                currentPaymentMethod: currentPaymentMethod,
+                id: 'CARD',
+                title: 'บัตรเครดิต/เดบิต',
+                icon: Icons.credit_card,
+              ),
+            ],
             const SizedBox(height: 20),
           ],
         ),

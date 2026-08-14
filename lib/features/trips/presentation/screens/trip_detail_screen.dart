@@ -147,15 +147,10 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
         );
       }
       if (pLat != 0 && dLat != 0) {
+        // Centre between pickup & dropoff. No route line on the history map —
+        // the straight pickup→dropoff polyline was misleading (not the real
+        // route), so we show pins only.
         centerLatLng = LatLng((pLat + dLat) / 2, (pLng + dLng) / 2);
-        polylines.add(
-          Polyline(
-            polylineId: const PolylineId('route'),
-            points: [LatLng(pLat, pLng), LatLng(dLat, dLng)],
-            color: AppColors.primary,
-            width: 4,
-          ),
-        );
       }
     } else if (state.foodDetails != null) {
       final food = state.foodDetails!;

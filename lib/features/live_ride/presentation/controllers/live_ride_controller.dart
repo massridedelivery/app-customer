@@ -17,6 +17,7 @@ class LiveRideController extends _$LiveRideController {
   StreamSubscription<Map<String, dynamic>>? _socketSubscription;
   DateTime? _lastLocationUpdateTime;
   Timer? _syncTimer;
+  int _syncTick = 0;
   static const _locationUpdateInterval = Duration(seconds: 2);
   static const _syncInterval = Duration(seconds: 5);
 
@@ -45,12 +46,21 @@ class LiveRideController extends _$LiveRideController {
   bool get _hasDriver =>
       state.driverId != null && state.driverId!.isNotEmpty;
 
-  /// Fallback for missed/misparsed WebSocket events: while still waiting for a
-  /// driver, periodically re-sync from the authoritative source
-  /// (`GET /api/customer/jobs/active`) so the customer never stays stuck on the
-  /// "finding driver" screen after a driver has actually accepted.
+  /// Fallback for missed/misparsed WebSocket events: periodically re-sync from
+  /// the authoritative source (`GET /api/customer/jobs/active`) so the customer
+  /// never stays stuck on the live-ride screen when a WS frame is lost.
+  ///
+  /// Runs until the job reaches a terminal status. Before a driver is assigned
+  /// it polls every tick (5s) so the "finding driver" screen advances quickly;
+  /// after assignment it keeps polling but at ~10s. The slower on-trip poll is
+  /// what recovers a `COMPLETED` that was pushed while the socket was suspended
+  /// (app backgrounded → the frame is lost, and there is no WS replay on
+  /// reconnect). Previously the poll stopped the moment a driver was assigned,
+  /// so after that the screen depended solely on the WS and could stay stuck on
+  /// "on trip" after the driver had already finished.
   void _startSyncPolling() {
     _syncTimer?.cancel();
+    _syncTick = 0;
     _syncTimer = Timer.periodic(_syncInterval, (_) {
       // No ride in flight yet (e.g. app idle on the home tab) — nothing to
       // re-sync. Skip the tick WITHOUT cancelling so polling resumes once a
@@ -62,11 +72,16 @@ class LiveRideController extends _$LiveRideController {
 
       final status = state.jobStatus?.toUpperCase();
       final isTerminal = status == 'COMPLETED' || status == 'CANCELLED';
-      if (_hasDriver || isTerminal) {
+      if (isTerminal) {
         _syncTimer?.cancel();
         return;
       }
-      getDriverProfile(silent: true);
+
+      // Throttle to ~10s once a driver is assigned; keep 5s while searching.
+      _syncTick++;
+      if (!_hasDriver || _syncTick.isEven) {
+        getDriverProfile(silent: true);
+      }
     });
   }
 
@@ -168,7 +183,19 @@ class LiveRideController extends _$LiveRideController {
       // No active job yet (still searching for a driver) is expected while
       // polling — don't treat it as an error or log noise.
       final noActiveJob = e.toString().contains('NO_ACTIVE_JOB');
-      if (noActiveJob) return;
+      if (noActiveJob) {
+        // The job dropped off the active list. If we were already on the trip
+        // (picked up, driver assigned), it finished while we weren't receiving
+        // live updates — the socket was suspended in the background and the
+        // COMPLETED frame was missed (no WS replay on reconnect). Mark it
+        // completed so the summary flow runs instead of the screen staying
+        // stuck on "on trip". Gated to PICKED_UP so a still-searching poll
+        // (no active job yet) is never misread as a completed ride.
+        if (_hasDriver && state.jobStatus?.toUpperCase() == 'PICKED_UP') {
+          state = state.copyWith(jobStatus: 'COMPLETED');
+        }
+        return;
+      }
 
       // Background sync polls must not surface transient errors to the UI.
       if (!silent) {

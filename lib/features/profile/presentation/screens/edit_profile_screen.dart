@@ -6,12 +6,47 @@ import 'package:customer_app/features/profile/presentation/controllers/profile_c
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class EditProfileScreen extends ConsumerWidget {
+class EditProfileScreen extends ConsumerStatefulWidget {
   const EditProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<EditProfileScreen> createState() => _EditProfileScreenState();
+}
+
+class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
+  // Persistent controller so the field's live text is the single source of
+  // truth on Save. The old code built a throwaway controller every rebuild and
+  // read a 1s-debounced `editName` on Save — tapping Save within 1s of the last
+  // keystroke sent the stale (pre-edit) name, so edits appeared not to save.
+  late final TextEditingController _nameController;
+
+  @override
+  void initState() {
+    super.initState();
+    final initial = ref.read(profileControllerProvider).value?.editName ?? '';
+    _nameController = TextEditingController(text: initial);
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final state = ref.watch(profileControllerProvider);
+
+    // Seed the field once when the profile name first arrives (async load),
+    // without clobbering what the user is actively typing.
+    ref.listen(profileControllerProvider.select((s) => s.value?.editName), (
+      prev,
+      next,
+    ) {
+      if (next != null && next.isNotEmpty && _nameController.text.isEmpty) {
+        _nameController.text = next;
+      }
+    });
 
     // Surface avatar-upload / update errors as a snackbar.
     ref.listen(profileControllerProvider.select((s) => s.value?.error), (
@@ -62,9 +97,7 @@ class EditProfileScreen extends ConsumerWidget {
                   const _FieldLabel(label: 'ชื่อ-นามสกุล'),
                   const SizedBox(height: 8),
                   _CustomTextField(
-                    controller: TextEditingController(
-                      text: state.value?.editName ?? '',
-                    ),
+                    controller: _nameController,
                     onChanged: (value) => ref
                         .read(profileControllerProvider.notifier)
                         .updateEditName(value),
@@ -83,9 +116,11 @@ class EditProfileScreen extends ConsumerWidget {
                 isUpdating: state.value?.isUpdating ?? false,
                 isValid: !(state.value?.isUploadingAvatar ?? false),
                 onPressed: () {
+                  // Read the live field text (not the 1s-debounced state) so a
+                  // quick Save right after typing still sends the new name.
                   ref
                       .read(profileControllerProvider.notifier)
-                      .updateProfile(fullName: state.value?.editName ?? '');
+                      .updateProfile(fullName: _nameController.text.trim());
                 },
               ),
             ),

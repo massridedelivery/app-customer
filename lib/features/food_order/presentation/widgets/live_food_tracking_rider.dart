@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/features/food_order/presentation/controllers/live_food_tracking_controller.dart';
@@ -114,7 +115,7 @@ class LiveFoodTrackingRider extends ConsumerWidget {
                   onPressed: () =>
                       context.push('/food-order/chat/$orderId'),
                   icon: const Icon(Icons.chat_bubble_outline, size: 18),
-                  label: const Text('Chat'),
+                  label: const Text('แชท'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.foundationGreen600,
                     side: BorderSide(color: Colors.grey.shade200),
@@ -128,32 +129,30 @@ class LiveFoodTrackingRider extends ConsumerWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: OutlinedButton.icon(
-                  onPressed: () {
+                  onPressed: () async {
                     final phone = order?.driverInfo?.phone;
-                    if (phone != null && phone.isNotEmpty) {
-                      showDialog(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                          title: const Text('เบอร์โทรศัพท์คนขับ'),
-                          content: SelectableText(phone),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(context),
-                              child: const Text('ปิด'),
-                            ),
-                          ],
+                    final messenger = ScaffoldMessenger.of(context);
+                    if (phone == null || phone.isEmpty) {
+                      messenger.showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'ไม่มีเบอร์โทรศัพท์คนขับสำหรับออเดอร์นี้',
+                          ),
                         ),
                       );
+                      return;
+                    }
+                    final uri = Uri(scheme: 'tel', path: phone);
+                    if (await canLaunchUrl(uri)) {
+                      await launchUrl(uri);
                     } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('ไม่มีเบอร์โทรศัพท์คนขับสำหรับออเดอร์นี้'),
-                        ),
+                      messenger.showSnackBar(
+                        SnackBar(content: Text('โทรไม่สำเร็จ: $phone')),
                       );
                     }
                   },
                   icon: const Icon(Icons.phone_outlined, size: 18),
-                  label: const Text('Call'),
+                  label: const Text('โทร'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.foundationGreen600,
                     side: BorderSide(color: Colors.grey.shade200),

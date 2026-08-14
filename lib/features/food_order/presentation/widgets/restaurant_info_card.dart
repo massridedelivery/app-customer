@@ -33,14 +33,22 @@ class RestaurantInfoCard extends StatelessWidget {
             height: 110,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
-              image: DecorationImage(
-                image: NetworkImage(
-                  restaurant.imageUrl ??
-                      'https://plus.unsplash.com/premium_photo-1694141253763-209b4c8f8ace?w=600',
-                ),
-                fit: BoxFit.cover,
-              ),
+              color: Colors.grey[200],
+              image:
+                  (restaurant.imageUrl != null &&
+                      restaurant.imageUrl!.isNotEmpty)
+                  ? DecorationImage(
+                      image: NetworkImage(restaurant.imageUrl!),
+                      fit: BoxFit.cover,
+                    )
+                  : null,
             ),
+            // Neutral placeholder instead of a random stock photo when the
+            // restaurant has no image.
+            child:
+                (restaurant.imageUrl == null || restaurant.imageUrl!.isEmpty)
+                ? Icon(Icons.restaurant, color: Colors.grey[400], size: 34)
+                : null,
           ),
           const SizedBox(width: 12),
           Expanded(

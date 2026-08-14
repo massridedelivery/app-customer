@@ -381,7 +381,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'Add ${amountNeeded.toStringAsFixed(0)} THB more to unlock Free Delivery!',
+                  'สั่งเพิ่มอีก ฿${amountNeeded.toStringAsFixed(0)} เพื่อรับส่งฟรี!',
                   style: AppTypography.caption3.copyWith(
                     fontWeight: FontWeight.bold,
                     color: const Color(0xFFFF8F00),

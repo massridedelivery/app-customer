@@ -93,29 +93,28 @@ class OnboardingScreen extends ConsumerWidget {
               ),
               child: Column(
                 children: [
-                  if (currentPageIndex == _pages.length - 1)
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: onNextPressed,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          elevation: 0,
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: onNextPressed,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
                         ),
-                        child: Text(
-                          'เริ่มต้นใช้งาน!',
-                          style: AppTypography.label1.copyWith(
-                            color: Colors.white,
-                          ),
+                        elevation: 0,
+                      ),
+                      child: Text(
+                        currentPageIndex == _pages.length - 1
+                            ? 'เริ่มต้นใช้งาน!'
+                            : 'ถัดไป',
+                        style: AppTypography.label1.copyWith(
+                          color: Colors.white,
                         ),
                       ),
-                    )
-                  else
-                    const SizedBox(height: 50),
+                    ),
+                  ),
 
                   const SizedBox(height: 30),
 
@@ -130,6 +129,23 @@ class OnboardingScreen extends ConsumerWidget {
                       ),
                     ),
                   ),
+                  if (currentPageIndex < _pages.length - 1) ...[
+                    const SizedBox(height: 4),
+                    TextButton(
+                      onPressed: () async {
+                        await ref
+                            .read(onboardingControllerProvider.notifier)
+                            .completeOnboarding();
+                        if (context.mounted) context.go('/auth');
+                      },
+                      child: Text(
+                        'ข้าม',
+                        style: AppTypography.label2.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),

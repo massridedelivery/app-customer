@@ -26,7 +26,7 @@ class ProfileScreen extends ConsumerWidget {
             child: profileAsync.when(
               loading: () => const _ProfileHeaderShimmer(),
               error: (e, s) =>
-                  _ProfileHeader(name: 'Error', phone: '', loyalty: null),
+                  _ProfileHeader(name: '', phone: '', loyalty: null),
               data: (p) => _ProfileHeader(
                 name: p.editName,
                 phone: p.phone,

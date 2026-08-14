@@ -10,6 +10,7 @@ import 'package:customer_app/features/trips/domain/models/history_order.dart';
 import 'package:customer_app/features/trips/presentation/controllers/trip_detail_controller.dart';
 import 'package:customer_app/features/trips/presentation/states/trip_detail_state.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
 import 'package:go_router/go_router.dart';
@@ -242,7 +243,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
             backgroundColor: Colors.white,
             child: IconButton(
               icon: const Icon(Icons.help_outline, color: AppColors.primary),
-              onPressed: () {},
+              onPressed: () => context.push('/sos'),
             ),
           ),
         ),
@@ -310,36 +311,49 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
               Expanded(
                 child: Align(
                   alignment: Alignment.centerRight,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Flexible(
-                          child: Text(
-                            bookingId,
-                            style: AppTypography.caption4.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.white,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
+                  child: InkWell(
+                    onTap: () {
+                      Clipboard.setData(ClipboardData(text: bookingId));
+                      ScaffoldMessenger.of(context)
+                        ..hideCurrentSnackBar()
+                        ..showSnackBar(
+                          const SnackBar(
+                            content: Text('คัดลอกรหัสการจองแล้ว'),
                           ),
-                        ),
-                        const SizedBox(width: 8),
-                        const Icon(
-                          Icons.copy,
-                          size: 14,
-                          color: AppColors.white,
-                        ),
-                      ],
+                        );
+                    },
+                    borderRadius: BorderRadius.circular(8),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Flexible(
+                            child: Text(
+                              bookingId,
+                              style: AppTypography.caption4.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.white,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          const Icon(
+                            Icons.copy,
+                            size: 14,
+                            color: AppColors.white,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -832,7 +846,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
           ),
           const SizedBox(height: 12),
           TextButton(
-            onPressed: () {},
+            onPressed: () => context.push('/sos'),
             style: TextButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 12),
             ),

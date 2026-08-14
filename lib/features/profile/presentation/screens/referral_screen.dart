@@ -161,7 +161,20 @@ class ReferralScreen extends ConsumerWidget {
                         const SizedBox(width: 12),
                         Expanded(
                           child: ElevatedButton.icon(
-                            onPressed: () {},
+                            onPressed: () {
+                              final code = referral['code'] ?? '';
+                              Clipboard.setData(
+                                ClipboardData(
+                                  text:
+                                      'มาใช้ Mass Move กัน! ใช้โค้ด $code รับส่วนลดเลย 🚀',
+                                ),
+                              );
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('คัดลอกข้อความเชิญชวนแล้ว'),
+                                ),
+                              );
+                            },
                             icon: const Icon(Icons.share_rounded, size: 18),
                             label: const Text('แชร์'),
                             style: ElevatedButton.styleFrom(

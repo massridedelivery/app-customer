@@ -183,7 +183,28 @@ class _FoodPlaceSearchScreenState extends ConsumerState<FoodPlaceSearchScreen>
         controller: _tabController,
         children: [
           _buildRecentList(state.recentPlaces),
-          Center(child: Text(AppLocalizations.of(context)!.recommended)),
+          // No recommendation source yet — show a proper empty state instead of
+          // printing the tab word.
+          Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.star_outline,
+                  size: 40,
+                  color: AppColors.semanticGrayNeutralFgLowOnWhite,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  AppLocalizations.of(context)!.recommendedEmpty,
+                  textAlign: TextAlign.center,
+                  style: AppTypography.body2.copyWith(
+                    color: AppColors.semanticGrayNeutralFgMidOnWhite,
+                  ),
+                ),
+              ],
+            ),
+          ),
           _buildSavedList(state.savedPlaces),
         ],
       ),

@@ -52,7 +52,10 @@ class _FoodRatingScreenState extends ConsumerState<FoodRatingScreen> {
     final itemReviewsList = <Map<String, dynamic>>[];
     if (stateInfo.order != null) {
       for (final item in stateInfo.order!.items) {
-        final itemRating = _itemRatings[item.id] ?? 5; // Default to 5 if not selected
+        // Only submit items the customer actually rated — don't fabricate a
+        // default 5-star review for items they left untouched.
+        final itemRating = _itemRatings[item.id];
+        if (itemRating == null || itemRating <= 0) continue;
         itemReviewsList.add({
           'order_item_id': item.id,
           'rating': itemRating,

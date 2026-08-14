@@ -451,12 +451,40 @@ class _StatusText extends StatelessWidget {
       );
     } else {
       return Text(
-        status,
+        _ongoingLabel(s),
         style: AppTypography.caption4.copyWith(
           color: Colors.orange,
           fontWeight: FontWeight.bold,
         ),
       );
+    }
+  }
+
+  // Thai labels for in-progress ride/food statuses (terminal ones handled
+  // above) so the list never shows a raw English enum.
+  String _ongoingLabel(String s) {
+    switch (s) {
+      case 'PENDING':
+        return 'กำลังหาคนขับ';
+      case 'ACCEPTED':
+      case 'CONFIRMING':
+        return 'คนขับรับงานแล้ว';
+      case 'ARRIVED_AT_PICK_UP':
+      case 'ARRIVED_AT_PICKUP':
+        return 'คนขับถึงจุดรับ';
+      case 'PICKED_UP':
+        return 'กำลังเดินทาง';
+      case 'PREPARING':
+        return 'กำลังเตรียมอาหาร';
+      case 'READY_FOR_PICKUP':
+        return 'รอรับอาหาร';
+      case 'DRIVER_ASSIGNED':
+        return 'จับคู่คนขับแล้ว';
+      case 'DELIVERING':
+      case 'ON_THE_WAY':
+        return 'กำลังจัดส่ง';
+      default:
+        return 'กำลังดำเนินการ';
     }
   }
 }

@@ -346,3 +346,124 @@ class _DashedLinePainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
+
+/// Manual coupon-code entry row (pill field + apply button + inline error),
+/// shared by the ride "ใช้คูปอง" and messenger "เลือกโค้ดส่วนลด" screens so the
+/// manual-entry UX is identical.
+class CouponManualEntry extends StatelessWidget {
+  final TextEditingController controller;
+  final ValueChanged<String> onApply;
+  final String applyLabel;
+  final String hint;
+  final String? errorText;
+  final bool isLoading;
+  final VoidCallback? onChanged;
+
+  const CouponManualEntry({
+    super.key,
+    required this.controller,
+    required this.onApply,
+    this.applyLabel = 'ใช้งาน',
+    this.hint = 'กรอกรหัสคูปองด้วยตนเอง',
+    this.errorText,
+    this.isLoading = false,
+    this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final hasError = errorText != null && errorText!.isNotEmpty;
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Container(
+            height: 48,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: hasError ? AppColors.error : const Color(0xFFDDDDDD),
+              ),
+            ),
+            child: Row(
+              children: [
+                const SizedBox(width: 12),
+                Icon(
+                  Icons.local_offer_outlined,
+                  color: Colors.grey[400],
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: TextField(
+                    controller: controller,
+                    textCapitalization: TextCapitalization.characters,
+                    onChanged: (_) => onChanged?.call(),
+                    onSubmitted: (v) => onApply(v.trim()),
+                    decoration: InputDecoration(
+                      hintText: hint,
+                      hintStyle: const TextStyle(
+                        color: Colors.grey,
+                        fontSize: 14,
+                      ),
+                      border: InputBorder.none,
+                      isDense: true,
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                    style: const TextStyle(fontSize: 14, color: Colors.black87),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(4),
+                  child: ElevatedButton(
+                    onPressed: isLoading
+                        ? null
+                        : () => onApply(controller.text.trim()),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(9),
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 18),
+                      minimumSize: const Size(0, 40),
+                    ),
+                    child: isLoading
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : Text(
+                            applyLabel,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                            ),
+                          ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (hasError) ...[
+            const SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: Text(
+                errorText!,
+                style: AppTypography.caption5.copyWith(color: AppColors.error),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}

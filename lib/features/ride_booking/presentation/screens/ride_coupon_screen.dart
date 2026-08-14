@@ -107,113 +107,18 @@ class _RideCouponScreenState extends ConsumerState<RideCouponScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-                // SECTION 1: Manual promo code input
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Container(
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: _errorMessage != null
-                                ? AppColors.error
-                                : Colors.grey[300]!,
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            const SizedBox(width: 12),
-                            Icon(
-                              Icons.local_offer_outlined,
-                              color: Colors.grey[400],
-                              size: 18,
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: TextField(
-                                controller: _manualController,
-                                onChanged: (val) {
-                                  if (_errorMessage != null) {
-                                    setState(() {
-                                      _errorMessage = null;
-                                    });
-                                  }
-                                },
-                                decoration: const InputDecoration(
-                                  hintText: 'กรอกรหัสคูปองด้วยตนเอง',
-                                  hintStyle: TextStyle(
-                                    color: Colors.grey,
-                                    fontSize: 13,
-                                  ),
-                                  border: InputBorder.none,
-                                  isDense: true,
-                                  contentPadding: EdgeInsets.symmetric(
-                                    vertical: 8,
-                                  ),
-                                ),
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  color: Colors.black87,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Container(
-                              height: 40,
-                              decoration: const BoxDecoration(
-                                color: AppColors.primary,
-                                borderRadius: BorderRadius.only(
-                                  topRight: Radius.circular(7),
-                                  bottomRight: Radius.circular(7),
-                                ),
-                              ),
-                              child: TextButton(
-                                onPressed: _isLoading
-                                    ? null
-                                    : () {
-                                        final code = _manualController.text
-                                            .trim();
-                                        _applyPromo(code);
-                                      },
-                                style: TextButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                  ),
-                                  minimumSize: Size.zero,
-                                  tapTargetSize:
-                                      MaterialTapTargetSize.shrinkWrap,
-                                ),
-                                child: const Text(
-                                  'ใช้งาน',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 13,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      if (_errorMessage != null) ...[
-                        const SizedBox(height: 8),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 4),
-                          child: Text(
-                            _errorMessage!,
-                            style: AppTypography.caption5.copyWith(
-                              color: AppColors.error,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
+                // SECTION 1: Manual promo code input (shared widget)
+                CouponManualEntry(
+                  controller: _manualController,
+                  onApply: _applyPromo,
+                  applyLabel: 'ใช้งาน',
+                  errorText: _errorMessage,
+                  isLoading: _isLoading,
+                  onChanged: () {
+                    if (_errorMessage != null) {
+                      setState(() => _errorMessage = null);
+                    }
+                  },
                 ),
 
                 // SECTION 2: List of promotions (Scrollable)

@@ -51,57 +51,13 @@ class _MessengerCouponScreenState extends ConsumerState<MessengerCouponScreen> {
       ),
       body: Column(
         children: [
-          // Manual entry
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _manual,
-                    textCapitalization: TextCapitalization.characters,
-                    decoration: InputDecoration(
-                      hintText: 'กรอกโค้ดส่วนลด',
-                      filled: true,
-                      fillColor: AppColors.white,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 14,
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(
-                          color: AppColors.foundationGrayscale300,
-                        ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: AppColors.primary),
-                      ),
-                    ),
-                    onSubmitted: _apply,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                SizedBox(
-                  height: 50,
-                  child: ElevatedButton(
-                    onPressed: () => _apply(_manual.text),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: AppColors.white,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: const Text('ใช้โค้ด'),
-                  ),
-                ),
-              ],
-            ),
+          // Manual entry — same shared pill as the ride "ใช้คูปอง" flow.
+          CouponManualEntry(
+            controller: _manual,
+            onApply: _apply,
+            applyLabel: 'ใช้โค้ด',
+            hint: 'กรอกโค้ดส่วนลด',
           ),
-          const Divider(height: 1),
           Expanded(
             child: promosAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),

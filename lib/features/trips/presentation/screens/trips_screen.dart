@@ -58,6 +58,7 @@ class _TripsScreenState extends ConsumerState<TripsScreen> {
       ref.read(messengerHistoryControllerProvider.notifier).refresh();
       return;
     }
+    // ALL (null) and ride/food both use the unified /history feed.
     ref
         .read(tripsControllerProvider.notifier)
         .fetchHistoryOrders(
@@ -65,6 +66,10 @@ class _TripsScreenState extends ConsumerState<TripsScreen> {
           status: null, // all statuses combined
           isRefresh: isRefresh,
         );
+    // "ทั้งหมด" also merges in the separate messenger source.
+    if (_selectedType == null) {
+      ref.read(messengerHistoryControllerProvider.notifier).refresh();
+    }
   }
 
   @override
@@ -99,6 +104,11 @@ class _TripsScreenState extends ConsumerState<TripsScreen> {
         onRefresh: () async => _loadHistory(isRefresh: true),
         child: _selectedType == HistoryType.messenger
             ? _MessengerHistoryBody(
+                onRetry: () => _loadHistory(isRefresh: true),
+              )
+            : _selectedType == null
+            ? _AllHistoryBody(
+                scrollController: _scrollController,
                 onRetry: () => _loadHistory(isRefresh: true),
               )
             : _TripsListBody(
@@ -138,6 +148,13 @@ class _TripsFilterBar extends StatelessWidget implements PreferredSizeWidget {
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 16),
               children: [
+                // "ทั้งหมด" = no type filter (null) → ride+food+messenger merged.
+                AppFilterChip(
+                  label: 'ทั้งหมด',
+                  selected: selectedType == null,
+                  onTap: () => onTypeChanged(null),
+                ),
+                const SizedBox(width: 8),
                 _buildTypeChip(HistoryType.food, 'ส่งอาหาร'),
                 const SizedBox(width: 8),
                 _buildTypeChip(HistoryType.ride, 'เรียกรถ'),
@@ -633,5 +650,128 @@ class _MessengerStatusText extends StatelessWidget {
       default:
         return 'กำลังดำเนินการ';
     }
+  }
+}
+
+// ─── "ทั้งหมด" (all) tab ──────────────────────────────────────────────────────
+// The unified /history feed only covers ride+food, and messenger has a separate
+// source/model, so the ALL tab merges the two client-side. A small sealed union
+// lets one sorted list reuse both existing row widgets unchanged.
+sealed class _FeedItem {
+  DateTime get sortDate;
+  bool get isOngoing;
+}
+
+class _TripItem extends _FeedItem {
+  final HistoryOrder order;
+  _TripItem(this.order);
+  @override
+  DateTime get sortDate =>
+      DateTime.tryParse(order.createdAt) ??
+      DateTime.fromMillisecondsSinceEpoch(0);
+  @override
+  bool get isOngoing => _isOngoingOrder(order.status);
+}
+
+class _MsgrItem extends _FeedItem {
+  final MessengerOrder order;
+  _MsgrItem(this.order);
+  @override
+  DateTime get sortDate =>
+      DateTime.tryParse(order.createdAt) ??
+      DateTime.fromMillisecondsSinceEpoch(0);
+  @override
+  bool get isOngoing => !order.isTerminal;
+}
+
+class _AllHistoryBody extends ConsumerWidget {
+  final ScrollController scrollController;
+  final VoidCallback onRetry;
+
+  const _AllHistoryBody({
+    required this.scrollController,
+    required this.onRetry,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final trips = ref.watch(
+      tripsControllerProvider.select((s) => s.historyOrders),
+    );
+    final tripsLoading = ref.watch(
+      tripsControllerProvider.select((s) => s.isHistoryLoading),
+    );
+    final tripsError = ref.watch(
+      tripsControllerProvider.select((s) => s.historyError),
+    );
+    final isLoadingMore = ref.watch(
+      tripsControllerProvider.select((s) => s.isLoadingMore),
+    );
+    final msgrAsync = ref.watch(messengerHistoryControllerProvider);
+    final messenger = msgrAsync.asData?.value ?? const <MessengerOrder>[];
+
+    // Only block on the spinner while BOTH sources are still empty & loading.
+    if (trips.isEmpty &&
+        messenger.isEmpty &&
+        (tripsLoading || msgrAsync.isLoading)) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    // Both failed with nothing to show → offer a retry.
+    if (trips.isEmpty &&
+        messenger.isEmpty &&
+        tripsError != null &&
+        msgrAsync.hasError) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(tripsError),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: onRetry,
+              child: Text(AppLocalizations.of(context)!.retry),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final merged = <_FeedItem>[
+      ...trips.map(_TripItem.new),
+      ...messenger.map(_MsgrItem.new),
+    ]..sort((a, b) => b.sortDate.compareTo(a.sortDate));
+    // Ongoing first, then the rest — each group already date-desc.
+    final sorted = [
+      ...merged.where((i) => i.isOngoing),
+      ...merged.where((i) => !i.isOngoing),
+    ];
+
+    if (sorted.isEmpty) {
+      return Center(child: Text(AppLocalizations.of(context)!.noTripsYet));
+    }
+
+    return ListView.separated(
+      controller: scrollController,
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      itemCount: sorted.length + (isLoadingMore ? 1 : 0),
+      separatorBuilder: (context, index) => const Padding(
+        padding: EdgeInsets.symmetric(horizontal: 16),
+        child: Divider(height: 0.5, color: AppColors.foundationGrayscale100),
+      ),
+      itemBuilder: (context, index) {
+        if (index == sorted.length) {
+          return const Padding(
+            padding: EdgeInsets.symmetric(vertical: 16),
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
+        final item = sorted[index];
+        return switch (item) {
+          _TripItem(:final order) => _OrderListItem(order: order),
+          _MsgrItem(:final order) => _MessengerOrderListItem(order: order),
+        };
+      },
+    );
   }
 }

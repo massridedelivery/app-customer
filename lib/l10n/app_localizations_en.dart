@@ -564,6 +564,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get wallet => 'Wallet';
 
   @override
+  String get creditCard => 'Credit Card';
+
+  @override
   String get support => 'Support';
 
   @override

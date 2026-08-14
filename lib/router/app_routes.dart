@@ -43,6 +43,8 @@ import 'package:customer_app/features/profile/presentation/screens/profile_scree
 import 'package:customer_app/features/profile/presentation/screens/edit_profile_screen.dart';
 import 'package:customer_app/features/profile/presentation/screens/loyalty_screen.dart';
 import 'package:customer_app/features/food_delivery/presentation/screens/saved_restaurants_screen.dart';
+import 'package:customer_app/features/payment/presentation/screens/credit_card_list_screen.dart';
+import 'package:customer_app/features/payment/presentation/screens/add_credit_card_screen.dart';
 import 'package:customer_app/features/profile/presentation/screens/saved_places_screen.dart';
 import 'package:customer_app/features/profile/presentation/screens/address_form_screen.dart';
 import 'package:customer_app/features/profile/presentation/screens/promo_list_screen.dart';
@@ -474,6 +476,17 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/add-card',
         builder: (context, state) => const AddCardScreen(),
+      ),
+      GoRoute(
+        path: '/credit-cards',
+        builder: (context, state) => const CreditCardListScreen(),
+        routes: [
+          // Nested so the add form keeps the list as its back stack.
+          GoRoute(
+            path: 'add',
+            builder: (context, state) => const AddCreditCardScreen(),
+          ),
+        ],
       ),
       GoRoute(
         path: '/payment/promptpay',

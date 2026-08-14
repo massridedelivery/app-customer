@@ -1,5 +1,6 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
+import 'package:customer_app/core/utils/vehicle_name_th.dart';
 import 'package:customer_app/features/ride_booking/domain/models/vehicle_estimation.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -101,7 +102,11 @@ class VehicleSelectionItem extends StatelessWidget {
                                 Row(
                                   children: [
                                     Text(
-                                      estimation.displayName,
+                                      vehicleNameTh(
+                                        estimation.displayName,
+                                        vehicleTypeName:
+                                            estimation.vehicleTypeName,
+                                      ),
                                       style: AppTypography.heading5.copyWith(
                                         fontWeight: FontWeight.bold,
                                         color: isSelected

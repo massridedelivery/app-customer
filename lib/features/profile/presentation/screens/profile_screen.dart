@@ -257,7 +257,9 @@ class _ProfileHeader extends StatelessWidget {
                         ? null
                         : Center(
                             child: Text(
-                              name.isNotEmpty ? name[0].toUpperCase() : '?',
+                              (name.isNotEmpty && name != phone)
+                                  ? name[0].toUpperCase()
+                                  : '?',
                               style: AppTypography.heading3.copyWith(
                                 color: AppColors.primary,
                               ),
@@ -270,7 +272,12 @@ class _ProfileHeader extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          name,
+                          // Show the real name; fall back to "สมาชิก" when the
+                          // backend hasn't set a name yet (it defaults full_name
+                          // to the phone, which would otherwise show twice).
+                          (name.isNotEmpty && name != phone)
+                              ? name
+                              : l10n.member,
                           style: AppTypography.heading4.copyWith(
                             color: AppColors.textPrimary,
                           ),
@@ -436,9 +443,9 @@ class _QuickActionsGrid extends StatelessWidget {
         color: Color(0xFFFEF2F2),
       ),
       _ActionItem(
-        icon: Icons.wallet_rounded,
-        label: l10n.wallet,
-        route: '#',
+        icon: Icons.credit_card_rounded,
+        label: l10n.creditCard,
+        route: '/credit-cards',
         color: Color(0xFFF5F3FF),
       ),
       _ActionItem(

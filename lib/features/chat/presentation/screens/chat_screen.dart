@@ -1,5 +1,6 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
+import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/features/chat/domain/models/chat_message.dart';
 import 'package:customer_app/features/chat/presentation/controllers/chat_controller.dart';
 import 'package:customer_app/features/live_ride/presentation/controllers/live_ride_controller.dart';
@@ -150,7 +151,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         children: [
           // Loading Indicator or Error Alert
           if (chatState.isLoading && chatState.messages.isEmpty)
-            const Expanded(child: Center(child: CircularProgressIndicator()))
+            const Expanded(child: Center(child: MassLoadingM(size: 72)))
           else if (chatState.error != null && chatState.messages.isEmpty)
             Expanded(
               child: Center(

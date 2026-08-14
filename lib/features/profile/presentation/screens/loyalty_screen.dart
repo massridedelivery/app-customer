@@ -1,5 +1,6 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
+import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/features/profile/data/datasources/loyalty_remote_data_source.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -36,7 +37,7 @@ class LoyaltyScreen extends ConsumerWidget {
         surfaceTintColor: Colors.transparent,
       ),
       body: summaryAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Center(child: MassLoadingM(size: 72)),
         error: (e, s) => Center(
           child: Text('ไม่สามารถโหลดข้อมูลได้', style: AppTypography.body2),
         ),
@@ -96,7 +97,7 @@ class LoyaltyScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 12),
               pointsAsync.when(
-                loading: () => const Center(child: CircularProgressIndicator()),
+                loading: () => const Center(child: MassLoadingM(size: 48)),
                 error: (e, s) => const SizedBox.shrink(),
                 data: (data) {
                   final txns = (data['transactions'] as List?) ?? [];
@@ -121,7 +122,7 @@ class LoyaltyScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 12),
               cashbackAsync.when(
-                loading: () => const Center(child: CircularProgressIndicator()),
+                loading: () => const Center(child: MassLoadingM(size: 48)),
                 error: (e, s) => const SizedBox.shrink(),
                 data: (list) => Column(
                   children: list

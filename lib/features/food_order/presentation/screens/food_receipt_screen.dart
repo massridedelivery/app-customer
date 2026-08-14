@@ -1,6 +1,7 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/utils/thai_date_formatter.dart';
+import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/features/food_order/domain/models/food_models.dart';
 import 'package:customer_app/features/food_order/presentation/controllers/food_receipt_controller.dart';
 import 'package:flutter/material.dart';
@@ -34,7 +35,7 @@ class FoodReceiptScreen extends ConsumerWidget {
 
   Widget _buildBody(BuildContext context, WidgetRef ref, dynamic state) {
     if (state.isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: MassLoadingM(size: 72));
     }
 
     if (state.error != null) {

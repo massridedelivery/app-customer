@@ -2,6 +2,7 @@ import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/constants/map_defaults.dart';
 import 'package:customer_app/core/widgets/app_network_image.dart';
+import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/features/food_delivery/data/repositories/food_discovery_repository_impl.dart';
 import 'package:customer_app/features/food_order/domain/models/food_models.dart';
 import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
@@ -96,7 +97,7 @@ class _SavedRestaurantsScreenState
     }
     final restaurants = _restaurants;
     if (restaurants == null) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: MassLoadingM(size: 72));
     }
     if (restaurants.isEmpty) {
       return _centered(

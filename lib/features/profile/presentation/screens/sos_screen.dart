@@ -1,5 +1,6 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
+import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/features/profile/presentation/controllers/sos_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -127,7 +128,7 @@ class SOSScreen extends ConsumerWidget {
             Text('ประวัติ SOS', style: AppTypography.heading4),
             const SizedBox(height: 12),
             historyAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
+              loading: () => const Center(child: MassLoadingM(size: 48)),
               error: (e, s) =>
                   Text('โหลดข้อมูลไม่สำเร็จ', style: AppTypography.body2),
               data: (history) => history.isEmpty

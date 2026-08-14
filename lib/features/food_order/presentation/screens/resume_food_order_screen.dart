@@ -1,5 +1,6 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
+import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/features/active_orders/presentation/controllers/active_orders_controller.dart';
 import 'package:customer_app/features/food_order/data/repositories/food_order_repository_impl.dart';
 import 'package:customer_app/features/food_order/presentation/widgets/resume_empty_state.dart';
@@ -108,7 +109,7 @@ class _ResumeFoodOrderScreenState extends ConsumerState<ResumeFoodOrderScreen> {
         children: [
           activeOrdersAsync.when(
             loading: () => const Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
+              child: MassLoadingM(size: 72),
             ),
             error: (err, stack) => Center(
               child: Padding(
@@ -160,7 +161,7 @@ class _ResumeFoodOrderScreenState extends ConsumerState<ResumeFoodOrderScreen> {
             Container(
               color: Colors.black.withValues(alpha: 0.3),
               child: const Center(
-                child: CircularProgressIndicator(color: AppColors.primary),
+                child: MassLoadingM(size: 72),
               ),
             ),
         ],

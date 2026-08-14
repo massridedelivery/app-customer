@@ -2,6 +2,7 @@ import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/widgets/app_filter_chip.dart';
 import 'package:customer_app/core/constants/feature_flags.dart';
+import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/features/food_order/presentation/controllers/food_rating_controller.dart';
 import 'package:customer_app/features/food_order/presentation/states/food_rating_state.dart';
 import 'package:flutter/material.dart';
@@ -114,7 +115,7 @@ class _FoodRatingScreenState extends ConsumerState<FoodRatingScreen> {
 
   Widget _buildBody(BuildContext context, FoodRatingState stateInfo) {
     if (stateInfo.isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: MassLoadingM(size: 72));
     }
 
     if (stateInfo.error != null) {

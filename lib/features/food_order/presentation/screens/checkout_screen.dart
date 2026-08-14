@@ -2,6 +2,7 @@ import 'package:customer_app/core/constants/map_defaults.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/constants/feature_flags.dart';
+import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/features/food_order/domain/models/food_models.dart';
 import 'package:customer_app/features/food_order/presentation/controllers/checkout_controller.dart';
 import 'package:customer_app/features/food_order/presentation/states/checkout_state.dart';
@@ -260,7 +261,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         ),
       ),
       body: checkoutState.isLoading
-          ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+          ? const Center(child: MassLoadingM(size: 72))
           : SingleChildScrollView(
               child: Column(
                 children: [

@@ -1,6 +1,7 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/error/api_error.dart';
+import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
 import 'package:customer_app/features/ride_booking/presentation/controllers/booking_controller.dart';
 import 'package:customer_app/features/ride_booking/presentation/states/booking_state.dart';
@@ -342,7 +343,7 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
             const Positioned.fill(
               child: ColoredBox(
                 color: Colors.black26,
-                child: Center(child: CircularProgressIndicator(color: AppColors.primary)),
+                child: Center(child: MassLoadingM(size: 72)),
               ),
             ),
 

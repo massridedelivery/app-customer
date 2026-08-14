@@ -1,6 +1,7 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/widgets/app_filter_chip.dart';
+import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:customer_app/features/messenger/domain/models/messenger_order.dart';
@@ -206,7 +207,7 @@ class _TripsListBody extends ConsumerWidget {
     );
 
     if (isHistoryLoading && orders.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: MassLoadingM(size: 72));
     }
 
     if (historyError != null && orders.isEmpty) {
@@ -506,7 +507,7 @@ class _MessengerHistoryBody extends ConsumerWidget {
     final ordersAsync = ref.watch(messengerHistoryControllerProvider);
 
     return ordersAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => const Center(child: MassLoadingM(size: 72)),
       error: (err, stack) => Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -786,7 +787,7 @@ class _AllHistoryBody extends ConsumerWidget {
     if (trips.isEmpty &&
         messenger.isEmpty &&
         (tripsLoading || msgrAsync.isLoading)) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: MassLoadingM(size: 72));
     }
 
     // Both failed with nothing to show → offer a retry.

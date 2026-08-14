@@ -1,5 +1,6 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
+import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/features/profile/data/datasources/promo_remote_data_source.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -32,7 +33,7 @@ class PromoDetailScreen extends ConsumerWidget {
             onPressed: () => Navigator.of(context).pop(),
           ),
         ),
-        body: const Center(child: CircularProgressIndicator()),
+        body: const Center(child: MassLoadingM(size: 72)),
       ),
       error: (e, s) => Scaffold(
         backgroundColor: AppColors.background,

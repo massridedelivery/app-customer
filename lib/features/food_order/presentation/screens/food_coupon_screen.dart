@@ -1,5 +1,6 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
+import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/features/food_order/presentation/controllers/checkout_controller.dart';
 import 'package:customer_app/features/food_order/presentation/controllers/food_cart_controller.dart';
 import 'package:customer_app/features/food_order/presentation/widgets/food_promo_card.dart';
@@ -62,9 +63,7 @@ class FoodCouponScreen extends ConsumerWidget {
             Expanded(
               child: isPromoLoading && promos.isEmpty
                   ? const Center(
-                      child: CircularProgressIndicator(
-                        color: AppColors.primary,
-                      ),
+                      child: MassLoadingM(size: 72),
                     )
                   : RefreshIndicator(
                       onRefresh: () => ref

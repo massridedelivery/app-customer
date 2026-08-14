@@ -4,6 +4,7 @@ import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_icons.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/utils/map_marker_providers.dart';
+import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/core/utils/thai_date_formatter.dart';
 import 'package:customer_app/features/live_ride/presentation/controllers/rating_controller.dart';
 import 'package:customer_app/features/trips/domain/models/history_order.dart';
@@ -81,7 +82,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
     final dropoffIcon = ref.watch(dropoffMarkerProvider).value;
 
     if (state.isLoading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const Scaffold(body: Center(child: MassLoadingM(size: 72)));
     }
 
     if (state.error != null) {

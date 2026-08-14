@@ -1,6 +1,7 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/widgets/coupon_card.dart';
+import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/features/profile/presentation/screens/promo_list_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -60,7 +61,7 @@ class _MessengerCouponScreenState extends ConsumerState<MessengerCouponScreen> {
           ),
           Expanded(
             child: promosAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
+              loading: () => const Center(child: MassLoadingM(size: 72)),
               error: (error, stack) => Center(
                 child: Text(
                   'โหลดโค้ดส่วนลดไม่สำเร็จ',

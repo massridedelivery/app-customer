@@ -3,6 +3,7 @@ import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_icons.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/widgets/app_filter_chip.dart';
+import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/core/constants/feature_flags.dart';
 import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
 import 'package:customer_app/features/home/presentation/states/home_state.dart';
@@ -255,7 +256,7 @@ class _MessengerBookingScreenState
         child: const Center(
           child: Padding(
             padding: EdgeInsets.all(16),
-            child: CircularProgressIndicator(color: AppColors.primary),
+            child: MassLoadingM(size: 72),
           ),
         ),
       );

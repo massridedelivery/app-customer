@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
+import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/features/payment/presentation/controllers/promptpay_controller.dart';
 import 'package:customer_app/features/payment/presentation/screens/qr_payload.dart';
 import 'package:customer_app/features/payment/presentation/states/promptpay_state.dart';
@@ -89,7 +90,7 @@ class _PromptPayQrScreenState extends ConsumerState<PromptPayQrScreen> {
 
   Widget _buildBody(PromptPayState state) {
     if (state.isCreating) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: MassLoadingM(size: 72));
     }
 
     if (state.error != null && state.intent == null) {
@@ -276,7 +277,7 @@ class _QrImageState extends State<_QrImage> {
       future: _bytesFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: MassLoadingM(size: 56));
         }
         final bytes = snapshot.data;
         if (snapshot.hasError || bytes == null || bytes.isEmpty) {

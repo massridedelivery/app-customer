@@ -1,5 +1,6 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
+import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/features/food_order/presentation/controllers/live_food_tracking_controller.dart';
 import 'package:customer_app/features/chat/presentation/controllers/chat_controller.dart';
 import 'package:flutter/material.dart';
@@ -145,9 +146,7 @@ class _FoodChatScreenState extends ConsumerState<FoodChatScreen> {
           if (chatState.isLoading && chatState.messages.isEmpty)
             const Expanded(
               child: Center(
-                child: CircularProgressIndicator(
-                  color: AppColors.foundationGreen500,
-                ),
+                child: MassLoadingM(size: 72),
               ),
             )
           else if (chatState.error != null && chatState.messages.isEmpty)

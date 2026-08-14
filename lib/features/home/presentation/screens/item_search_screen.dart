@@ -6,6 +6,7 @@ import 'package:customer_app/features/food_order/domain/models/food_models.dart'
 import 'package:customer_app/features/food_order/presentation/controllers/food_search_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:customer_app/core/widgets/app_network_image.dart';
+import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -116,7 +117,7 @@ class _ItemSearchScreenState extends ConsumerState<ItemSearchScreen> {
   Widget _buildBody(FoodSearchState state) {
     if (state.isLoading) {
       return const Center(
-        child: CircularProgressIndicator(color: AppColors.primary),
+        child: MassLoadingM(size: 72),
       );
     }
 

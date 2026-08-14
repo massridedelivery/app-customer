@@ -3,6 +3,7 @@ import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_icons.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/widgets/app_pill_tab.dart';
+import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
 import 'package:customer_app/features/home/presentation/controllers/place_search_controller.dart';
 import 'package:customer_app/features/home/presentation/states/home_state.dart';
@@ -174,7 +175,7 @@ class _FoodPlaceSearchScreenState extends ConsumerState<FoodPlaceSearchScreen>
 
     if (searchState.isSearching) {
       return const Expanded(
-        child: Center(child: CircularProgressIndicator()),
+        child: Center(child: MassLoadingM(size: 72)),
       );
     }
 

@@ -1,5 +1,6 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
+import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/features/profile/data/datasources/referral_remote_data_source.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -26,7 +27,7 @@ class ReferralScreen extends ConsumerWidget {
         surfaceTintColor: Colors.transparent,
       ),
       body: referralAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Center(child: MassLoadingM(size: 72)),
         error: (e, s) => Center(
           child: Text('โหลดข้อมูลไม่สำเร็จ', style: AppTypography.body2),
         ),

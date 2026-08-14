@@ -1,5 +1,6 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
+import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
 import 'package:customer_app/features/home/presentation/controllers/place_search_controller.dart';
 import 'package:customer_app/features/home/domain/models/place.dart';
@@ -118,7 +119,7 @@ class PlaceSearchMainContent extends ConsumerWidget {
     }
 
     if (searchState.isSearching) {
-      return const Expanded(child: Center(child: CircularProgressIndicator()));
+      return const Expanded(child: Center(child: MassLoadingM(size: 72)));
     }
 
     return Expanded(

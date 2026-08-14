@@ -1,5 +1,6 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
+import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/features/chat/presentation/controllers/chat_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -132,7 +133,7 @@ class _MessengerChatScreenState extends ConsumerState<MessengerChatScreen> {
           if (chatState.isLoading && chatState.messages.isEmpty)
             const Expanded(
               child: Center(
-                child: CircularProgressIndicator(color: AppColors.primary),
+                child: MassLoadingM(size: 72),
               ),
             )
           else if (chatState.error != null && chatState.messages.isEmpty)

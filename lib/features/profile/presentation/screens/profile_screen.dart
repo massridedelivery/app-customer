@@ -1,5 +1,6 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
+import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/core/localization/locale_controller.dart';
 import 'package:customer_app/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:customer_app/features/profile/presentation/controllers/profile_controller.dart';
@@ -404,7 +405,7 @@ class _ProfileHeaderShimmer extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     height: 240,
     color: Colors.white,
-    child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+    child: const Center(child: MassLoadingM(size: 56)),
   );
 }
 

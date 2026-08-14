@@ -1,6 +1,7 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/utils/vehicle_name_th.dart';
+import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/features/ride_booking/domain/models/vehicle_estimation.dart';
 import 'package:customer_app/features/ride_booking/presentation/controllers/booking_controller.dart';
 import 'package:customer_app/features/ride_booking/presentation/states/booking_state.dart';
@@ -90,7 +91,7 @@ class VehicleSelectionSheet extends ConsumerWidget {
                     children: const [
                       SizedBox(
                         height: 160,
-                        child: Center(child: CircularProgressIndicator()),
+                        child: Center(child: MassLoadingM(size: 56)),
                       ),
                     ],
                   )

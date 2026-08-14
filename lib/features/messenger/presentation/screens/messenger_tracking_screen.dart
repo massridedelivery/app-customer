@@ -2,6 +2,7 @@ import 'package:customer_app/core/constants/app_assets.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_icons.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
+import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/features/messenger/domain/models/messenger_order.dart';
 import 'package:customer_app/features/messenger/presentation/controllers/messenger_tracking_controller.dart';
 import 'package:flutter/material.dart';
@@ -192,9 +193,7 @@ class _MessengerTrackingScreenState
                     child: Container(
                       color: Colors.black.withValues(alpha: 0.3),
                       child: const Center(
-                        child: CircularProgressIndicator(
-                          color: AppColors.primary,
-                        ),
+                        child: MassLoadingM(size: 72),
                       ),
                     ),
                   ),
@@ -247,7 +246,7 @@ class _MessengerTrackingScreenState
   Widget _buildLoadingOrError(bool isLoading, String? error) {
     if (isLoading || error == null) {
       return const Center(
-        child: CircularProgressIndicator(color: AppColors.primary),
+        child: MassLoadingM(size: 72),
       );
     }
     return Center(

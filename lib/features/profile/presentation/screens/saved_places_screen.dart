@@ -1,5 +1,6 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
+import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/features/home/domain/models/place.dart';
 import 'package:customer_app/features/profile/presentation/controllers/saved_places_controller.dart';
 import 'package:flutter/material.dart';
@@ -30,13 +31,13 @@ class _SavedPlacesScreenState extends ConsumerState<SavedPlacesScreen> {
       body: Stack(
         children: [
           stateAsync.when(
-            loading: () => const Center(child: CircularProgressIndicator()),
+            loading: () => const Center(child: MassLoadingM(size: 72)),
             error: (e, s) => Center(
               child: Text('โหลดข้อมูลไม่สำเร็จ', style: AppTypography.body2),
             ),
             data: (stateData) {
               return stateData.places.when(
-                loading: () => const Center(child: CircularProgressIndicator()),
+                loading: () => const Center(child: MassLoadingM(size: 72)),
                 error: (e, s) => Center(
                   child: Text('โหลดข้อมูลไม่สำเร็จ', style: AppTypography.body2),
                 ),
@@ -61,7 +62,7 @@ class _SavedPlacesScreenState extends ConsumerState<SavedPlacesScreen> {
             Container(
               color: Colors.black.withValues(alpha: 0.15),
               child: const Center(
-                child: CircularProgressIndicator(),
+                child: MassLoadingM(size: 72),
               ),
             ),
         ],

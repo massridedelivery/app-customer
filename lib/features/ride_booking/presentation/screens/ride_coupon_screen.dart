@@ -1,6 +1,7 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/widgets/coupon_card.dart';
+import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/features/ride_booking/presentation/controllers/booking_controller.dart';
 import 'package:customer_app/features/ride_booking/presentation/providers/discover_promos_provider.dart';
 import 'package:flutter/material.dart';
@@ -125,9 +126,7 @@ class _RideCouponScreenState extends ConsumerState<RideCouponScreen> {
                 Expanded(
                   child: promosAsync.when(
                     loading: () => const Center(
-                      child: CircularProgressIndicator(
-                        color: AppColors.primary,
-                      ),
+                      child: MassLoadingM(size: 72),
                     ),
                     error: (err, stack) => Center(
                       child: Text(

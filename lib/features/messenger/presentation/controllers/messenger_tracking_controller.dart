@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:customer_app/core/services/socket_service.dart';
 import 'package:customer_app/features/messenger/data/repositories/messenger_repository_impl.dart';
 import 'package:customer_app/features/messenger/presentation/states/messenger_tracking_state.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'messenger_tracking_controller.g.dart';
@@ -15,15 +15,31 @@ part 'messenger_tracking_controller.g.dart';
 class MessengerTrackingController extends _$MessengerTrackingController {
   StreamSubscription<Map<String, dynamic>>? _socketSubscription;
   Timer? _pollingTimer;
+  AppLifecycleListener? _lifecycleListener;
 
   @override
   MessengerTrackingState build() {
     _initSocket();
+    // Re-sync the instant the app returns to the foreground — see [_onResume].
+    _lifecycleListener = AppLifecycleListener(onResume: _onResume);
     ref.onDispose(() {
       _socketSubscription?.cancel();
       _pollingTimer?.cancel();
+      _lifecycleListener?.dispose();
     });
     return const MessengerTrackingState();
+  }
+
+  /// App returned to the foreground. WS frames pushed while backgrounded are
+  /// gone (socket suspended, no replay on reconnect), so refetch the order right
+  /// away instead of waiting for the next 10s poll — otherwise a delivery the
+  /// rider finished while the user was in another app leaves the screen stuck.
+  void _onResume() {
+    final id = state.orderId;
+    if (id == null) return;
+    final order = state.order;
+    if (order != null && order.isTerminal) return;
+    _loadOrder(id);
   }
 
   void _initSocket() {

@@ -3,7 +3,7 @@ import 'package:customer_app/core/services/socket_service.dart';
 import 'package:customer_app/features/food_order/data/repositories/food_order_repository_impl.dart';
 import 'package:customer_app/features/food_order/domain/models/food_models.dart';
 import 'package:customer_app/features/food_order/presentation/states/live_food_tracking_state.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -13,15 +13,30 @@ part 'live_food_tracking_controller.g.dart';
 class LiveFoodTrackingController extends _$LiveFoodTrackingController {
   StreamSubscription<Map<String, dynamic>>? _socketSubscription;
   Timer? _pollingTimer;
+  AppLifecycleListener? _lifecycleListener;
 
   @override
   LiveFoodTrackingState build() {
     _initSocket();
+    // Re-sync the instant the app returns to the foreground — see [_onResume].
+    _lifecycleListener = AppLifecycleListener(onResume: _onResume);
     ref.onDispose(() {
       _socketSubscription?.cancel();
       _pollingTimer?.cancel();
+      _lifecycleListener?.dispose();
     });
     return const LiveFoodTrackingState();
+  }
+
+  /// App returned to the foreground. WS frames pushed while backgrounded are
+  /// gone (socket suspended, no replay on reconnect), so refetch the order right
+  /// away instead of waiting for the next 10s poll — otherwise an order the
+  /// rider delivered while the user was in another app leaves the screen stuck.
+  void _onResume() {
+    final id = state.orderId;
+    if (id == null) return;
+    if (_isTerminalStatus(state.orderStatus)) return;
+    _loadOrderDetail(id);
   }
 
   void _initSocket() {

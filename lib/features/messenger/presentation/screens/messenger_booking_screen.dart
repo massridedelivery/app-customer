@@ -123,31 +123,15 @@ class _MessengerBookingScreenState
 
     return Scaffold(
       backgroundColor: AppColors.foundationGrayscale100,
-      appBar: AppBar(
-        backgroundColor: AppColors.white,
-        // Keep the bar white when content scrolls under it (Material 3 would
-        // otherwise tint it with the surface colour).
-        surfaceTintColor: Colors.transparent,
-        scrolledUnderElevation: 0,
-        elevation: 0,
-        centerTitle: true,
-        title: Text(
-          'เมสเซนเจอร์ส่งพัสดุ',
-          style: AppTypography.heading4.copyWith(
-            fontWeight: FontWeight.bold,
-            color: AppColors.semanticGrayNeutralFgHigh,
-          ),
-        ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.black),
-          onPressed: () => context.pop(),
-        ),
-      ),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-          children: [
+      body: Column(
+        children: [
+          _buildHero(context),
+          Expanded(
+            child: Form(
+              key: _formKey,
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+                children: [
             _buildLocationCard(homeState),
             const SizedBox(height: 12),
             _buildVehicleAndSizeCard(bookingState),
@@ -159,10 +143,75 @@ class _MessengerBookingScreenState
             _buildPaymentCard(bookingState),
             const SizedBox(height: 12),
             _buildEstimateCard(bookingState),
-          ],
-        ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
       bottomNavigationBar: _buildBottomBar(bookingState),
+    );
+  }
+
+  /// Branded gradient hero with a wave-clipped bottom — matches the ride
+  /// ("รับส่งคน") landing header style.
+  Widget _buildHero(BuildContext context) {
+    return ClipPath(
+      clipper: _MessengerWaveClipper(),
+      child: Container(
+        width: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [AppColors.foundationRed700, AppColors.foundationRed900],
+          ),
+        ),
+        child: SafeArea(
+          bottom: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 44),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    InkWell(
+                      onTap: () => context.pop(),
+                      borderRadius: BorderRadius.circular(20),
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.16),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.arrow_back,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'เมสเซนเจอร์ส่งพัสดุ',
+                  style: AppTypography.heading2.copyWith(color: Colors.white),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'ส่ง-รับพัสดุด่วน ถึงมือผู้รับ ทุกที่ทุกเวลา',
+                  style: AppTypography.caption3.copyWith(
+                    color: Colors.white.withValues(alpha: 0.9),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -997,4 +1046,24 @@ class _MessengerBookingScreenState
       ),
     );
   }
+}
+
+/// Wave-clipped bottom edge for the hero header (same geometry as the ride
+/// landing header, kept in sync visually).
+class _MessengerWaveClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    final w = size.width;
+    final h = size.height;
+    final path = Path()
+      ..lineTo(0, h - 36)
+      ..quadraticBezierTo(w * 0.25, h, w * 0.52, h - 16)
+      ..quadraticBezierTo(w * 0.80, h - 40, w, h - 6)
+      ..lineTo(w, 0)
+      ..close();
+    return path;
+  }
+
+  @override
+  bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
 }

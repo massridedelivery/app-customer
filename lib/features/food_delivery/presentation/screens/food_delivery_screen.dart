@@ -237,7 +237,9 @@ class _FoodDeliveryScreenState extends ConsumerState<FoodDeliveryScreen> {
     return SliverAppBar(
       pinned: true,
       floating: false,
-      expandedHeight: 190,
+      // Tightened so the search bar sits closer under the address instead of
+      // leaving a large empty red gap between them.
+      expandedHeight: 165,
       elevation: 0,
       backgroundColor: AppColors.primary,
       leading: IconButton(
@@ -312,7 +314,7 @@ class _FoodDeliveryScreenState extends ConsumerState<FoodDeliveryScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
               // Rounded bottom edge
               Container(
                 height: 20,

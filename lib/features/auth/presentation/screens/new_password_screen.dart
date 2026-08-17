@@ -61,7 +61,8 @@ class _NewPasswordScreenState extends ConsumerState<NewPasswordScreen> {
           refId: widget.resetToken,
         );
 
-    if (mounted && success) {
+    if (!mounted) return;
+    if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(AppLocalizations.of(context)!.passwordChangedSuccess),
@@ -73,6 +74,17 @@ class _NewPasswordScreenState extends ConsumerState<NewPasswordScreen> {
         context.pop();
       }
       context.pushReplacement('/auth/email_login');
+    } else {
+      // Was failing silently — surface the error so the user can retry.
+      final err = ref.read(authControllerProvider).error;
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(
+            content: Text(err ?? 'เปลี่ยนรหัสผ่านไม่สำเร็จ กรุณาลองใหม่'),
+            backgroundColor: AppColors.error,
+          ),
+        );
     }
   }
 

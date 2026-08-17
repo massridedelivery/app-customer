@@ -23,14 +23,19 @@ class RegisterController extends _$RegisterController {
     });
   }
 
+  /// Best-effort device/push-token registration. A failure here (missing token,
+  /// or the push endpoint being down) must NOT fail sign-up — the user is
+  /// already authenticated from the OTP step, so never block app entry on it.
   Future<void> registerNotification() async {
-    final deviceType = PlatformUtils.devicePlatform.toLowerCase();
-    final token = ref.read(tokenStorageProvider).getAccessToken();
-    if (token == null) {
-      throw Exception('Token is null');
+    try {
+      final deviceType = PlatformUtils.devicePlatform.toLowerCase();
+      final token = ref.read(tokenStorageProvider).getAccessToken();
+      if (token == null) return;
+      await ref
+          .read(registerRepositoryProvider)
+          .registerDevice(token: token, deviceType: deviceType);
+    } catch (_) {
+      // swallow — push-token registration is not critical to sign-up
     }
-    await ref
-        .read(registerRepositoryProvider)
-        .registerDevice(token: token, deviceType: deviceType);
   }
 }

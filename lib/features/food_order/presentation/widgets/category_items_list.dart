@@ -20,8 +20,11 @@ class CategoryItemsList extends StatelessWidget {
     return SliverList(
       delegate: SliverChildBuilderDelegate((context, index) {
         final item = items[index];
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        return InkWell(
+          // Whole row opens the item (available items only) — not just the "+".
+          onTap: item.isAvailable ? () => onItemTap(item) : null,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
             color: Colors.white,
             border: Border(bottom: BorderSide(color: Colors.grey[200]!)),
@@ -111,6 +114,7 @@ class CategoryItemsList extends StatelessWidget {
                   ),
                 ),
             ],
+          ),
           ),
         );
       }, childCount: items.length),

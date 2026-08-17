@@ -18,6 +18,20 @@ import 'package:customer_app/features/profile/data/repositories/profile_reposito
 
 part 'auth_controller.g.dart';
 
+/// A user-facing (Thai) message for an error — prefers the backend's own
+/// message on a Dio error, otherwise a generic Thai fallback. Never surfaces a
+/// raw `Exception: …` / stack string to the user.
+String _authErrorMessage(Object e) {
+  if (e is DioException) {
+    final data = e.response?.data;
+    if (data is Map) {
+      final m = data['message'] ?? data['error'];
+      if (m is String && m.isNotEmpty) return m;
+    }
+  }
+  return 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง';
+}
+
 @riverpod
 class AuthController extends _$AuthController {
   @override
@@ -96,16 +110,16 @@ class AuthController extends _$AuthController {
       } else {
         state = state.copyWith(
           isLoading: false,
-          error: 'Invalid response from server',
+          error: 'การตอบกลับจากเซิร์ฟเวอร์ไม่ถูกต้อง',
         );
       }
     } on DioException catch (e) {
       state = state.copyWith(
         isLoading: false,
-        error: e.response?.data['error'] ?? 'Invalid credentials',
+        error: e.response?.data['error'] ?? 'อีเมลหรือรหัสผ่านไม่ถูกต้อง',
       );
     } catch (e) {
-      state = state.copyWith(isLoading: false, error: e.toString());
+      state = state.copyWith(isLoading: false, error: _authErrorMessage(e));
     }
   }
 
@@ -147,7 +161,7 @@ class AuthController extends _$AuthController {
       state = state.copyWith(isLoading: false);
       return response['ref_id'] as String?;
     } catch (e) {
-      state = state.copyWith(isLoading: false, error: e.toString());
+      state = state.copyWith(isLoading: false, error: _authErrorMessage(e));
       return null;
     }
   }
@@ -160,7 +174,7 @@ class AuthController extends _$AuthController {
       state = state.copyWith(isLoading: false);
       return response['token'] as String?;
     } catch (e) {
-      state = state.copyWith(isLoading: false, error: e.toString());
+      state = state.copyWith(isLoading: false, error: _authErrorMessage(e));
       return null;
     }
   }
@@ -177,7 +191,7 @@ class AuthController extends _$AuthController {
       state = state.copyWith(isLoading: false);
       return true;
     } catch (e) {
-      state = state.copyWith(isLoading: false, error: e.toString());
+      state = state.copyWith(isLoading: false, error: _authErrorMessage(e));
       return false;
     }
   }
@@ -211,7 +225,7 @@ class AuthController extends _$AuthController {
       );
     } catch (e) {
       // Catch any unexpected exceptions
-      state = state.copyWith(isLoading: false, error: e.toString());
+      state = state.copyWith(isLoading: false, error: _authErrorMessage(e));
       return null;
     }
   }
@@ -261,7 +275,7 @@ class AuthController extends _$AuthController {
       );
     } catch (e) {
       // Catch any unexpected exceptions
-      state = state.copyWith(isLoading: false, error: e.toString());
+      state = state.copyWith(isLoading: false, error: _authErrorMessage(e));
       return false;
     }
   }

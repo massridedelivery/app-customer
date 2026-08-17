@@ -234,7 +234,7 @@ class RideSelectionView extends ConsumerWidget {
           content: TextField(
             controller: nameController,
             decoration: InputDecoration(
-              hintText: 'e.g. Home, Work, Gym',
+              hintText: 'เช่น บ้าน, ที่ทำงาน, ฟิตเนส',
               hintStyle: AppTypography.caption4.copyWith(
                 color: AppColors.semanticGrayNeutralFgLowOnGray,
               ),

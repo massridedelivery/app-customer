@@ -50,8 +50,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     ref.listen<AsyncValue<void>>(registerControllerProvider, (previous, next) {
       if (next is AsyncError) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(next.error.toString()),
+          const SnackBar(
+            content: Text('ลงทะเบียนไม่สำเร็จ กรุณาลองใหม่อีกครั้ง'),
             backgroundColor: Colors.red,
           ),
         );

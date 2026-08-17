@@ -49,7 +49,7 @@ class _RideCouponScreenState extends ConsumerState<RideCouponScreen> {
         }
       } else {
         setState(() {
-          _errorMessage = 'Invalid Promo Code';
+          _errorMessage = 'รหัสส่วนลดไม่ถูกต้อง';
         });
       }
     } catch (e) {

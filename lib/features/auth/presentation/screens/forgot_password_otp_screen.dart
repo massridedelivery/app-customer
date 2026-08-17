@@ -78,11 +78,22 @@ class _ForgotPasswordOtpScreenState
         .read(authControllerProvider.notifier)
         .verifyResetOtp(widget.email, _otp);
 
-    if (mounted && token != null) {
+    if (!mounted) return;
+    if (token != null) {
       context.push(
         '/auth/new-password',
         extra: {'email': widget.email, 'resetToken': token},
       );
+    } else {
+      // Wrong / expired code: clear and refocus so the user can retry, and give
+      // clear feedback instead of a silent dead-end.
+      _otpController.clear();
+      _otpFocus.requestFocus();
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          const SnackBar(content: Text('รหัส OTP ไม่ถูกต้อง กรุณาลองใหม่')),
+        );
     }
   }
 
@@ -164,23 +175,24 @@ class _ForgotPasswordOtpScreenState
               );
             }),
           ),
-          // Transparent field on top captures typing, paste and autofill.
+          // Invisible-but-LIVE field on top. Transparent text/cursor instead of
+          // Opacity(0): a fully transparent widget can drop the iOS text-input
+          // connection so the keyboard won't reopen and digits are lost
+          // (SCRUM-51 — same fix as otp_screen).
           Positioned.fill(
-            child: Opacity(
-              opacity: 0,
-              child: TextField(
-                controller: _otpController,
-                focusNode: _otpFocus,
-                keyboardType: TextInputType.number,
-                maxLength: _otpLength,
-                autofillHints: const [AutofillHints.oneTimeCode],
-                showCursor: false,
-                cursorColor: Colors.transparent,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                decoration: const InputDecoration(
-                  counterText: '',
-                  border: InputBorder.none,
-                ),
+            child: TextField(
+              controller: _otpController,
+              focusNode: _otpFocus,
+              keyboardType: TextInputType.number,
+              maxLength: _otpLength,
+              autofillHints: const [AutofillHints.oneTimeCode],
+              showCursor: false,
+              cursorColor: Colors.transparent,
+              style: const TextStyle(color: Colors.transparent),
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              decoration: const InputDecoration(
+                counterText: '',
+                border: InputBorder.none,
               ),
             ),
           ),

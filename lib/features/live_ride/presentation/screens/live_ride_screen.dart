@@ -823,7 +823,12 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
                         const Icon(Icons.star, color: Colors.amber, size: 14),
                         const SizedBox(width: 8),
                         Text(
-                          "${liveState.vehicleType} • ${liveState.vehiclePlate}",
+                          // Only join the parts we actually have — avoid showing
+                          // "null • null" before vehicle details arrive.
+                          [liveState.vehicleType, liveState.vehiclePlate]
+                              .whereType<String>()
+                              .where((s) => s.isNotEmpty)
+                              .join(' • '),
                           style: AppTypography.caption4.copyWith(
                             color: AppColors.semanticGrayNeutralFgLowOnWhite,
                           ),

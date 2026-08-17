@@ -134,15 +134,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             Container(
               width: 40,
               height: 40,
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                image: DecorationImage(
-                  image: NetworkImage(
-                    'https://randomuser.me/api/portraits/men/44.jpg',
-                  ),
-                  fit: BoxFit.cover,
-                ),
+                color: Colors.grey.shade200,
               ),
+              child: Icon(Icons.person, color: Colors.grey.shade500, size: 24),
             ),
           ],
         ),

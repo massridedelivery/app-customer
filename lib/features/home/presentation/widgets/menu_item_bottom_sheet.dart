@@ -196,18 +196,23 @@ class _MenuItemBottomSheetState extends State<MenuItemBottomSheet> {
   }
 
   Widget _buildItemCover() {
+    final url = widget.item.imageUrl;
+    final hasImage = url != null && url.isNotEmpty;
     return Container(
       height: 220,
       width: double.infinity,
+      alignment: Alignment.center,
       decoration: BoxDecoration(
-        image: DecorationImage(
-          image: NetworkImage(
-            widget.item.imageUrl ??
-                'https://plus.unsplash.com/premium_photo-1694141253763-209b4c8f8ace?w=600',
-          ),
-          fit: BoxFit.cover,
-        ),
+        color: Colors.grey[200],
+        // Neutral placeholder instead of a random stock photo when the item has
+        // no image.
+        image: hasImage
+            ? DecorationImage(image: NetworkImage(url), fit: BoxFit.cover)
+            : null,
       ),
+      child: hasImage
+          ? null
+          : Icon(Icons.restaurant, color: Colors.grey[400], size: 56),
     );
   }
 

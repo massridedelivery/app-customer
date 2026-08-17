@@ -1,0 +1,5 @@
+source "https://rubygems.org"
+
+# Android side uses fastlane's `supply` (upload_to_play_store) to push AABs to
+# Google Play. Run `bundle install` in this directory once.
+gem "fastlane"

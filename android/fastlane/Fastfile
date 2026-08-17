@@ -1,0 +1,36 @@
+default_platform(:android)
+
+platform :android do
+  desc "Upload an AAB to a Google Play track.\n" \
+       "Options: aab: <path> (or AAB_PATH env), track: <internal|alpha|beta|production> " \
+       "(default internal), status: <completed|draft|inProgress|halted> (default completed)."
+  lane :deploy do |options|
+    aab    = options[:aab] || ENV["AAB_PATH"]
+    track  = options[:track] || "internal"
+    status = options[:status] || "completed"
+
+    UI.user_error!("No AAB path given (pass aab: or set AAB_PATH)") if aab.nil? || aab.empty?
+    UI.user_error!("AAB not found at #{aab} — run `make build_aab_dev` first") unless File.exist?(aab)
+
+    UI.message("Uploading #{aab} → track '#{track}' (#{status})")
+
+    # package_name + json_key come from the Appfile. We only ship the binary;
+    # the store listing / screenshots / changelog stay managed in the console.
+    upload_to_play_store(
+      track: track,
+      aab: aab,
+      release_status: status,
+      skip_upload_apk: true,
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      skip_upload_changelogs: true,
+    )
+  end
+
+  desc "Verify the Play service-account JSON authenticates for this package."
+  lane :whoami do
+    validate_play_store_json_key
+    UI.success("Service-account JSON is valid for #{CredentialsManager::AppfileConfig.try_fetch_value(:package_name)}")
+  end
+end

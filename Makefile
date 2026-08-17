@@ -1,4 +1,4 @@
-.PHONY: gen watch fix clean clean_cache test test_cov analyze pre_pr run_dev run_prod run_ios_dev run_ios_prod build_apk_dev build_apk_prod build_ios_dev build_ios_prod
+.PHONY: gen watch fix clean clean_cache test test_cov analyze pre_pr run_dev run_prod run_ios_dev run_ios_prod build_apk_dev build_apk_prod build_ios_dev build_ios_prod build_aab_dev build_aab_prod deploy_play_dev deploy_play_prod deploy_play_check
 
 # 🚀 สร้างไฟล์ที่จำเป็น (Freezed, Riverpod, JSON)
 gen:
@@ -99,3 +99,35 @@ deploy_dev: bump ipa_dev
 	xcrun altool --upload-app --type ios \
 		-f build/ios/ipa/customer_app.ipa \
 		--apiKey M4PPU86374 --apiIssuer 03750a9c-5c4e-4be1-bb27-546000146161
+
+# ─── 🤖 Android / Google Play ───────────────────────────────────────────────
+# One-time setup (keystore + service account + Play app) is documented in
+# docs/android-play-setup.md. AABs are signed with the release keystore only
+# when android/key.properties exists.
+
+# 📦 build Android App Bundle (AAB) per flavor — no version bump
+build_aab_dev:
+	flutter build appbundle --flavor dev --dart-define-from-file=env/dev.json
+
+build_aab_prod:
+	flutter build appbundle --release --flavor prod --dart-define-from-file=env/prod.json
+
+# ✅ verify the Play service-account JSON authenticates (no upload)
+deploy_play_check:
+	cd android && bundle exec fastlane whoami
+
+# 🚀 bump + build dev AAB + upload to Google Play internal track
+# needs android/key.properties (+keystore) and android/fastlane/play-service-account.json
+deploy_play_dev: bump build_aab_dev
+	cd android && \
+		PLAY_PACKAGE_NAME=com.massdrive.customer_app.dev \
+		AAB_PATH="$(CURDIR)/build/app/outputs/bundle/devRelease/app-dev-release.aab" \
+		bundle exec fastlane deploy track:internal
+
+# 🚀 bump + build prod AAB + upload to Google Play internal track
+# needs env/prod.json (real Maps key) in addition to the signing + service account
+deploy_play_prod: bump build_aab_prod
+	cd android && \
+		PLAY_PACKAGE_NAME=com.massdrive.customer_app \
+		AAB_PATH="$(CURDIR)/build/app/outputs/bundle/prodRelease/app-prod-release.aab" \
+		bundle exec fastlane deploy track:internal

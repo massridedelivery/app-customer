@@ -1,0 +1,9 @@
+# Google Play package name. The Makefile overrides this per flavor via
+# PLAY_PACKAGE_NAME (dev flavor → com.massdrive.customer_app.dev). Default is
+# the production package.
+package_name(ENV["PLAY_PACKAGE_NAME"] || "com.massdrive.customer_app")
+
+# Service-account JSON with "Release manager" access to this app in the Play
+# Console. Kept OUT of git (see android/.gitignore). Path is relative to the
+# android/ directory; override with PLAY_JSON_KEY_FILE.
+json_key_file(ENV["PLAY_JSON_KEY_FILE"] || "fastlane/play-service-account.json")

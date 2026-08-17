@@ -12,3 +12,12 @@ GeneratedPluginRegistrant.java
 key.properties
 **/*.keystore
 **/*.jks
+
+# Google Play deploy secrets + fastlane artifacts (never commit)
+fastlane/play-service-account.json
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+/vendor/bundle
+.bundle/

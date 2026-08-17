@@ -74,20 +74,28 @@ class _HeroPatternPainter extends CustomPainter {
     final w = size.width;
     final h = size.height;
 
-    // Scattered delivery icons (parcel / truck / pin / scooter), biased to the
-    // right and edges so they stay clear of the header's title on the left.
-    _icon(canvas, Icons.inventory_2, Offset(w * 0.86, h * 0.30), 54, 0.08, -0.2);
+    // Scattered delivery icons (parcel / truck / pin / scooter), kept to the
+    // UPPER-RIGHT band (w > 0.6, h < 0.6) so they never sit behind the title on
+    // the left or the search bar / buttons along the bottom. Low opacity so they
+    // read as faint texture rather than clutter over the controls.
+    _icon(
+      canvas,
+      Icons.inventory_2,
+      Offset(w * 0.86, h * 0.34),
+      44,
+      0.06,
+      -0.15,
+    );
     _icon(
       canvas,
       Icons.local_shipping,
-      Offset(w * 0.60, h * 0.78),
-      40,
-      0.07,
-      0.1,
+      Offset(w * 0.62, h * 0.20),
+      26,
+      0.05,
+      0.08,
     );
-    _icon(canvas, Icons.location_on, Offset(w * 0.30, h * 0.30), 34, 0.07, 0.0);
-    _icon(canvas, Icons.two_wheeler, Offset(w * 0.20, h * 0.82), 30, 0.06, 0.0);
-    _icon(canvas, Icons.inventory_2, Offset(w * 0.48, h * 0.24), 22, 0.06, 0.25);
+    _icon(canvas, Icons.location_on, Offset(w * 0.95, h * 0.60), 24, 0.05, 0.0);
+    _icon(canvas, Icons.two_wheeler, Offset(w * 0.77, h * 0.48), 22, 0.045, 0.0);
   }
 
   @override

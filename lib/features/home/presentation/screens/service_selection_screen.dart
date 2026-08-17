@@ -10,6 +10,7 @@ import 'package:customer_app/features/home/presentation/widgets/home_promo_banne
 import 'package:customer_app/features/active_orders/presentation/widgets/active_orders_banner.dart';
 import 'package:flutter/material.dart';
 import 'package:customer_app/core/widgets/app_network_image.dart';
+import 'package:customer_app/core/widgets/hero_header.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -69,6 +70,8 @@ class _ServiceSelectionScreenState
                             ],
                           ),
                         ),
+                        // Faint delivery-icon texture, clipped to the S-shape.
+                        child: const Stack(children: [HeroPatternOverlay()]),
                       ),
                     ),
                     // Header Content

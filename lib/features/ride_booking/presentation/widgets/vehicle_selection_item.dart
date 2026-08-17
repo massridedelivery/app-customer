@@ -22,16 +22,16 @@ class VehicleSelectionItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final isDisabled = !estimation.available;
 
+    // Product decision: every service type is always selectable — we never grey
+    // out / block a type for being "unavailable". If no driver is found the
+    // finding screen surfaces a retry / change-type prompt after 3 minutes.
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
       curve: Curves.easeInOut,
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       decoration: BoxDecoration(
-        boxShadow: isDisabled
-            ? null
-            : isSelected
+        boxShadow: isSelected
             ? [
                 BoxShadow(
                   color: AppColors.primary.withAlpha(30),
@@ -40,25 +40,17 @@ class VehicleSelectionItem extends StatelessWidget {
                 ),
               ]
             : null,
-        color: isDisabled
-            ? AppColors.grey100
-            : isSelected
-            ? AppColors.foundationRed100
-            : Colors.transparent,
+        color: isSelected ? AppColors.foundationRed100 : Colors.transparent,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isDisabled
-              ? AppColors.grey100
-              : isSelected
-              ? AppColors.primary
-              : AppColors.grey100,
+          color: isSelected ? AppColors.primary : AppColors.grey100,
           width: isSelected ? 1.5 : 1,
         ),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(15),
         child: InkWell(
-          onTap: isDisabled ? null : onTap,
+          onTap: onTap,
           borderRadius: BorderRadius.circular(15),
           // IntrinsicHeight lets the Row use CrossAxisAlignment.stretch
           // without needing an unbounded height from the ListView parent.
@@ -77,19 +69,14 @@ class VehicleSelectionItem extends StatelessWidget {
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.all(12),
-                    child: Opacity(
-                      opacity: isDisabled ? 0.5 : 1.0,
-                      child: Row(
-                        children: [
-                          Image.asset(
-                            iconPath,
-                            width: 60,
-                            height: 40,
-                            fit: BoxFit.cover,
-                            color: isDisabled ? Colors.grey : null,
-                            colorBlendMode:
-                                isDisabled ? BlendMode.srcIn : null,
-                          ),
+                    child: Row(
+                      children: [
+                        Image.asset(
+                          iconPath,
+                          width: 60,
+                          height: 40,
+                          fit: BoxFit.cover,
+                        ),
 
                           const SizedBox(width: 16),
 
@@ -214,7 +201,6 @@ class VehicleSelectionItem extends StatelessWidget {
                       ),
                     ),
                   ),
-                ),
               ],
             ),
           ),

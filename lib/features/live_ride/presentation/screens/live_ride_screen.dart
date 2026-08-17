@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:customer_app/core/constants/map_defaults.dart';
 import 'package:customer_app/core/constants/app_assets.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
@@ -45,6 +47,12 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
 
   bool _isRideDetailsExpanded = false;
 
+  // Prompts the customer to keep searching or change service type when no driver
+  // is found within [_findingTimeout] of the "finding" screen.
+  static const Duration _findingTimeout = Duration(minutes: 3);
+  Timer? _findingTimer;
+  bool _findingPromptOpen = false;
+
   @override
   void initState() {
     super.initState();
@@ -54,6 +62,69 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
           'id': widget.jobId,
         });
       });
+    }
+  }
+
+  @override
+  void dispose() {
+    _findingTimer?.cancel();
+    super.dispose();
+  }
+
+  /// Runs the 3-minute "still searching" timer only while the finding screen is
+  /// up. Idempotent — safe to call every build.
+  void _manageFindingTimer(RideUIState uiState) {
+    if (uiState == RideUIState.finding) {
+      if (_findingTimer == null && !_findingPromptOpen) {
+        _findingTimer = Timer(_findingTimeout, _onFindingTimeout);
+      }
+    } else {
+      _findingTimer?.cancel();
+      _findingTimer = null;
+    }
+  }
+
+  Future<void> _onFindingTimeout() async {
+    _findingTimer = null;
+    if (!mounted) return;
+    final st = ref.read(liveRideControllerProvider);
+    final hasDriver = st.driverId?.isNotEmpty ?? false;
+    // A driver showed up (or the job moved on) right as the timer fired — nothing
+    // to prompt.
+    if (_getUIState(st.jobStatus, hasDriver: hasDriver) != RideUIState.finding) {
+      return;
+    }
+    _findingPromptOpen = true;
+    final choice = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('ยังหาคนขับให้ไม่ได้'),
+        content: const Text(
+          'ตอนนี้ยังไม่พบคนขับที่ว่างรับงาน '
+          'ต้องการค้นหาต่อ หรือเปลี่ยนประเภทบริการ?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop('retry'),
+            child: const Text('ค้นหาต่อ'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop('change'),
+            child: const Text(
+              'เปลี่ยนประเภทบริการ',
+              style: TextStyle(color: AppColors.primary),
+            ),
+          ),
+        ],
+      ),
+    );
+    _findingPromptOpen = false;
+    if (!mounted) return;
+    if (choice == 'change') {
+      await _cancelRide(ref.read(liveRideControllerProvider));
+    } else {
+      // Keep searching — a rebuild restarts the timer via _manageFindingTimer.
+      setState(() {});
     }
   }
 
@@ -167,6 +238,7 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
     final driverIcon = ref.watch(vehicleMarkerProvider).value;
     final hasDriver = liveState.driverId?.isNotEmpty ?? false;
     final uiState = _getUIState(liveState.jobStatus, hasDriver: hasDriver);
+    _manageFindingTimer(uiState);
 
     ref.listen(liveRideControllerProvider, (previous, next) {
       if ((next.jobStatus == 'CANCELLED' &&
@@ -369,7 +441,9 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
                     ),
                   ),
                 ),
-                if (uiState == RideUIState.finding &&
+                if ((uiState == RideUIState.finding ||
+                        uiState == RideUIState.confirming ||
+                        uiState == RideUIState.pickupArrived) &&
                     liveState.jobStatus != 'CANCELLED')
                   GestureDetector(
                     onTap: liveState.isLoading
@@ -399,7 +473,9 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
                           : Text(
-                              l10n.cancelSearch,
+                              uiState == RideUIState.finding
+                                  ? l10n.cancelSearch
+                                  : 'ยกเลิกการเดินทาง',
                               style: AppTypography.caption4.copyWith(
                                 color: AppColors.semanticGrayNeutralFgHigh,
                                 fontWeight: FontWeight.w600,
@@ -416,6 +492,37 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
   }
 
   Future<void> _cancelRide(dynamic liveState) async {
+    // Cancelling after a driver has accepted may incur a cancellation fee
+    // (amount is configured/charged by the backend — see SCRUM-65). Warn first.
+    final hasDriver =
+        ref.read(liveRideControllerProvider).driverId?.isNotEmpty ?? false;
+    if (hasDriver) {
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('ยกเลิกการเดินทาง?'),
+          content: const Text(
+            'คนขับรับงานแล้ว การยกเลิกตอนนี้อาจมีค่าบริการในการยกเลิก\n'
+            'ต้องการยกเลิกหรือไม่?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: const Text('ไม่'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(true),
+              child: const Text(
+                'ยืนยันยกเลิก',
+                style: TextStyle(color: AppColors.error),
+              ),
+            ),
+          ],
+        ),
+      );
+      if (confirmed != true) return;
+    }
+
     final success = await ref
         .read(liveRideControllerProvider.notifier)
         .cancelRide();

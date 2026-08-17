@@ -2,6 +2,7 @@ import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/constants/feature_flags.dart';
 import 'package:customer_app/core/widgets/async_state_view.dart';
+import 'package:customer_app/core/widgets/hero_header.dart';
 import 'package:customer_app/features/food_delivery/presentation/controllers/food_discovery_controller.dart';
 import 'package:customer_app/features/food_delivery/presentation/widgets/popular_categories_widget.dart';
 import 'package:customer_app/features/food_delivery/presentation/widgets/quick_promos_widget.dart';
@@ -284,7 +285,10 @@ class _FoodDeliveryScreenState extends ConsumerState<FoodDeliveryScreen> {
               end: Alignment.bottomRight,
             ),
           ),
-          child: Column(
+          child: Stack(
+            children: [
+              const HeroPatternOverlay(),
+              Column(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               // Search Bar
@@ -326,6 +330,8 @@ class _FoodDeliveryScreenState extends ConsumerState<FoodDeliveryScreen> {
                   ),
                 ),
               ),
+            ],
+          ),
             ],
           ),
         ),

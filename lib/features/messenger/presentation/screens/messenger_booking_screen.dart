@@ -3,6 +3,7 @@ import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_icons.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/widgets/app_filter_chip.dart';
+import 'package:customer_app/core/widgets/hero_header.dart';
 import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/core/constants/feature_flags.dart';
 import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
@@ -157,7 +158,7 @@ class _MessengerBookingScreenState
   /// ("รับส่งคน") landing header style.
   Widget _buildHero(BuildContext context) {
     return ClipPath(
-      clipper: _MessengerWaveClipper(),
+      clipper: HeroWaveClipper(),
       child: Container(
         width: double.infinity,
         decoration: const BoxDecoration(
@@ -167,7 +168,10 @@ class _MessengerBookingScreenState
             colors: [AppColors.foundationRed700, AppColors.foundationRed900],
           ),
         ),
-        child: SafeArea(
+        child: Stack(
+          children: [
+            const HeroPatternOverlay(),
+            SafeArea(
           bottom: false,
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 4, 16, 44),
@@ -210,6 +214,8 @@ class _MessengerBookingScreenState
               ],
             ),
           ),
+        ),
+          ],
         ),
       ),
     );
@@ -1046,24 +1052,4 @@ class _MessengerBookingScreenState
       ),
     );
   }
-}
-
-/// Wave-clipped bottom edge for the hero header (same geometry as the ride
-/// landing header, kept in sync visually).
-class _MessengerWaveClipper extends CustomClipper<Path> {
-  @override
-  Path getClip(Size size) {
-    final w = size.width;
-    final h = size.height;
-    final path = Path()
-      ..lineTo(0, h - 36)
-      ..quadraticBezierTo(w * 0.25, h, w * 0.52, h - 16)
-      ..quadraticBezierTo(w * 0.80, h - 40, w, h - 6)
-      ..lineTo(w, 0)
-      ..close();
-    return path;
-  }
-
-  @override
-  bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
 }

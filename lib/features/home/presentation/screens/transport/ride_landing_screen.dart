@@ -2,6 +2,7 @@ import 'package:customer_app/core/constants/app_assets.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_icons.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
+import 'package:customer_app/core/widgets/hero_header.dart';
 import 'package:customer_app/features/home/domain/models/place.dart';
 import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
 import 'package:customer_app/features/trips/domain/models/history_order.dart';
@@ -103,7 +104,7 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
   // ---------------------------------------------------------------------------
   Widget _buildHeader(BuildContext context, AppLocalizations l10n) {
     return ClipPath(
-      clipper: _HeaderWaveClipper(),
+      clipper: HeroWaveClipper(),
       child: Container(
       width: double.infinity,
       decoration: const BoxDecoration(
@@ -113,7 +114,10 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
           colors: [AppColors.foundationRed700, AppColors.foundationRed900],
         ),
       ),
-      child: SafeArea(
+      child: Stack(
+        children: [
+          const HeroPatternOverlay(),
+          SafeArea(
         bottom: false,
         child: Padding(
           padding: const EdgeInsets.fromLTRB(20, 4, 20, 52),
@@ -216,6 +220,8 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
             ],
           ),
         ),
+      ),
+        ],
       ),
       ),
     );
@@ -566,23 +572,4 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
       ),
     );
   }
-}
-
-// Gives the red header a soft double-wave bottom edge (see reference design).
-class _HeaderWaveClipper extends CustomClipper<Path> {
-  @override
-  Path getClip(Size size) {
-    final w = size.width;
-    final h = size.height;
-    final path = Path()
-      ..lineTo(0, h - 36)
-      ..quadraticBezierTo(w * 0.25, h, w * 0.52, h - 16)
-      ..quadraticBezierTo(w * 0.80, h - 40, w, h - 6)
-      ..lineTo(w, 0)
-      ..close();
-    return path;
-  }
-
-  @override
-  bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
 }

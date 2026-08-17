@@ -1,4 +1,5 @@
 import 'package:customer_app/core/constants/map_defaults.dart';
+import 'package:customer_app/core/utils/error_text.dart';
 import 'package:customer_app/core/constants/app_assets.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_icons.dart';
@@ -95,7 +96,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: Text(
-                  state.error!,
+                  friendlyError(state.error),
                   textAlign: TextAlign.center,
                   style: AppTypography.body3,
                 ),

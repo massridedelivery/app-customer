@@ -1,4 +1,5 @@
 import 'package:customer_app/core/constants/app_colors.dart';
+import 'package:customer_app/core/utils/error_text.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/features/profile/data/datasources/promo_remote_data_source.dart';
@@ -45,7 +46,7 @@ class PromoDetailScreen extends ConsumerWidget {
             onPressed: () => Navigator.of(context).pop(),
           ),
         ),
-        body: Center(child: Text('Error: $e')),
+        body: Center(child: Text(friendlyError(e))),
       ),
       data: (promo) => Scaffold(
         backgroundColor: AppColors.background,

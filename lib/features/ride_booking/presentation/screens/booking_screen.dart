@@ -421,9 +421,9 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                       pickup: pickup,
                       dropoff: dropoff,
                       pickupAddress:
-                          pickupAddress ?? 'Unknown Pickup',
+                          pickupAddress ?? 'ไม่ระบุจุดรับ',
                       dropoffAddress:
-                          dropoffAddress ?? 'Unknown Dropoff',
+                          dropoffAddress ?? 'ไม่ระบุจุดส่ง',
                     );
               },
             ),
@@ -535,7 +535,6 @@ class _LocationOverlay extends StatelessWidget {
               style: AppTypography.caption5.copyWith(color: Colors.black87),
             ),
           ),
-          const Icon(Icons.chevron_right, size: 16, color: Colors.grey),
         ],
       ),
     );

@@ -77,7 +77,7 @@ class PrivacyPdpaScreen extends ConsumerWidget {
             icon: Icons.history_edu_rounded,
             iconColor: AppColors.primary,
             title: 'ประวัติความยินยอม',
-            subtitle: 'ดูและจัดการความยินยอมของคุณ',
+            subtitle: 'ดูสถานะความยินยอมของคุณ',
             onTap: () => _showConsentDialog(context, ref),
           ),
           const SizedBox(height: 32),

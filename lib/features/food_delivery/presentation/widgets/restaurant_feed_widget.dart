@@ -57,11 +57,6 @@ class RestaurantFeedWidget extends StatelessWidget {
                               maxLines: 2,
                             ),
                           ),
-                          const Icon(
-                            Icons.more_vert,
-                            size: 16,
-                            color: Colors.grey,
-                          ),
                         ],
                       ),
                       const SizedBox(height: 4),

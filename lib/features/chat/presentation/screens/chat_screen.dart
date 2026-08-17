@@ -98,6 +98,17 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       if (previous != null && previous.messages.length < next.messages.length) {
         WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
       }
+      // A failed send drops the optimistic bubble; the inline error UI only
+      // shows on an empty thread, so surface a snackbar otherwise.
+      if (next.error != null &&
+          next.error != previous?.error &&
+          next.messages.isNotEmpty) {
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            const SnackBar(content: Text('ส่งข้อความไม่สำเร็จ กรุณาลองใหม่')),
+          );
+      }
     });
 
     return Scaffold(

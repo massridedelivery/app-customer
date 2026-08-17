@@ -61,7 +61,7 @@ class LoyaltyScreen extends ConsumerWidget {
                   _StatCard(
                     label: 'เงินคืน (฿)',
                     value:
-                        '${(summary['cashback_balance'] ?? 0.0).toStringAsFixed(2)}',
+                        _safeAmount(summary['cashback_balance']),
                     icon: Icons.account_balance_wallet_rounded,
                     color: AppColors.primary,
                   ),

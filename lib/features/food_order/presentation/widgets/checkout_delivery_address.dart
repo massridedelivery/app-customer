@@ -15,10 +15,9 @@ class CheckoutDeliveryAddress extends ConsumerWidget {
     final checkoutState = ref.watch(checkoutProvider);
 
     final addressDisplay = homeState.foodAddress ?? 'โปรดเลือกสถานที่';
-    final addressSubDisplay =
-        homeState.foodLocation != null
-            ? '${homeState.foodLocation!.latitude.toStringAsFixed(4)}, ${homeState.foodLocation!.longitude.toStringAsFixed(4)}'
-            : 'แตะเพื่อเลือกจุดส่งบนแผนที่';
+    final addressSubDisplay = homeState.foodLocation != null
+        ? 'แตะเพื่อเปลี่ยนจุดส่งบนแผนที่'
+        : 'แตะเพื่อเลือกจุดส่งบนแผนที่';
 
     return Padding(
       padding: const EdgeInsets.all(16.0),

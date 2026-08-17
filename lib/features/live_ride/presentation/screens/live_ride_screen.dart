@@ -923,7 +923,7 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
                     Text('จุดรับ', style: AppTypography.label2),
                     const SizedBox(height: 4),
                     Text(
-                      pickupAddress ?? 'Pickup Location',
+                      pickupAddress ?? 'จุดรับ',
                       style: AppTypography.caption4.copyWith(
                         color: AppColors.semanticGrayNeutralFgLowOnWhite,
                       ),
@@ -961,7 +961,7 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
                     Text('จุดส่ง', style: AppTypography.label2),
                     const SizedBox(height: 4),
                     Text(
-                      dropoffAddress ?? 'Dropoff Location',
+                      dropoffAddress ?? 'จุดส่ง',
                       style: AppTypography.caption4.copyWith(
                         color: AppColors.semanticGrayNeutralFgLowOnWhite,
                       ),

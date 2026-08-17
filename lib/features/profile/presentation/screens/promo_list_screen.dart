@@ -1,4 +1,5 @@
 import 'package:customer_app/core/constants/app_colors.dart';
+import 'package:customer_app/core/utils/error_text.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/features/profile/data/datasources/promo_remote_data_source.dart';
@@ -54,7 +55,10 @@ class PromoListScreen extends ConsumerWidget {
                   color: AppColors.error,
                 ),
                 const SizedBox(height: 16),
-                Text('โหลดข้อมูลไม่สำเร็จ: $e', style: AppTypography.body2),
+                Text(
+                  friendlyError(e, fallback: 'โหลดข้อมูลไม่สำเร็จ'),
+                  style: AppTypography.body2,
+                ),
                 TextButton(
                   onPressed: () => ref.invalidate(promoListProvider),
                   child: const Text('ลองใหม่'),
@@ -111,7 +115,7 @@ class PromoListScreen extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                      'ข้อผิดพลาดในการแสดงผล: $e',
+                      friendlyError(e, fallback: 'แสดงผลไม่สำเร็จ'),
                       style: const TextStyle(color: Colors.red),
                     ),
                   );
@@ -135,7 +139,9 @@ class _PromoCard extends StatelessWidget {
     final barColor = Color(promo['color'] as int? ?? 0xFF26A69A);
     final promoId = promo['id']?.toString() ?? '';
     final expiresAt = promo['expires_at'] as String? ?? '';
-    final expireDate = expiresAt.isNotEmpty ? expiresAt.substring(0, 10) : '';
+    final expireDate = expiresAt.length >= 10
+        ? expiresAt.substring(0, 10)
+        : expiresAt;
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () {

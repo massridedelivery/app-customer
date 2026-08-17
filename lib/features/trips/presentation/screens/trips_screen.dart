@@ -1,4 +1,5 @@
 import 'package:customer_app/core/constants/app_assets.dart';
+import 'package:customer_app/core/utils/error_text.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/widgets/app_filter_chip.dart';
@@ -218,7 +219,7 @@ class _TripsListBody extends ConsumerWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(historyError),
+            Text(friendlyError(historyError)),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: onRetry,
@@ -516,7 +517,7 @@ class _MessengerHistoryBody extends ConsumerWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(err.toString()),
+            Text(friendlyError(err)),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: onRetry,
@@ -797,7 +798,7 @@ class _AllHistoryBody extends ConsumerWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(tripsError),
+            Text(friendlyError(tripsError)),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: onRetry,

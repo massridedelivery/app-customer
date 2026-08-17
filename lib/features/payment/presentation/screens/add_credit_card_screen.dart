@@ -89,6 +89,35 @@ class _AddCreditCardScreenState extends ConsumerState<AddCreditCardScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  // The card feature is UI-only for now — make that explicit so
+                  // users never think the card is stored for real payments.
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppColors.foundationOrange100,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.info_outline,
+                          size: 18,
+                          color: AppColors.foundationOrange600,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'อยู่ระหว่างพัฒนา — ยังใช้ชำระเงินจริงไม่ได้ '
+                            'และข้อมูลบัตรจะไม่ถูกบันทึกถาวร',
+                            style: AppTypography.caption5.copyWith(
+                              color: AppColors.foundationOrange600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
                   // Live preview.
                   CreditCardVisual(
                     brand: cardBrandFromNumber(_digits),

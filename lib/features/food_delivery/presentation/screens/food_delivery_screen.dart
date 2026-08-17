@@ -93,19 +93,6 @@ class _FoodDeliveryScreenState extends ConsumerState<FoodDeliveryScreen> {
                                       _sectionTitleTh(section.title!),
                                       style: AppTypography.heading4,
                                     ),
-                                    if (section.layout != 'GRID_VERTICAL')
-                                      Container(
-                                        padding: const EdgeInsets.all(6),
-                                        decoration: const BoxDecoration(
-                                          color: Color(0xFFE4FDF2),
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: const Icon(
-                                          Icons.chevron_right_rounded,
-                                          color: Color(0xFF0D995C),
-                                          size: 16,
-                                        ),
-                                      ),
                                   ],
                                 ),
                               ),
@@ -587,8 +574,8 @@ class _FoodDeliveryScreenState extends ConsumerState<FoodDeliveryScreen> {
                       Expanded(
                         child: Text(
                           item.durationMin != null
-                              ? '${item.durationMin} min'
-                              : '20 min',
+                              ? '${item.durationMin} นาที'
+                              : '— นาที',
                           style: AppTypography.caption5.copyWith(
                             color: AppColors.textSecondary,
                           ),

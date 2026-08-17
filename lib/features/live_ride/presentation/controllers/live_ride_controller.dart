@@ -8,7 +8,7 @@ import 'package:customer_app/features/live_ride/domain/usecases/cancel_ride_usec
 import 'package:customer_app/features/live_ride/domain/usecases/get_driver_profile_usecase.dart';
 import 'package:customer_app/features/live_ride/presentation/states/live_ride_state.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 
 part 'live_ride_controller.g.dart';
 
@@ -17,6 +17,7 @@ class LiveRideController extends _$LiveRideController {
   StreamSubscription<Map<String, dynamic>>? _socketSubscription;
   DateTime? _lastLocationUpdateTime;
   Timer? _syncTimer;
+  AppLifecycleListener? _lifecycleListener;
   int _syncTick = 0;
   static const _locationUpdateInterval = Duration(seconds: 2);
   static const _syncInterval = Duration(seconds: 5);
@@ -25,11 +26,30 @@ class LiveRideController extends _$LiveRideController {
   LiveRideState build() {
     _initSocket();
     _startSyncPolling();
+    // Re-sync the instant the app returns to the foreground — see [_onResume].
+    _lifecycleListener = AppLifecycleListener(onResume: _onResume);
     ref.onDispose(() {
       _socketSubscription?.cancel();
       _syncTimer?.cancel();
+      _lifecycleListener?.dispose();
     });
     return const LiveRideState();
+  }
+
+  /// The app just came back to the foreground. The socket reconnects centrally
+  /// (App.didChangeAppLifecycleState → SocketService.ensureConnected), but any
+  /// WebSocket frame the server pushed while we were backgrounded is gone — the
+  /// socket was suspended and there is no replay on reconnect. So pull the
+  /// authoritative job straight away instead of waiting up to ~10s for the next
+  /// [_startSyncPolling] tick. This is what makes a ride the driver finished
+  /// while the user was in another app resolve immediately on return, rather
+  /// than leaving the screen stuck on "on trip" / "finding driver".
+  void _onResume() {
+    final jobId = state.jobId;
+    if (jobId == null || jobId.isEmpty) return;
+    final status = state.jobStatus?.toUpperCase();
+    if (status == 'COMPLETED' || status == 'CANCELLED') return;
+    getDriverProfile(silent: true);
   }
 
   void _initSocket() {

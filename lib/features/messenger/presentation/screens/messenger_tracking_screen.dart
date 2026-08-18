@@ -131,6 +131,22 @@ class _MessengerTrackingScreenState
       }
       final nextOrder = next.order;
       if (nextOrder != null) _fitCamera(nextOrder);
+
+      // Just delivered while watching live → go to the payment summary (mirrors
+      // the ride flow: live → payment_summary → review). Guarded to a real
+      // transition (previous order existed and was not yet delivered) so opening
+      // an already-delivered order from history stays on the detail view.
+      final prevOrder = previous?.order;
+      if (prevOrder != null &&
+          !prevOrder.isDelivered &&
+          (nextOrder?.isDelivered ?? false)) {
+        final id = nextOrder!.id;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (context.mounted) {
+            context.pushReplacement('/messenger/payment-summary/$id');
+          }
+        });
+      }
     });
 
     return Scaffold(
@@ -356,18 +372,20 @@ class _MessengerTrackingScreenState
               ),
             ),
           ],
-          // Review CTA once delivered (SCRUM-41 review endpoint).
+          // Delivered → the payment summary, then the review (mirrors the ride
+          // flow: live_ride → payment_summary → rating).
           if (order.isDelivered) ...[
             const SizedBox(height: 16),
             ElevatedButton.icon(
-              onPressed: () => context.push('/messenger/review/${order.id}'),
+              onPressed: () =>
+                  context.push('/messenger/payment-summary/${order.id}'),
               icon: const Icon(
                 Icons.star_rate_rounded,
                 size: 20,
                 color: Colors.white,
               ),
               label: Text(
-                'ให้คะแนนการจัดส่ง',
+                'สรุปและให้คะแนน',
                 style: AppTypography.heading6.copyWith(color: Colors.white),
               ),
               style: ElevatedButton.styleFrom(

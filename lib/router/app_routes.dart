@@ -31,6 +31,7 @@ import 'package:customer_app/features/live_ride/presentation/screens/payment_sum
 import 'package:customer_app/features/live_ride/presentation/screens/rating_screen.dart';
 import 'package:customer_app/features/messenger/presentation/screens/messenger_booking_screen.dart';
 import 'package:customer_app/features/messenger/presentation/screens/messenger_chat_screen.dart';
+import 'package:customer_app/features/messenger/presentation/screens/messenger_payment_summary_screen.dart';
 import 'package:customer_app/features/messenger/presentation/screens/messenger_review_screen.dart';
 import 'package:customer_app/features/messenger/presentation/screens/messenger_tracking_screen.dart';
 import 'package:customer_app/features/main/presentation/screens/main_screen.dart'
@@ -402,6 +403,13 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final orderId = state.pathParameters['id']!;
           return MessengerChatScreen(orderId: orderId);
+        },
+      ),
+      GoRoute(
+        path: '/messenger/payment-summary/:id',
+        builder: (context, state) {
+          final orderId = state.pathParameters['id']!;
+          return MessengerPaymentSummaryScreen(orderId: orderId);
         },
       ),
       GoRoute(

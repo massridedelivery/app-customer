@@ -75,25 +75,34 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
         : homeState.recentPlaces;
     return Scaffold(
       backgroundColor: AppColors.foundationGrayscale75,
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.only(bottom: 40),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildHeader(context, l10n),
-            const SizedBox(height: 20),
-            _buildQuickActions(context, l10n, homeState.savedPlaces),
-            const SizedBox(height: 28),
-            // Recent trips — the customer's latest ride destinations (from
-            // order history), falling back to frequent places. Hidden when both
-            // are empty so there's no dangling header.
-            if (recentPlaces.isNotEmpty) ...[
-              _buildRecentTrips('การเดินทางล่าสุด', recentPlaces),
-              const SizedBox(height: 28),
-            ],
-            _buildExperienceSection(l10n),
-          ],
-        ),
+      // Header stays fixed while the content below scrolls (same pattern as the
+      // messenger booking screen).
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildHeader(context, l10n),
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.only(bottom: 40),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 20),
+                  _buildQuickActions(context, l10n, homeState.savedPlaces),
+                  const SizedBox(height: 28),
+                  // Recent trips — the customer's latest ride destinations (from
+                  // order history), falling back to frequent places. Hidden when
+                  // both are empty so there's no dangling header.
+                  if (recentPlaces.isNotEmpty) ...[
+                    _buildRecentTrips('การเดินทางล่าสุด', recentPlaces),
+                    const SizedBox(height: 28),
+                  ],
+                  _buildExperienceSection(l10n),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

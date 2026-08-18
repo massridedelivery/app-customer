@@ -1,4 +1,5 @@
 import 'package:customer_app/core/constants/app_colors.dart';
+import 'package:customer_app/core/services/google_directions_service.dart';
 import 'package:customer_app/core/utils/map_marker_providers.dart';
 import 'package:customer_app/core/utils/polyline_decoder.dart';
 import 'package:customer_app/features/ride_booking/presentation/controllers/booking_controller.dart';
@@ -25,6 +26,31 @@ final decodedPolylineProvider = Provider.autoDispose<List<LatLng>>((ref) {
     return true;
   }());
   return points;
+});
+
+final _directionsServiceProvider = Provider(
+  (ref) => GoogleDirectionsService(),
+);
+
+/// Route points for the booking map. Prefers the backend polyline; when it's
+/// missing, fetches a real road-following route from Google Directions. Returns
+/// an empty list until/unless a route resolves, so the map keeps its straight
+/// pickup→dropoff fallback in the meantime.
+final routePointsProvider = FutureProvider.autoDispose<List<LatLng>>((
+  ref,
+) async {
+  final backendRoute = ref.watch(decodedPolylineProvider);
+  if (backendRoute.isNotEmpty) return backendRoute;
+
+  final pickup = ref.watch(
+    homeControllerProvider.select((s) => s.pickupLocation),
+  );
+  final dropoff = ref.watch(
+    homeControllerProvider.select((s) => s.dropoffLocation),
+  );
+  if (pickup == null || dropoff == null) return const <LatLng>[];
+
+  return ref.read(_directionsServiceProvider).route(pickup, dropoff);
 });
 
 class BookingMapWidget extends ConsumerWidget {
@@ -77,8 +103,11 @@ class BookingMapWidget extends ConsumerWidget {
       homeControllerProvider.select((s) => s.dropoffLocation),
     );
 
-    // Watch the decoded polyline points
-    final polylinePoints = ref.watch(decodedPolylineProvider);
+    // Backend polyline when present, otherwise the Google Directions route.
+    // Empty until it resolves → the Polyline below keeps the straight-line
+    // fallback in the meantime.
+    final polylinePoints =
+        ref.watch(routePointsProvider).asData?.value ?? const <LatLng>[];
 
     final pickupIconAsync = ref.watch(pickupMarkerProvider);
     final dropoffIconAsync = ref.watch(dropoffMarkerProvider);

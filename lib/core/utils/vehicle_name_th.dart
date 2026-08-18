@@ -9,11 +9,11 @@
 /// matches, the original English `displayName` is returned unchanged.
 String vehicleNameTh(String displayName, {String? vehicleTypeName}) {
   const exact = <String, String>{
-    'Comfort Car': 'รถคอมฟอร์ท',
-    'Economy Car': 'รถอีโคโนมี',
+    'Comfort Car': 'รถ Comfort',
+    'Economy Car': 'รถ Eco car',
     'Messenger Bike': 'มอเตอร์ไซค์ส่งของ',
     'Messenger Car': 'รถส่งของ',
-    'Motorcycle (Ride Only)': 'มอเตอร์ไซค์ (รับส่งเฉพาะผู้โดยสาร)',
+    'Motorcycle (Ride Only)': 'มอเตอร์ไซต์ (ผู้โดยสาร)',
     'Tuk-Tuk': 'ตุ๊กตุ๊ก',
     'Van': 'รถตู้',
   };
@@ -27,9 +27,11 @@ String vehicleNameTh(String displayName, {String? vehicleTypeName}) {
   if (key.contains('van')) return 'รถตู้';
   if (key.contains('luxury')) return 'รถหรู';
   if (key.contains('premium')) return 'รถพรีเมียม';
-  if (key.contains('comfort')) return 'รถคอมฟอร์ท';
-  if (key.contains('economy') || key.contains('eco')) return 'รถอีโคโนมี';
-  if (key.contains('motorcycle') || key.contains('bike')) return 'มอเตอร์ไซค์';
+  if (key.contains('comfort')) return 'รถ Comfort';
+  if (key.contains('economy') || key.contains('eco')) return 'รถ Eco car';
+  if (key.contains('motorcycle') || key.contains('bike')) {
+    return 'มอเตอร์ไซต์ (ผู้โดยสาร)';
+  }
   if (key.contains('car')) return 'รถยนต์';
   return displayName;
 }

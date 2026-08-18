@@ -373,30 +373,49 @@ class _MessengerTrackingScreenState
             ),
           ],
           // Delivered → the payment summary, then the review (mirrors the ride
-          // flow: live_ride → payment_summary → rating).
+          // flow: live_ride → payment_summary → rating). Once reviewed, show a
+          // read-only state instead so the customer can't review again
+          // (SCRUM-69).
           if (order.isDelivered) ...[
             const SizedBox(height: 16),
-            ElevatedButton.icon(
-              onPressed: () =>
-                  context.push('/messenger/payment-summary/${order.id}'),
-              icon: const Icon(
-                Icons.star_rate_rounded,
-                size: 20,
-                color: Colors.white,
-              ),
-              label: Text(
-                'สรุปและให้คะแนน',
-                style: AppTypography.heading6.copyWith(color: Colors.white),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                elevation: 0,
+            if (order.isReviewed)
+              Container(
+                width: double.infinity,
                 padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: AppColors.foundationGrayscale100,
                   borderRadius: BorderRadius.circular(12),
                 ),
+                child: Text(
+                  'ให้คะแนนแล้ว  ⭐ ${order.customerRating}',
+                  style: AppTypography.heading6.copyWith(
+                    color: AppColors.semanticGrayNeutralFgMidOnWhite,
+                  ),
+                ),
+              )
+            else
+              ElevatedButton.icon(
+                onPressed: () =>
+                    context.push('/messenger/payment-summary/${order.id}'),
+                icon: const Icon(
+                  Icons.star_rate_rounded,
+                  size: 20,
+                  color: Colors.white,
+                ),
+                label: Text(
+                  'สรุปและให้คะแนน',
+                  style: AppTypography.heading6.copyWith(color: Colors.white),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
               ),
-            ),
           ],
           if (order.isCancellable) ...[
             const SizedBox(height: 16),

@@ -37,6 +37,9 @@ abstract class MessengerOrder with _$MessengerOrder {
     @JsonKey(name: 'distance_km') @Default(0.0) double distanceKm,
     @JsonKey(name: 'fare') @Default(0.0) double fare,
     @JsonKey(name: 'discount') @Default(0.0) double discount,
+    // 0 = not reviewed yet, 1–5 = customer's star rating (SCRUM-69). Defaults to
+    // 0 until the backend ships this field, so the review button stays visible.
+    @JsonKey(name: 'customer_rating') @Default(0) int customerRating,
     @JsonKey(name: 'platform_commission') @Default(0.0) double platformCommission,
     @JsonKey(name: 'promo_id') @Default('') String promoId,
     @JsonKey(name: 'created_at') @Default('') String createdAt,
@@ -64,6 +67,9 @@ abstract class MessengerOrder with _$MessengerOrder {
   }
 
   bool get isCod => paymentMethod.toUpperCase() == 'COD';
+
+  /// Whether the customer has already reviewed this delivery (SCRUM-69).
+  bool get isReviewed => customerRating > 0;
 
   /// `fare` is gross; the customer pays fare − discount.
   double get amountDue {

@@ -225,9 +225,9 @@ class _FoodDeliveryScreenState extends ConsumerState<FoodDeliveryScreen> {
     return SliverAppBar(
       pinned: true,
       floating: false,
-      // Tightened so the search bar sits closer under the address instead of
-      // leaving a large empty red gap between them.
-      expandedHeight: 165,
+      // Tightened so the search bar sits closer under the address; extra room
+      // for the wave cut at the bottom.
+      expandedHeight: 182,
       elevation: 0,
       backgroundColor: AppColors.primary,
       leading: IconButton(
@@ -264,62 +264,56 @@ class _FoodDeliveryScreenState extends ConsumerState<FoodDeliveryScreen> {
       ),
       actions: const [],
       flexibleSpace: FlexibleSpaceBar(
-        background: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [AppColors.primary, AppColors.accentRedDeep],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+        // Wave-clipped bottom edge to match the messenger / ride hero header.
+        background: ClipPath(
+          clipper: HeroWaveClipper(),
+          child: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [AppColors.primary, AppColors.accentRedDeep],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
             ),
-          ),
-          child: Stack(
-            children: [
-              const HeroPatternOverlay(),
-              Column(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              // Search Bar
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: GestureDetector(
-                  onTap: () => context.push('/item-search'),
-                  child: Container(
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      children: [
-                        const SizedBox(width: 16),
-                        const Icon(Icons.search, color: Colors.black54),
-                        const SizedBox(width: 12),
-                        Text(
-                          'ค้นหาร้านหรือเมนูอาหาร',
-                          style: AppTypography.caption3.copyWith(
-                            color: Colors.black54,
+            child: Stack(
+              children: [
+                const HeroPatternOverlay(),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    // Search Bar
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: GestureDetector(
+                        onTap: () => context.push('/item-search'),
+                        child: Container(
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            children: [
+                              const SizedBox(width: 16),
+                              const Icon(Icons.search, color: Colors.black54),
+                              const SizedBox(width: 12),
+                              Text(
+                                'ค้นหาร้านหรือเมนูอาหาร',
+                                style: AppTypography.caption3.copyWith(
+                                  color: Colors.black54,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      ],
+                      ),
                     ),
-                  ),
+                    // Clearance so the search bar clears the wave cut below.
+                    const SizedBox(height: 44),
+                  ],
                 ),
-              ),
-              const SizedBox(height: 16),
-              // Rounded bottom edge
-              Container(
-                height: 20,
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(24),
-                    topRight: Radius.circular(24),
-                  ),
-                ),
-              ),
-            ],
-          ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

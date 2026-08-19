@@ -1,4 +1,5 @@
 import 'package:customer_app/core/widgets/async_state_view.dart';
+import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -12,9 +13,9 @@ Widget _host(Widget child) => MaterialApp(
 
 void main() {
   group('LoadingView', () {
-    testWidgets('shows a progress indicator', (tester) async {
+    testWidgets('shows the brand loader', (tester) async {
       await tester.pumpWidget(_host(const LoadingView()));
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.byType(MassLoadingM), findsOneWidget);
     });
   });
 

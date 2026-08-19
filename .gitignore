@@ -56,3 +56,5 @@ build/
 
 # Environment config — prod may carry secrets; commit dev.json + prod.json.example only
 env/prod.json
+# Flutter golden-test diff artifacts
+test/**/failures/

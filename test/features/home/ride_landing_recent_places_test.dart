@@ -46,15 +46,17 @@ void main() {
     await tester.pumpWidget(_wrap(HomeState(recentPlaces: places)));
     await tester.pump();
 
-    expect(find.text('ใช้งานล่าสุด'), findsOneWidget);
+    expect(find.text('การเดินทางล่าสุด'), findsOneWidget);
     expect(find.text('Recent address 0'), findsOneWidget);
     expect(find.text('Recent address 2'), findsOneWidget);
-    // 4th and 5th hidden until expanded.
+    // Only the first 3 are shown; the rest are not rendered (no "see more").
     expect(find.text('Recent address 3'), findsNothing);
     expect(find.text('Recent address 4'), findsNothing);
   });
 
-  testWidgets('"see more" expands to reveal the rest', (tester) async {
+  testWidgets('caps the recent list at 3 with no "see more" affordance', (
+    tester,
+  ) async {
     final places = List.generate(
       5,
       (i) => _place('Place $i', 'Recent address $i'),
@@ -62,15 +64,10 @@ void main() {
     await tester.pumpWidget(_wrap(HomeState(recentPlaces: places)));
     await tester.pump();
 
-    // The button sits below the fold on the default test surface — bring it
-    // into view before tapping.
-    await tester.ensureVisible(find.text('ดูเพิ่มเติม'));
-    await tester.pump();
-    await tester.tap(find.text('ดูเพิ่มเติม'));
-    await tester.pump();
-
-    expect(find.text('Recent address 3'), findsOneWidget);
-    expect(find.text('Recent address 4'), findsOneWidget);
+    // The section shows the first 3 only and offers no way to reveal more.
+    expect(find.text('ดูเพิ่มเติม'), findsNothing);
+    expect(find.text('Recent address 3'), findsNothing);
+    expect(find.text('Recent address 4'), findsNothing);
   });
 
   testWidgets('no "see more" button when 3 or fewer', (tester) async {
@@ -88,7 +85,7 @@ void main() {
     await tester.pumpWidget(_wrap(const HomeState(recentPlaces: [])));
     await tester.pump();
 
-    expect(find.text('ใช้งานล่าสุด'), findsNothing);
+    expect(find.text('การเดินทางล่าสุด'), findsNothing);
   });
 
   testWidgets('"เพิ่มที่อยู่" navigates to the /add-address route', (

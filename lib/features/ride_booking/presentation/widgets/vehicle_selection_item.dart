@@ -144,6 +144,33 @@ class VehicleSelectionItem extends StatelessWidget {
                                       color: Colors.grey,
                                     ),
                                   ),
+                                // Nearby-driver count (SCRUM-64) — only when the
+                                // backend sends the field.
+                                if (estimation.driversNearby != null) ...[
+                                  const SizedBox(height: 3),
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.person_pin_circle_rounded,
+                                        size: 13,
+                                        color: estimation.driversNearby! > 0
+                                            ? AppColors.foundationGreen600
+                                            : Colors.grey,
+                                      ),
+                                      const SizedBox(width: 3),
+                                      Text(
+                                        estimation.driversNearby! > 0
+                                            ? 'มีคนขับใกล้ฉัน ${estimation.driversNearby} คน'
+                                            : 'ยังไม่มีคนขับว่างขณะนี้',
+                                        style: AppTypography.caption5.copyWith(
+                                          color: estimation.driversNearby! > 0
+                                              ? AppColors.foundationGreen600
+                                              : Colors.grey,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
                               ],
                             ),
                           ),

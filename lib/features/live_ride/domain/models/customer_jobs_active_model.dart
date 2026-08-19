@@ -31,6 +31,10 @@ abstract class CustomerJobsActiveModel with _$CustomerJobsActiveModel {
     @JsonKey(name: 'customer_info') CustomerJobInfoModel? customerJobInfo,
     @JsonKey(name: 'polyline') @Default('') String polyline,
     @JsonKey(name: 'is_intercity') @Default(false) bool isIntercity,
+    // Cancellation fee the customer would be charged if they cancel now, and
+    // the fee actually charged after a cancellation (SCRUM-65).
+    @JsonKey(name: 'estimated_cancel_fee') @Default(0.0) double estimatedCancelFee,
+    @JsonKey(name: 'cancellation_fee') @Default(0.0) double cancellationFee,
     @JsonKey(name: 'back_to_back_notified')
     @Default(false)
     bool backToBackNotified,

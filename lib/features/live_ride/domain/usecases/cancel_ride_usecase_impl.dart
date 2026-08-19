@@ -19,7 +19,7 @@ class CancelRideUseCaseImpl implements CancelRideUseCase {
   CancelRideUseCaseImpl(this._repository);
 
   @override
-  Future<Either<Failure, void>> call(String jobId) {
+  Future<Either<Failure, double>> call(String jobId) {
     return _repository.cancelRide(jobId);
   }
 }

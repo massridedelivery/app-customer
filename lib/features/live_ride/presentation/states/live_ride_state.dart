@@ -18,6 +18,10 @@ abstract class LiveRideState with _$LiveRideState {
     LatLng? driverLocation,
     double? fare,
     double? discount,
+    // Fee the customer would be charged if they cancel now (SCRUM-65).
+    double? estimatedCancelFee,
+    // Fee actually charged after a cancellation (from the cancel response).
+    double? chargedCancelFee,
     @Default('PENDING')
     String? jobStatus, // PENDING, ACCEPTED, PICKED_UP, COMPLETED, CANCELLED
     String? error,

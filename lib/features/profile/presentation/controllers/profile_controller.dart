@@ -95,11 +95,12 @@ class ProfileController extends _$ProfileController {
             emergencyContact: '',
             preferences: {},
             email: email,
-            // Send the freshly-uploaded file_key when present; the backend
-            // resolves it to a URL. Fall back to the existing avatar so an
-            // unchanged avatar isn't dropped.
-            avatarUrl:
-                currentState.pendingAvatarFileKey ?? currentState.editAvatarUrl,
+            // Send ONLY a freshly-uploaded media file_key (SCRUM-54: the
+            // backend now rejects a URL/any non-file_key with HTTP 400). When
+            // the avatar is unchanged we send nothing — a partial update keeps
+            // the existing avatar server-side, so we must NOT echo the URL that
+            // GET returned.
+            avatarUrl: currentState.pendingAvatarFileKey,
           );
     });
 

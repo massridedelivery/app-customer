@@ -174,6 +174,7 @@ class LiveRideController extends _$LiveRideController {
         jobStatus: liveState.status,
         fare: liveState.fare,
         discount: liveState.discount,
+        estimatedCancelFee: liveState.estimatedCancelFee,
         driverProfile: DriverProfileModel.fromActiveJob(liveState),
       );
 
@@ -237,8 +238,12 @@ class LiveRideController extends _$LiveRideController {
         state = state.copyWith(isLoading: false, error: failure.message);
         return false;
       },
-      (_) {
-        state = state.copyWith(isLoading: false, jobStatus: 'CANCELLED');
+      (fee) {
+        state = state.copyWith(
+          isLoading: false,
+          jobStatus: 'CANCELLED',
+          chargedCancelFee: fee,
+        );
         return true;
       },
     );

@@ -19,10 +19,11 @@ class LiveRideRepositoryImpl implements LiveRideRepository {
   LiveRideRepositoryImpl(this._dataSource);
 
   @override
-  Future<Either<Failure, void>> cancelRide(String jobId) async {
+  Future<Either<Failure, double>> cancelRide(String jobId) async {
     try {
-      await _dataSource.cancelRide(jobId);
-      return const Right(null);
+      final data = await _dataSource.cancelRide(jobId);
+      final fee = (data['cancellation_fee'] as num?)?.toDouble() ?? 0.0;
+      return Right(fee);
     } on DioException catch (e) {
       return Left(
         ServerFailure(e.response?.data['message'] ?? 'Failed to cancel ride'),

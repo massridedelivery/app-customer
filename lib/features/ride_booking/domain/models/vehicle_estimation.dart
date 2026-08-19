@@ -27,6 +27,9 @@ sealed class VehicleEstimation with _$VehicleEstimation {
     @JsonKey(name: 'surcharge_name') String? surchargeName,
     @JsonKey(name: 'surge_multiplier') @Default(1.0) double surgeMultiplier,
     @JsonKey(name: 'surged_fare') required double surgedFare,
+    // Number of available drivers near the pickup for this type (SCRUM-64).
+    // Nullable so "field not sent" (null) is distinguishable from "0 drivers".
+    @JsonKey(name: 'drivers_nearby') int? driversNearby,
   }) = _VehicleEstimation;
 
   factory VehicleEstimation.fromJson(Map<String, dynamic> json) =>

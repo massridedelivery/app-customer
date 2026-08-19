@@ -264,14 +264,16 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
           }
         });
 
+        final cancelFee = next.chargedCancelFee ?? 0;
+        final cancelMsg = cancelFee > 0
+            ? 'ยกเลิกการเดินทางแล้ว • มีค่าบริการยกเลิก ฿${cancelFee.toStringAsFixed(0)}'
+            : l10n.rideCancelled;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              next.jobStatus == 'COMPLETED'
-                  ? l10n.rideCompleted
-                  : l10n.rideCancelled,
+              next.jobStatus == 'COMPLETED' ? l10n.rideCompleted : cancelMsg,
             ),
-            duration: const Duration(seconds: 2),
+            duration: const Duration(seconds: 3),
           ),
         );
       }
@@ -492,19 +494,23 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
   }
 
   Future<void> _cancelRide(dynamic liveState) async {
-    // Cancelling after a driver has accepted may incur a cancellation fee
-    // (amount is configured/charged by the backend — see SCRUM-65). Warn first.
-    final hasDriver =
-        ref.read(liveRideControllerProvider).driverId?.isNotEmpty ?? false;
+    // Cancelling after a driver has accepted may incur a cancellation fee. Show
+    // the real amount from the backend (estimated_cancel_fee, SCRUM-65) rather
+    // than a vague warning.
+    final st = ref.read(liveRideControllerProvider);
+    final hasDriver = st.driverId?.isNotEmpty ?? false;
     if (hasDriver) {
+      final fee = st.estimatedCancelFee ?? 0;
+      final content = fee > 0
+          ? 'คนขับรับงานแล้ว หากยกเลิกตอนนี้จะมีค่าบริการยกเลิก '
+                '฿${fee.toStringAsFixed(0)}\nต้องการยกเลิกหรือไม่?'
+          : 'คนขับรับงานแล้ว การยกเลิกตอนนี้อาจมีค่าบริการในการยกเลิก\n'
+                'ต้องการยกเลิกหรือไม่?';
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
           title: const Text('ยกเลิกการเดินทาง?'),
-          content: const Text(
-            'คนขับรับงานแล้ว การยกเลิกตอนนี้อาจมีค่าบริการในการยกเลิก\n'
-            'ต้องการยกเลิกหรือไม่?',
-          ),
+          content: Text(content),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(false),

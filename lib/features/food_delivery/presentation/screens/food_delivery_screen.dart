@@ -38,14 +38,20 @@ class _FoodDeliveryScreenState extends ConsumerState<FoodDeliveryScreen> {
       backgroundColor: Colors.white,
       body: Stack(
         children: [
-          RefreshIndicator(
-            onRefresh: () =>
-                ref.read(foodDiscoveryProvider.notifier).refreshFeed(),
-            color: AppColors.primary,
-            child: CustomScrollView(
-              slivers: [
-                _buildSliverAppBar(),
-                discoveryState.when(
+          // Fixed wave hero + scrolling feed below — mirrors the messenger /
+          // ride landing structure so the wave sits on the white body (no red
+          // band showing below the curve like the old SliverAppBar did).
+          Column(
+            children: [
+              _buildFoodHero(context),
+              Expanded(
+                child: RefreshIndicator(
+                  onRefresh: () =>
+                      ref.read(foodDiscoveryProvider.notifier).refreshFeed(),
+                  color: AppColors.primary,
+                  child: CustomScrollView(
+                    slivers: [
+                      discoveryState.when(
                   loading: () => const SliverFillRemaining(
                     hasScrollBody: false,
                     child: LoadingView(),
@@ -178,9 +184,12 @@ class _FoodDeliveryScreenState extends ConsumerState<FoodDeliveryScreen> {
                     );
                   },
                 ),
-                const SliverToBoxAdapter(child: SizedBox(height: 140)),
-              ],
-            ),
+                      const SliverToBoxAdapter(child: SizedBox(height: 140)),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
 
           // Bottom cart bar — self-contained; watches the cart on its own so
@@ -215,106 +224,127 @@ class _FoodDeliveryScreenState extends ConsumerState<FoodDeliveryScreen> {
     return title;
   }
 
-  SliverAppBar _buildSliverAppBar() {
+  /// Branded gradient hero with a wave-clipped bottom — same structure and
+  /// gradient as the messenger ("เมสเซนเจอร์") hero, so the wave curve resolves
+  /// onto the white Scaffold body instead of a solid-red band. Fixed at the top
+  /// (does not scroll away); the restaurant feed scrolls in the Expanded below.
+  Widget _buildFoodHero(BuildContext context) {
     final foodAddress = ref.watch(
       homeControllerProvider.select(
         (state) => state.foodAddress ?? 'ระบุสถานที่ส่งอาหาร',
       ),
     );
 
-    return SliverAppBar(
-      pinned: true,
-      floating: false,
-      // Tightened so the search bar sits closer under the address; extra room
-      // for the wave cut at the bottom.
-      expandedHeight: 182,
-      elevation: 0,
-      backgroundColor: AppColors.primary,
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: Colors.white, size: 20),
-        onPressed: () => Navigator.of(context).pop(),
-      ),
-      title: GestureDetector(
-        onTap: () => context.push('/food-place-search'),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'จัดส่งที่',
-              style: AppTypography.caption5.copyWith(color: Colors.white70),
-            ),
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    foodAddress,
-                    style: AppTypography.caption3.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                const Icon(Icons.arrow_drop_down, color: Colors.white),
-              ],
-            ),
-          ],
+    return ClipPath(
+      clipper: HeroWaveClipper(),
+      child: Container(
+        width: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [AppColors.foundationRed700, AppColors.foundationRed900],
+          ),
         ),
-      ),
-      actions: const [],
-      flexibleSpace: FlexibleSpaceBar(
-        // Wave-clipped bottom edge to match the messenger / ride hero header.
-        background: ClipPath(
-          clipper: HeroWaveClipper(),
-          child: Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [AppColors.primary, AppColors.accentRedDeep],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-            ),
-            child: Stack(
-              children: [
-                const HeroPatternOverlay(),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
+        child: Stack(
+          children: [
+            const HeroPatternOverlay(),
+            SafeArea(
+              bottom: false,
+              // Bottom padding clears the wave cut so the search bar isn't clipped.
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 44),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Search Bar
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: GestureDetector(
-                        onTap: () => context.push('/item-search'),
-                        child: Container(
-                          height: 48,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(12),
+                    // Back button + delivery address.
+                    Row(
+                      children: [
+                        InkWell(
+                          onTap: () => Navigator.of(context).pop(),
+                          borderRadius: BorderRadius.circular(20),
+                          child: Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.16),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.arrow_back,
+                              color: Colors.white,
+                              size: 20,
+                            ),
                           ),
-                          child: Row(
-                            children: [
-                              const SizedBox(width: 16),
-                              const Icon(Icons.search, color: Colors.black54),
-                              const SizedBox(width: 12),
-                              Text(
-                                'ค้นหาร้านหรือเมนูอาหาร',
-                                style: AppTypography.caption3.copyWith(
-                                  color: Colors.black54,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () => context.push('/food-place-search'),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'จัดส่งที่',
+                                  style: AppTypography.caption5.copyWith(
+                                    color: Colors.white70,
+                                  ),
                                 ),
-                              ),
-                            ],
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        foodAddress,
+                                        style: AppTypography.caption3.copyWith(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                    const Icon(
+                                      Icons.arrow_drop_down,
+                                      color: Colors.white,
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    // Search bar.
+                    GestureDetector(
+                      onTap: () => context.push('/item-search'),
+                      child: Container(
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          children: [
+                            const SizedBox(width: 16),
+                            const Icon(Icons.search, color: Colors.black54),
+                            const SizedBox(width: 12),
+                            Text(
+                              'ค้นหาร้านหรือเมนูอาหาร',
+                              style: AppTypography.caption3.copyWith(
+                                color: Colors.black54,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                    // Clearance so the search bar clears the wave cut below.
-                    const SizedBox(height: 44),
                   ],
                 ),
-              ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );

@@ -11,6 +11,7 @@ import 'package:customer_app/features/home/presentation/states/home_state.dart';
 import 'package:customer_app/features/messenger/domain/models/messenger_vehicle_type.dart';
 import 'package:customer_app/features/messenger/presentation/controllers/messenger_booking_controller.dart';
 import 'package:customer_app/features/messenger/presentation/states/messenger_booking_state.dart';
+import 'package:customer_app/features/messenger/presentation/util/delivery_service_levels.dart';
 import 'package:customer_app/features/messenger/presentation/screens/messenger_coupon_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -134,6 +135,8 @@ class _MessengerBookingScreenState
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
                 children: [
             _buildLocationCard(homeState),
+            const SizedBox(height: 12),
+            _buildDeliveryTypeCard(bookingState),
             const SizedBox(height: 12),
             _buildVehicleAndSizeCard(bookingState),
             const SizedBox(height: 12),
@@ -337,6 +340,134 @@ class _MessengerBookingScreenState
   }
 
   // ─── Vehicle + Size tier ───────────────────────────────────────────────────
+
+  // ─── Delivery mode (STOPGAP: client-side pricing/time until SCRUM-71) ────────
+
+  Widget _buildDeliveryTypeCard(MessengerBookingState bookingState) {
+    final levels = stopgapServiceLevels(
+      estimate: bookingState.estimate,
+      now: DateTime.now(),
+    );
+    return _card(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'ต้องการจัดส่งแบบไหน?',
+            style: AppTypography.heading6.copyWith(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 12),
+          for (final level in levels) ...[
+            _deliveryOption(
+              level,
+              selected: level.type == bookingState.deliveryType,
+            ),
+            if (level.type != levels.last.type) const SizedBox(height: 10),
+          ],
+          const SizedBox(height: 8),
+          // STOPGAP notice — remove once BE returns real per-mode pricing/time.
+          Text(
+            '* ราคาและเวลาโดยประมาณ ยืนยันอีกครั้งเมื่อสร้างออเดอร์',
+            style: AppTypography.support2.copyWith(
+              color: AppColors.foundationGrayscale400,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _deliveryOption(
+    MessengerServiceLevel level, {
+    required bool selected,
+  }) {
+    final Color accent = level.isInstant
+        ? AppColors.foundationOrange600
+        : AppColors.foundationBlue700;
+    final String priceText = level.hasPrice
+        ? 'เริ่มต้น ฿${level.totalFare.toStringAsFixed(0)}'
+        : 'คำนวณเมื่อเลือกครบ';
+    final String subtitle = level.hasPrice
+        ? 'จัดส่งภายใน ${formatHhmm(level.deliverBy)} • ไปรับใน ${level.pickupEtaMin} นาที'
+        : 'ไปรับตอนนี้ (${level.pickupEtaMin} นาที หรือเร็วกว่านั้น)';
+
+    return GestureDetector(
+      onTap: () => ref
+          .read(messengerBookingControllerProvider.notifier)
+          .selectDeliveryType(level.type),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+        decoration: BoxDecoration(
+          color: selected
+              ? AppColors.foundationGreen500.withValues(alpha: 0.06)
+              : AppColors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: selected
+                ? AppColors.foundationGreen500
+                : AppColors.foundationGrayscale300,
+            width: selected ? 2 : 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: accent.withValues(alpha: 0.12),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                level.isInstant ? Icons.bolt_rounded : Icons.schedule_rounded,
+                color: accent,
+                size: 22,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          level.title,
+                          style: AppTypography.label1.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        priceText,
+                        style: AppTypography.caption3.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: selected
+                              ? AppColors.foundationGreen600
+                              : AppColors.textPrimary,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: AppTypography.caption5.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   Widget _buildVehicleAndSizeCard(MessengerBookingState bookingState) {
     if (bookingState.isLoadingVehicles) {
@@ -908,6 +1039,15 @@ class _MessengerBookingScreenState
               '-฿${estimate.discount.toStringAsFixed(0)}',
               valueColor: AppColors.foundationGreen500,
             ),
+          // STOPGAP: reconcile the line items with the per-mode total until BE
+          // sends real per-mode pricing (SCRUM-71).
+          if (bookingState.deliveryType == kDeliveryTwoHour &&
+              estimate.totalFare > bookingState.displayTotalFare)
+            _priceRow(
+              'ปรับตามโหมด (ส่ง 2 ชม.)',
+              '-฿${(estimate.totalFare - bookingState.displayTotalFare).toStringAsFixed(0)}',
+              valueColor: AppColors.foundationGreen500,
+            ),
           const Divider(height: 16, color: AppColors.foundationGrayscale200),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -919,7 +1059,7 @@ class _MessengerBookingScreenState
                 ),
               ),
               Text(
-                '฿${estimate.totalFare.toStringAsFixed(0)}',
+                '฿${bookingState.displayTotalFare.toStringAsFixed(0)}',
                 style: AppTypography.heading4.copyWith(
                   fontWeight: FontWeight.bold,
                   color: AppColors.primary,
@@ -996,7 +1136,7 @@ class _MessengerBookingScreenState
                 )
               : Text(
                   estimate != null
-                      ? 'เรียกเมสเซนเจอร์ • ฿${estimate.totalFare.toStringAsFixed(0)}'
+                      ? 'เรียกเมสเซนเจอร์ • ฿${bookingState.displayTotalFare.toStringAsFixed(0)}'
                       : 'เรียกเมสเซนเจอร์',
                   style: AppTypography.heading5.copyWith(
                     color: Colors.white,

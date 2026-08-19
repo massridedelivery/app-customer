@@ -95,6 +95,15 @@ class MessengerBookingController extends _$MessengerBookingController {
     _scheduleEstimate();
   }
 
+  /// Pick the delivery mode (INSTANT / TWO_HOUR). STOPGAP: no re-estimate is
+  /// needed — [MessengerBookingState.displayTotalFare] derives the per-mode
+  /// price from the existing estimate until BE ships `service_levels[]`
+  /// (SCRUM-71), at which point this should trigger a re-estimate instead.
+  void selectDeliveryType(String type) {
+    if (type == state.deliveryType) return;
+    state = state.copyWith(deliveryType: type);
+  }
+
   void setPaymentMethod(String method) {
     state = state.copyWith(paymentMethod: method);
   }

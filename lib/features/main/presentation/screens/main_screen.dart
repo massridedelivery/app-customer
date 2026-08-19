@@ -50,6 +50,11 @@ class _MainScreenState extends ConsumerState<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // `extendBody: true` draws the body behind the system navigation area, so a
+    // fixed `bottom` would let the floating bar collide with an opaque Android
+    // 3-button nav bar (iOS's thin home indicator hides the overlap). Lift it by
+    // the device's bottom inset so it clears system UI on every device.
+    final bottomInset = MediaQuery.of(context).viewPadding.bottom;
     return Scaffold(
       extendBody: true,
       body: Stack(
@@ -59,7 +64,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
 
           // Floating Bottom Navigation
           Positioned(
-            bottom: 24,
+            bottom: 24 + bottomInset,
             left: 20,
             right: 20,
             child: Center(

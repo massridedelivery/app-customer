@@ -201,12 +201,12 @@ class _MessengerBookingScreenState
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'เมสเซนเจอร์ส่งพัสดุ',
+                  'ยินดีต้อนรับสู่ เมสเซนเจอร์',
                   style: AppTypography.heading2.copyWith(color: Colors.white),
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'ส่ง-รับพัสดุด่วน ถึงมือผู้รับ ทุกที่ทุกเวลา',
+                  'บริการรับ-ส่งพัสดุเพื่อคุณ ไม่ว่าจะที่ไหน เมื่อไหร่',
                   style: AppTypography.caption3.copyWith(
                     color: Colors.white.withValues(alpha: 0.9),
                   ),

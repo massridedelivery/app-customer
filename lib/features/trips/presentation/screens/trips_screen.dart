@@ -2,6 +2,7 @@ import 'package:customer_app/core/constants/app_assets.dart';
 import 'package:customer_app/core/utils/error_text.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
+import 'package:customer_app/core/constants/layout.dart';
 import 'package:customer_app/core/widgets/app_filter_chip.dart';
 import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
@@ -243,7 +244,11 @@ class _TripsListBody extends ConsumerWidget {
 
     return ListView.separated(
       controller: scrollController,
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: EdgeInsets.only(
+        top: 8,
+        // Clear the floating bottom nav so the last row isn't hidden behind it.
+        bottom: 8 + kFloatingNavReserve + MediaQuery.of(context).viewPadding.bottom,
+      ),
       itemCount: sorted.length + (isLoadingMore ? 1 : 0),
       separatorBuilder: (context, index) => const Padding(
         padding: EdgeInsets.symmetric(horizontal: 16),
@@ -546,7 +551,11 @@ class _MessengerHistoryBody extends ConsumerWidget {
           );
         }
         return ListView.separated(
-          padding: const EdgeInsets.symmetric(vertical: 8),
+          padding: EdgeInsets.only(
+        top: 8,
+        // Clear the floating bottom nav so the last row isn't hidden behind it.
+        bottom: 8 + kFloatingNavReserve + MediaQuery.of(context).viewPadding.bottom,
+      ),
           itemCount: filtered.length,
           separatorBuilder: (context, index) => const Padding(
             padding: EdgeInsets.symmetric(horizontal: 16),
@@ -825,7 +834,11 @@ class _AllHistoryBody extends ConsumerWidget {
 
     return ListView.separated(
       controller: scrollController,
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: EdgeInsets.only(
+        top: 8,
+        // Clear the floating bottom nav so the last row isn't hidden behind it.
+        bottom: 8 + kFloatingNavReserve + MediaQuery.of(context).viewPadding.bottom,
+      ),
       itemCount: sorted.length + (isLoadingMore ? 1 : 0),
       separatorBuilder: (context, index) => const Padding(
         padding: EdgeInsets.symmetric(horizontal: 16),

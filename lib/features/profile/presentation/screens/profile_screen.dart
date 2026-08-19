@@ -1,5 +1,6 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
+import 'package:customer_app/core/constants/layout.dart';
 import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/core/localization/locale_controller.dart';
 import 'package:customer_app/features/auth/presentation/controllers/auth_controller.dart';
@@ -118,7 +119,12 @@ class ProfileScreen extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 80),
+                  // Clear the floating bottom nav so the logout button is fully
+                  // tappable above it (was a too-short fixed 80).
+                  SizedBox(
+                    height: kFloatingNavReserve +
+                        MediaQuery.of(context).viewPadding.bottom,
+                  ),
                 ],
               ),
             ),

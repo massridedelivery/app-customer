@@ -1,6 +1,7 @@
 import 'package:customer_app/core/constants/app_assets.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_icons.dart';
+import 'package:customer_app/core/constants/layout.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/constants/feature_flags.dart';
 import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
@@ -92,7 +93,11 @@ class _ServiceSelectionScreenState
                   ),
                 ),
                 child: Padding(
-                  padding: EdgeInsets.only(top: 2, bottom: bottomPadding + 28),
+                  // Reserve the floating bottom nav so the last content clears it.
+                  padding: EdgeInsets.only(
+                    top: 2,
+                    bottom: bottomPadding + kFloatingNavReserve,
+                  ),
                   child: Column(
                     children: [
                       ActiveOrdersBanner(),

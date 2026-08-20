@@ -23,7 +23,7 @@ iOS (`Info.plist`):
 | Key | Feature | Status |
 |---|---|---|
 | `NSLocationWhenInUseUsageDescription` | foreground location | ✅ present, specific |
-| ~~`NSLocationAlwaysAndWhenInUseUsageDescription`~~ | background/Always | ❌ **removed** (app is foreground-only) |
+| `NSLocationAlwaysAndWhenInUseUsageDescription` | **required by the `location` SDK** (references the Always API → Apple ITMS-90683) | ✅ present. **Runtime requests When-In-Use only**; no location `UIBackgroundModes` → not actually background |
 | `NSPhotoLibraryUsageDescription` | pick profile avatar (`image_picker`) | ✅ |
 | `NSCameraUsageDescription` | take profile avatar (`image_picker`) | ✅ |
 | `UIBackgroundModes` (location) | — | ❌ absent (correct) |
@@ -71,12 +71,20 @@ Future<bool> ensure(Permission p, {required String why}) async {
 - **Location (Precise):** *App Functionality* — not used for tracking, not linked
   to identity for ads. WhenInUse only.
 - **Photos:** *App Functionality* (avatar).
-- Purpose strings must be specific (they are — see table). **Do not** add
-  `NSLocationAlwaysAndWhenInUse` unless a real background-location feature ships.
+- Purpose strings must be specific (they are — see table).
+- **ITMS-90683 note:** the `location` SDK references the Always-location API, so
+  Apple's static analyzer *requires* `NSLocationAlwaysAndWhenInUseUsageDescription`
+  to be present even though we never request Always at runtime and ship no
+  location background mode. Removing it triggers the ITMS-90683 warning — keep
+  both strings. This does not make the app a background-location app; the App
+  Privacy label stays **When-In-Use / App Functionality**.
 
 ## Acceptance
 - [x] Every permission maps to a feature; none unused (background location absent)
-- [x] No background location — Android (merged manifest) + iOS (no Always / no bg mode)
+- [x] No background location behaviour — Android (merged manifest has no
+      ACCESS_BACKGROUND_LOCATION) + iOS (no location UIBackgroundModes; runtime
+      When-In-Use only). The iOS Always *string* is present only to satisfy the
+      SDK's ITMS-90683 requirement.
 - [x] iOS purpose strings present + specific; asked in-context
 - [x] Location deny has a fallback (type the address) — never blocks the user
 - [x] Notifications asked after login, not at launch

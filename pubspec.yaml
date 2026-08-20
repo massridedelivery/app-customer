@@ -76,9 +76,23 @@ dev_dependencies:
   freezed: ^3.2.5
   json_serializable: ^6.13.0
   flutter_launcher_icons: ^0.14.4
+  flutter_native_splash: ^2.4.4
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
+
+# Branded splash — matches the launcher icon (white M mark on brand red).
+# Regenerate after changing color/image: dart run flutter_native_splash:create
+flutter_native_splash:
+  color: "#B4312E"                       # brand color = adaptive_icon_background
+  image: assets/icon/icon_m_mark.png     # white logo, transparent background
+  android: true
+  ios: true
+  web: false
+  # Android 12+ uses the system splash API (icon is circle-masked).
+  android_12:
+    color: "#B4312E"
+    image: assets/icon/icon_m_mark.png
 
 # App launcher icon (run: dart run flutter_launcher_icons)
 flutter_launcher_icons:

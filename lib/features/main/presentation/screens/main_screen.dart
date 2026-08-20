@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/features/home/presentation/screens/service_selection_screen.dart';
@@ -48,11 +50,14 @@ class _MainScreenState extends ConsumerState<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // `extendBody: true` draws the body behind the system navigation area, so a
-    // fixed `bottom` would let the floating bar collide with an opaque Android
-    // 3-button nav bar (iOS's thin home indicator hides the overlap). Lift it by
-    // the device's bottom inset so it clears system UI on every device.
+    // `extendBody: true` draws the body behind the system navigation area.
+    // Android's system nav (esp. 3-button) is opaque, so lift the floating bar
+    // above it by the device inset. iOS only has a thin home indicator — adding
+    // that inset floats the bar too high, so there we hug the bottom with just
+    // the base gap.
     final bottomInset = MediaQuery.of(context).viewPadding.bottom;
+    const baseGap = 24.0;
+    final navBottom = Platform.isAndroid ? baseGap + bottomInset : baseGap;
     return Scaffold(
       extendBody: true,
       body: Stack(
@@ -62,7 +67,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
 
           // Floating Bottom Navigation
           Positioned(
-            bottom: 24 + bottomInset,
+            bottom: navBottom,
             left: 20,
             right: 20,
             child: Center(

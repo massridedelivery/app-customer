@@ -59,6 +59,13 @@ git push -u origin feat/<ชื่องาน>       # ครั้งแรก
 - เปิด PR จาก `develop` → `main`, **rebase ก่อน**, ให้คนดูแล merge เอง (ไม่ auto)
 - ตัดผ่าน PR เท่านั้น + tag version (เช่น `v1.0.2`)
 
+## ⚠️ Release / TestFlight — สั่งโดยเจ้าของงานเท่านั้น
+- **ห้าม build / upload TestFlight (หรือ App Store / Play) เองเด็ดขาด** — build จะถูก
+  **สั่งโดยผู้ดูแลเท่านั้น** (เช่น "build TestFlight +NN")
+- ห้าม auto-deploy หลัง merge/PR · CI build เพื่อ "ตรวจ" ได้ แต่ไม่ปล่อยขึ้นสโตร์เอง
+- คน/agent ที่ทำฟีเจอร์: เสร็จแล้วแค่รายงาน + รอคำสั่ง build — ไม่ริเริ่มเอง
+- (ทดสอบบนเครื่อง local เช่น `make install_dev` ทำได้; ที่ห้ามคือ upload ขึ้นสโตร์)
+
 ## 8) Commit message
 ```
 <type>(<scope>): <สรุปสั้น>

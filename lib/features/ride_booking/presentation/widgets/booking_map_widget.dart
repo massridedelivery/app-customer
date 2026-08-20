@@ -65,33 +65,49 @@ class BookingMapWidget extends ConsumerWidget {
     this.onCameraIdle,
   });
 
-  void _fitMapToMarkers(
+  Future<void> _fitMapToMarkers(
     GoogleMapController controller,
     LatLng pickup,
     LatLng dropoff,
-  ) {
+  ) async {
     // Calculate bounding box
-    double minLat = pickup.latitude < dropoff.latitude
+    final double minLat = pickup.latitude < dropoff.latitude
         ? pickup.latitude
         : dropoff.latitude;
-    double maxLat = pickup.latitude > dropoff.latitude
+    final double maxLat = pickup.latitude > dropoff.latitude
         ? pickup.latitude
         : dropoff.latitude;
-    double minLng = pickup.longitude < dropoff.longitude
+    final double minLng = pickup.longitude < dropoff.longitude
         ? pickup.longitude
         : dropoff.longitude;
-    double maxLng = pickup.longitude > dropoff.longitude
+    final double maxLng = pickup.longitude > dropoff.longitude
         ? pickup.longitude
         : dropoff.longitude;
 
-    // Add some padding to bounds calculation
     final bounds = LatLngBounds(
       southwest: LatLng(minLat, minLng),
       northeast: LatLng(maxLat, maxLng),
     );
 
-    // Padding parameters ensure pins don't get covered by UI elements
-    controller.animateCamera(CameraUpdate.newLatLngBounds(bounds, 100));
+    // onMapCreated can fire before the map's GL surface has a size. Fitting
+    // bounds then silently falls back to the min (whole-world) zoom — the map
+    // "sometimes doesn't zoom" bug. Fit once soon, then again once it's laid
+    // out, so the second pass always lands on the route. 100px keeps the pins
+    // clear of the address bubbles / bottom sheet.
+    Future<void> fit() async {
+      try {
+        await controller.animateCamera(
+          CameraUpdate.newLatLngBounds(bounds, 100),
+        );
+      } catch (_) {
+        // Map not ready yet — the later retry below will take.
+      }
+    }
+
+    await Future.delayed(const Duration(milliseconds: 200));
+    await fit();
+    await Future.delayed(const Duration(milliseconds: 450));
+    await fit();
   }
 
   @override

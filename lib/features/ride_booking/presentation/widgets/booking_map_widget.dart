@@ -53,7 +53,7 @@ final routePointsProvider = FutureProvider.autoDispose<List<LatLng>>((
   return ref.read(_directionsServiceProvider).route(pickup, dropoff);
 });
 
-class BookingMapWidget extends ConsumerWidget {
+class BookingMapWidget extends ConsumerStatefulWidget {
   final Function(GoogleMapController)? onMapCreated;
   final Function(CameraPosition)? onCameraMove;
   final Function()? onCameraIdle;
@@ -64,6 +64,13 @@ class BookingMapWidget extends ConsumerWidget {
     this.onCameraMove,
     this.onCameraIdle,
   });
+
+  @override
+  ConsumerState<BookingMapWidget> createState() => _BookingMapWidgetState();
+}
+
+class _BookingMapWidgetState extends ConsumerState<BookingMapWidget> {
+  GoogleMapController? _controller;
 
   Future<void> _fitMapToMarkers(
     GoogleMapController controller,
@@ -111,12 +118,28 @@ class BookingMapWidget extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final pickup = ref.watch(
       homeControllerProvider.select((s) => s.pickupLocation),
     );
     final dropoff = ref.watch(
       homeControllerProvider.select((s) => s.dropoffLocation),
+    );
+
+    // Re-fit whenever the pickup or dropoff changes (e.g. the user picks a new
+    // destination) so both pins stay in view instead of the map staying on the
+    // old route. Fires only on change; the initial fit runs in onMapCreated.
+    ref.listen(
+      homeControllerProvider.select(
+        (s) => (s.pickupLocation, s.dropoffLocation),
+      ),
+      (prev, next) {
+        final (p, d) = next;
+        final controller = _controller;
+        if (p != null && d != null && controller != null) {
+          _fitMapToMarkers(controller, p, d);
+        }
+      },
     );
 
     // Backend polyline when present, otherwise the Google Directions route.
@@ -143,13 +166,12 @@ class BookingMapWidget extends ConsumerWidget {
         bottom: 300,
       ),
       onMapCreated: (controller) {
+        _controller = controller;
         _fitMapToMarkers(controller, pickup, dropoff);
-        if (onMapCreated != null) {
-          onMapCreated!(controller);
-        }
+        widget.onMapCreated?.call(controller);
       },
-      onCameraMove: onCameraMove,
-      onCameraIdle: onCameraIdle,
+      onCameraMove: widget.onCameraMove,
+      onCameraIdle: widget.onCameraIdle,
       markers: {
         Marker(
           markerId: const MarkerId('pickup'),

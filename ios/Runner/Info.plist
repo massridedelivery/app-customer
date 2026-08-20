@@ -5,9 +5,7 @@
 		<key>CADisableMinimumFrameDurationOnPhone</key>
 		<true/>
 		<key>NSLocationWhenInUseUsageDescription</key>
-		<string>แอปนี้ต้องใช้ตำแหน่งเพื่อแสดงการรับส่งและค้นหาคนขับใกล้คุณ</string>
-		<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-		<string>แอปต้องใช้ตำแหน่งเพื่อให้บริการติดตามการเดินทางแบบเรียลไทม์</string>
+		<string>ใช้ตำแหน่งของคุณเพื่อค้นหาร้าน/บริการใกล้คุณ กรอกจุดรับ-ส่งอัตโนมัติ และติดตามการเดินทาง/การจัดส่งขณะใช้งานแอป</string>
 		<key>CFBundleDevelopmentRegion</key>
 		<string>$(DEVELOPMENT_LANGUAGE)</string>
 		<key>CFBundleDisplayName</key>

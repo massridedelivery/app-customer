@@ -16,13 +16,13 @@ abstract class LiveRideState with _$LiveRideState {
     String? vehicleType,
     double? driverRating,
     LatLng? driverLocation,
-    // Route endpoints (from the active job) — targets for the live ETA.
-    LatLng? pickupLatLng,
-    LatLng? dropoffLatLng,
-    // Live, traffic-aware ETA (minutes) from the driver's current location to
-    // the current target (pickup before PICKED_UP, dropoff after). Null until
-    // the first driver-location ping resolves via Google Directions.
-    int? etaMinutes,
+    // Estimated arrival time at the current target (pickup before PICKED_UP,
+    // dropoff after). The backend computes it ONCE per phase (traffic-aware) and
+    // pushes it on the driver-location socket; the client derives both the
+    // "อีก N นาที" countdown and the "ถึงประมาณ HH:MM" clock from it locally, so
+    // no routing API is called while the ride runs. Null until the backend sends
+    // it.
+    DateTime? etaArriveAt,
     double? fare,
     double? discount,
     // Fee the customer would be charged if they cancel now (SCRUM-65).

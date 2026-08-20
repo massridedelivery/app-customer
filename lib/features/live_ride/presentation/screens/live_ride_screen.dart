@@ -45,6 +45,10 @@ class LiveRideScreen extends ConsumerStatefulWidget {
 class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
   GoogleMapController? _mapController;
 
+  /// Safety buffer added to the backend ETA before display, so we under-promise
+  /// (the rider tends to arrive a little earlier than shown).
+  static const int _kEtaBufferMinutes = 15;
+
   // Prompts the customer to keep searching or change service type when no driver
   // is found within [_findingTimeout] of the "finding" screen.
   static const Duration _findingTimeout = Duration(minutes: 3);
@@ -757,18 +761,21 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
     );
   }
 
-  /// Live "arrives in ~N min" banner (Grab / LINE MAN style). Driven by the
-  /// controller's traffic-aware Google ETA — driver → pickup before the ride
-  /// starts, driver → destination once PICKED_UP. Hidden until the first ETA
-  /// resolves.
+  /// Live "arrives in ~N min · around HH:MM" banner (Grab / LINE MAN style).
+  /// Driven by a server-computed arrival time pushed on the socket — the client
+  /// counts the minutes down locally, calling no routing API. Copy switches by
+  /// phase: driver → pickup before the ride, driver → destination once
+  /// PICKED_UP. Hidden until the backend sends an ETA.
   Widget _buildEtaBanner(dynamic liveState) {
-    final int? eta = liveState.etaMinutes;
-    if (eta == null) return const SizedBox.shrink();
-    final toDropoff = (liveState.jobStatus as String?)?.toUpperCase() ==
-        'PICKED_UP';
-    final label = toDropoff
-        ? 'คาดว่าจะถึงที่หมายในอีกประมาณ'
-        : 'คนขับถึงจุดรับในอีกประมาณ';
+    final DateTime? raw = liveState.etaArriveAt;
+    if (raw == null) return const SizedBox.shrink();
+    // Pad with a safety buffer so we under-promise the arrival.
+    final arriveAt = raw.add(const Duration(minutes: _kEtaBufferMinutes));
+    final diff = arriveAt.difference(DateTime.now()).inMinutes;
+    final minutes = diff < 1 ? 1 : diff;
+    final pickedUp =
+        (liveState.jobStatus as String?)?.toUpperCase() == 'PICKED_UP';
+    final title = pickedUp ? 'กำลังเดินทางไปส่ง' : 'ไรเดอร์กำลังมารับ';
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
@@ -801,7 +808,7 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    label,
+                    title,
                     style: AppTypography.caption4.copyWith(
                       color: AppColors.semanticGrayNeutralFgLowOnWhite,
                     ),
@@ -812,7 +819,13 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
                     textBaseline: TextBaseline.alphabetic,
                     children: [
                       Text(
-                        '$eta',
+                        'อีกประมาณ ',
+                        style: AppTypography.label1.copyWith(
+                          color: AppColors.foundationGreen600,
+                        ),
+                      ),
+                      Text(
+                        '$minutes',
                         style: AppTypography.heading2.copyWith(
                           color: AppColors.foundationGreen600,
                           fontWeight: FontWeight.bold,
@@ -827,13 +840,14 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
                       ),
                     ],
                   ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'คาดว่าถึงประมาณ ${_formatClock(arriveAt)} น.',
+                    style: AppTypography.caption4.copyWith(
+                      color: AppColors.semanticGrayNeutralFgLowOnWhite,
+                    ),
+                  ),
                 ],
-              ),
-            ),
-            Text(
-              'อัปเดตสด',
-              style: AppTypography.support2.copyWith(
-                color: AppColors.semanticGrayNeutralFgLowOnWhite,
               ),
             ),
           ],
@@ -841,6 +855,10 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
       ),
     );
   }
+
+  /// Formats a [DateTime] as a 24h HH:mm clock.
+  String _formatClock(DateTime t) =>
+      '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
 
   /// Opens the phone dialer with the driver's number (free, uses the mobile
   /// network). No masked/VoIP layer yet — the rider sees the real number.
@@ -1097,11 +1115,11 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
               ),
               if ((liveState.jobStatus as String?)?.toUpperCase() ==
                       'PICKED_UP' &&
-                  liveState.etaMinutes != null)
+                  liveState.etaArriveAt != null)
                 Expanded(
                   child: _buildStatColumn(
                     'คาดว่าจะถึง',
-                    '~${liveState.etaMinutes} ${AppLocalizations.of(context)!.minutes}',
+                    '${_formatClock((liveState.etaArriveAt as DateTime).add(const Duration(minutes: _kEtaBufferMinutes)))} น.',
                   ),
                 ),
             ],

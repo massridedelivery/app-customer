@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:customer_app/features/live_ride/domain/models/driver_profile_model.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:customer_app/core/services/google_directions_service.dart';
 import 'package:customer_app/core/services/socket_service.dart';
 import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
 import 'package:customer_app/features/ride_booking/presentation/controllers/booking_controller.dart';
@@ -17,7 +16,6 @@ part 'live_ride_controller.g.dart';
 class LiveRideController extends _$LiveRideController {
   StreamSubscription<Map<String, dynamic>>? _socketSubscription;
   DateTime? _lastLocationUpdateTime;
-  DateTime? _lastEtaFetch;
   Timer? _syncTimer;
   AppLifecycleListener? _lifecycleListener;
   int _syncTick = 0;
@@ -123,12 +121,6 @@ class LiveRideController extends _$LiveRideController {
         final status = ((data?['status'] ?? message['status']) as String?)
             ?.toUpperCase();
         if (status != null) {
-          // The ETA target flips from pickup to dropoff at PICKED_UP — clear
-          // the throttle so the next driver ping recomputes immediately.
-          if (status == 'PICKED_UP' &&
-              state.jobStatus?.toUpperCase() != 'PICKED_UP') {
-            _lastEtaFetch = null;
-          }
           state = state.copyWith(jobStatus: status);
           // A driver was (or is being) assigned but we don't have their details
           // yet — pull the authoritative job so the confirming screen populates.
@@ -140,6 +132,11 @@ class LiveRideController extends _$LiveRideController {
       case 'driver_location':
         final lat = data?['lat'] as num?;
         final lng = data?['lng'] as num?;
+        // Server-computed arrival time to the current target — pushed alongside
+        // the location so the client never calls a routing API. Prefer an
+        // absolute `arrive_at` (stable clock); fall back to `eta_min` (now + N).
+        // Optional: absent until the backend ships it (last value kept).
+        final arriveAt = _parseEta(data);
         if (lat != null && lng != null) {
           final now = DateTime.now();
           if (_lastLocationUpdateTime == null ||
@@ -148,8 +145,8 @@ class LiveRideController extends _$LiveRideController {
             _lastLocationUpdateTime = now;
             state = state.copyWith(
               driverLocation: LatLng(lat.toDouble(), lng.toDouble()),
+              etaArriveAt: arriveAt ?? state.etaArriveAt,
             );
-            _updateEta();
           }
         }
         break;
@@ -184,13 +181,8 @@ class LiveRideController extends _$LiveRideController {
         fare: liveState.fare,
         discount: liveState.discount,
         estimatedCancelFee: liveState.estimatedCancelFee,
-        pickupLatLng: LatLng(liveState.pickupLat, liveState.pickupLng),
-        dropoffLatLng: LatLng(liveState.dropoffLat, liveState.dropoffLng),
         driverProfile: DriverProfileModel.fromActiveJob(liveState),
       );
-      // A driver ping may have arrived before the endpoints were known — try an
-      // ETA now that the targets are set.
-      _updateEta();
 
       // Restore locations in HomeController
       ref
@@ -241,29 +233,21 @@ class LiveRideController extends _$LiveRideController {
     }
   }
 
-  /// Refresh the live, traffic-aware ETA from the driver's current location to
-  /// the current target (pickup before PICKED_UP, dropoff after). Throttled to
-  /// one Google Directions call per ~20s to keep API cost down; no-op until both
-  /// a driver location and the route endpoints are known.
-  Future<void> _updateEta() async {
-    final driver = state.driverLocation;
-    if (driver == null) return;
-    final enRouteToDropoff = state.jobStatus?.toUpperCase() == 'PICKED_UP';
-    final target = enRouteToDropoff ? state.dropoffLatLng : state.pickupLatLng;
-    if (target == null) return;
-
-    final now = DateTime.now();
-    if (_lastEtaFetch != null &&
-        now.difference(_lastEtaFetch!) < const Duration(seconds: 20)) {
-      return;
+  /// Arrival time from a driver-location payload: prefers an absolute
+  /// `arrive_at` (ISO8601); otherwise derives it from `eta_min` (now + N min).
+  /// Null when neither is present.
+  DateTime? _parseEta(Map<String, dynamic>? data) {
+    if (data == null) return null;
+    final iso = data['arrive_at'] as String?;
+    if (iso != null && iso.isNotEmpty) {
+      return DateTime.tryParse(iso)?.toLocal();
     }
-    _lastEtaFetch = now;
-
-    final info = await ref
-        .read(googleDirectionsServiceProvider)
-        .routeInfo(driver, target);
-    if (info == null || info.duration.inSeconds <= 0) return;
-    state = state.copyWith(etaMinutes: info.minutes < 1 ? 1 : info.minutes);
+    final etaMin =
+        (data['eta_min'] ?? data['eta_minutes'] ?? data['eta']) as num?;
+    if (etaMin != null) {
+      return DateTime.now().add(Duration(minutes: etaMin.round()));
+    }
+    return null;
   }
 
   Future<bool> cancelRide() async {

@@ -1,4 +1,7 @@
-.PHONY: gen watch fix clean clean_cache test test_cov analyze pre_pr run_dev run_prod run_ios_dev run_ios_prod build_apk_dev build_apk_prod build_ios_dev build_ios_prod build_aab_dev build_aab_prod deploy_play_dev deploy_play_prod deploy_play_check
+.PHONY: gen watch fix clean clean_cache test test_cov analyze pre_pr run_dev run_prod run_ios_dev run_ios_prod build_apk_dev build_apk_dev_arm64 install_dev build_apk_prod build_ios_dev build_ios_prod build_aab_dev build_aab_prod deploy_play_dev deploy_play_prod deploy_play_check
+
+# 📁 โฟลเดอร์เก็บ debug symbols ของ Dart (จาก --obfuscate) — ใช้ de-obfuscate stack trace ทีหลัง
+SYMBOLS := build/symbols
 
 # 🚀 สร้างไฟล์ที่จำเป็น (Freezed, Riverpod, JSON)
 gen:
@@ -70,12 +73,25 @@ run_ios_dev:
 run_ios_prod:
 	flutter run -d ios --flavor prod --dart-define-from-file=env/prod.json
 
-# 📦 build APK ตาม environment
+# 📦 build APK ตาม environment (universal — ทุก ABI, ไฟล์ใหญ่)
 build_apk_dev:
 	flutter build apk --flavor dev --dart-define-from-file=env/dev.json
 
 build_apk_prod:
 	flutter build apk --release --flavor prod --dart-define-from-file=env/prod.json
+
+# 📱 build APK dev แบบเล็กสำหรับ sideload/ทดสอบบนเครื่อง — arm64 อย่างเดียว + obfuscate
+#    เล็กกว่า build_apk_dev ~3 เท่า (ตัด armeabi-v7a/x86_64 + ตัด Dart debug symbols)
+#    ~22MB เทียบกับ universal ~66MB · ออกไฟล์ที่ build/app/outputs/flutter-apk/app-dev-release.apk
+build_apk_dev_arm64:
+	flutter build apk --release --flavor dev --dart-define-from-file=env/dev.json \
+		--target-platform android-arm64 --obfuscate --split-debug-info=$(SYMBOLS)
+
+# 📲 build (arm64) แล้วติดตั้ง + เปิดบนเครื่อง Android ที่ต่ออยู่ (adb)
+#    ถ้าต่อหลายเครื่อง ให้ระบุ: make install_dev ANDROID_SERIAL=<serial>
+install_dev: build_apk_dev_arm64
+	adb install -r build/app/outputs/flutter-apk/app-dev-release.apk
+	adb shell monkey -p com.massdrive.customer_app.dev -c android.intent.category.LAUNCHER 1
 
 # 🍏 build iOS ตาม environment
 build_ios_dev:
@@ -106,11 +122,16 @@ deploy_dev: bump ipa_dev
 # when android/key.properties exists.
 
 # 📦 build Android App Bundle (AAB) per flavor — no version bump
+#    obfuscate + split symbols: Play จะแตก ABI/ความหนาแน่นให้ต่อเครื่องเองอยู่แล้ว
+#    (เล็กสุดสำหรับผู้ใช้) ส่วน --obfuscate ตัด Dart symbols ออกจาก libapp.so
+#    เก็บ symbols ไว้ที่ $(SYMBOLS) เผื่อ de-obfuscate crash report ทีหลัง
 build_aab_dev:
-	flutter build appbundle --flavor dev --dart-define-from-file=env/dev.json
+	flutter build appbundle --flavor dev --dart-define-from-file=env/dev.json \
+		--obfuscate --split-debug-info=$(SYMBOLS)
 
 build_aab_prod:
-	flutter build appbundle --release --flavor prod --dart-define-from-file=env/prod.json
+	flutter build appbundle --release --flavor prod --dart-define-from-file=env/prod.json \
+		--obfuscate --split-debug-info=$(SYMBOLS)
 
 # ✅ verify the Play service-account JSON authenticates (no upload)
 deploy_play_check:

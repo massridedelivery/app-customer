@@ -45,8 +45,6 @@ class LiveRideScreen extends ConsumerStatefulWidget {
 class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
   GoogleMapController? _mapController;
 
-  bool _isRideDetailsExpanded = false;
-
   // Prompts the customer to keep searching or change service type when no driver
   // is found within [_findingTimeout] of the "finding" screen.
   static const Duration _findingTimeout = Duration(minutes: 3);
@@ -747,6 +745,7 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        _buildEtaBanner(liveState),
         _buildRiderSection(liveState),
         const SizedBox(height: 16),
         _buildLocationDetailsSection(pickupAddress, dropoffAddress),
@@ -755,6 +754,91 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
         const SizedBox(height: 16),
         _buildPaymentMethodSection(),
       ],
+    );
+  }
+
+  /// Live "arrives in ~N min" banner (Grab / LINE MAN style). Driven by the
+  /// controller's traffic-aware Google ETA — driver → pickup before the ride
+  /// starts, driver → destination once PICKED_UP. Hidden until the first ETA
+  /// resolves.
+  Widget _buildEtaBanner(dynamic liveState) {
+    final int? eta = liveState.etaMinutes;
+    if (eta == null) return const SizedBox.shrink();
+    final toDropoff = (liveState.jobStatus as String?)?.toUpperCase() ==
+        'PICKED_UP';
+    final label = toDropoff
+        ? 'คาดว่าจะถึงที่หมายในอีกประมาณ'
+        : 'คนขับถึงจุดรับในอีกประมาณ';
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: AppColors.foundationGreen500.withValues(alpha: 0.10),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: AppColors.foundationGreen500.withValues(alpha: 0.35),
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: const BoxDecoration(
+                color: AppColors.foundationGreen500,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.access_time_rounded,
+                color: Colors.white,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: AppTypography.caption4.copyWith(
+                      color: AppColors.semanticGrayNeutralFgLowOnWhite,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                    textBaseline: TextBaseline.alphabetic,
+                    children: [
+                      Text(
+                        '$eta',
+                        style: AppTypography.heading2.copyWith(
+                          color: AppColors.foundationGreen600,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        AppLocalizations.of(context)!.minutes,
+                        style: AppTypography.label1.copyWith(
+                          color: AppColors.foundationGreen600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            Text(
+              'อัปเดตสด',
+              style: AppTypography.support2.copyWith(
+                color: AppColors.semanticGrayNeutralFgLowOnWhite,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -943,10 +1027,9 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
             alignment: Alignment.centerLeft,
             child: Padding(
               padding: const EdgeInsets.only(left: 9),
-              child: Container(
+              child: _DashedVerticalLine(
                 height: 24,
-                width: 2,
-                color: Colors.grey.shade200,
+                color: Colors.grey.shade400,
               ),
             ),
           ),
@@ -1000,45 +1083,32 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text('สรุปการเดินทาง', style: AppTypography.label2),
-              GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _isRideDetailsExpanded = !_isRideDetailsExpanded;
-                  });
-                },
-                child: Text(
-                  _isRideDetailsExpanded ? 'ซ่อน' : 'ดู',
-                  style: AppTypography.caption4.copyWith(
-                    color: AppColors.accentRedDeep,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ],
-          ),
+          Text('สรุปการเดินทาง', style: AppTypography.label2),
           const SizedBox(height: 12),
-          if (_isRideDetailsExpanded) ...[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _buildStatColumn(
+          // Always visible: distance now; travel time only appears once the ride
+          // is underway (PICKED_UP), as a live Google ETA to the destination.
+          Row(
+            children: [
+              Expanded(
+                child: _buildStatColumn(
                   AppLocalizations.of(context)!.distance,
                   '${bookingState.distanceKm?.toStringAsFixed(1) ?? '--'} ${AppLocalizations.of(context)!.km}',
                 ),
-                _buildStatColumn(
-                  AppLocalizations.of(context)!.time,
-                  '${bookingState.durationMin?.toStringAsFixed(0) ?? '--'} ${AppLocalizations.of(context)!.minutes}',
+              ),
+              if ((liveState.jobStatus as String?)?.toUpperCase() ==
+                      'PICKED_UP' &&
+                  liveState.etaMinutes != null)
+                Expanded(
+                  child: _buildStatColumn(
+                    'คาดว่าจะถึง',
+                    '~${liveState.etaMinutes} ${AppLocalizations.of(context)!.minutes}',
+                  ),
                 ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            const Divider(height: 1),
-            const SizedBox(height: 12),
-          ],
+            ],
+          ),
+          const SizedBox(height: 12),
+          const Divider(height: 1),
+          const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -1227,4 +1297,54 @@ class _LiveRideMap extends ConsumerWidget {
       },
     );
   }
+}
+
+/// A thin vertical dashed line — the pickup→dropoff connector in the location
+/// card (dashed instead of a solid rule, matching the route styling).
+class _DashedVerticalLine extends StatelessWidget {
+  const _DashedVerticalLine({required this.height, required this.color});
+
+  final double height;
+  final Color color;
+
+  static const double _thickness = 2;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: height,
+      width: _thickness,
+      child: CustomPaint(painter: _DashedLinePainter(color: color)),
+    );
+  }
+}
+
+class _DashedLinePainter extends CustomPainter {
+  _DashedLinePainter({required this.color});
+
+  final Color color;
+
+  static const double _dashHeight = 3;
+  static const double _gap = 3;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = size.width
+      ..strokeCap = StrokeCap.round;
+    final x = size.width / 2;
+    var y = 0.0;
+    while (y < size.height) {
+      canvas.drawLine(
+        Offset(x, y),
+        Offset(x, (y + _dashHeight).clamp(0, size.height)),
+        paint,
+      );
+      y += _dashHeight + _gap;
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _DashedLinePainter old) => old.color != color;
 }

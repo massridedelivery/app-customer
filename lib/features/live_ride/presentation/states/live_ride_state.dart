@@ -16,6 +16,13 @@ abstract class LiveRideState with _$LiveRideState {
     String? vehicleType,
     double? driverRating,
     LatLng? driverLocation,
+    // Route endpoints (from the active job) — targets for the live ETA.
+    LatLng? pickupLatLng,
+    LatLng? dropoffLatLng,
+    // Live, traffic-aware ETA (minutes) from the driver's current location to
+    // the current target (pickup before PICKED_UP, dropoff after). Null until
+    // the first driver-location ping resolves via Google Directions.
+    int? etaMinutes,
     double? fare,
     double? discount,
     // Fee the customer would be charged if they cancel now (SCRUM-65).

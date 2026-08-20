@@ -3,6 +3,7 @@ import 'package:customer_app/core/constants/app_assets.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_icons.dart';
 import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
+import 'package:customer_app/features/home/presentation/states/home_state.dart';
 import 'package:customer_app/features/home/presentation/widgets/ride_selection_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -21,6 +22,20 @@ class _DropoffSelectionScreenState
   GoogleMapController? _mapController;
   // Guards the one-shot recenter below so we never fight the user's panning.
   bool _centeredOnTarget = false;
+
+  // The mode this screen was opened with. Tapping ถัดไป calls confirmSelection(),
+  // which clears the controller's selectionMode and then pushes on to /booking —
+  // this screen stays mounted, so on returning here the camera handlers (which
+  // no-op when selectionMode == none) would never re-populate tempLocation and
+  // ถัดไป would stay disabled. Re-arm this mode when the user pans again.
+  RideSelectionMode _selectionMode = RideSelectionMode.dropoff;
+
+  @override
+  void initState() {
+    super.initState();
+    final mode = ref.read(homeControllerProvider).selectionMode;
+    if (mode != RideSelectionMode.none) _selectionMode = mode;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -90,9 +105,16 @@ class _DropoffSelectionScreenState
             myLocationButtonEnabled: false,
             zoomControlsEnabled: true,
             mapType: MapType.normal,
-            onCameraMoveStarted: () => ref
-                .read(homeControllerProvider.notifier)
-                .onCameraMoveStarted(),
+            onCameraMoveStarted: () {
+              final notifier = ref.read(homeControllerProvider.notifier);
+              // Returned from /booking with selection already committed → re-arm
+              // so panning updates the pin again (otherwise ถัดไป stays disabled).
+              if (ref.read(homeControllerProvider).selectionMode ==
+                  RideSelectionMode.none) {
+                notifier.startSelection(mode: _selectionMode);
+              }
+              notifier.onCameraMoveStarted();
+            },
             onCameraMove: (position) {
               ref.read(homeControllerProvider.notifier).onCameraMove(position);
             },

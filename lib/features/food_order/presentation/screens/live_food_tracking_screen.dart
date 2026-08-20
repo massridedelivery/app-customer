@@ -27,6 +27,9 @@ class LiveFoodTrackingScreen extends ConsumerStatefulWidget {
 
 class _LiveFoodTrackingScreenState
     extends ConsumerState<LiveFoodTrackingScreen> {
+  /// Safety buffer added to the backend ETA before display (under-promise).
+  static const int _kEtaBufferMinutes = 15;
+
   @override
   void initState() {
     super.initState();
@@ -345,8 +348,11 @@ class _LiveFoodTrackingScreenState
                           const SizedBox(height: 16),
                           if (currentState == OrderState.finding)
                             _buildFindingModeContent(currentState)
-                          else
+                          else ...[
+                            if (currentState == OrderState.delivery)
+                              _buildEtaBanner(),
                             _buildConfirmedModeContent(currentState),
+                          ],
                         ],
                       ),
                     ),
@@ -397,6 +403,97 @@ class _LiveFoodTrackingScreenState
   }
 
   String get _orderNumber => widget.orderId.toUpperCase();
+
+  /// Live "อาหารกำลังมาส่ง · อีกประมาณ N นาที · ถึงประมาณ HH:MM" banner. Driven
+  /// by a server-computed arrival time pushed on the socket — the client counts
+  /// down locally, calling no routing API. Hidden until the backend sends it.
+  Widget _buildEtaBanner() {
+    final arriveAt = ref.watch(
+      liveFoodTrackingControllerProvider.select((s) => s.etaArriveAt),
+    );
+    if (arriveAt == null) return const SizedBox.shrink();
+    final padded = arriveAt.add(const Duration(minutes: _kEtaBufferMinutes));
+    final diff = padded.difference(DateTime.now()).inMinutes;
+    final minutes = diff < 1 ? 1 : diff;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: AppColors.foundationGreen500.withValues(alpha: 0.10),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: AppColors.foundationGreen500.withValues(alpha: 0.35),
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: const BoxDecoration(
+                color: AppColors.foundationGreen500,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.moped, color: Colors.white, size: 20),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'อาหารกำลังมาส่ง',
+                    style: AppTypography.caption4.copyWith(
+                      color: AppColors.semanticGrayNeutralFgLowOnWhite,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                    textBaseline: TextBaseline.alphabetic,
+                    children: [
+                      Text(
+                        'อีกประมาณ ',
+                        style: AppTypography.label1.copyWith(
+                          color: AppColors.foundationGreen700,
+                        ),
+                      ),
+                      Text(
+                        '$minutes',
+                        style: AppTypography.heading2.copyWith(
+                          color: AppColors.foundationGreen700,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        'นาที',
+                        style: AppTypography.label1.copyWith(
+                          color: AppColors.foundationGreen700,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'คาดว่าถึงประมาณ ${_formatClock(padded)} น.',
+                    style: AppTypography.caption4.copyWith(
+                      color: AppColors.semanticGrayNeutralFgLowOnWhite,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Formats a [DateTime] as a 24h HH:mm clock.
+  String _formatClock(DateTime t) =>
+      '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
 
   Widget _buildHeaderTitle(OrderState currentState) {
     String title = '';

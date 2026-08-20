@@ -11,6 +11,11 @@ abstract class LiveFoodTrackingState with _$LiveFoodTrackingState {
     @Default('PLACED') String orderStatus,
     LatLng? driverLocation,
     LatLng? restaurantLocation,
+    // Estimated arrival time of the food at the customer. Computed server-side
+    // (once per phase, traffic-aware) and pushed on the driver-location socket;
+    // the client counts the minutes down locally, so no routing API is called.
+    // Null until the backend sends it.
+    DateTime? etaArriveAt,
     String? driverId,
     String? driverName,
     String? vehiclePlate,

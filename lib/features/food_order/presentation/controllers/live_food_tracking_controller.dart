@@ -105,6 +105,21 @@ class LiveFoodTrackingController extends _$LiveFoodTrackingController {
     }
   }
 
+  /// Arrival time from a driver-location payload: prefers absolute `arrive_at`
+  /// (ISO8601); else derives from `eta_min` (now + N min). Null if neither.
+  DateTime? _parseEta(Map<String, dynamic> data) {
+    final iso = data['arrive_at'] as String?;
+    if (iso != null && iso.isNotEmpty) {
+      return DateTime.tryParse(iso)?.toLocal();
+    }
+    final etaMin =
+        (data['eta_min'] ?? data['eta_minutes'] ?? data['eta']) as num?;
+    if (etaMin != null) {
+      return DateTime.now().add(Duration(minutes: etaMin.round()));
+    }
+    return null;
+  }
+
   void _handleSocketMessage(Map<String, dynamic> message) {
     final type = (message['type'] as String?)?.toLowerCase();
     final orderId = message['order_id']?.toString() ??
@@ -124,9 +139,14 @@ class LiveFoodTrackingController extends _$LiveFoodTrackingController {
       final data = message['data'] as Map<String, dynamic>? ?? message;
       final lat = (data['lat'] ?? data['latitude']) as num?;
       final lng = (data['lng'] ?? data['longitude']) as num?;
+      // Server-computed food arrival time — pushed with the location so the
+      // client never calls a routing API. Prefer absolute `arrive_at`; fall
+      // back to `eta_min` (now + N). Optional: kept when absent.
+      final arriveAt = _parseEta(data);
       if (lat != null && lng != null) {
         state = state.copyWith(
           driverLocation: LatLng(lat.toDouble(), lng.toDouble()),
+          etaArriveAt: arriveAt ?? state.etaArriveAt,
         );
       }
       return;

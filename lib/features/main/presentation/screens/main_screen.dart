@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/features/home/presentation/screens/service_selection_screen.dart';
@@ -74,29 +72,26 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                 child: Stack(
                   clipBehavior: Clip.none,
                   children: [
-                    // 1. Background Layer (Blurred & Glass)
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(9999),
-                      child: BackdropFilter(
-                        filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: const Color(
-                              0xFFFCF9F8,
-                            ).withValues(alpha: 0.8),
-                            borderRadius: BorderRadius.circular(9999),
-                            border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.2),
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.4),
-                                blurRadius: 20,
-                                offset: const Offset(0, 10),
-                              ),
-                            ],
-                          ),
+                    // 1. Background Layer — a near-opaque frosted pill.
+                    // Previously a live BackdropFilter blur (sigma 24), but the
+                    // 0.8-opacity fill on top already hid almost all of it, so
+                    // the blur re-rendered every frame content scrolled behind
+                    // it for no visible gain — real jank on low-end devices.
+                    // Dropping to a solid ~0.94 fill looks the same and is free.
+                    Container(
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFCF9F8).withValues(alpha: 0.94),
+                        borderRadius: BorderRadius.circular(9999),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.2),
                         ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.4),
+                            blurRadius: 20,
+                            offset: const Offset(0, 10),
+                          ),
+                        ],
                       ),
                     ),
 

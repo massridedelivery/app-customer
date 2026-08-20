@@ -114,20 +114,8 @@ flutter:
     - assets/icon/
 
   fonts:
-    - family: Ibm
-      fonts:
-        - asset: assets/fonts/ibm_regular.ttf
-        - asset: assets/fonts/ibm_medium.ttf
-          weight: 500
-        - asset: assets/fonts/ibm_bold.ttf
-          weight: 700
-    - family: Poppins
-      fonts:
-        - asset: assets/fonts/poppins_regular.ttf
-        - asset: assets/fonts/poppins_medium.ttf
-          weight: 500
-        - asset: assets/fonts/poppins_bold.ttf
-          weight: 700
+    # Ibm + Poppins removed — the whole app renders in NotoSansThai
+    # (see core/configs/theme.dart, core/constants/app_typography.dart).
     - family: NotoSansThai
       fonts:
         - asset: assets/fonts/NotoSansThai-Light.ttf

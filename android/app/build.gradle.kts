@@ -83,6 +83,15 @@ android {
             } else {
                 signingConfigs.getByName("debug")
             }
+            // Shrink the Java/Kotlin + plugin layer and strip unused Android
+            // resources from the release APK/AAB. (Dart code lives in libapp.so
+            // and is shrunk separately via --obfuscate/tree-shaking at build.)
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
         }
     }
 }

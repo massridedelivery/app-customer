@@ -19,6 +19,7 @@ abstract class IMessengerRepository {
     double? packageWidthCm,
     double? packageHeightCm,
     String? promoCode,
+    String? deliveryType,
   });
 
   /// POST /api/messenger/customer/orders → 201 Order (PENDING)
@@ -31,6 +32,7 @@ abstract class IMessengerRepository {
     required String packageSizeTier,
     required double packageWeightKg,
     required String paymentMethod,
+    required String deliveryType,
     String? pickupAddress,
     String? dropoffAddress,
     String? recipientName,

@@ -10,6 +10,7 @@ import 'package:customer_app/features/home/presentation/controllers/home_control
 import 'package:customer_app/features/home/presentation/states/home_state.dart';
 import 'package:customer_app/features/messenger/domain/models/messenger_vehicle_type.dart';
 import 'package:customer_app/features/messenger/presentation/controllers/messenger_booking_controller.dart';
+import 'package:customer_app/features/messenger/domain/models/messenger_estimate.dart';
 import 'package:customer_app/features/messenger/presentation/states/messenger_booking_state.dart';
 import 'package:customer_app/features/messenger/presentation/util/delivery_service_levels.dart';
 import 'package:customer_app/features/messenger/presentation/screens/messenger_coupon_screen.dart';
@@ -344,10 +345,9 @@ class _MessengerBookingScreenState
   // ─── Delivery mode (STOPGAP: client-side pricing/time until SCRUM-71) ────────
 
   Widget _buildDeliveryTypeCard(MessengerBookingState bookingState) {
-    final levels = stopgapServiceLevels(
-      estimate: bookingState.estimate,
-      now: DateTime.now(),
-    );
+    // Render strictly from the backend's enabled modes (SCRUM-71) — never
+    // hardcode the modes; a mode the admin disabled simply isn't in the list.
+    final levels = bookingState.serviceLevels;
     return _card(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -357,21 +357,24 @@ class _MessengerBookingScreenState
             style: AppTypography.heading6.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
-          for (final level in levels) ...[
-            _deliveryOption(
-              level,
-              selected: level.type == bookingState.deliveryType,
-            ),
-            if (level.type != levels.last.type) const SizedBox(height: 10),
-          ],
-          const SizedBox(height: 8),
-          // STOPGAP notice — remove once BE returns real per-mode pricing/time.
-          Text(
-            '* ราคาและเวลาโดยประมาณ ยืนยันอีกครั้งเมื่อสร้างออเดอร์',
-            style: AppTypography.support2.copyWith(
-              color: AppColors.foundationGrayscale400,
-            ),
-          ),
+          if (levels.isEmpty)
+            Text(
+              'เลือกจุดส่งและระบุน้ำหนักพัสดุเพื่อดูตัวเลือกจัดส่ง',
+              style: AppTypography.caption4.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            )
+          else
+            ...[
+              for (final level in levels) ...[
+                _deliveryOption(
+                  level,
+                  selected: level.deliveryType == bookingState.deliveryType,
+                ),
+                if (level.deliveryType != levels.last.deliveryType)
+                  const SizedBox(height: 10),
+              ],
+            ],
         ],
       ),
     );
@@ -381,20 +384,26 @@ class _MessengerBookingScreenState
     MessengerServiceLevel level, {
     required bool selected,
   }) {
-    final Color accent = level.isInstant
+    final bool isInstant = level.deliveryType == kDeliveryInstant;
+    final Color accent = isInstant
         ? AppColors.foundationOrange600
         : AppColors.foundationBlue700;
-    final String priceText = level.hasPrice
-        ? 'เริ่มต้น ฿${level.totalFare.toStringAsFixed(0)}'
-        : 'คำนวณเมื่อเลือกครบ';
-    final String subtitle = level.hasPrice
-        ? 'จัดส่งภายใน ${formatHhmm(level.deliverBy)} • ไปรับใน ${level.pickupEtaMin} นาที'
-        : 'ไปรับตอนนี้ (${level.pickupEtaMin} นาที หรือเร็วกว่านั้น)';
+    final String title = level.label.isNotEmpty
+        ? level.label
+        : level.deliveryType;
+    final String priceText = 'เริ่มต้น ฿${level.totalFare.toStringAsFixed(0)}';
+    final String? clock = formatDeliverBy(level.deliverBy);
+    final String pickup = level.pickupEtaMin != null
+        ? 'ไปรับใน ${level.pickupEtaMin} นาที'
+        : '';
+    final String subtitle = clock != null
+        ? 'ส่งถึงประมาณ $clock น.${pickup.isNotEmpty ? ' • $pickup' : ''}'
+        : pickup;
 
     return GestureDetector(
       onTap: () => ref
           .read(messengerBookingControllerProvider.notifier)
-          .selectDeliveryType(level.type),
+          .selectDeliveryType(level.deliveryType),
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
         decoration: BoxDecoration(
@@ -419,7 +428,7 @@ class _MessengerBookingScreenState
                 shape: BoxShape.circle,
               ),
               child: Icon(
-                level.isInstant ? Icons.bolt_rounded : Icons.schedule_rounded,
+                isInstant ? Icons.bolt_rounded : Icons.schedule_rounded,
                 color: accent,
                 size: 22,
               ),
@@ -434,7 +443,7 @@ class _MessengerBookingScreenState
                     children: [
                       Expanded(
                         child: Text(
-                          level.title,
+                          title,
                           style: AppTypography.label1.copyWith(
                             fontWeight: FontWeight.bold,
                             color: AppColors.textPrimary,

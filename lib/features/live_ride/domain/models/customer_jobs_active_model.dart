@@ -35,6 +35,12 @@ abstract class CustomerJobsActiveModel with _$CustomerJobsActiveModel {
     // the fee actually charged after a cancellation (SCRUM-65).
     @JsonKey(name: 'estimated_cancel_fee') @Default(0.0) double estimatedCancelFee,
     @JsonKey(name: 'cancellation_fee') @Default(0.0) double cancellationFee,
+    // Server-computed ETA to the current target (SCRUM-76) — used to seed the
+    // live ETA on resync without waiting for the first socket frame. Keys are
+    // absent (not 0) when there's no ETA, so these stay null.
+    @JsonKey(name: 'eta_min') int? etaMin,
+    @JsonKey(name: 'arrive_at') String? arriveAt,
+    @JsonKey(name: 'distance_remaining_m') int? distanceRemainingM,
     @JsonKey(name: 'back_to_back_notified')
     @Default(false)
     bool backToBackNotified,

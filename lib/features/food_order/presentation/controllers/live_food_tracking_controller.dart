@@ -144,9 +144,12 @@ class LiveFoodTrackingController extends _$LiveFoodTrackingController {
       // back to `eta_min` (now + N). Optional: kept when absent.
       final arriveAt = _parseEta(data);
       if (lat != null && lng != null) {
+        // ETA keys are sent every frame while there's an ETA and vanish when
+        // there's none — set directly so absent (null) hides the ETA rather
+        // than leaving a stale countdown (SCRUM-76). Never default to 0.
         state = state.copyWith(
           driverLocation: LatLng(lat.toDouble(), lng.toDouble()),
-          etaArriveAt: arriveAt ?? state.etaArriveAt,
+          etaArriveAt: arriveAt,
         );
       }
       return;

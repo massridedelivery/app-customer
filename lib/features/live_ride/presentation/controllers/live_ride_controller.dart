@@ -143,9 +143,13 @@ class LiveRideController extends _$LiveRideController {
               now.difference(_lastLocationUpdateTime!) >=
                   _locationUpdateInterval) {
             _lastLocationUpdateTime = now;
+            // ETA keys are sent on every frame while there IS an ETA and vanish
+            // entirely when there's none (no active job / routing down). So set
+            // it to the parsed value directly — null (absent) hides the ETA UI
+            // rather than leaving a stale countdown (SCRUM-76). Never default 0.
             state = state.copyWith(
               driverLocation: LatLng(lat.toDouble(), lng.toDouble()),
-              etaArriveAt: arriveAt ?? state.etaArriveAt,
+              etaArriveAt: arriveAt,
             );
           }
         }
@@ -168,6 +172,15 @@ class LiveRideController extends _$LiveRideController {
       final liveState = await ref.refresh(
         getDriverProfileUsecaseProvider.future,
       );
+      // Seed the live ETA from the active job so resync (app resume / restart)
+      // shows an ETA immediately, without waiting for the next socket frame
+      // (SCRUM-76). Keys absent → keep whatever we already have.
+      final resyncEta =
+          (liveState.arriveAt != null && liveState.arriveAt!.isNotEmpty)
+          ? DateTime.tryParse(liveState.arriveAt!)?.toLocal()
+          : (liveState.etaMin != null
+                ? DateTime.now().add(Duration(minutes: liveState.etaMin!))
+                : null);
       state = state.copyWith(
         isLoading: false,
         jobId: liveState.id,
@@ -181,6 +194,7 @@ class LiveRideController extends _$LiveRideController {
         fare: liveState.fare,
         discount: liveState.discount,
         estimatedCancelFee: liveState.estimatedCancelFee,
+        etaArriveAt: resyncEta ?? state.etaArriveAt,
         driverProfile: DriverProfileModel.fromActiveJob(liveState),
       );
 

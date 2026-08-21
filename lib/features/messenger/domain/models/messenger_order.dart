@@ -38,8 +38,17 @@ abstract class MessengerOrder with _$MessengerOrder {
     @JsonKey(name: 'fare') @Default(0.0) double fare,
     @JsonKey(name: 'discount') @Default(0.0) double discount,
     // 0 = not reviewed yet, 1–5 = customer's star rating (SCRUM-69). Defaults to
-    // 0 until the backend ships this field, so the review button stays visible.
+    // 0 for legacy orders, so the review button stays visible.
     @JsonKey(name: 'customer_rating') @Default(0) int customerRating,
+    // Present only when the customer left a comment (SCRUM-69).
+    @JsonKey(name: 'customer_comment') String? customerComment,
+    // Delivery mode + server-computed timing (SCRUM-71). Legacy orders come back
+    // as INSTANT with express_surcharge 0; the *_min / deliver_by keys may be
+    // absent on old orders.
+    @JsonKey(name: 'delivery_type') @Default('INSTANT') String deliveryType,
+    @JsonKey(name: 'express_surcharge') @Default(0.0) double expressSurcharge,
+    @JsonKey(name: 'pickup_eta_min') int? pickupEtaMin,
+    @JsonKey(name: 'deliver_by') String? deliverBy,
     @JsonKey(name: 'platform_commission') @Default(0.0) double platformCommission,
     @JsonKey(name: 'promo_id') @Default('') String promoId,
     @JsonKey(name: 'created_at') @Default('') String createdAt,

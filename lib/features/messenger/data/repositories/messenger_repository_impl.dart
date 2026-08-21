@@ -60,6 +60,7 @@ class MessengerRepositoryImpl implements IMessengerRepository {
     double? packageWidthCm,
     double? packageHeightCm,
     String? promoCode,
+    String? deliveryType,
   }) async {
     try {
       final response = await _apiService.dio.post(
@@ -77,12 +78,20 @@ class MessengerRepositoryImpl implements IMessengerRepository {
           'package_height_cm': ?packageHeightCm,
           if (promoCode != null && promoCode.isNotEmpty)
             'promo_code': promoCode,
+          // Optional: when omitted the top-level fare describes INSTANT; the
+          // full mode list still comes back in `service_levels` either way.
+          if (deliveryType != null && deliveryType.isNotEmpty)
+            'delivery_type': deliveryType,
         },
       );
       return MessengerEstimate.fromJson(
         response.data as Map<String, dynamic>,
       );
     } on DioException catch (e) {
+      // 409 = no delivery mode is currently enabled (SCRUM-71).
+      if (e.response?.statusCode == 409) {
+        throw Exception('NO_DELIVERY_MODES');
+      }
       _throwFrom(e, 'Failed to estimate fare');
     } catch (e) {
       throw Exception(e.toString());
@@ -99,6 +108,7 @@ class MessengerRepositoryImpl implements IMessengerRepository {
     required String packageSizeTier,
     required double packageWeightKg,
     required String paymentMethod,
+    required String deliveryType,
     String? pickupAddress,
     String? dropoffAddress,
     String? recipientName,
@@ -122,6 +132,8 @@ class MessengerRepositoryImpl implements IMessengerRepository {
           'package_size_tier': packageSizeTier,
           'package_weight_kg': packageWeightKg,
           'payment_method': paymentMethod,
+          // Required (SCRUM-71). The backend 400s without it.
+          'delivery_type': deliveryType,
           if (pickupAddress != null && pickupAddress.isNotEmpty)
             'pickup_address': pickupAddress,
           if (dropoffAddress != null && dropoffAddress.isNotEmpty)
@@ -141,6 +153,11 @@ class MessengerRepositoryImpl implements IMessengerRepository {
       );
       return MessengerOrder.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
+      // 409 = the selected delivery mode was disabled between estimate and
+      // create (SCRUM-71) → caller should refresh the estimate.
+      if (e.response?.statusCode == 409) {
+        throw Exception('DELIVERY_MODE_UNAVAILABLE');
+      }
       _throwFrom(e, 'Failed to create order');
     } catch (e) {
       throw Exception(e.toString());

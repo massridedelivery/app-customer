@@ -168,13 +168,28 @@ class MessengerBookingController extends _$MessengerBookingController {
             packageWidthCm: state.widthCm,
             packageHeightCm: state.heightCm,
             promoCode: state.promoCode,
+            deliveryType: state.deliveryType,
           );
-      state = state.copyWith(isEstimating: false, estimate: result);
+      // Keep the selection valid: if the chosen mode was disabled by admin (not
+      // in the returned service_levels), fall back to the first offered mode.
+      final levels = result.serviceLevels;
+      final validType =
+          levels.any((l) => l.deliveryType == state.deliveryType)
+          ? state.deliveryType
+          : (levels.isNotEmpty ? levels.first.deliveryType : state.deliveryType);
+      state = state.copyWith(
+        isEstimating: false,
+        estimate: result,
+        deliveryType: validType,
+      );
     } catch (e) {
+      final msg = e.toString().replaceFirst('Exception: ', '');
       state = state.copyWith(
         isEstimating: false,
         estimate: null,
-        error: e.toString().replaceFirst('Exception: ', ''),
+        error: msg == 'NO_DELIVERY_MODES'
+            ? 'ขณะนี้ยังไม่เปิดให้บริการจัดส่ง กรุณาลองใหม่ภายหลัง'
+            : msg,
       );
     }
   }
@@ -197,6 +212,7 @@ class MessengerBookingController extends _$MessengerBookingController {
             packageSizeTier: state.sizeTier,
             packageWeightKg: state.weightKg,
             paymentMethod: state.paymentMethod,
+            deliveryType: state.deliveryType,
             pickupAddress: home.pickupAddress,
             dropoffAddress: home.dropoffAddress,
             recipientName: recipientName,
@@ -210,10 +226,18 @@ class MessengerBookingController extends _$MessengerBookingController {
           );
       state = state.copyWith(isCreating: false, createdOrderId: order.id);
     } catch (e) {
-      state = state.copyWith(
-        isCreating: false,
-        error: e.toString().replaceFirst('Exception: ', ''),
-      );
+      final msg = e.toString().replaceFirst('Exception: ', '');
+      if (msg == 'DELIVERY_MODE_UNAVAILABLE') {
+        // The selected mode was disabled while the user waited — re-estimate so
+        // the picker reflects the currently-offered modes, and prompt a retry.
+        state = state.copyWith(
+          isCreating: false,
+          error: 'โหมดจัดส่งที่เลือกถูกปิด กรุณาเลือกใหม่แล้วลองอีกครั้ง',
+        );
+        unawaited(estimate());
+      } else {
+        state = state.copyWith(isCreating: false, error: msg);
+      }
     }
   }
 }

@@ -21,8 +21,8 @@ abstract class MessengerBookingState with _$MessengerBookingState {
     @Default('CASH') String paymentMethod,
     @Default(0.0) double codAmount,
     @Default('') String promoCode,
-    // Selected delivery mode (INSTANT / TWO_HOUR). STOPGAP until BE ships
-    // per-mode pricing (SCRUM-71); see [displayTotalFare].
+    // Selected delivery mode (delivery_type, e.g. INSTANT / TWO_HOUR). The
+    // available modes + pricing come from estimate.serviceLevels (SCRUM-71).
     @Default(kDeliveryInstant) String deliveryType,
     MessengerEstimate? estimate,
     @Default(false) bool isEstimating,
@@ -47,8 +47,22 @@ abstract class MessengerBookingState with _$MessengerBookingState {
 
   bool get isCod => paymentMethod.toUpperCase() == 'COD';
 
-  /// Fare to display/charge for the currently selected delivery mode.
-  /// STOPGAP: derived client-side from the single BE estimate; swap to the
-  /// per-mode `total_fare` once BE ships `service_levels[]` (SCRUM-71).
-  double get displayTotalFare => stopgapTotalFor(estimate, deliveryType);
+  /// Delivery modes offered by the backend for the current estimate.
+  List<MessengerServiceLevel> get serviceLevels =>
+      estimate?.serviceLevels ?? const [];
+
+  /// The service level matching [deliveryType], else the first available one
+  /// (so a disabled/absent selection falls back to a real offered mode).
+  MessengerServiceLevel? get selectedServiceLevel {
+    final levels = serviceLevels;
+    if (levels.isEmpty) return null;
+    for (final l in levels) {
+      if (l.deliveryType == deliveryType) return l;
+    }
+    return levels.first;
+  }
+
+  /// Fare to display/charge for the selected delivery mode (server-computed).
+  double get displayTotalFare =>
+      selectedServiceLevel?.totalFare ?? estimate?.totalFare ?? 0;
 }

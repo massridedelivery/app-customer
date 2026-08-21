@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/error/api_error.dart';
@@ -35,6 +37,62 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
   // During bookingAsync.isLoading the last known state keeps all widgets mounted,
   // preventing the RenderBox-not-laid-out crash in VehicleSelectionSheet/ListView.
   BookingState _lastKnownState = const BookingState();
+
+  // Keep the per-vehicle "drivers nearby" counts live while the user is picking
+  // a vehicle: silently re-estimate every 30s (no spinner). The timer lives with
+  // this screen, so it stops the moment we leave — dispatch pushReplacement's to
+  // /live and back goes to the pickup/dropoff screen, both disposing this state.
+  // Re-entering builds a fresh screen → fresh estimate + a fresh timer.
+  Timer? _nearbyTimer;
+  AppLifecycleListener? _lifecycle;
+  static const _nearbyRefreshInterval = Duration(seconds: 30);
+
+  @override
+  void initState() {
+    super.initState();
+    _startNearbyPolling();
+    // Pause while backgrounded (no point spending calls); refresh + resume the
+    // instant we return so the count is current when the user looks again.
+    _lifecycle = AppLifecycleListener(
+      onResume: () {
+        _refreshNearbyDrivers();
+        _startNearbyPolling();
+      },
+      onPause: () => _nearbyTimer?.cancel(),
+    );
+  }
+
+  void _startNearbyPolling() {
+    _nearbyTimer?.cancel();
+    _nearbyTimer = Timer.periodic(
+      _nearbyRefreshInterval,
+      (_) => _refreshNearbyDrivers(),
+    );
+  }
+
+  /// Silent re-estimate to refresh drivers-nearby. No-op unless we're still on
+  /// the vehicle-selection step with a loaded estimate and no ride dispatched.
+  void _refreshNearbyDrivers() {
+    if (!mounted) return;
+    final home = ref.read(homeControllerProvider);
+    final pickup = home.pickupLocation;
+    final dropoff = home.dropoffLocation;
+    if (pickup == null || dropoff == null) return;
+    final st = ref.read(bookingControllerProvider).value;
+    if (st == null || st.estimations.isEmpty || st.activeJobId != null) return;
+    ref.read(bookingControllerProvider.notifier).refreshEstimate(
+          pickup,
+          dropoff,
+          promoCode: st.appliedPromoCode,
+        );
+  }
+
+  @override
+  void dispose() {
+    _nearbyTimer?.cancel();
+    _lifecycle?.dispose();
+    super.dispose();
+  }
 
   Future<void> _updateScreenPositions() async {
     if (_mapController == null || !mounted) return;

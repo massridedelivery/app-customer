@@ -50,6 +50,47 @@ class BookingController extends _$BookingController {
     });
   }
 
+  /// Re-fetch the estimate WITHOUT flipping to AsyncLoading, updating the
+  /// per-vehicle nearby-driver counts / prices in place. Used by the vehicle
+  /// screen's ~30s refresh so the sheet never flashes a spinner. No-op unless an
+  /// estimate is already loaded and no ride is being dispatched; errors are
+  /// swallowed so a transient failure keeps the last good estimate on screen.
+  Future<void> refreshEstimate(
+    LatLng pickup,
+    LatLng dropoff, {
+    String? promoCode,
+  }) async {
+    final current = state.value;
+    if (current == null ||
+        current.estimations.isEmpty ||
+        current.activeJobId != null) {
+      return;
+    }
+    try {
+      final response = await ref.read(estimateFareUseCaseProvider)(
+        pickupLat: pickup.latitude,
+        pickupLng: pickup.longitude,
+        dropoffLat: dropoff.latitude,
+        dropoffLng: dropoff.longitude,
+        promoCode: promoCode,
+      );
+      final latest = state.value;
+      // A dispatch / fresh estimate may have landed during the await.
+      if (latest == null || latest.activeJobId != null) return;
+      state = AsyncValue.data(
+        latest.copyWith(
+          estimations: response.estimations,
+          distanceKm: response.distanceKm,
+          durationMin: response.durationMin.toDouble(),
+          encodedPolyline: response.waypoint,
+          surgeMultiplier: response.surgeMultiplier,
+        ),
+      );
+    } catch (_) {
+      // Silent background refresh — keep the last estimate on any failure.
+    }
+  }
+
   Future<bool> validatePromo(String code) async {
     final useCase = ref.read(validatePromoUseCaseProvider);
     final currentState = state.value ?? const BookingState();

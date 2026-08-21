@@ -11,11 +11,13 @@ abstract class FeatureFlags {
   /// field; only CASH / PromptPay remain.
   static const bool messengerCodEnabled = false;
 
-  /// PromptPay (QR) for messenger parcels. Off for now: the backend gates
-  /// digital payment for messenger in phase 1 (SCRUM-41 accepts CASH | COD),
-  /// so selecting PromptPay + submitting always 400s. While off, only CASH is
-  /// offered; flip on once the messenger PromptPay create is accepted.
-  static const bool messengerPromptPayEnabled = true;
+  /// PromptPay (QR) for messenger parcels.
+  ///
+  /// Backend-verified working (dev BE accepts payment_method=PROMPTPAY and
+  /// returns the Omise QR), but kept OFF by business decision: messenger takes
+  /// CASH only for now. While off, only CASH is offered. Flip on to re-enable
+  /// the PromptPay option — no rework needed.
+  static const bool messengerPromptPayEnabled = false;
 
   // ─── Food delivery ─────────────────────────────────────────────────────────
   // These gate UI that has no backing API yet (SCRUM-44 audit). Flip on once

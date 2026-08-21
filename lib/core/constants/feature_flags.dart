@@ -15,7 +15,7 @@ abstract class FeatureFlags {
   /// digital payment for messenger in phase 1 (SCRUM-41 accepts CASH | COD),
   /// so selecting PromptPay + submitting always 400s. While off, only CASH is
   /// offered; flip on once the messenger PromptPay create is accepted.
-  static const bool messengerPromptPayEnabled = false;
+  static const bool messengerPromptPayEnabled = true;
 
   // ─── Food delivery ─────────────────────────────────────────────────────────
   // These gate UI that has no backing API yet (SCRUM-44 audit). Flip on once

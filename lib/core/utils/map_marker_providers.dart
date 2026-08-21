@@ -13,7 +13,7 @@ final dropoffMarkerProvider = FutureProvider<BitmapDescriptor>((ref) async {
   return MapMarkerUtils.createDropoffMarker();
 });
 
-/// The driver's live-location marker (car icon).
+/// The driver's live-location marker (branded delivery scooter).
 final vehicleMarkerProvider = FutureProvider<BitmapDescriptor>((ref) async {
   return MapMarkerUtils.createVehicleMarker();
 });

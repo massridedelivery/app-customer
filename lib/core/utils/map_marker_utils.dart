@@ -84,7 +84,7 @@ class MapMarkerUtils {
     double size = _pinDisplaySize * _pinRasterScale,
   }) async {
     final ByteData data = await rootBundle.load(
-      'assets/images/icons/ic_taxi_custom.png',
+      'assets/images/icons/3d/ic_car_scooter.png',
     );
     final ui.Codec codec = await ui.instantiateImageCodec(
       data.buffer.asUint8List(),

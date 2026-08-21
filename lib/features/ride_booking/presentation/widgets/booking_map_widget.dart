@@ -1,6 +1,7 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/services/google_directions_service.dart';
 import 'package:customer_app/core/utils/map_marker_providers.dart';
+import 'package:customer_app/features/ride_booking/domain/models/fare_estimation_response.dart';
 import 'package:customer_app/core/utils/polyline_decoder.dart';
 import 'package:customer_app/features/ride_booking/presentation/controllers/booking_controller.dart';
 import 'package:flutter/material.dart';
@@ -151,6 +152,15 @@ class _BookingMapWidgetState extends ConsumerState<BookingMapWidget> {
     final pickupIconAsync = ref.watch(pickupMarkerProvider);
     final dropoffIconAsync = ref.watch(dropoffMarkerProvider);
 
+    // Online drivers near the pickup (SCRUM-81), refreshed with the 30s estimate
+    // poll. Empty until the backend ships nearby_drivers → nothing is drawn.
+    final nearbyDrivers = ref.watch(
+      bookingControllerProvider.select(
+        (s) => s.value?.nearbyDrivers ?? const <NearbyDriver>[],
+      ),
+    );
+    final driverIcon = ref.watch(vehicleMarkerProvider).value;
+
     if (pickup == null || dropoff == null) return const SizedBox.shrink();
 
     return GoogleMap(
@@ -173,6 +183,17 @@ class _BookingMapWidgetState extends ConsumerState<BookingMapWidget> {
       onCameraMove: widget.onCameraMove,
       onCameraIdle: widget.onCameraIdle,
       markers: {
+        // Nearby online drivers as scooter markers (drawn only once the branded
+        // bitmap is ready). Center-anchored + flat so they sit on the road.
+        if (driverIcon != null)
+          for (var i = 0; i < nearbyDrivers.length; i++)
+            Marker(
+              markerId: MarkerId('nearby_$i'),
+              position: LatLng(nearbyDrivers[i].lat, nearbyDrivers[i].lng),
+              icon: driverIcon,
+              anchor: const Offset(0.5, 0.5),
+              flat: true,
+            ),
         Marker(
           markerId: const MarkerId('pickup'),
           position: pickup,

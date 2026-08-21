@@ -109,6 +109,33 @@ void main() {
     });
   });
 
+  group('SCRUM-81 · nearby driver positions on estimate', () {
+    test('parses nearby_drivers[] with optional vehicle_type_id', () {
+      final r = FareEstimationResponse.fromJson(const {
+        'distance_km': 4.2,
+        'duration_min': 12,
+        'estimations': [],
+        'nearby_drivers': [
+          {'lat': 13.751, 'lng': 100.502, 'vehicle_type_id': 'eco'},
+          {'lat': 13.749, 'lng': 100.498},
+        ],
+      });
+      expect(r.nearbyDrivers.length, 2);
+      expect(r.nearbyDrivers.first.lat, 13.751);
+      expect(r.nearbyDrivers.first.vehicleTypeId, 'eco');
+      expect(r.nearbyDrivers[1].vehicleTypeId, isNull);
+    });
+
+    test('nearby_drivers absent → empty (gated, no crash)', () {
+      final r = FareEstimationResponse.fromJson(const {
+        'distance_km': 4.2,
+        'duration_min': 12,
+        'estimations': [],
+      });
+      expect(r.nearbyDrivers, isEmpty);
+    });
+  });
+
   group('SCRUM-71 · messenger delivery modes (v1.6.1-dev11)', () {
     test('estimate parses service_levels[] + delivery_type', () {
       final e = MessengerEstimate.fromJson(const {

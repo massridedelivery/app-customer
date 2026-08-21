@@ -38,6 +38,7 @@ class BookingController extends _$BookingController {
       return previousState.copyWith(
         isLoading: false,
         estimations: response.estimations,
+        nearbyDrivers: response.nearbyDrivers,
         distanceKm: response.distanceKm,
         durationMin: response.durationMin.toDouble(),
         encodedPolyline: response.waypoint,
@@ -80,6 +81,7 @@ class BookingController extends _$BookingController {
       state = AsyncValue.data(
         latest.copyWith(
           estimations: response.estimations,
+          nearbyDrivers: response.nearbyDrivers,
           distanceKm: response.distanceKm,
           durationMin: response.durationMin.toDouble(),
           encodedPolyline: response.waypoint,

@@ -23,8 +23,27 @@ abstract class FareEstimationResponse with _$FareEstimationResponse {
     required List<VehicleEstimation> estimations,
     @JsonKey(name: 'surge_multiplier') @Default(1.0) double surgeMultiplier,
     @JsonKey(name: 'waypoint', readValue: _readWaypoint) String? waypoint,
+    // Positions of online drivers near the pickup, to plot on the vehicle
+    // screen (SCRUM-81). Empty until the backend ships it → nothing is drawn.
+    @JsonKey(name: 'nearby_drivers')
+    @Default(<NearbyDriver>[])
+    List<NearbyDriver> nearbyDrivers,
   }) = _FareEstimationResponse;
 
   factory FareEstimationResponse.fromJson(Map<String, dynamic> json) =>
       _$FareEstimationResponseFromJson(json);
+}
+
+/// A nearby online driver's approximate position (SCRUM-81). No id/name by
+/// design (privacy) — just a point to draw a vehicle marker at.
+@freezed
+abstract class NearbyDriver with _$NearbyDriver {
+  const factory NearbyDriver({
+    @JsonKey(name: 'lat') @Default(0.0) double lat,
+    @JsonKey(name: 'lng') @Default(0.0) double lng,
+    @JsonKey(name: 'vehicle_type_id') String? vehicleTypeId,
+  }) = _NearbyDriver;
+
+  factory NearbyDriver.fromJson(Map<String, dynamic> json) =>
+      _$NearbyDriverFromJson(json);
 }

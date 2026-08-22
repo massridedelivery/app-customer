@@ -796,32 +796,23 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
         (liveState.jobStatus as String?)?.toUpperCase() == 'PICKED_UP';
     final title = pickedUp ? 'กำลังเดินทางไปส่ง' : 'ไรเดอร์กำลังมารับ';
 
+    final minLabel = AppLocalizations.of(context)!.minutes;
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.only(bottom: 12),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
         decoration: BoxDecoration(
           color: AppColors.foundationGreen500.withValues(alpha: 0.10),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: AppColors.foundationGreen500.withValues(alpha: 0.35),
-          ),
+          borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
           children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: const BoxDecoration(
-                color: AppColors.foundationGreen500,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.access_time_rounded,
-                color: Colors.white,
-                size: 20,
-              ),
+            const Icon(
+              Icons.access_time_rounded,
+              color: AppColors.foundationGreen600,
+              size: 18,
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 10),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -832,38 +823,31 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
                       color: AppColors.semanticGrayNeutralFgLowOnWhite,
                     ),
                   ),
-                  const SizedBox(height: 2),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.baseline,
-                    textBaseline: TextBaseline.alphabetic,
-                    children: [
-                      Text(
-                        'อีกประมาณ ',
-                        style: AppTypography.label1.copyWith(
-                          color: AppColors.foundationGreen600,
-                        ),
+                  const SizedBox(height: 1),
+                  // Compact single line: "อีก 15 นาที · ถึง ~17:31 น." with the
+                  // minutes emphasised but not oversized.
+                  RichText(
+                    text: TextSpan(
+                      style: AppTypography.label2.copyWith(
+                        color: AppColors.foundationGreen700,
                       ),
-                      Text(
-                        '$minutes',
-                        style: AppTypography.heading2.copyWith(
-                          color: AppColors.foundationGreen600,
-                          fontWeight: FontWeight.bold,
+                      children: [
+                        const TextSpan(text: 'อีก '),
+                        TextSpan(
+                          text: '$minutes',
+                          style: AppTypography.label1.copyWith(
+                            color: AppColors.foundationGreen700,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        AppLocalizations.of(context)!.minutes,
-                        style: AppTypography.label1.copyWith(
-                          color: AppColors.foundationGreen600,
+                        TextSpan(text: ' $minLabel'),
+                        TextSpan(
+                          text: '  ·  ถึง ~${_formatClock(arriveAt)} น.',
+                          style: AppTypography.caption4.copyWith(
+                            color: AppColors.semanticGrayNeutralFgLowOnWhite,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'คาดว่าถึงประมาณ ${_formatClock(arriveAt)} น.',
-                    style: AppTypography.caption4.copyWith(
-                      color: AppColors.semanticGrayNeutralFgLowOnWhite,
+                      ],
                     ),
                   ),
                 ],

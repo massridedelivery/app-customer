@@ -53,8 +53,10 @@ class _MessengerBookingScreenState
     super.dispose();
   }
 
-  /// Thai phone per spec: `+66812345678` or `0812345678`.
-  static final _thaiPhoneRegex = RegExp(r'^(\+66\d{9}|0\d{8,9})$');
+  /// Thai phone per spec: `+66812345678` or `0812345678` — 10 digits in the
+  /// `0…` form (the backend's `phone_th` validator rejects a shorter number, so
+  /// require the full length here to catch it before submitting).
+  static final _thaiPhoneRegex = RegExp(r'^(\+66\d{9}|0\d{9})$');
 
   void _onDimensionsChanged() {
     ref.read(messengerBookingControllerProvider.notifier).setDimensions(

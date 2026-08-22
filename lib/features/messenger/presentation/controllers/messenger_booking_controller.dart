@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:customer_app/core/utils/error_text.dart';
 import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
 import 'package:customer_app/features/messenger/data/repositories/messenger_repository_impl.dart';
 import 'package:customer_app/features/messenger/domain/models/messenger_vehicle_type.dart';
@@ -195,7 +196,7 @@ class MessengerBookingController extends _$MessengerBookingController {
         estimate: null,
         error: msg == 'NO_DELIVERY_MODES'
             ? 'ขณะนี้ยังไม่เปิดให้บริการจัดส่ง กรุณาลองใหม่ภายหลัง'
-            : msg,
+            : friendlyError(e, fallback: 'ประเมินราคาไม่สำเร็จ กรุณาลองใหม่'),
       );
     }
   }
@@ -243,7 +244,10 @@ class MessengerBookingController extends _$MessengerBookingController {
         );
         unawaited(estimate());
       } else {
-        state = state.copyWith(isCreating: false, error: msg);
+        state = state.copyWith(
+          isCreating: false,
+          error: friendlyError(e, fallback: 'สร้างออเดอร์ไม่สำเร็จ กรุณาลองใหม่'),
+        );
       }
     }
   }

@@ -160,13 +160,18 @@ class MessengerPaymentSummaryScreen extends ConsumerWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'ยอดชำระ (${_paymentLabel(order.paymentMethod)})',
+                            // Recipient-pays: the fee is collected at the door,
+                            // so the sender's amount_due is 0 — label it as
+                            // "ชำระปลายทาง" and still show the ฿ amount, not ฿0.
+                            order.isRecipientPays
+                                ? 'ชำระปลายทาง (${_paymentLabel(order.paymentMethod)})'
+                                : 'ยอดชำระ (${_paymentLabel(order.paymentMethod)})',
                             style: AppTypography.label1.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                           Text(
-                            '฿${order.amountDue.toStringAsFixed(0)}',
+                            '฿${order.deliveryFee.toStringAsFixed(0)}',
                             style: AppTypography.heading4.copyWith(
                               color: AppColors.primary,
                               fontWeight: FontWeight.bold,

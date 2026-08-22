@@ -737,7 +737,9 @@ class _MessengerTrackingScreenState
                 ),
               ),
               Text(
-                '฿${order.amountDue.toStringAsFixed(0)}',
+                // The delivery fee — shown even for recipient-pays, where the
+                // sender's amount_due is 0 (fee collected at the door).
+                '฿${order.deliveryFee.toStringAsFixed(0)}',
                 style: AppTypography.heading4.copyWith(
                   fontWeight: FontWeight.bold,
                   color: AppColors.primary,

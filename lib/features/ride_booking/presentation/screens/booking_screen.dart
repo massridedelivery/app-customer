@@ -276,16 +276,11 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
       next.whenData((state) {
         if (state.activeJobId != null &&
             state.activeJobId != previous?.value?.activeJobId) {
-          // PromptPay must be paid before matching: route to the QR screen,
-          // which proceeds to /live on PAID. Cash goes straight to tracking.
-          if (state.paymentMethod == 'PROMPTPAY') {
-            context.push(
-              '/payment/promptpay',
-              extra: {'jobId': state.activeJobId},
-            );
-          } else {
-            context.pushReplacement('/live/${state.activeJobId}');
-          }
+          // Pay-at-destination (dev14): PROMPTPAY is no longer collected before
+          // matching. Every ride goes straight to live tracking; the QR is
+          // surfaced at the destination (LiveRideController.awaitingPromptPay)
+          // when the driver opens the collection intent.
+          context.pushReplacement('/live/${state.activeJobId}');
         }
       });
     });

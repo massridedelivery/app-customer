@@ -319,6 +319,35 @@ void main() {
     });
   });
 
+  group('dev14 · ride pay-at-destination fields (customer job)', () {
+    test('parses payment_status/amount_due/collect_at', () {
+      final j = CustomerJobsActiveModel.fromJson(const {
+        'id': 'job1',
+        'status': 'PICKED_UP',
+        'payment_method': 'PROMPTPAY',
+        'payment_status': 'AWAITING_PAYMENT',
+        'amount_due': 284.0,
+        'collect_at': 'DESTINATION',
+        'fare': 250.0,
+      });
+      expect(j.paymentMethod, 'PROMPTPAY');
+      expect(j.paymentStatus, 'AWAITING_PAYMENT');
+      expect(j.amountDue, 284.0);
+      expect(j.collectAt, 'DESTINATION');
+    });
+
+    test('legacy job: payment_status empty, amount_due null', () {
+      final j = CustomerJobsActiveModel.fromJson(const {
+        'id': 'job0',
+        'status': 'PICKED_UP',
+        'payment_method': 'CASH',
+      });
+      expect(j.paymentStatus, '');
+      expect(j.amountDue, isNull);
+      expect(j.collectAt, isNull);
+    });
+  });
+
   group('dev14 · food order ETA via REST', () {
     test('parses eta_min/arrive_at/distance_remaining_m', () {
       final o = FoodOrderModel.fromJson(const {

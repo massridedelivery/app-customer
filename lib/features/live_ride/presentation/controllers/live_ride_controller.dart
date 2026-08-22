@@ -7,6 +7,8 @@ import 'package:customer_app/features/ride_booking/presentation/controllers/book
 import 'package:customer_app/features/live_ride/domain/usecases/cancel_ride_usecase_impl.dart';
 import 'package:customer_app/features/live_ride/domain/usecases/get_driver_profile_usecase.dart';
 import 'package:customer_app/features/live_ride/presentation/states/live_ride_state.dart';
+import 'package:customer_app/features/payment/data/repositories/payment_repository_impl.dart';
+import 'package:customer_app/features/payment/domain/models/payment_intent.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/widgets.dart';
 
@@ -193,10 +195,18 @@ class LiveRideController extends _$LiveRideController {
         jobStatus: liveState.status,
         fare: liveState.fare,
         discount: liveState.discount,
+        paymentMethod: liveState.paymentMethod,
+        amountDue: liveState.amountDue,
         estimatedCancelFee: liveState.estimatedCancelFee,
         etaArriveAt: resyncEta ?? state.etaArriveAt,
         driverProfile: DriverProfileModel.fromActiveJob(liveState),
       );
+
+      // Pay-at-destination (dev14): a PROMPTPAY ride is charged when the trip
+      // ends. Watch for the driver opening a collection intent on the final leg
+      // and surface the QR to the customer. Keyed off the intent existing (not a
+      // status string) so it's robust to the exact payment_status value.
+      unawaited(_checkDestinationPayment(liveState.paymentStatus));
 
       // Restore locations in HomeController
       ref
@@ -262,6 +272,40 @@ class LiveRideController extends _$LiveRideController {
       return DateTime.now().add(Duration(minutes: etaMin.round()));
     }
     return null;
+  }
+
+  /// Pay-at-destination detection (dev14). For a PROMPTPAY ride, the driver
+  /// opens a collection intent when the trip ends; the customer then pays by QR
+  /// on their own phone. We surface the QR by watching for that intent to exist
+  /// (via GET /payment/intent/job/:id) rather than a specific status string, and
+  /// latch [LiveRideState.awaitingPromptPay] so the screen routes to the QR once.
+  /// Cleared on PAID so it never re-triggers after the customer has paid.
+  Future<void> _checkDestinationPayment(String paymentStatus) async {
+    if (state.paymentMethod.toUpperCase() != 'PROMPTPAY') return;
+    if (paymentStatus.toUpperCase() == 'PAID') {
+      if (state.awaitingPromptPay) {
+        state = state.copyWith(awaitingPromptPay: false);
+      }
+      return;
+    }
+    // The intent is opened on the final leg (PICKED_UP → COMPLETED); don't poll
+    // earlier. Once surfaced, stop re-checking until PAID clears it above.
+    if (state.jobStatus?.toUpperCase() != 'PICKED_UP') return;
+    if (state.awaitingPromptPay) return;
+    final jobId = state.jobId;
+    if (jobId == null || jobId.isEmpty) return;
+    try {
+      final intent =
+          await ref.read(paymentRepositoryProvider).getIntentByJob(jobId);
+      if (intent == null) return; // driver hasn't opened collection yet
+      if (intent.status == PaymentIntentStatus.paid) {
+        state = state.copyWith(awaitingPromptPay: false);
+      } else if (!intent.status.isTerminal) {
+        state = state.copyWith(awaitingPromptPay: true);
+      }
+    } catch (e) {
+      debugPrint('LiveRideController: destination payment check failed: $e');
+    }
   }
 
   Future<bool> cancelRide() async {

@@ -25,6 +25,14 @@ abstract class LiveRideState with _$LiveRideState {
     DateTime? etaArriveAt,
     double? fare,
     double? discount,
+    // Payment method + total due for the pay-at-destination flow (dev14). For a
+    // PROMPTPAY ride the customer is charged when the trip ends, not up front.
+    @Default('') String paymentMethod,
+    double? amountDue,
+    // True once the driver has opened a collection intent at the destination and
+    // the customer still owes a PROMPTPAY payment — drives the "scan to pay" QR.
+    // Latched so it survives re-syncs; cleared on PAID.
+    @Default(false) bool awaitingPromptPay,
     // Fee the customer would be charged if they cancel now (SCRUM-65).
     double? estimatedCancelFee,
     // Fee actually charged after a cancellation (from the cancel response).

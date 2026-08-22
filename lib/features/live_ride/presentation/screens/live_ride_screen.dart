@@ -281,6 +281,25 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
       }
     });
 
+    // Pay-at-destination (dev14): once the driver opens the collection intent at
+    // the end of a PROMPTPAY ride, surface the QR so the customer pays on their
+    // own phone. On PAID the QR screen returns to live; the driver then completes
+    // the ride, which routes to the summary above.
+    ref.listen(
+      liveRideControllerProvider.select((s) => s.awaitingPromptPay),
+      (wasAwaiting, isAwaiting) {
+        if (isAwaiting && !(wasAwaiting ?? false)) {
+          final jobId = ref.read(liveRideControllerProvider).jobId;
+          if (jobId != null && context.mounted) {
+            context.push(
+              '/payment/promptpay',
+              extra: {'jobId': jobId, 'onPaidRoute': '/live/$jobId'},
+            );
+          }
+        }
+      },
+    );
+
     final pickup = pickupLocation ?? MapDefaults.bangkokCenter;
     // Fall back to the same named default as pickup instead of an arbitrary
     // hardcoded coordinate when the destination isn't restored yet.

@@ -24,6 +24,13 @@ abstract class CustomerJobsActiveModel with _$CustomerJobsActiveModel {
     @JsonKey(name: 'is_scheduled') @Default(false) bool isScheduled,
     @JsonKey(name: 'accepted_at') DateTime? acceptedAt,
     @JsonKey(name: 'payment_method') @Default('') String paymentMethod,
+    // Pay-at-destination signal (dev14): PROMPTPAY rides are no longer paid up
+    // front — the driver opens a collection intent when the ride ends, at which
+    // point payment_status flips away from PAID and `amount_due` is the total to
+    // charge (fare + toll/waiting − discount). Absent/empty on legacy jobs.
+    @JsonKey(name: 'payment_status') @Default('') String paymentStatus,
+    @JsonKey(name: 'amount_due') double? amountDue,
+    @JsonKey(name: 'collect_at') String? collectAt,
     @JsonKey(name: 'discount') @Default(0.0) double discount,
     @JsonKey(name: 'created_at') DateTime? createdAt,
     @JsonKey(name: 'updated_at') DateTime? updatedAt,

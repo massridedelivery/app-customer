@@ -1,11 +1,10 @@
 import 'dart:async';
 
 import 'package:customer_app/core/constants/map_defaults.dart';
-import 'package:customer_app/core/constants/app_assets.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
-import 'package:customer_app/core/constants/app_icons.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/utils/map_marker_providers.dart';
+import 'package:customer_app/core/widgets/route_stops.dart';
 import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
 import 'package:customer_app/features/ride_booking/presentation/widgets/booking_map_widget.dart'
     show decodedPolylineProvider;
@@ -1015,73 +1014,9 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
           ),
         ],
       ),
-      child: Column(
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              AppIcons.asset(
-                AppAssets.icLocationFill,
-                color: AppColors.foundationGreen500,
-                width: 20,
-                height: 20,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('จุดรับ', style: AppTypography.label2),
-                    const SizedBox(height: 4),
-                    Text(
-                      pickupAddress ?? 'จุดรับ',
-                      style: AppTypography.caption4.copyWith(
-                        color: AppColors.semanticGrayNeutralFgLowOnWhite,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Padding(
-              padding: const EdgeInsets.only(left: 9),
-              child: _DashedVerticalLine(
-                height: 24,
-                color: Colors.grey.shade400,
-              ),
-            ),
-          ),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              AppIcons.asset(
-                AppAssets.icLocationFill,
-                color: AppColors.foundationRed700,
-                width: 20,
-                height: 20,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('จุดส่ง', style: AppTypography.label2),
-                    const SizedBox(height: 4),
-                    Text(
-                      dropoffAddress ?? 'จุดส่ง',
-                      style: AppTypography.caption4.copyWith(
-                        color: AppColors.semanticGrayNeutralFgLowOnWhite,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ],
+      child: RouteStops(
+        pickupAddress: pickupAddress,
+        dropoffAddress: dropoffAddress,
       ),
     );
   }
@@ -1318,54 +1253,4 @@ class _LiveRideMap extends ConsumerWidget {
       },
     );
   }
-}
-
-/// A thin vertical dashed line — the pickup→dropoff connector in the location
-/// card (dashed instead of a solid rule, matching the route styling).
-class _DashedVerticalLine extends StatelessWidget {
-  const _DashedVerticalLine({required this.height, required this.color});
-
-  final double height;
-  final Color color;
-
-  static const double _thickness = 2;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: height,
-      width: _thickness,
-      child: CustomPaint(painter: _DashedLinePainter(color: color)),
-    );
-  }
-}
-
-class _DashedLinePainter extends CustomPainter {
-  _DashedLinePainter({required this.color});
-
-  final Color color;
-
-  static const double _dashHeight = 3;
-  static const double _gap = 3;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = size.width
-      ..strokeCap = StrokeCap.round;
-    final x = size.width / 2;
-    var y = 0.0;
-    while (y < size.height) {
-      canvas.drawLine(
-        Offset(x, y),
-        Offset(x, (y + _dashHeight).clamp(0, size.height)),
-        paint,
-      );
-      y += _dashHeight + _gap;
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _DashedLinePainter old) => old.color != color;
 }

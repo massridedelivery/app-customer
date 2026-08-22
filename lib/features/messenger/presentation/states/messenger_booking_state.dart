@@ -19,6 +19,8 @@ abstract class MessengerBookingState with _$MessengerBookingState {
     double? widthCm,
     double? heightCm,
     @Default('CASH') String paymentMethod,
+    // Who pays the delivery fee: 'SENDER' (default) or 'RECIPIENT' (dev14).
+    @Default('SENDER') String payer,
     @Default(0.0) double codAmount,
     @Default('') String promoCode,
     // Selected delivery mode (delivery_type, e.g. INSTANT / TWO_HOUR). The
@@ -46,6 +48,10 @@ abstract class MessengerBookingState with _$MessengerBookingState {
   }
 
   bool get isCod => paymentMethod.toUpperCase() == 'COD';
+
+  /// The recipient pays the fee at the door — the sender is not charged upfront,
+  /// so the order dispatches straight to tracking (no PromptPay QR).
+  bool get isRecipientPays => payer.toUpperCase() == 'RECIPIENT';
 
   /// Delivery modes offered by the backend for the current estimate.
   List<MessengerServiceLevel> get serviceLevels =>

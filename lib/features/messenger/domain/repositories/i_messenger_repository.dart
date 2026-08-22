@@ -43,6 +43,9 @@ abstract class IMessengerRepository {
     double? packageHeightCm,
     double? codAmount,
     String? promoCode,
+    // 'SENDER' (default) | 'RECIPIENT' (dev14). RECIPIENT dispatches unpaid and
+    // the driver collects the fee at delivery.
+    String? payer,
   });
 
   /// GET /api/messenger/customer/orders — the customer's messenger orders,

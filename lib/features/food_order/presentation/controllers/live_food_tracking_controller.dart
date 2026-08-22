@@ -83,6 +83,17 @@ class LiveFoodTrackingController extends _$LiveFoodTrackingController {
 
       if (state.orderId == id) {
         final upperStatus = order.status.toUpperCase();
+        // ETA via REST (dev14): the order now carries a live estimate too, not
+        // just the socket. Prefer it when present; else keep the socket value.
+        // omitempty — absent (not 0) means no estimate, so leave ETA untouched.
+        DateTime? etaFromOrder;
+        final at = order.arriveAt;
+        if (at != null && at.isNotEmpty) {
+          etaFromOrder = DateTime.tryParse(at)?.toLocal();
+        }
+        etaFromOrder ??= order.etaMin != null
+            ? DateTime.now().add(Duration(minutes: order.etaMin!))
+            : null;
         state = state.copyWith(
           isLoading: false,
           orderStatus: upperStatus,
@@ -90,6 +101,7 @@ class LiveFoodTrackingController extends _$LiveFoodTrackingController {
           driverName: order.driverName ?? state.driverName,
           vehiclePlate: order.vehiclePlate ?? state.vehiclePlate,
           restaurantLocation: restaurantLoc,
+          etaArriveAt: etaFromOrder ?? state.etaArriveAt,
           order: order,
         );
 

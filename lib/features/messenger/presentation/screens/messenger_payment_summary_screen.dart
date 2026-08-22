@@ -1,6 +1,7 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/widgets/mass_loading_m.dart';
+import 'package:customer_app/core/widgets/route_stops.dart';
 import 'package:customer_app/features/messenger/data/repositories/messenger_repository_impl.dart';
 import 'package:customer_app/features/messenger/domain/models/messenger_order.dart';
 import 'package:flutter/material.dart';
@@ -84,18 +85,13 @@ class MessengerPaymentSummaryScreen extends ConsumerWidget {
                     children: [
                       Text('เส้นทางจัดส่ง', style: AppTypography.label2),
                       const SizedBox(height: 14),
-                      _routeRow(
-                        color: AppColors.foundationGreen500,
-                        address: order.pickupAddress.isNotEmpty
-                            ? order.pickupAddress
-                            : 'จุดรับพัสดุ',
-                      ),
-                      const SizedBox(height: 10),
-                      _routeRow(
-                        color: AppColors.foundationRed700,
-                        address: order.dropoffAddress.isNotEmpty
-                            ? order.dropoffAddress
-                            : 'จุดส่งพัสดุ',
+                      RouteStops(
+                        showLabels: false,
+                        pickupLabel: 'จุดรับพัสดุ',
+                        dropoffLabel: 'จุดส่งพัสดุ',
+                        pickupAddress: order.pickupAddress,
+                        dropoffAddress: order.dropoffAddress,
+                        addressStyle: AppTypography.body2,
                       ),
                     ],
                   ),
@@ -226,27 +222,6 @@ class MessengerPaymentSummaryScreen extends ConsumerWidget {
         borderRadius: BorderRadius.circular(16),
       ),
       child: child,
-    );
-  }
-
-  Widget _routeRow({required Color color, required String address}) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(top: 2),
-          child: Icon(Icons.location_on, color: color, size: 18),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Text(
-            address,
-            style: AppTypography.body2,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-      ],
     );
   }
 

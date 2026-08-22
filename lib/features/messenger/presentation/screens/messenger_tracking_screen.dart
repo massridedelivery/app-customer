@@ -4,6 +4,7 @@ import 'package:customer_app/core/constants/app_icons.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/utils/polyline_decoder.dart';
 import 'package:customer_app/core/widgets/mass_loading_m.dart';
+import 'package:customer_app/core/widgets/route_stops.dart';
 import 'package:customer_app/features/messenger/domain/models/messenger_order.dart';
 import 'package:customer_app/features/messenger/presentation/controllers/messenger_tracking_controller.dart';
 import 'package:flutter/material.dart';
@@ -654,21 +655,14 @@ class _MessengerTrackingScreenState
             'ข้อมูลพัสดุ',
             style: AppTypography.heading6.copyWith(fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 8),
-          _infoRow(
-            Icons.location_on,
-            AppColors.foundationGreen500,
-            order.pickupAddress.isNotEmpty ? order.pickupAddress : 'จุดรับพัสดุ',
-            asset: true,
-          ),
-          const SizedBox(height: 8),
-          _infoRow(
-            Icons.location_on,
-            AppColors.foundationRed700,
-            order.dropoffAddress.isNotEmpty
-                ? order.dropoffAddress
-                : 'จุดส่งพัสดุ',
-            asset: true,
+          const SizedBox(height: 10),
+          RouteStops(
+            showLabels: false,
+            pickupLabel: 'จุดรับพัสดุ',
+            dropoffLabel: 'จุดส่งพัสดุ',
+            pickupAddress: order.pickupAddress,
+            dropoffAddress: order.dropoffAddress,
+            addressStyle: AppTypography.body2,
           ),
           const Divider(height: 20, color: AppColors.foundationGrayscale200),
           Wrap(

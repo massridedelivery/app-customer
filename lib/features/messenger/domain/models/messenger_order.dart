@@ -115,6 +115,15 @@ abstract class MessengerOrder with _$MessengerOrder {
     return due < 0 ? 0 : due;
   }
 
+  /// The delivery fee for this parcel (fare − discount), regardless of who pays
+  /// or where it's collected. Use this for the "ยอดชำระ/ชำระปลายทาง" total —
+  /// unlike [amountDue], it is never 0 for a recipient-pays order (where the
+  /// sender's own `amount_due` is 0 but the fee still needs to be shown).
+  double get deliveryFee {
+    final fee = fare - discount;
+    return fee < 0 ? 0 : fee;
+  }
+
   /// When the driver is expected at the next stop, or null when the backend
   /// omitted both keys (no driver / stale position). Prefers the absolute
   /// `arrive_at`; else derives from `eta_min` (now + N minutes).

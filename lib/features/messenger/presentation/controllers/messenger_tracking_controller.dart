@@ -115,9 +115,14 @@ class MessengerTrackingController extends _$MessengerTrackingController {
       state = state.copyWith(isCancelling: false);
       return true;
     } catch (e) {
+      final msg = e.toString().replaceFirst('Exception: ', '');
       state = state.copyWith(
         isCancelling: false,
-        error: e.toString().replaceFirst('Exception: ', ''),
+        // A paid order can't be cancelled in-app (PromptPay refunds are manual
+        // via admin) — point the user at support instead of a raw 409 (dev14).
+        error: msg == 'ORDER_ALREADY_PAID'
+            ? 'ออเดอร์นี้ชำระเงินแล้ว ยกเลิกในแอปไม่ได้ กรุณาติดต่อฝ่ายบริการลูกค้าเพื่อขอคืนเงิน'
+            : msg,
       );
       return false;
     }

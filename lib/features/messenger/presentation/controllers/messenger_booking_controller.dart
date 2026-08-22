@@ -108,6 +108,12 @@ class MessengerBookingController extends _$MessengerBookingController {
     state = state.copyWith(paymentMethod: method);
   }
 
+  /// 'SENDER' (default) | 'RECIPIENT' (dev14).
+  void setPayer(String payer) {
+    if (payer == state.payer) return;
+    state = state.copyWith(payer: payer);
+  }
+
   void setCodAmount(double amount) {
     state = state.copyWith(codAmount: amount);
   }
@@ -223,6 +229,7 @@ class MessengerBookingController extends _$MessengerBookingController {
             packageHeightCm: state.heightCm,
             codAmount: state.isCod ? state.codAmount : null,
             promoCode: state.promoCode,
+            payer: state.payer,
           );
       state = state.copyWith(isCreating: false, createdOrderId: order.id);
     } catch (e) {

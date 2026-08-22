@@ -346,6 +346,11 @@ abstract class FoodOrderModel with _$FoodOrderModel {
     @JsonKey(name: 'platform_commission') double? platformCommission,
     @JsonKey(name: 'driver_info') FoodDriverInfoModel? driverInfo,
     String? polyline,
+    // Live ETA via REST (dev14) — complements the socket push. omitempty:
+    // absent (not 0) when there's no driver yet or the position is stale.
+    @JsonKey(name: 'eta_min') int? etaMin,
+    @JsonKey(name: 'arrive_at') String? arriveAt,
+    @JsonKey(name: 'distance_remaining_m') int? distanceRemainingM,
   }) = _FoodOrderModel;
 
   factory FoodOrderModel.fromJson(Map<String, dynamic> json) =>

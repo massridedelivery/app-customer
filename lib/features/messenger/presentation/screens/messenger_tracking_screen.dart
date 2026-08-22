@@ -2,6 +2,7 @@ import 'package:customer_app/core/constants/app_assets.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_icons.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
+import 'package:customer_app/core/utils/polyline_decoder.dart';
 import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/features/messenger/domain/models/messenger_order.dart';
 import 'package:customer_app/features/messenger/presentation/controllers/messenger_tracking_controller.dart';
@@ -302,8 +303,26 @@ class _MessengerTrackingScreenState
     final pickupIcon = ref.watch(pickupMarkerProvider).value;
     final dropoffIcon = ref.watch(dropoffMarkerProvider).value;
 
+    // Road-following route from the backend (dev14) — no Google Directions
+    // call. Falls back to a straight pickup→dropoff line if absent.
+    final encoded = order.encodedPolyline?.isNotEmpty ?? false
+        ? order.encodedPolyline!
+        : (order.polyline ?? '');
+    final routePoints = encoded.isNotEmpty
+        ? PolylineDecoder.decodePolyline(encoded)
+        : <LatLng>[pickup, dropoff];
+
     return GoogleMap(
       initialCameraPosition: CameraPosition(target: pickup, zoom: 13),
+      polylines: {
+        if (routePoints.length >= 2)
+          Polyline(
+            polylineId: const PolylineId('route'),
+            points: routePoints,
+            color: AppColors.primary,
+            width: 4,
+          ),
+      },
       // Keep the fitted route in the visible top half, above the sheet.
       padding: EdgeInsets.only(
         top: MediaQuery.of(context).padding.top + 56,
@@ -503,8 +522,47 @@ class _MessengerTrackingScreenState
               ),
             ),
           ],
+          // Server-pushed ETA (dev14): shown only when the backend has a live
+          // estimate (absent = null → hidden, never a bogus "0 นาที").
+          if (!order.isTerminal) ...[
+            ?_buildEtaLine(order),
+          ],
           const SizedBox(height: 18),
           _buildTimeline(activeStep),
+        ],
+      ),
+    );
+  }
+
+  /// "อีกประมาณ N นาที · ถึงประมาณ HH:MM" from the server ETA, or null when the
+  /// backend has no live estimate yet (dev14 omitempty).
+  Widget? _buildEtaLine(MessengerOrder order) {
+    final arrive = order.etaArriveAt;
+    if (arrive == null) return null;
+    final minutesLeft = arrive.difference(DateTime.now()).inMinutes;
+    if (minutesLeft < 0) return null;
+    final hh = arrive.hour.toString().padLeft(2, '0');
+    final mm = arrive.minute.toString().padLeft(2, '0');
+    final label = minutesLeft <= 0
+        ? 'กำลังจะถึง · ถึงประมาณ $hh:$mm น.'
+        : 'อีกประมาณ $minutesLeft นาที · ถึงประมาณ $hh:$mm น.';
+    return Padding(
+      padding: const EdgeInsets.only(top: 6),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.schedule,
+            size: 16,
+            color: AppColors.foundationGreen700,
+          ),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: AppTypography.caption4.copyWith(
+              fontWeight: FontWeight.bold,
+              color: AppColors.foundationGreen700,
+            ),
+          ),
         ],
       ),
     );
@@ -673,7 +731,7 @@ class _MessengerTrackingScreenState
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'ยอดชำระ (${_paymentLabel(order)})',
+                'ค่าส่ง (${_paymentLabel(order)})',
                 style: AppTypography.body2.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -686,6 +744,64 @@ class _MessengerTrackingScreenState
                 ),
               ),
             ],
+          ),
+          // COD (goods value) is a separate debt from the delivery fee (dev14)
+          // — never fold it into amount_due; show it on its own line.
+          if (order.isCod && order.codAmount > 0) ...[
+            const SizedBox(height: 4),
+            _fareRow(
+              'เก็บเงินค่าสินค้าปลายทาง',
+              '฿${order.codAmount.toStringAsFixed(0)}',
+            ),
+          ],
+          // Who pays the fee + where the driver collects (dev14).
+          const SizedBox(height: 8),
+          _buildPayerInfo(order),
+        ],
+      ),
+    );
+  }
+
+  /// Payer + collection-point + paid badge (dev14). Tells the sender who owes
+  /// the delivery fee and where it gets collected.
+  Widget _buildPayerInfo(MessengerOrder order) {
+    final bool paid = order.isPaid;
+    final String who = order.isRecipientPays ? 'ผู้รับปลายทาง' : 'ผู้ส่ง (คุณ)';
+    String? where;
+    switch ((order.collectAt ?? '').toUpperCase()) {
+      case 'PICKUP':
+        where = 'เก็บตอนรับพัสดุ';
+        break;
+      case 'DELIVERY':
+        where = 'เก็บตอนส่งถึงปลายทาง';
+        break;
+    }
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: AppColors.foundationGrayscale100,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            paid ? Icons.check_circle : Icons.account_balance_wallet_outlined,
+            size: 18,
+            color: paid ? AppColors.foundationGreen600 : AppColors.textSecondary,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              paid
+                  ? 'ชำระค่าส่งแล้ว'
+                  : 'ผู้จ่ายค่าส่ง: $who${where != null ? ' · $where' : ''}',
+              style: AppTypography.caption4.copyWith(
+                color: paid
+                    ? AppColors.foundationGreen700
+                    : AppColors.textSecondary,
+                fontWeight: paid ? FontWeight.bold : FontWeight.normal,
+              ),
+            ),
           ),
         ],
       ),

@@ -1,5 +1,8 @@
 // Verifies the FE models parse the newly-merged backend fields
-// (SCRUM-54/64/65/66 and v1.6.1-dev11: SCRUM-71/76/69) from real BE JSON.
+// (SCRUM-54/64/65/66, v1.6.1-dev11: SCRUM-71/76/69, and v1.6.1-dev14: payer /
+// amount_due / collect_at / payment_status, messenger ETA + polyline, food ETA)
+// from real BE JSON.
+import 'package:customer_app/features/food_order/domain/models/food_models.dart';
 import 'package:customer_app/features/live_ride/domain/models/customer_jobs_active_model.dart';
 import 'package:customer_app/features/messenger/domain/models/messenger_estimate.dart';
 import 'package:customer_app/features/messenger/domain/models/messenger_order.dart';
@@ -242,6 +245,98 @@ void main() {
       expect(j.etaMin, isNull);
       expect(j.arriveAt, isNull);
       expect(j.distanceRemainingM, isNull);
+    });
+  });
+
+  group('dev14 · messenger payer / amount_due / collect_at / payment_status', () {
+    test('parses payer=RECIPIENT with collection + status fields', () {
+      final o = MessengerOrder.fromJson(const {
+        'id': 'm1',
+        'payer': 'RECIPIENT',
+        'amount_due': 45.0,
+        'cod_amount': 300.0,
+        'collect_at': 'DELIVERY',
+        'payment_status': 'PENDING',
+        'fare': 45.0,
+      });
+      expect(o.payer, 'RECIPIENT');
+      expect(o.isRecipientPays, isTrue);
+      expect(o.collectAt, 'DELIVERY');
+      expect(o.paymentStatus, 'PENDING');
+      expect(o.isPaid, isFalse);
+      // amount_due is the delivery fee only, distinct from cod_amount (goods).
+      expect(o.amountDue, 45.0);
+      expect(o.codAmount, 300.0);
+    });
+
+    test('payment_status PAID → isPaid', () {
+      final o = MessengerOrder.fromJson(const {
+        'id': 'm1',
+        'payment_status': 'PAID',
+      });
+      expect(o.isPaid, isTrue);
+    });
+
+    test('legacy order: payer defaults to SENDER, amountDue falls back', () {
+      final o = MessengerOrder.fromJson(const {
+        'id': 'm0',
+        'fare': 60.0,
+        'discount': 10.0,
+      });
+      expect(o.payer, 'SENDER');
+      expect(o.isRecipientPays, isFalse);
+      expect(o.collectAt, isNull);
+      // No amount_due from the server → fare − discount.
+      expect(o.amountDue, 50.0);
+    });
+  });
+
+  group('dev14 · messenger ETA + polyline', () {
+    test('parses eta_min/arrive_at/distance_remaining_m + polyline', () {
+      final o = MessengerOrder.fromJson(const {
+        'id': 'm1',
+        'eta_min': 12,
+        'arrive_at': '2026-08-21T10:15:00Z',
+        'distance_remaining_m': 2400,
+        'polyline': 'abc123',
+        'encoded_polyline': 'abc123',
+      });
+      expect(o.etaMin, 12);
+      expect(o.arriveAt, '2026-08-21T10:15:00Z');
+      expect(o.distanceRemainingM, 2400);
+      expect(o.polyline, 'abc123');
+      expect(o.encodedPolyline, 'abc123');
+      expect(o.etaArriveAt, isNotNull);
+    });
+
+    test('ETA/polyline absent → null (no bogus 0)', () {
+      final o = MessengerOrder.fromJson(const {'id': 'm2'});
+      expect(o.etaMin, isNull);
+      expect(o.arriveAt, isNull);
+      expect(o.distanceRemainingM, isNull);
+      expect(o.encodedPolyline, isNull);
+      expect(o.etaArriveAt, isNull);
+    });
+  });
+
+  group('dev14 · food order ETA via REST', () {
+    test('parses eta_min/arrive_at/distance_remaining_m', () {
+      final o = FoodOrderModel.fromJson(const {
+        'id': 'f1',
+        'eta_min': 9,
+        'arrive_at': '2026-08-21T11:05:00Z',
+        'distance_remaining_m': 1500,
+      });
+      expect(o.etaMin, 9);
+      expect(o.arriveAt, '2026-08-21T11:05:00Z');
+      expect(o.distanceRemainingM, 1500);
+    });
+
+    test('ETA keys absent → null', () {
+      final o = FoodOrderModel.fromJson(const {'id': 'f2'});
+      expect(o.etaMin, isNull);
+      expect(o.arriveAt, isNull);
+      expect(o.distanceRemainingM, isNull);
     });
   });
 }

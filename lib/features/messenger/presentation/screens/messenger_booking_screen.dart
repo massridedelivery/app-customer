@@ -103,10 +103,16 @@ class _MessengerBookingScreenState
       if (next.createdOrderId != null &&
           next.createdOrderId != previous?.createdOrderId) {
         final orderId = next.createdOrderId!;
+        // Recipient-pays (dev14): the sender is never charged upfront — the
+        // order dispatches unpaid and the driver collects at delivery — so go
+        // straight to tracking regardless of the chosen method.
+        if (next.isRecipientPays) {
+          context.pushReplacement('/messenger/tracking/$orderId');
+        }
         // PromptPay must be paid before dispatch (SCRUM-35 §3.3): go through
         // the QR screen, which replaces itself with tracking on PAID. Pushed
         // (not replaced) so expiry/failure can fall back to this screen.
-        if (next.paymentMethod.toUpperCase() == 'PROMPTPAY') {
+        else if (next.paymentMethod.toUpperCase() == 'PROMPTPAY') {
           context.push(
             '/payment/promptpay',
             extra: {
@@ -144,6 +150,8 @@ class _MessengerBookingScreenState
             _buildRecipientCard(),
             const SizedBox(height: 12),
             _buildDeliveryTypeCard(bookingState),
+            const SizedBox(height: 12),
+            _buildPayerCard(bookingState),
             const SizedBox(height: 12),
             _buildPaymentCard(bookingState),
             const SizedBox(height: 12),
@@ -788,6 +796,122 @@ class _MessengerBookingScreenState
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  // ─── Payer (who pays the delivery fee) ──────────────────────────────────────
+
+  Widget _buildPayerCard(MessengerBookingState bookingState) {
+    final String payer = bookingState.payer.toUpperCase();
+    return _card(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'ใครออกค่าส่ง?',
+            style: AppTypography.heading6.copyWith(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _payerOption(
+                  'SENDER',
+                  'ผู้ส่ง',
+                  'จ่ายตอนนี้',
+                  Icons.person_outline,
+                  payer == 'SENDER',
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _payerOption(
+                  'RECIPIENT',
+                  'ผู้รับ',
+                  'เก็บปลายทาง',
+                  Icons.pin_drop_outlined,
+                  payer == 'RECIPIENT',
+                ),
+              ),
+            ],
+          ),
+          if (bookingState.isRecipientPays) ...[
+            const SizedBox(height: 10),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Icon(
+                  Icons.info_outline,
+                  size: 16,
+                  color: AppColors.textSecondary,
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    'คนขับจะไปเก็บค่าส่งจากผู้รับที่ปลายทาง — คุณไม่ต้องจ่ายตอนนี้',
+                    style: AppTypography.caption4.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _payerOption(
+    String value,
+    String label,
+    String subtitle,
+    IconData icon,
+    bool isSelected,
+  ) {
+    return GestureDetector(
+      onTap: () =>
+          ref.read(messengerBookingControllerProvider.notifier).setPayer(value),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppColors.primary.withValues(alpha: 0.08)
+              : AppColors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected
+                ? AppColors.primary
+                : AppColors.foundationGrayscale300,
+            width: isSelected ? 2 : 1,
+          ),
+        ),
+        child: Column(
+          children: [
+            Icon(
+              icon,
+              color: isSelected ? AppColors.primary : AppColors.textSecondary,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              maxLines: 1,
+              style: AppTypography.caption4.copyWith(
+                fontWeight: FontWeight.bold,
+                color:
+                    isSelected ? AppColors.primary : AppColors.textSecondary,
+              ),
+            ),
+            Text(
+              subtitle,
+              maxLines: 1,
+              style: AppTypography.caption4.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

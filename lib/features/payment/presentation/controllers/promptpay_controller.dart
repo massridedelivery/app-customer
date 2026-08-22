@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:customer_app/core/services/socket_service.dart';
 import 'package:customer_app/features/payment/data/repositories/payment_repository_impl.dart';
 import 'package:customer_app/features/payment/domain/models/payment_intent.dart';
 import 'package:customer_app/features/payment/presentation/states/promptpay_state.dart';
@@ -21,11 +22,44 @@ class PromptPayController extends _$PromptPayController {
   int _tick = 0;
   String? _jobId;
   String? _orderId;
+  StreamSubscription<Map<String, dynamic>>? _socketSubscription;
 
   @override
   PromptPayState build() {
-    ref.onDispose(() => _ticker?.cancel());
+    // Real-time confirmation (dev14): the backend pushes `payment_paid` on the
+    // main WS the instant the Omise webhook lands, so we flip to PAID without
+    // waiting for the next 3s poll. The poll stays as the fallback.
+    final socket = ref.read(socketServiceProvider);
+    socket.connect();
+    _socketSubscription = socket.messages.listen(_handleSocketMessage);
+    ref.onDispose(() {
+      _ticker?.cancel();
+      _socketSubscription?.cancel();
+    });
     return const PromptPayState();
+  }
+
+  void _handleSocketMessage(Map<String, dynamic> message) {
+    final type = (message['type'] as String?)?.toLowerCase();
+    if (type != 'payment_paid') return;
+
+    // Envelope may be flat ({intent_id, status}) or nested under `data`.
+    final data = message['data'];
+    final eventIntentId =
+        (message['intent_id'] ?? (data is Map ? data['intent_id'] : null))
+            ?.toString();
+
+    final current = state.intent;
+    if (current == null) return;
+    // Ignore paid events for some other intent (e.g. a stale screen).
+    if (eventIntentId != null && eventIntentId != current.id) return;
+    if (current.status == PaymentIntentStatus.paid) return;
+
+    debugPrint('PromptPay: payment_paid over WS for ${current.id}');
+    _ticker?.cancel();
+    state = state.copyWith(
+      intent: current.copyWith(status: PaymentIntentStatus.paid),
+    );
   }
 
   /// Create (or reuse) an intent for a ride [jobId] and begin polling.

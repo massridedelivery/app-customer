@@ -119,6 +119,7 @@ class MessengerRepositoryImpl implements IMessengerRepository {
     double? packageHeightCm,
     double? codAmount,
     String? promoCode,
+    String? payer,
   }) async {
     try {
       final response = await _apiService.dio.post(
@@ -134,6 +135,8 @@ class MessengerRepositoryImpl implements IMessengerRepository {
           'payment_method': paymentMethod,
           // Required (SCRUM-71). The backend 400s without it.
           'delivery_type': deliveryType,
+          // Optional (dev14). Omitted = SENDER (backend default).
+          if (payer != null && payer.isNotEmpty) 'payer': payer,
           if (pickupAddress != null && pickupAddress.isNotEmpty)
             'pickup_address': pickupAddress,
           if (dropoffAddress != null && dropoffAddress.isNotEmpty)
@@ -207,6 +210,12 @@ class MessengerRepositoryImpl implements IMessengerRepository {
         },
       );
     } on DioException catch (e) {
+      // 409 = the fee was already paid (dev14). PromptPay can't be refunded via
+      // the Omise API — refunds are handled by hand through admin — so the UI
+      // should point the user at support rather than invite a retry.
+      if (e.response?.statusCode == 409) {
+        throw Exception('ORDER_ALREADY_PAID');
+      }
       _throwFrom(e, 'Failed to cancel order');
     } catch (e) {
       throw Exception(e.toString());

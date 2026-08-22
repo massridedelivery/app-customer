@@ -49,6 +49,25 @@ abstract class MessengerOrder with _$MessengerOrder {
     @JsonKey(name: 'express_surcharge') @Default(0.0) double expressSurcharge,
     @JsonKey(name: 'pickup_eta_min') int? pickupEtaMin,
     @JsonKey(name: 'deliver_by') String? deliverBy,
+    // Who pays the delivery fee (dev14): SENDER (default) pays upfront on the
+    // customer app; RECIPIENT pays the driver at delivery (order dispatches
+    // unpaid). `collect_at` says where the driver collects (PICKUP | DELIVERY).
+    @JsonKey(name: 'payer') @Default('SENDER') String payer,
+    @JsonKey(name: 'collect_at') String? collectAt,
+    @JsonKey(name: 'payment_status') @Default('') String paymentStatus,
+    // Delivery-fee due at collection. Server-authoritative; **excludes**
+    // cod_amount (goods value) — they are separate debts, shown on separate
+    // lines. Absent on legacy orders → fall back to `fare − discount`.
+    @JsonKey(name: 'amount_due') double? amountDueRaw,
+    // Live ETA to the next stop (dev14). omitempty: absent (not 0) when no
+    // driver yet or the position is stale — always null-check before use.
+    @JsonKey(name: 'eta_min') int? etaMin,
+    @JsonKey(name: 'arrive_at') String? arriveAt,
+    @JsonKey(name: 'distance_remaining_m') int? distanceRemainingM,
+    // Road-following route (dev14): same value in both keys. Lets the tracking
+    // map draw the route without a Google Directions call.
+    @JsonKey(name: 'polyline') String? polyline,
+    @JsonKey(name: 'encoded_polyline') String? encodedPolyline,
     @JsonKey(name: 'platform_commission') @Default(0.0) double platformCommission,
     @JsonKey(name: 'promo_id') @Default('') String promoId,
     @JsonKey(name: 'created_at') @Default('') String createdAt,
@@ -80,10 +99,34 @@ abstract class MessengerOrder with _$MessengerOrder {
   /// Whether the customer has already reviewed this delivery (SCRUM-69).
   bool get isReviewed => customerRating > 0;
 
-  /// `fare` is gross; the customer pays fare − discount.
+  /// The recipient (not the sender) pays the delivery fee at the door (dev14).
+  bool get isRecipientPays => payer.toUpperCase() == 'RECIPIENT';
+
+  /// Delivery fee has been settled.
+  bool get isPaid => paymentStatus.toUpperCase() == 'PAID';
+
+  /// Delivery fee due at collection. Prefers the server's `amount_due`
+  /// (authoritative, excludes cod_amount); falls back to `fare − discount` for
+  /// legacy orders that don't send it.
   double get amountDue {
+    final raw = amountDueRaw;
+    if (raw != null) return raw < 0 ? 0 : raw;
     final due = fare - discount;
     return due < 0 ? 0 : due;
+  }
+
+  /// When the driver is expected at the next stop, or null when the backend
+  /// omitted both keys (no driver / stale position). Prefers the absolute
+  /// `arrive_at`; else derives from `eta_min` (now + N minutes).
+  DateTime? get etaArriveAt {
+    final at = arriveAt;
+    if (at != null && at.isNotEmpty) {
+      final parsed = DateTime.tryParse(at);
+      if (parsed != null) return parsed.toLocal();
+    }
+    final min = etaMin;
+    if (min != null) return DateTime.now().add(Duration(minutes: min));
+    return null;
   }
 
   String get formattedCreatedAt => ThaiDateFormatter.dateTime(createdAt);

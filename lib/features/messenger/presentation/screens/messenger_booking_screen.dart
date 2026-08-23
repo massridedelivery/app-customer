@@ -40,6 +40,26 @@ class _MessengerBookingScreenState
   final _promoController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    // Default the parcel pickup (จุดรับ) to the app's current delivery location
+    // — the top "เลือกสถานที่จัดส่ง" selector (foodLocation). So when the user
+    // changes that place, the messenger pickup follows it by default here; they
+    // can still tap จุดรับ to pick a different one.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final home = ref.read(homeControllerProvider);
+      final deliveryLoc = home.foodLocation;
+      if (deliveryLoc != null && home.pickupLocation != deliveryLoc) {
+        ref.read(homeControllerProvider.notifier).setPickupLocation(
+              deliveryLoc,
+              home.foodAddress ?? '',
+            );
+      }
+    });
+  }
+
+  @override
   void dispose() {
     _weightController.dispose();
     _lengthController.dispose();

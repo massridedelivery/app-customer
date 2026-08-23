@@ -30,15 +30,21 @@ class _PaymentSummaryScreenState extends ConsumerState<PaymentSummaryScreen> {
   static const _tipOptions = [10, 20, 50];
 
   String _formatBaht(double amount) {
-    final rounded = amount.round();
-    final digits = rounded.abs().toString();
+    // Never force-round on the client (SCRUM-89: fares are whole baht from BE,
+    // but a driver-entered toll can still carry satang). Show satang only when
+    // the amount actually has them.
+    final sign = amount < 0 ? '-' : '';
+    final abs = amount.abs();
+    final intPart = abs.floor();
+    final digits = intPart.toString();
     final buffer = StringBuffer();
     for (var i = 0; i < digits.length; i++) {
       if (i > 0 && (digits.length - i) % 3 == 0) buffer.write(',');
       buffer.write(digits[i]);
     }
-    final sign = rounded < 0 ? '-' : '';
-    return '$sign฿$buffer';
+    final hasSatang = abs != abs.roundToDouble();
+    final satang = hasSatang ? (abs - intPart).toStringAsFixed(2).substring(1) : '';
+    return '$sign฿$buffer$satang';
   }
 
   String _paymentMethodLabel(String method) {

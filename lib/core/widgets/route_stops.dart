@@ -54,10 +54,10 @@ class RouteStops extends StatelessWidget {
                     const SizedBox(height: 2),
                     Expanded(
                       child: SizedBox(
-                        width: 2,
+                        width: 4,
                         child: CustomPaint(
-                          painter: _DashedLinePainter(
-                            color: Colors.grey.shade400,
+                          painter: _DottedLinePainter(
+                            color: AppColors.foundationGrayscale400,
                           ),
                         ),
                       ),
@@ -118,32 +118,32 @@ class RouteStops extends StatelessWidget {
   }
 }
 
-class _DashedLinePainter extends CustomPainter {
-  _DashedLinePainter({required this.color});
+/// Vertical connector drawn as round dots (not dashes) — matches the messenger
+/// booking card: a 3px dot with ~4px gaps above/below (≈11px pitch).
+class _DottedLinePainter extends CustomPainter {
+  _DottedLinePainter({required this.color});
 
   final Color color;
 
-  static const double _dashHeight = 3;
-  static const double _gap = 3;
+  static const double _radius = 1.5; // 3px dot
+  static const double _pitch = 11; // centre-to-centre (dot + ~4px each side)
 
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
       ..color = color
-      ..strokeWidth = size.width
-      ..strokeCap = StrokeCap.round;
+      ..style = PaintingStyle.fill;
     final x = size.width / 2;
-    var y = 0.0;
-    while (y < size.height) {
-      canvas.drawLine(
-        Offset(x, y),
-        Offset(x, (y + _dashHeight).clamp(0, size.height)),
-        paint,
-      );
-      y += _dashHeight + _gap;
+    // Centre the run of dots vertically within the available height.
+    final count = ((size.height - 2 * _radius) / _pitch).floor() + 1;
+    final span = (count - 1) * _pitch;
+    var y = (size.height - span) / 2;
+    for (var i = 0; i < count; i++) {
+      canvas.drawCircle(Offset(x, y), _radius, paint);
+      y += _pitch;
     }
   }
 
   @override
-  bool shouldRepaint(covariant _DashedLinePainter old) => old.color != color;
+  bool shouldRepaint(covariant _DottedLinePainter old) => old.color != color;
 }

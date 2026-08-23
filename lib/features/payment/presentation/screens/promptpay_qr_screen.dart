@@ -200,7 +200,10 @@ class _QrView extends StatelessWidget {
         const SizedBox(height: 24),
         if (amount != null)
           Text(
-            '฿${amount!.toStringAsFixed(2)}',
+            // Whole-baht fares (ride/messenger) show no decimals; a value that
+            // carries satang (e.g. a food order with menu satang) still shows
+            // them (SCRUM-89 — don't force ".00").
+            '฿${amount! == amount!.roundToDouble() ? amount!.toStringAsFixed(0) : amount!.toStringAsFixed(2)}',
             style: AppTypography.heading2,
           ),
         const SizedBox(height: 12),

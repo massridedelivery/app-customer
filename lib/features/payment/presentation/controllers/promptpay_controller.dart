@@ -123,12 +123,24 @@ class PromptPayController extends _$PromptPayController {
         }
       }
 
-      final intent = jobId != null
-          ? await repo.createIntent(jobId: jobId, paymentMethod: 'PROMPTPAY')
-          : await repo.createIntentForOrder(
-              orderId: orderId!,
-              paymentMethod: 'PROMPTPAY',
-            );
+      PaymentIntent intent;
+      try {
+        intent = jobId != null
+            ? await repo.createIntent(jobId: jobId, paymentMethod: 'PROMPTPAY')
+            : await repo.createIntentForOrder(
+                orderId: orderId!,
+                paymentMethod: 'PROMPTPAY',
+              );
+      } catch (_) {
+        // A live intent already exists → the backend answers POST with 409, not
+        // a real error (dev15). Reuse the existing intent instead of surfacing
+        // an error; rethrow only if there genuinely isn't one to fall back to.
+        final again = jobId != null
+            ? await repo.getIntentByJob(jobId)
+            : await repo.getIntentByOrder(orderId!);
+        if (again == null) rethrow;
+        intent = again;
+      }
 
       _expiresAt = DateTime.tryParse(intent.expiresAt ?? '');
       state = state.copyWith(

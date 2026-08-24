@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:customer_app/core/services/socket_service.dart';
 import 'package:customer_app/features/messenger/data/repositories/messenger_repository_impl.dart';
+import 'package:customer_app/features/messenger/domain/models/messenger_order.dart';
 import 'package:customer_app/features/messenger/presentation/states/messenger_tracking_state.dart';
 import 'package:flutter/widgets.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -67,7 +68,12 @@ class MessengerTrackingController extends _$MessengerTrackingController {
     try {
       final order = await ref.read(messengerRepositoryProvider).getOrder(id);
       if (state.orderId != id) return;
-      state = state.copyWith(isLoading: false, order: order, error: null);
+      state = state.copyWith(
+        isLoading: false,
+        order: order,
+        error: null,
+        awaitingPromptPay: _computeAwaitingPromptPay(order),
+      );
 
       if (order.isTerminal) {
         _pollingTimer?.cancel();
@@ -81,6 +87,17 @@ class MessengerTrackingController extends _$MessengerTrackingController {
         );
       }
     }
+  }
+
+  /// Whether the sender should be shown the PromptPay QR now: a sender-pays
+  /// PromptPay order (dispatched unpaid) whose driver has reached pickup and
+  /// whose fee is still owed. Recomputed on every load, so it clears itself the
+  /// moment payment lands (PAID) — the screen listens for the false→true edge to
+  /// route to the QR exactly once, and reads the flag for a persistent CTA.
+  bool _computeAwaitingPromptPay(MessengerOrder order) {
+    return !order.isTerminal &&
+        order.isSenderPromptPayUnpaid &&
+        order.isDriverAtPickup;
   }
 
   void _handleSocketMessage(Map<String, dynamic> message) {

@@ -125,26 +125,12 @@ class _MessengerBookingScreenState
       if (next.createdOrderId != null &&
           next.createdOrderId != previous?.createdOrderId) {
         final orderId = next.createdOrderId!;
-        // Recipient-pays (dev14): the sender is never charged upfront — the
-        // order dispatches unpaid and the driver collects at delivery — so go
-        // straight to tracking regardless of the chosen method.
-        if (next.isRecipientPays) {
-          context.pushReplacement('/messenger/tracking/$orderId');
-        }
-        // PromptPay must be paid before dispatch (SCRUM-35 §3.3): go through
-        // the QR screen, which replaces itself with tracking on PAID. Pushed
-        // (not replaced) so expiry/failure can fall back to this screen.
-        else if (next.paymentMethod.toUpperCase() == 'PROMPTPAY') {
-          context.push(
-            '/payment/promptpay',
-            extra: {
-              'orderId': orderId,
-              'onPaidRoute': '/messenger/tracking/$orderId',
-            },
-          );
-        } else {
-          context.pushReplacement('/messenger/tracking/$orderId');
-        }
+        // Pay-after-match (dev): the sender is no longer charged before a driver
+        // is found. Every order — cash, recipient-pays, and sender-pays
+        // PromptPay alike — now dispatches unpaid and goes straight to tracking.
+        // Sender-pays PromptPay is collected once the driver reaches pickup: the
+        // tracking screen surfaces the QR then (see awaitingPromptPay).
+        context.pushReplacement('/messenger/tracking/$orderId');
       }
       if (next.error != null && next.error != previous?.error) {
         _showSnack(next.error!, isError: true);

@@ -291,6 +291,50 @@ void main() {
     });
   });
 
+  group('dev · messenger sender-pays PromptPay pay-after-match', () {
+    MessengerOrder order(String status, String paymentStatus,
+            {String payer = 'SENDER', String method = 'PROMPTPAY'}) =>
+        MessengerOrder.fromJson({
+          'id': 'm1',
+          'payer': payer,
+          'payment_method': method,
+          'payment_status': paymentStatus,
+          'status': status,
+        });
+
+    test('unpaid sender PromptPay is flagged until paid', () {
+      expect(order('ACCEPTED', 'PENDING').isSenderPromptPayUnpaid, isTrue);
+      expect(order('ACCEPTED', 'PAID').isSenderPromptPayUnpaid, isFalse);
+    });
+
+    test('cash / recipient-pays never route through the customer QR', () {
+      expect(order('ACCEPTED', 'PENDING', method: 'CASH').isSenderPromptPayUnpaid,
+          isFalse);
+      expect(
+          order('ACCEPTED', 'PENDING', payer: 'RECIPIENT')
+              .isSenderPromptPayUnpaid,
+          isFalse);
+    });
+
+    test('driver-at-pickup covers ARRIVED_AT_PICKUP + PICKED_UP, not before', () {
+      expect(order('PENDING', 'PENDING').isDriverAtPickup, isFalse);
+      expect(order('ACCEPTED', 'PENDING').isDriverAtPickup, isFalse);
+      expect(order('ARRIVED_AT_PICKUP', 'PENDING').isDriverAtPickup, isTrue);
+      expect(order('PICKED_UP', 'PENDING').isDriverAtPickup, isTrue);
+      // Delivered routes to the summary, not the QR.
+      expect(order('DELIVERED', 'PENDING').isDriverAtPickup, isFalse);
+    });
+
+    test('prompt fires only once driver reaches pickup while unpaid', () {
+      // Mirrors MessengerTrackingController._computeAwaitingPromptPay.
+      bool shouldPrompt(MessengerOrder o) =>
+          !o.isTerminal && o.isSenderPromptPayUnpaid && o.isDriverAtPickup;
+      expect(shouldPrompt(order('ACCEPTED', 'PENDING')), isFalse);
+      expect(shouldPrompt(order('ARRIVED_AT_PICKUP', 'PENDING')), isTrue);
+      expect(shouldPrompt(order('ARRIVED_AT_PICKUP', 'PAID')), isFalse);
+    });
+  });
+
   group('dev14 · messenger ETA + polyline', () {
     test('parses eta_min/arrive_at/distance_remaining_m + polyline', () {
       final o = MessengerOrder.fromJson(const {

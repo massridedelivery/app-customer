@@ -12,6 +12,7 @@ part 'live_food_tracking_controller.g.dart';
 @riverpod
 class LiveFoodTrackingController extends _$LiveFoodTrackingController {
   StreamSubscription<Map<String, dynamic>>? _socketSubscription;
+  StreamSubscription<void>? _reconnectSubscription;
   Timer? _pollingTimer;
   AppLifecycleListener? _lifecycleListener;
 
@@ -22,6 +23,7 @@ class LiveFoodTrackingController extends _$LiveFoodTrackingController {
     _lifecycleListener = AppLifecycleListener(onResume: _onResume);
     ref.onDispose(() {
       _socketSubscription?.cancel();
+      _reconnectSubscription?.cancel();
       _pollingTimer?.cancel();
       _lifecycleListener?.dispose();
     });
@@ -45,6 +47,15 @@ class LiveFoodTrackingController extends _$LiveFoodTrackingController {
 
     _socketSubscription = socket.messages.listen((message) {
       _handleSocketMessage(message);
+    });
+
+    // Reconnect after a mid-session drop → refetch immediately (missed frames
+    // aren't replayed), rather than waiting for the next 10s poll.
+    _reconnectSubscription = socket.reconnected.listen((_) {
+      final id = state.orderId;
+      if (id == null) return;
+      if (_isTerminalStatus(state.orderStatus)) return;
+      _loadOrderDetail(id);
     });
   }
 

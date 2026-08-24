@@ -30,6 +30,20 @@ class SocketService {
 
   Stream<Map<String, dynamic>> get messages => _messageController.stream;
 
+  /// Fires once each time the socket comes back up *after* a mid-session drop
+  /// (not the first connect, and not the reconnect that follows a resume — the
+  /// app-lifecycle resync covers that). Frames pushed during the gap are lost
+  /// (no server replay), so controllers listen here to immediately re-fetch the
+  /// authoritative state instead of waiting for their next poll tick.
+  final _reconnectedController = StreamController<void>.broadcast();
+
+  Stream<void> get reconnected => _reconnectedController.stream;
+
+  /// Whether we have already had a live connection in the current foreground
+  /// session. Distinguishes a genuine reconnect (fire [reconnected]) from the
+  /// first connect / the post-resume connect (don't). Cleared on [suspend].
+  bool _hasConnectedOnce = false;
+
   bool _isConnected = false;
   bool _isConnecting = false;
 
@@ -45,7 +59,13 @@ class SocketService {
   /// has gone silent — see [_staleAfter].
   DateTime? _lastInboundAt;
 
-  static const int maxReconnectAttempts = 5;
+  /// The exponential backoff grows to this many attempts, then holds — the
+  /// delay ceiling is `2^_backoffCeilingExponent` seconds ([_maxReconnectDelay]).
+  /// Reconnection itself does **not** stop there: while the app is foregrounded
+  /// we keep retrying at that ceiling forever, so a socket that drops mid-ride
+  /// always recovers instead of dying for the rest of the trip.
+  static const int _backoffCeilingExponent = 5; // 2^5 = 32s ceiling
+  static const Duration _maxReconnectDelay = Duration(seconds: 32);
 
   /// How often to ping. Applies at two levels: RFC 6455 ping frames, which
   /// `dart:io` answers-checks itself and which close the socket on a missing
@@ -74,9 +94,9 @@ class SocketService {
   ///
   /// Call this whenever the app gains a new reason to believe a socket should
   /// be up — the user just authenticated, or the app returned to the
-  /// foreground. Unlike [connect] this resets [_reconnectAttempts], so a socket
-  /// that already burnt through [maxReconnectAttempts] (and would otherwise
-  /// stay dead for the rest of the session) gets another chance. Safe to call
+  /// foreground. Unlike [connect] this resets [_reconnectAttempts] so the
+  /// backoff starts from the bottom again, and clears [_isSuspended] so a socket
+  /// stood down for the background regains its retry loop. Safe to call
   /// repeatedly: it's a no-op while the connection is live or in flight.
   void ensureConnected() {
     _isSuspended = false;
@@ -107,10 +127,10 @@ class SocketService {
   ///
   /// Measured on a device: Android revokes network access from backgrounded
   /// apps outright — every retry failed at DNS resolution ("Failed host lookup
-  /// … errno = 7") yet still consumed the [maxReconnectAttempts] budget, so
-  /// ~80s in the background was enough to spend it all on attempts that could
-  /// not possibly succeed. Closing now and standing down keeps the budget (and
-  /// the radio) intact until [ensureConnected] revives things on resume.
+  /// … errno = 7") and, now that the foreground loop retries forever, would
+  /// otherwise spin every 32s for the whole time backgrounded. Closing now and
+  /// standing down (via [_isSuspended]) keeps the radio idle until
+  /// [ensureConnected] revives things on resume.
   void suspend() {
     if (_isSuspended) return;
     debugPrint('SocketService: Suspended (app backgrounded).');
@@ -118,6 +138,10 @@ class SocketService {
     _reconnectTimer?.cancel();
     _reconnectTimer = null;
     _reconnectAttempts = 0;
+    // The post-resume connect should count as a fresh first connect: the
+    // app-lifecycle resync already refetches on resume, so we don't also want to
+    // fire [reconnected] for it.
+    _hasConnectedOnce = false;
     _teardown();
   }
 
@@ -153,11 +177,7 @@ class SocketService {
       currentChannel?.ready
           .then((_) {
             if (currentChannel == _channel) {
-              debugPrint('SocketService: Connected successfully (via ready).');
-              _isConnected = true;
-              _isConnecting = false;
-              _reconnectAttempts = 0;
-              _lastInboundAt = DateTime.now();
+              _onConnectionEstablished('via ready');
             }
           })
           .catchError((error) {
@@ -168,10 +188,7 @@ class SocketService {
         (data) {
           _lastInboundAt = DateTime.now();
           if (!_isConnected) {
-            debugPrint('SocketService: Connected successfully.');
-            _isConnected = true;
-            _isConnecting = false;
-            _reconnectAttempts = 0;
+            _onConnectionEstablished('first frame');
           }
           try {
             final decoded = jsonDecode(data as String);
@@ -204,6 +221,23 @@ class SocketService {
       _isConnecting = false;
       _handleDisconnect();
     }
+  }
+
+  /// Marks the connection live (idempotent per channel) and, when this is a
+  /// reconnect after a mid-session drop, notifies listeners to resync.
+  void _onConnectionEstablished(String via) {
+    if (_isConnected) return;
+    debugPrint('SocketService: Connected successfully ($via).');
+    _isConnected = true;
+    _isConnecting = false;
+    _reconnectAttempts = 0;
+    _lastInboundAt = DateTime.now();
+
+    if (_hasConnectedOnce) {
+      debugPrint('SocketService: Reconnected — signalling resync.');
+      _reconnectedController.add(null);
+    }
+    _hasConnectedOnce = true;
   }
 
   void sendMessage(String type, Map<String, dynamic> data) {
@@ -250,23 +284,32 @@ class SocketService {
       return;
     }
 
-    if (_reconnectAttempts < maxReconnectAttempts) {
-      _reconnectAttempts++;
-      // Exponential backoff: 2^attempts * 1000 ms -> 2s, 4s, 8s...
-      final delay = Duration(
-        milliseconds: 1000 * pow(2, _reconnectAttempts).toInt(),
-      );
-      debugPrint(
-        'SocketService: Reconnecting in ${delay.inSeconds} seconds (Attempt $_reconnectAttempts)...',
-      );
+    _reconnectAttempts++;
+    // Exponential backoff (2s, 4s, 8s, 16s, 32s) that then HOLDS at the 32s
+    // ceiling and keeps retrying indefinitely while foregrounded. Never give up
+    // on our own: a mid-ride socket drop must always recover, and [suspend]
+    // already stands the retries down while backgrounded so this can't burn the
+    // radio. `min` on the exponent keeps `pow` from overflowing on a long
+    // outage.
+    final exponent =
+        _reconnectAttempts < _backoffCeilingExponent
+        ? _reconnectAttempts
+        : _backoffCeilingExponent;
+    final expoMs = 1000 * pow(2, exponent).toInt();
+    final delay = Duration(
+      milliseconds:
+          expoMs < _maxReconnectDelay.inMilliseconds
+          ? expoMs
+          : _maxReconnectDelay.inMilliseconds,
+    );
+    debugPrint(
+      'SocketService: Reconnecting in ${delay.inSeconds}s (attempt $_reconnectAttempts)...',
+    );
 
-      _reconnectTimer?.cancel();
-      _reconnectTimer = Timer(delay, () {
-        connect(isReconnect: true);
-      });
-    } else {
-      debugPrint('SocketService: Max reconnect attempts reached.');
-    }
+    _reconnectTimer?.cancel();
+    _reconnectTimer = Timer(delay, () {
+      connect(isReconnect: true);
+    });
   }
 
   void disconnect() {

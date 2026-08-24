@@ -308,7 +308,7 @@ class _MessengerBookingScreenState
                     ref
                         .read(homeControllerProvider.notifier)
                         .startSelection(mode: RideSelectionMode.pickup);
-                    context.push('/select-pickup');
+                    context.push('/messenger-place-search');
                   },
                 ),
                 const SizedBox(height: 12),
@@ -321,7 +321,7 @@ class _MessengerBookingScreenState
                         .startSelection(
                           mode: RideSelectionMode.messengerDropoff,
                         );
-                    context.push('/select-dropoff');
+                    context.push('/messenger-place-search');
                   },
                 ),
               ],

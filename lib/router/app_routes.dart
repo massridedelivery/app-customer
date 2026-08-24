@@ -22,6 +22,7 @@ import 'package:customer_app/features/food_order/presentation/screens/restaurant
 import 'package:customer_app/features/home/presentation/screens/transport/dropoff_selection_screen.dart';
 import 'package:customer_app/features/home/presentation/screens/transport/food_location_selection_screen.dart';
 import 'package:customer_app/features/home/presentation/screens/transport/food_place_search_screen.dart';
+import 'package:customer_app/features/home/presentation/screens/transport/messenger_place_search_screen.dart';
 import 'package:customer_app/features/home/presentation/screens/transport/pickup_selection_screen.dart';
 import 'package:customer_app/features/home/presentation/screens/transport/place_search_screen.dart';
 import 'package:customer_app/features/home/presentation/screens/transport/ride_landing_screen.dart';
@@ -327,6 +328,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/food-place-search',
         builder: (context, state) => const FoodPlaceSearchScreen(),
+      ),
+      GoRoute(
+        path: '/messenger-place-search',
+        builder: (context, state) => const MessengerPlaceSearchScreen(),
       ),
       GoRoute(
         path: '/food-location-selection',

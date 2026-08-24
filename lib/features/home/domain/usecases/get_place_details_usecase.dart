@@ -1,5 +1,5 @@
 import 'package:customer_app/features/home/domain/models/place.dart';
 
 abstract class GetPlaceDetailsUseCase {
-  Future<Place> call(String placeId);
+  Future<Place> call(String placeId, {String? sessionToken});
 }

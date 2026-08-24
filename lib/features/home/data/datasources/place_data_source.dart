@@ -1,6 +1,8 @@
+import 'package:customer_app/core/constants/feature_flags.dart';
 import 'package:customer_app/core/managers/providers.dart';
 import 'package:customer_app/core/services/api_service.dart';
 import 'package:customer_app/core/services/google_places_service.dart';
+import 'package:customer_app/core/services/places_proxy_service.dart';
 import 'package:customer_app/features/home/domain/models/place.dart';
 import 'package:customer_app/features/home/domain/models/place_prediction.dart';
 import 'package:dio/dio.dart';
@@ -14,10 +16,11 @@ abstract class PlaceDataSource {
     String query, {
     double? lat,
     double? lng,
+    String? sessionToken,
   });
 
   /// Google Place Details for a prediction's [placeId].
-  Future<Place> getPlaceDetails(String placeId);
+  Future<Place> getPlaceDetails(String placeId, {String? sessionToken});
 
   /// Recently used places (from the BFF).
   Future<List<dynamic>> getRecentPlaces();
@@ -46,27 +49,48 @@ abstract class PlaceDataSource {
 PlaceDataSourceImpl placeDataSource(Ref ref) {
   final apiService = ref.watch(apiServiceProvider);
   final places = ref.watch(googlePlacesServiceProvider);
-  return PlaceDataSourceImpl(apiService, places);
+  final proxy = ref.watch(placesProxyServiceProvider);
+  return PlaceDataSourceImpl(apiService, places, proxy);
 }
 
 class PlaceDataSourceImpl implements PlaceDataSource {
   final ApiService _apiService;
   final GooglePlacesService _places;
+  final PlacesProxyService _proxy;
 
-  PlaceDataSourceImpl(this._apiService, this._places);
+  PlaceDataSourceImpl(this._apiService, this._places, this._proxy);
 
   @override
   Future<List<PlacePrediction>> autocomplete(
     String query, {
     double? lat,
     double? lng,
+    String? sessionToken,
   }) {
-    return _places.autocomplete(query, lat: lat, lng: lng);
+    // SCRUM-74: route through the BE proxy (no key in the app) once enabled;
+    // otherwise fall back to the direct Google Places call.
+    if (FeatureFlags.placesProxyEnabled) {
+      return _proxy.autocomplete(
+        query,
+        lat: lat,
+        lng: lng,
+        sessionToken: sessionToken,
+      );
+    }
+    return _places.autocomplete(
+      query,
+      lat: lat,
+      lng: lng,
+      sessionToken: sessionToken,
+    );
   }
 
   @override
-  Future<Place> getPlaceDetails(String placeId) {
-    return _places.placeDetails(placeId);
+  Future<Place> getPlaceDetails(String placeId, {String? sessionToken}) {
+    if (FeatureFlags.placesProxyEnabled) {
+      return _proxy.placeDetails(placeId, sessionToken: sessionToken);
+    }
+    return _places.placeDetails(placeId, sessionToken: sessionToken);
   }
 
   @override

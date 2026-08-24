@@ -24,18 +24,27 @@ class PlaceRepositoryImpl implements PlaceRepository {
     String query, {
     double? lat,
     double? lng,
+    String? sessionToken,
   }) async {
     try {
-      return await _dataSource.autocomplete(query, lat: lat, lng: lng);
+      return await _dataSource.autocomplete(
+        query,
+        lat: lat,
+        lng: lng,
+        sessionToken: sessionToken,
+      );
     } on DioException catch (e) {
       throw ServerException(_message(e, 'ค้นหาสถานที่ไม่สำเร็จ'));
     }
   }
 
   @override
-  Future<Place> getPlaceDetails(String placeId) async {
+  Future<Place> getPlaceDetails(String placeId, {String? sessionToken}) async {
     try {
-      return await _dataSource.getPlaceDetails(placeId);
+      return await _dataSource.getPlaceDetails(
+        placeId,
+        sessionToken: sessionToken,
+      );
     } on DioException catch (e) {
       throw ServerException(_message(e, 'ดึงข้อมูลสถานที่ไม่สำเร็จ'));
     }

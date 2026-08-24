@@ -11,5 +11,9 @@ abstract class MessengerTrackingState with _$MessengerTrackingState {
     @Default(false) bool isCancelling,
     MessengerOrder? order,
     String? error,
+    // Pay-after-match (dev): a sender-pays PromptPay order dispatches unpaid and
+    // is charged once the driver reaches pickup. Latched true when that moment
+    // arrives so the screen routes to the QR once; cleared on PAID.
+    @Default(false) bool awaitingPromptPay,
   }) = _MessengerTrackingState;
 }

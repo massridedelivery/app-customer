@@ -105,6 +105,24 @@ abstract class MessengerOrder with _$MessengerOrder {
   /// Delivery fee has been settled.
   bool get isPaid => paymentStatus.toUpperCase() == 'PAID';
 
+  /// A sender-pays PromptPay order whose fee is still owed. The customer app
+  /// dispatches these unpaid and shows the QR only once a driver reaches pickup
+  /// (pay-after-match) — see the messenger tracking screen. Cash and
+  /// recipient-pays never route through the customer QR.
+  bool get isSenderPromptPayUnpaid =>
+      !isRecipientPays &&
+      paymentMethod.toUpperCase() == 'PROMPTPAY' &&
+      !isPaid;
+
+  /// The driver has reached the sender to collect the parcel (and, for
+  /// sender-pays PromptPay, the fee). Includes PICKED_UP so a fast status jump
+  /// that skips ARRIVED_AT_PICKUP still prompts; DELIVERED is excluded (a
+  /// delivered order routes to the payment summary instead).
+  bool get isDriverAtPickup {
+    final s = status.toUpperCase();
+    return s == 'ARRIVED_AT_PICKUP' || s == 'PICKED_UP';
+  }
+
   /// Delivery fee due at collection. Prefers the server's `amount_due`
   /// (authoritative, excludes cod_amount); falls back to `fare − discount` for
   /// legacy orders that don't send it.

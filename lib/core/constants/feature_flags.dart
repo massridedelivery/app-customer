@@ -61,6 +61,17 @@ abstract class FeatureFlags {
 
   // ─── Maps ────────────────────────────────────────────────────────────────
 
+  /// Route Google Places autocomplete/details through our backend proxy
+  /// (`GET /api/places/autocomplete` + `/api/places/details`, SCRUM-74) instead
+  /// of calling `maps.googleapis.com` directly with a key baked into the app.
+  ///
+  /// Off until (1) the dev16 proxy endpoints are deployed to the API host the
+  /// app points at, and (2) ops has set `GOOGLE_PLACES_API_KEY` server-side —
+  /// without the key the proxy returns 503. While off, the app keeps using the
+  /// direct Google Places path (google_config.dart). Flip on — and then delete
+  /// the baked-in keys from google_config.dart — once both are in place.
+  static const bool placesProxyEnabled = false;
+
   /// Snap the pickup/dropoff pin onto the nearest road (Google Roads API) when
   /// the map settles. Off by default: the Roads API is a paid API and is not
   /// enabled on the iOS Places key yet (returns 403), so while off we make no

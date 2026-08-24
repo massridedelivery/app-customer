@@ -18,7 +18,7 @@ class GetPlaceDetailsUseCaseImpl implements GetPlaceDetailsUseCase {
   GetPlaceDetailsUseCaseImpl(this._repository);
 
   @override
-  Future<Place> call(String placeId) {
-    return _repository.getPlaceDetails(placeId);
+  Future<Place> call(String placeId, {String? sessionToken}) {
+    return _repository.getPlaceDetails(placeId, sessionToken: sessionToken);
   }
 }

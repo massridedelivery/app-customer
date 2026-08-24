@@ -22,7 +22,13 @@ class SearchPlacesUseCaseImpl implements SearchPlacesUseCase {
     String query, {
     double? lat,
     double? lng,
+    String? sessionToken,
   }) {
-    return _repository.autocomplete(query, lat: lat, lng: lng);
+    return _repository.autocomplete(
+      query,
+      lat: lat,
+      lng: lng,
+      sessionToken: sessionToken,
+    );
   }
 }

@@ -7,10 +7,11 @@ abstract class PlaceRepository {
     String query, {
     double? lat,
     double? lng,
+    String? sessionToken,
   });
 
   /// Resolves a prediction [placeId] into a full [Place] with coordinates.
-  Future<Place> getPlaceDetails(String placeId);
+  Future<Place> getPlaceDetails(String placeId, {String? sessionToken});
 
   /// Recently used places.
   Future<List<Place>> getRecentPlaces();

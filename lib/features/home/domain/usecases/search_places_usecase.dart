@@ -5,5 +5,6 @@ abstract class SearchPlacesUseCase {
     String query, {
     double? lat,
     double? lng,
+    String? sessionToken,
   });
 }

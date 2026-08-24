@@ -15,6 +15,7 @@ part 'messenger_tracking_controller.g.dart';
 @riverpod
 class MessengerTrackingController extends _$MessengerTrackingController {
   StreamSubscription<Map<String, dynamic>>? _socketSubscription;
+  StreamSubscription<void>? _reconnectSubscription;
   Timer? _pollingTimer;
   AppLifecycleListener? _lifecycleListener;
 
@@ -25,6 +26,7 @@ class MessengerTrackingController extends _$MessengerTrackingController {
     _lifecycleListener = AppLifecycleListener(onResume: _onResume);
     ref.onDispose(() {
       _socketSubscription?.cancel();
+      _reconnectSubscription?.cancel();
       _pollingTimer?.cancel();
       _lifecycleListener?.dispose();
     });
@@ -47,6 +49,15 @@ class MessengerTrackingController extends _$MessengerTrackingController {
     final socket = ref.read(socketServiceProvider);
     socket.connect();
     _socketSubscription = socket.messages.listen(_handleSocketMessage);
+    // Missed frames during a mid-session drop are gone (no replay) — refetch the
+    // order the moment the socket comes back so status/driver updates that
+    // landed during the gap show immediately, not at the next 10s poll.
+    _reconnectSubscription = socket.reconnected.listen((_) {
+      final id = state.orderId;
+      if (id == null) return;
+      if (state.order?.isTerminal ?? false) return;
+      _loadOrder(id);
+    });
   }
 
   void startTracking(String orderId) {

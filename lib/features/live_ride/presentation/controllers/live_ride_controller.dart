@@ -17,6 +17,7 @@ part 'live_ride_controller.g.dart';
 @riverpod
 class LiveRideController extends _$LiveRideController {
   StreamSubscription<Map<String, dynamic>>? _socketSubscription;
+  StreamSubscription<void>? _reconnectSubscription;
   DateTime? _lastLocationUpdateTime;
   Timer? _syncTimer;
   AppLifecycleListener? _lifecycleListener;
@@ -32,6 +33,7 @@ class LiveRideController extends _$LiveRideController {
     _lifecycleListener = AppLifecycleListener(onResume: _onResume);
     ref.onDispose(() {
       _socketSubscription?.cancel();
+      _reconnectSubscription?.cancel();
       _syncTimer?.cancel();
       _lifecycleListener?.dispose();
     });
@@ -61,6 +63,18 @@ class LiveRideController extends _$LiveRideController {
 
     _socketSubscription = socket.messages.listen((message) {
       _handleSocketMessage(message);
+    });
+
+    // A socket that dropped and came back mid-ride missed every frame in the
+    // gap (no server replay). Pull the authoritative job immediately on
+    // reconnect so a status change that happened during the outage shows at
+    // once, rather than waiting for the next 5–10s poll tick.
+    _reconnectSubscription = socket.reconnected.listen((_) {
+      final jobId = state.jobId;
+      if (jobId == null || jobId.isEmpty) return;
+      final status = state.jobStatus?.toUpperCase();
+      if (status == 'COMPLETED' || status == 'CANCELLED') return;
+      getDriverProfile(silent: true);
     });
   }
 

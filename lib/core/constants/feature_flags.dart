@@ -13,11 +13,11 @@ abstract class FeatureFlags {
 
   /// PromptPay (QR) for messenger parcels.
   ///
-  /// Backend-verified working (dev BE accepts payment_method=PROMPTPAY and
-  /// returns the Omise QR), but kept OFF by business decision: messenger takes
-  /// CASH only for now. While off, only CASH is offered. Flip on to re-enable
-  /// the PromptPay option — no rework needed.
-  static const bool messengerPromptPayEnabled = false;
+  /// Backend-verified working on dev15 for BOTH directions: the sender pays the
+  /// QR up front (customer intent), and payer=RECIPIENT + PROMPTPAY dispatches
+  /// unpaid so the driver shows the QR to the recipient at delivery. Enabled so
+  /// the messenger booking screen offers "เงินสด / พร้อมเพย์".
+  static const bool messengerPromptPayEnabled = true;
 
   // ─── Food delivery ─────────────────────────────────────────────────────────
   // These gate UI that has no backing API yet (SCRUM-44 audit). Flip on once

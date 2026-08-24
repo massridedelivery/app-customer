@@ -568,14 +568,26 @@ class _MessengerBookingScreenState
           ],
           const SizedBox(height: 12),
           if (vehicle != null)
-            Row(
+            Column(
               children: vehicle.sizeTiers
                   .map<Widget>(
-                    (tier) => Expanded(
-                      child: _sizeTierCard(
-                        tier,
-                        tier.tier.toUpperCase() ==
-                            bookingState.sizeTier.toUpperCase(),
+                    (tier) => _selectableRow(
+                      selected: tier.tier.toUpperCase() ==
+                          bookingState.sizeTier.toUpperCase(),
+                      onTap: () => ref
+                          .read(messengerBookingControllerProvider.notifier)
+                          .selectSizeTier(tier.tier),
+                      title: 'ขนาด ${tier.tier.toUpperCase()}',
+                      subtitle:
+                          '≤ ${tier.maxWeightKg} กก. · ${tier.maxLengthCm}×${tier.maxWidthCm}×${tier.maxHeightCm} ซม.',
+                      trailing: Text(
+                        tier.surchargeThb > 0
+                            ? '+฿${tier.surchargeThb}'
+                            : 'ฟรี',
+                        style: AppTypography.caption4.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.foundationGreen500,
+                        ),
                       ),
                     ),
                   )
@@ -586,60 +598,92 @@ class _MessengerBookingScreenState
     );
   }
 
-  Widget _sizeTierCard(MessengerSizeTier tier, bool isSelected) {
+  /// Shared selectable list row (radio + optional icon + title/subtitle +
+  /// optional trailing) used by the size, payer, and payment pickers so all
+  /// three read as one consistent list-and-radio pattern.
+  Widget _selectableRow({
+    required bool selected,
+    required VoidCallback onTap,
+    required String title,
+    String? subtitle,
+    IconData? icon,
+    Widget? trailing,
+  }) {
     return GestureDetector(
-      onTap: () => ref
-          .read(messengerBookingControllerProvider.notifier)
-          .selectSizeTier(tier.tier),
+      onTap: onTap,
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 4),
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
         decoration: BoxDecoration(
-          color: isSelected
+          color: selected
               ? AppColors.primary.withValues(alpha: 0.08)
               : AppColors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected
+            color: selected
                 ? AppColors.primary
                 : AppColors.foundationGrayscale300,
-            width: isSelected ? 2 : 1,
+            width: selected ? 2 : 1,
           ),
         ),
-        child: Column(
+        child: Row(
           children: [
-            Text(
-              tier.tier.toUpperCase(),
-              style: AppTypography.heading4.copyWith(
-                fontWeight: FontWeight.bold,
-                color: isSelected ? AppColors.primary : AppColors.textPrimary,
+            _radio(selected),
+            if (icon != null) ...[
+              const SizedBox(width: 12),
+              Icon(
+                icon,
+                size: 20,
+                color: selected ? AppColors.primary : AppColors.textSecondary,
+              ),
+            ],
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: AppTypography.caption4.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: selected
+                          ? AppColors.primary
+                          : AppColors.textPrimary,
+                    ),
+                  ),
+                  if (subtitle != null)
+                    Text(
+                      subtitle,
+                      style: AppTypography.caption5.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                ],
               ),
             ),
-            const SizedBox(height: 4),
-            Text(
-              '≤ ${tier.maxWeightKg} กก.',
-              style: AppTypography.caption5.copyWith(
-                color: AppColors.textSecondary,
-              ),
-            ),
-            Text(
-              '≤ ${tier.maxLengthCm}×${tier.maxWidthCm}×${tier.maxHeightCm} ซม.',
-              style: AppTypography.support2.copyWith(
-                color: AppColors.textSecondary,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              tier.surchargeThb > 0 ? '+฿${tier.surchargeThb}' : 'ฟรี',
-              style: AppTypography.caption4.copyWith(
-                fontWeight: FontWeight.bold,
-                color: isSelected
-                    ? AppColors.primary
-                    : AppColors.foundationGreen500,
-              ),
-            ),
+            if (trailing != null) ...[
+              const SizedBox(width: 8),
+              trailing,
+            ],
           ],
+        ),
+      ),
+    );
+  }
+
+  /// Radio indicator for [_selectableRow] — a filled ring when selected.
+  Widget _radio(bool selected) {
+    return Container(
+      width: 20,
+      height: 20,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: AppColors.white,
+        border: Border.all(
+          color: selected
+              ? AppColors.primary
+              : AppColors.foundationGrayscale400,
+          width: selected ? 6 : 1.5,
         ),
       ),
     );
@@ -821,26 +865,25 @@ class _MessengerBookingScreenState
             style: AppTypography.heading6.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
-          Row(
+          Column(
             children: [
-              Expanded(
-                child: _payerOption(
-                  'SENDER',
-                  'ผู้ส่ง',
-                  'จ่ายตอนนี้',
-                  Icons.person_outline,
-                  payer == 'SENDER',
-                ),
+              _selectableRow(
+                selected: payer == 'SENDER',
+                onTap: () => ref
+                    .read(messengerBookingControllerProvider.notifier)
+                    .setPayer('SENDER'),
+                icon: Icons.person_outline,
+                title: 'ผู้ส่ง (คุณ)',
+                subtitle: 'จ่ายค่าส่งตอนนี้',
               ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _payerOption(
-                  'RECIPIENT',
-                  'ผู้รับ',
-                  'เก็บปลายทาง',
-                  Icons.pin_drop_outlined,
-                  payer == 'RECIPIENT',
-                ),
+              _selectableRow(
+                selected: payer == 'RECIPIENT',
+                onTap: () => ref
+                    .read(messengerBookingControllerProvider.notifier)
+                    .setPayer('RECIPIENT'),
+                icon: Icons.pin_drop_outlined,
+                title: 'ผู้รับปลายทาง',
+                subtitle: 'เก็บเงินตอนส่งของ',
               ),
             ],
           ),
@@ -871,59 +914,6 @@ class _MessengerBookingScreenState
     );
   }
 
-  Widget _payerOption(
-    String value,
-    String label,
-    String subtitle,
-    IconData icon,
-    bool isSelected,
-  ) {
-    return GestureDetector(
-      onTap: () =>
-          ref.read(messengerBookingControllerProvider.notifier).setPayer(value),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? AppColors.primary.withValues(alpha: 0.08)
-              : AppColors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected
-                ? AppColors.primary
-                : AppColors.foundationGrayscale300,
-            width: isSelected ? 2 : 1,
-          ),
-        ),
-        child: Column(
-          children: [
-            Icon(
-              icon,
-              color: isSelected ? AppColors.primary : AppColors.textSecondary,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              maxLines: 1,
-              style: AppTypography.caption4.copyWith(
-                fontWeight: FontWeight.bold,
-                color:
-                    isSelected ? AppColors.primary : AppColors.textSecondary,
-              ),
-            ),
-            Text(
-              subtitle,
-              maxLines: 1,
-              style: AppTypography.caption4.copyWith(
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   // ─── Payment ───────────────────────────────────────────────────────────────
 
   Widget _buildPaymentCard(MessengerBookingState bookingState) {
@@ -938,42 +928,38 @@ class _MessengerBookingScreenState
             style: AppTypography.heading6.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
-          Row(
+          Column(
             children: [
-              Expanded(
-                child: _paymentOption(
-                  'CASH',
-                  'เงินสด',
-                  Icons.payments_outlined,
-                  method == 'CASH',
-                ),
+              _selectableRow(
+                selected: method == 'CASH',
+                onTap: () => ref
+                    .read(messengerBookingControllerProvider.notifier)
+                    .setPaymentMethod('CASH'),
+                icon: Icons.payments_outlined,
+                title: 'เงินสด',
               ),
               // PromptPay is gated off until the messenger backend accepts
               // digital payment (SCRUM-41 phase 1 = CASH|COD; PROMPTPAY 400s).
-              if (FeatureFlags.messengerPromptPayEnabled) ...[
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _paymentOption(
-                    'PROMPTPAY',
-                    'พร้อมเพย์',
-                    Icons.qr_code_2_rounded,
-                    method == 'PROMPTPAY',
-                  ),
+              if (FeatureFlags.messengerPromptPayEnabled)
+                _selectableRow(
+                  selected: method == 'PROMPTPAY',
+                  onTap: () => ref
+                      .read(messengerBookingControllerProvider.notifier)
+                      .setPaymentMethod('PROMPTPAY'),
+                  icon: Icons.qr_code_2_rounded,
+                  title: 'พร้อมเพย์',
                 ),
-              ],
               // COD hidden behind a flag until its collection/settlement flow
               // is finalised (FeatureFlags.messengerCodEnabled).
-              if (FeatureFlags.messengerCodEnabled) ...[
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _paymentOption(
-                    'COD',
-                    'เก็บเงินปลายทาง',
-                    Icons.local_atm,
-                    method == 'COD',
-                  ),
+              if (FeatureFlags.messengerCodEnabled)
+                _selectableRow(
+                  selected: method == 'COD',
+                  onTap: () => ref
+                      .read(messengerBookingControllerProvider.notifier)
+                      .setPaymentMethod('COD'),
+                  icon: Icons.local_atm,
+                  title: 'เก็บเงินปลายทาง',
                 ),
-              ],
             ],
           ),
           if (FeatureFlags.messengerCodEnabled && isCod) ...[
@@ -1061,59 +1047,6 @@ class _MessengerBookingScreenState
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _paymentOption(
-    String value,
-    String label,
-    IconData icon,
-    bool isSelected,
-  ) {
-    return GestureDetector(
-      onTap: () => ref
-          .read(messengerBookingControllerProvider.notifier)
-          .setPaymentMethod(value),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? AppColors.primary.withValues(alpha: 0.08)
-              : AppColors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected
-                ? AppColors.primary
-                : AppColors.foundationGrayscale300,
-            width: isSelected ? 2 : 1,
-          ),
-        ),
-        child: Column(
-          children: [
-            Icon(
-              icon,
-              color: isSelected ? AppColors.primary : AppColors.textSecondary,
-            ),
-            const SizedBox(height: 4),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(
-                  label,
-                  maxLines: 1,
-                  style: AppTypography.caption4.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: isSelected
-                        ? AppColors.primary
-                        : AppColors.textSecondary,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

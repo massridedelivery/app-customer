@@ -577,6 +577,7 @@ class _MessengerBookingScreenState
                       onTap: () => ref
                           .read(messengerBookingControllerProvider.notifier)
                           .selectSizeTier(tier.tier),
+                      badgeText: tier.tier.toUpperCase(),
                       title: 'ขนาด ${tier.tier.toUpperCase()}',
                       subtitle:
                           '≤ ${tier.maxWeightKg} กก. · ${tier.maxLengthCm}×${tier.maxWidthCm}×${tier.maxHeightCm} ซม.',
@@ -598,45 +599,58 @@ class _MessengerBookingScreenState
     );
   }
 
-  /// Shared selectable list row (radio + optional icon + title/subtitle +
-  /// optional trailing) used by the size, payer, and payment pickers so all
-  /// three read as one consistent list-and-radio pattern.
+  /// Shared selectable card row used by the size, payer, and payment pickers so
+  /// all three match the delivery-type card ([_deliveryOption]): a circular
+  /// leading badge (an [icon] or a short [badgeText]), title + optional
+  /// subtitle, optional [trailing], and a green outline + tint when selected.
   Widget _selectableRow({
     required bool selected,
     required VoidCallback onTap,
     required String title,
     String? subtitle,
     IconData? icon,
+    String? badgeText,
     Widget? trailing,
   }) {
+    final Color badgeContent =
+        selected ? AppColors.foundationGreen600 : AppColors.textSecondary;
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: const EdgeInsets.only(bottom: 8),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         decoration: BoxDecoration(
           color: selected
-              ? AppColors.primary.withValues(alpha: 0.08)
+              ? AppColors.foundationGreen500.withValues(alpha: 0.06)
               : AppColors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: selected
-                ? AppColors.primary
+                ? AppColors.foundationGreen500
                 : AppColors.foundationGrayscale300,
             width: selected ? 2 : 1,
           ),
         ),
         child: Row(
           children: [
-            _radio(selected),
-            if (icon != null) ...[
-              const SizedBox(width: 12),
-              Icon(
-                icon,
-                size: 20,
-                color: selected ? AppColors.primary : AppColors.textSecondary,
+            Container(
+              width: 40,
+              height: 40,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: badgeContent.withValues(alpha: 0.12),
+                shape: BoxShape.circle,
               ),
-            ],
+              child: badgeText != null
+                  ? Text(
+                      badgeText,
+                      style: AppTypography.label1.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: badgeContent,
+                      ),
+                    )
+                  : Icon(icon, size: 22, color: badgeContent),
+            ),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -644,20 +658,20 @@ class _MessengerBookingScreenState
                 children: [
                   Text(
                     title,
-                    style: AppTypography.caption4.copyWith(
+                    style: AppTypography.label1.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: selected
-                          ? AppColors.primary
-                          : AppColors.textPrimary,
+                      color: AppColors.textPrimary,
                     ),
                   ),
-                  if (subtitle != null)
+                  if (subtitle != null) ...[
+                    const SizedBox(height: 2),
                     Text(
                       subtitle,
                       style: AppTypography.caption5.copyWith(
                         color: AppColors.textSecondary,
                       ),
                     ),
+                  ],
                 ],
               ),
             ),
@@ -666,24 +680,6 @@ class _MessengerBookingScreenState
               trailing,
             ],
           ],
-        ),
-      ),
-    );
-  }
-
-  /// Radio indicator for [_selectableRow] — a filled ring when selected.
-  Widget _radio(bool selected) {
-    return Container(
-      width: 20,
-      height: 20,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: AppColors.white,
-        border: Border.all(
-          color: selected
-              ? AppColors.primary
-              : AppColors.foundationGrayscale400,
-          width: selected ? 6 : 1.5,
         ),
       ),
     );

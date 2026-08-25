@@ -1,6 +1,7 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/constants/layout.dart';
+import 'package:customer_app/core/widgets/coming_soon_dialog.dart';
 import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/core/localization/locale_controller.dart';
 import 'package:customer_app/features/auth/presentation/controllers/auth_controller.dart';
@@ -9,6 +10,11 @@ import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+/// Customer support line, shown + dialled from the profile "ติดต่อเจ้าหน้าที่"
+/// row.
+const String _supportPhoneNumber = '0899999999';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -76,11 +82,6 @@ class ProfileScreen extends ConsumerWidget {
                         ),
                         onTap: () => _showLangSelector(context, ref, l10n),
                       ),
-                      _MenuTile(
-                        icon: Icons.card_giftcard_rounded,
-                        title: 'แต้มสะสม',
-                        onTap: () => context.push('/loyalty'),
-                      ),
                     ],
                   ),
                   const SizedBox(height: 24),
@@ -98,6 +99,22 @@ class ProfileScreen extends ConsumerWidget {
                         icon: Icons.privacy_tip_outlined,
                         title: l10n.privacyPdpa,
                         onTap: () => context.push('/privacy'),
+                      ),
+                      _MenuTile(
+                        icon: Icons.shield_outlined,
+                        title: 'นโยบายความเป็นส่วนตัว',
+                        onTap: () => _openPrivacyPolicy(),
+                      ),
+                      _MenuTile(
+                        icon: Icons.headset_mic_outlined,
+                        title: 'ติดต่อเจ้าหน้าที่',
+                        trailing: Text(
+                          _supportPhoneNumber,
+                          style: AppTypography.body3.copyWith(
+                            color: AppColors.primary,
+                          ),
+                        ),
+                        onTap: () => _callSupport(),
                       ),
                     ],
                   ),
@@ -132,6 +149,17 @@ class ProfileScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _openPrivacyPolicy() async {
+    await launchUrl(
+      Uri.parse('https://massridedelivery.com/privacy'),
+      mode: LaunchMode.externalApplication,
+    );
+  }
+
+  Future<void> _callSupport() async {
+    await launchUrl(Uri(scheme: 'tel', path: _supportPhoneNumber));
   }
 
   void _showLangSelector(
@@ -432,12 +460,6 @@ class _QuickActionsGrid extends StatelessWidget {
         color: Color(0xFFF3FBF5),
       ),
       _ActionItem(
-        icon: Icons.restaurant_rounded,
-        label: l10n.orders,
-        route: '/food-delivery',
-        color: Color(0xFFFFF7ED),
-      ),
-      _ActionItem(
         icon: Icons.location_on_outlined,
         label: l10n.addresses,
         route: '/saved-places',
@@ -449,17 +471,14 @@ class _QuickActionsGrid extends StatelessWidget {
         route: '/promos',
         color: Color(0xFFFEF2F2),
       ),
+      // Card payment isn't live yet — surface a "coming soon" notice instead of
+      // the (empty) card-management flow.
       _ActionItem(
         icon: Icons.credit_card_rounded,
         label: l10n.creditCard,
-        route: '/credit-cards',
+        route: '#',
+        comingSoon: true,
         color: Color(0xFFF5F3FF),
-      ),
-      _ActionItem(
-        icon: Icons.group_add_rounded,
-        label: 'ชวนเพื่อน',
-        route: '/referral',
-        color: Color(0xFFF0FDFA),
       ),
     ];
 
@@ -495,17 +514,26 @@ class _ActionItem extends StatelessWidget {
   final String route;
   final Color color;
 
+  /// When true, tapping shows the "coming soon" dialog instead of navigating —
+  /// for features that aren't live yet (e.g. card payment).
+  final bool comingSoon;
+
   const _ActionItem({
     required this.icon,
     required this.label,
     required this.route,
     required this.color,
+    this.comingSoon = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
+        if (comingSoon) {
+          showComingSoonDialog(context);
+          return;
+        }
         if (route == '#') return;
         if (route.startsWith('/main')) {
           context.go(route);

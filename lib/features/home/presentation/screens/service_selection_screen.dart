@@ -1,6 +1,7 @@
 import 'package:customer_app/core/constants/app_assets.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_icons.dart';
+import 'package:customer_app/core/widgets/coming_soon_dialog.dart';
 import 'package:customer_app/core/constants/layout.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/constants/feature_flags.dart';
@@ -247,7 +248,8 @@ class _ServiceSelectionScreenState
 
   Widget _buildSearchBar(double t) {
     return GestureDetector(
-      onTap: () => context.push('/item-search'),
+      // Restaurant/menu search is part of food ordering — not live yet.
+      onTap: () => showComingSoonDialog(context),
       child: Container(
         height: 48,
         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -321,7 +323,9 @@ class _ServiceSelectionScreenState
             'ลด ฿100*',
             Colors.red,
             AppAssets.ic3dFood,
-            onTap: () => context.push('/food-delivery'),
+            // Food ordering isn't live yet — show a "coming soon" notice instead
+            // of opening the unfinished flow.
+            onTap: () => showComingSoonDialog(context),
           ),
           _buildServiceCard(
             context,

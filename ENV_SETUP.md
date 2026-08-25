@@ -32,10 +32,23 @@ backend prod (`driver-api.nutchaphut.dev`) ยังไม่ขึ้น — Cl
 
 ```bash
 make run_prod_devapi          # รันบนเครื่อง
-make build_aab_prod_devapi    # AAB
-make ipa_prod_devapi          # IPA
+make build_aab_prod_devapi    # AAB อย่างเดียว
+make ipa_prod_devapi          # IPA อย่างเดียว
 make deploy_prod_devapi       # bump + IPA + TestFlight
 make deploy_play_prod_devapi  # bump + AAB + Play internal
+make deploy_both_prod_devapi  # bump ครั้งเดียว → ส่งทั้ง TestFlight + Play
+```
+
+`deploy_both_prod_devapi` มีไว้เพราะ `deploy_prod_devapi` กับ `deploy_play_prod_devapi`
+ต่างก็ `bump` เอง ถ้ารันต่อกันเลข build จะขยับสองครั้ง (`+49` แล้ว `+50`) iOS กับ Android
+เลยไม่ตรงกัน ตัวรวมทำ `bump` รอบเดียวแล้ว build ให้ครบทั้งสองก่อนค่อย upload —
+ถ้าฝั่งไหน build พังจะไม่มี artifact หลุดขึ้น store ไปก่อน
+
+ถ้า build ค้างไว้แล้วอยาก upload ซ้ำอย่างเดียว (ไม่ bump ไม่ build):
+
+```bash
+make upload_testflight_prod_devapi
+make upload_play_prod_devapi
 ```
 
 ทำไมต้องมีไฟล์แยก: `env/prod.json` อยู่ใน `.gitignore` (มีเฉพาะเครื่องแต่ละคน)

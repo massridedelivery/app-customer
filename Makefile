@@ -1,4 +1,7 @@
-.PHONY: gen watch fix clean clean_cache test test_cov analyze pre_pr run_dev run_prod run_ios_dev run_ios_prod build_apk_dev build_apk_dev_arm64 install_dev build_apk_prod build_ios_dev build_ios_prod build_aab_dev build_aab_prod deploy_play_dev deploy_play_prod deploy_play_check run_prod_devapi build_apk_prod_devapi build_aab_prod_devapi ipa_prod_devapi deploy_prod_devapi deploy_play_prod_devapi
+.PHONY: gen watch fix clean clean_cache test test_cov analyze pre_pr run_dev run_prod run_ios_dev run_ios_prod build_apk_dev build_apk_dev_arm64 install_dev build_apk_prod build_ios_dev build_ios_prod build_aab_dev build_aab_prod deploy_play_dev deploy_play_prod deploy_play_check run_prod_devapi build_apk_prod_devapi build_aab_prod_devapi ipa_prod_devapi deploy_prod_devapi deploy_play_prod_devapi upload_testflight_prod_devapi upload_play_prod_devapi deploy_both_prod_devapi
+
+# ทุก target เป็นสเต็ปที่ต้องเรียงกัน (build ก่อน upload) — กัน -j สลับลำดับ
+.NOTPARALLEL:
 
 # 📁 โฟลเดอร์เก็บ debug symbols ของ Dart (จาก --obfuscate) — ใช้ de-obfuscate stack trace ทีหลัง
 SYMBOLS := build/symbols
@@ -177,15 +180,26 @@ build_aab_prod_devapi:
 ipa_prod_devapi:
 	flutter build ipa --flavor prod --dart-define-from-file=env/prod-devapi.json --export-method app-store
 
-# 🚀 bump + build + upload prod (ชี้ dev API) ขึ้น TestFlight
-deploy_prod_devapi: bump ipa_prod_devapi
+# ⬆️  ขั้น upload ล้วนๆ — ไม่ bump ไม่ build ใช้กับ artifact ที่ build ค้างไว้แล้ว
+upload_testflight_prod_devapi:
 	xcrun altool --upload-app --type ios \
 		-f build/ios/ipa/customer_app.ipa \
 		--apiKey M4PPU86374 --apiIssuer 03750a9c-5c4e-4be1-bb27-546000146161
 
-# 🚀 bump + build prod AAB (ชี้ dev API) + upload ขึ้น Google Play internal track
-deploy_play_prod_devapi: bump build_aab_prod_devapi
+upload_play_prod_devapi:
 	cd android && \
 		PLAY_PACKAGE_NAME=com.massdrive.customer_app \
 		AAB_PATH="$(CURDIR)/build/app/outputs/bundle/prodRelease/app-prod-release.aab" \
 		bundle exec fastlane deploy track:internal
+
+# 🚀 bump + build + upload prod (ชี้ dev API) ขึ้น TestFlight
+deploy_prod_devapi: bump ipa_prod_devapi upload_testflight_prod_devapi
+
+# 🚀 bump + build prod AAB (ชี้ dev API) + upload ขึ้น Google Play internal track
+deploy_play_prod_devapi: bump build_aab_prod_devapi upload_play_prod_devapi
+
+# 🚀 ส่งทั้ง TestFlight + Play ด้วย build number เดียวกัน — bump ทำงานครั้งเดียว
+# เพราะ make สร้าง prerequisite ที่ซ้ำกันแค่รอบเดียวต่อการเรียกหนึ่งครั้ง
+# ลำดับสำคัญ: build ให้ครบทั้งสองก่อนค่อย upload — ฝั่งไหน build พังจะไม่มีอะไรหลุดขึ้นไปก่อน
+# (.NOTPARALLEL ด้านบนกันไม่ให้ -j สลับลำดับ)
+deploy_both_prod_devapi: bump ipa_prod_devapi build_aab_prod_devapi upload_testflight_prod_devapi upload_play_prod_devapi

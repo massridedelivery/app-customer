@@ -6,13 +6,6 @@ import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:package_info_plus/package_info_plus.dart';
-
-/// Real app version read from the bundle, so the footer never goes stale.
-final appVersionProvider = FutureProvider<String>((ref) async {
-  final info = await PackageInfo.fromPlatform();
-  return '${info.version} (${info.buildNumber})';
-});
 
 // Neutral slate palette shared with the rest of the auth flow (see otp_screen).
 // Kept as named constants so the values live in one place.
@@ -176,26 +169,6 @@ class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
                             ),
                           ),
                         const SizedBox(height: 84),
-
-                        // Footer version
-                        Center(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            child: Text(
-                              ref
-                                  .watch(appVersionProvider)
-                                  .maybeWhen(
-                                    data: (v) => 'เวอร์ชัน $v',
-                                    orElse: () => '',
-                                  ),
-                              textAlign: TextAlign.center,
-                              style: AppTypography.body3.copyWith(
-                                color: _kTextSecondary.withValues(alpha: 0.5),
-                                height: 1.5,
-                              ),
-                            ),
-                          ),
-                        ),
                       ],
                     ),
                   ),

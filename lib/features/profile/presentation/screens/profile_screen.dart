@@ -1,6 +1,7 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/constants/layout.dart';
+import 'package:customer_app/core/providers/app_version_provider.dart';
 import 'package:customer_app/core/widgets/coming_soon_dialog.dart';
 import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/core/localization/locale_controller.dart';
@@ -133,6 +134,19 @@ class ProfileScreen extends ConsumerWidget {
                         style: AppTypography.label2.copyWith(
                           color: AppColors.error,
                         ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  // App version (moved here from the login screen).
+                  Center(
+                    child: Text(
+                      ref.watch(appVersionProvider).maybeWhen(
+                            data: (v) => 'เวอร์ชัน $v',
+                            orElse: () => '',
+                          ),
+                      style: AppTypography.body3.copyWith(
+                        color: AppColors.textSecondary.withValues(alpha: 0.6),
                       ),
                     ),
                   ),

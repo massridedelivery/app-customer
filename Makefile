@@ -1,4 +1,4 @@
-.PHONY: gen watch fix clean clean_cache test test_cov analyze pre_pr run_dev run_prod run_ios_dev run_ios_prod build_apk_dev build_apk_dev_arm64 install_dev build_apk_prod build_ios_dev build_ios_prod build_aab_dev build_aab_prod deploy_play_dev deploy_play_prod deploy_play_check
+.PHONY: gen watch fix clean clean_cache test test_cov analyze pre_pr run_dev run_prod run_ios_dev run_ios_prod build_apk_dev build_apk_dev_arm64 install_dev build_apk_prod build_ios_dev build_ios_prod build_aab_dev build_aab_prod deploy_play_dev deploy_play_prod deploy_play_check run_prod_devapi build_apk_prod_devapi build_aab_prod_devapi ipa_prod_devapi deploy_prod_devapi deploy_play_prod_devapi
 
 # 📁 โฟลเดอร์เก็บ debug symbols ของ Dart (จาก --obfuscate) — ใช้ de-obfuscate stack trace ทีหลัง
 SYMBOLS := build/symbols
@@ -148,6 +148,43 @@ deploy_play_dev: bump build_aab_dev
 # 🚀 bump + build prod AAB + upload to Google Play internal track
 # needs env/prod.json (real Maps key) in addition to the signing + service account
 deploy_play_prod: bump build_aab_prod
+	cd android && \
+		PLAY_PACKAGE_NAME=com.massdrive.customer_app \
+		AAB_PATH="$(CURDIR)/build/app/outputs/bundle/prodRelease/app-prod-release.aab" \
+		bundle exec fastlane deploy track:internal
+
+# ─── ⚠️  ชั่วคราว: prod flavor → dev API ─────────────────────────────────────
+# backend prod (driver-api.nutchaphut.dev) ยังไม่ขึ้น (Cloudflare ตอบ 502) ชุดนี้จึง build
+# ด้วย flavor prod (applicationId/bundle id จริง ชื่อ "Customer") แต่ชี้ API/WS ไปที่
+# dev ผ่าน env/prod-devapi.json — ดู ENV_SETUP.md → "prod ชี้ dev API (ชั่วคราว)"
+#
+# ข้อจำกัด: push notification จะไม่เข้า — เครื่อง register FCM token ของ Firebase
+# project prod แต่ backend dev ส่ง push ผ่าน project dev (register พลาดถูก ignore อยู่แล้ว)
+#
+# พอ backend prod ขึ้น: เลิกใช้ target ชุดนี้ กลับไปใช้ run_prod / build_aab_prod / deploy_play_prod
+# ตามเดิม แล้วลบ block นี้ + env/prod-devapi.json ทิ้ง
+
+run_prod_devapi:
+	flutter run --flavor prod --dart-define-from-file=env/prod-devapi.json
+
+build_apk_prod_devapi:
+	flutter build apk --release --flavor prod --dart-define-from-file=env/prod-devapi.json
+
+build_aab_prod_devapi:
+	flutter build appbundle --release --flavor prod --dart-define-from-file=env/prod-devapi.json \
+		--obfuscate --split-debug-info=$(SYMBOLS)
+
+ipa_prod_devapi:
+	flutter build ipa --flavor prod --dart-define-from-file=env/prod-devapi.json --export-method app-store
+
+# 🚀 bump + build + upload prod (ชี้ dev API) ขึ้น TestFlight
+deploy_prod_devapi: bump ipa_prod_devapi
+	xcrun altool --upload-app --type ios \
+		-f build/ios/ipa/customer_app.ipa \
+		--apiKey M4PPU86374 --apiIssuer 03750a9c-5c4e-4be1-bb27-546000146161
+
+# 🚀 bump + build prod AAB (ชี้ dev API) + upload ขึ้น Google Play internal track
+deploy_play_prod_devapi: bump build_aab_prod_devapi
 	cd android && \
 		PLAY_PACKAGE_NAME=com.massdrive.customer_app \
 		AAB_PATH="$(CURDIR)/build/app/outputs/bundle/prodRelease/app-prod-release.aab" \

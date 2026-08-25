@@ -12,6 +12,7 @@ come from `env/dev.json` or `env/prod.json` via `lib/core/config/app_env.dart`
 | `env/dev.json` | ✅ yes | dev config (non-secret) |
 | `env/prod.json` | ❌ gitignored | real prod config (may hold keys) |
 | `env/prod.json.example` | ✅ yes | template — copy to `env/prod.json` |
+| `env/prod-devapi.json` | ✅ yes | **ชั่วคราว** — flavor prod แต่ชี้ API/WS ของ dev (ดูด้านล่าง) |
 
 Keys: `FLAVOR`, `APP_NAME`, `API_BASE_URL`, `WS_BASE_URL`,
 `GOOGLE_PLACES_KEY_ANDROID`, `GOOGLE_PLACES_KEY_IOS` (Places keys optional —
@@ -21,6 +22,34 @@ First-time setup:
 ```bash
 cp env/prod.json.example env/prod.json   # then fill in any prod-only keys
 ```
+
+## prod ชี้ dev API (ชั่วคราว) ⚠️
+
+backend prod (`driver-api.nutchaphut.dev`) ยังไม่ขึ้น — Cloudflare ตอบ **502** ทุก path
+(dev host `driver-api-dev.nutchaphut.dev` ตอบ 200 ปกติ) ระหว่างนี้จึง build ด้วย
+`env/prod-devapi.json` — flavor `prod` เหมือนเดิม (applicationId / bundle id / ชื่อ
+"Customer" จริง) แต่ `API_BASE_URL` / `WS_BASE_URL` ชี้ dev
+
+```bash
+make run_prod_devapi          # รันบนเครื่อง
+make build_aab_prod_devapi    # AAB
+make ipa_prod_devapi          # IPA
+make deploy_prod_devapi       # bump + IPA + TestFlight
+make deploy_play_prod_devapi  # bump + AAB + Play internal
+```
+
+ทำไมต้องมีไฟล์แยก: `env/prod.json` อยู่ใน `.gitignore` (มีเฉพาะเครื่องแต่ละคน)
+ค่าที่ตั้งไว้จึง track ไม่ได้ ไฟล์แยกทำให้ทุกเครื่อง/CI build ได้เหมือนกัน
+และ `env/prod.json.example` ยังเป็น template ของ prod จริงไม่โดนแก้
+
+ข้อจำกัด — **push notification จะไม่เข้า**: prod flavor ใช้ Firebase project
+`prod-mass-ride-delivery` แต่ backend dev ส่ง push ผ่าน `mass-ride-delivery`
+ไม่กระทบส่วนอื่น — ล็อกอินเป็น OTP เบอร์โทรที่ backend ออก token เอง ไม่ได้ใช้
+Firebase Auth และ register device token ที่ `push_notification_service.dart` จับ error ทิ้งอยู่แล้ว
+
+เมื่อ backend prod ขึ้น: กลับไปใช้ `make run_prod` / `build_aab_prod` / `deploy_play_prod`
+ตามเดิม แล้วลบ `env/prod-devapi.json` + กลุ่ม target `*_devapi` ใน `Makefile` ทิ้ง
+(อย่าลืมเช็คว่า `env/prod.json` ในเครื่องชี้ host ประจำจริงหรือยัง)
 
 ## Run / build
 

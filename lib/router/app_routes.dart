@@ -26,7 +26,6 @@ import 'package:customer_app/features/home/presentation/screens/transport/messen
 import 'package:customer_app/features/home/presentation/screens/transport/pickup_selection_screen.dart';
 import 'package:customer_app/features/home/presentation/screens/transport/place_search_screen.dart';
 import 'package:customer_app/features/home/presentation/screens/transport/ride_landing_screen.dart';
-import 'package:customer_app/features/home/presentation/screens/service_unavailable_screen.dart';
 import 'package:customer_app/features/chat/presentation/screens/chat_screen.dart';
 import 'package:customer_app/features/live_ride/presentation/screens/live_ride_screen.dart';
 import 'package:customer_app/features/live_ride/presentation/screens/payment_summary_screen.dart';
@@ -345,19 +344,6 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/ride-landing',
         builder: (context, state) => const RideLandingScreen(),
-      ),
-      GoRoute(
-        path: '/service-unavailable',
-        builder: (context, state) {
-          final extra = state.extra;
-          final data = extra is Map ? extra : const {};
-          return ServiceUnavailableScreen(
-            areaName: (data['areaName'] ?? '').toString(),
-            lat: (data['lat'] as num?)?.toDouble(),
-            lng: (data['lng'] as num?)?.toDouble(),
-            serviceLabel: (data['serviceLabel'] ?? 'เรียกรถ').toString(),
-          );
-        },
       ),
       GoRoute(
         path: '/food-delivery',

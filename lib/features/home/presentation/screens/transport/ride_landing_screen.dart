@@ -3,7 +3,6 @@ import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_icons.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/widgets/hero_header.dart';
-import 'package:customer_app/features/home/data/repositories/service_area_repository.dart';
 import 'package:customer_app/features/home/domain/models/place.dart';
 import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
 import 'package:customer_app/features/trips/domain/models/history_order.dart';
@@ -39,27 +38,6 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
             .read(tripsControllerProvider.notifier)
             .fetchHistoryOrders(type: HistoryType.ride);
       }
-      _checkServiceZone();
-    });
-  }
-
-  /// Zone gate (SCRUM zone-availability): ask the backend whether ride service
-  /// is open at the customer's current location. Fail-open — if the location
-  /// isn't known yet, or the check errors / the endpoint isn't live, we stay on
-  /// this screen and behave exactly as today. Only an explicit `available:false`
-  /// routes to the "coming soon in your area" screen.
-  Future<void> _checkServiceZone() async {
-    final loc = ref.read(homeControllerProvider).currentLocation;
-    if (loc == null) return; // no location yet → don't gate
-    final result = await ref
-        .read(serviceAreaRepositoryProvider)
-        .check(lat: loc.latitude, lng: loc.longitude);
-    if (!mounted || result.available) return;
-    context.pushReplacement('/service-unavailable', extra: {
-      'areaName': result.areaName,
-      'lat': loc.latitude,
-      'lng': loc.longitude,
-      'serviceLabel': 'เรียกรถ',
     });
   }
 

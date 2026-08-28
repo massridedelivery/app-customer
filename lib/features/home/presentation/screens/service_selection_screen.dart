@@ -5,6 +5,7 @@ import 'package:customer_app/core/widgets/coming_soon_dialog.dart';
 import 'package:customer_app/core/constants/layout.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/constants/feature_flags.dart';
+import 'package:customer_app/features/home/data/repositories/service_area_repository.dart';
 import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
 import 'package:customer_app/features/home/presentation/states/home_state.dart';
 import 'package:customer_app/features/active_orders/presentation/controllers/active_orders_controller.dart';
@@ -314,7 +315,12 @@ class _ServiceSelectionScreenState
             'ลด ฿100*',
             Colors.red,
             AppAssets.ic3dRide,
-            onTap: () => context.push('/ride-landing'),
+            onTap: () => _openWithZoneCheck(
+              service: 'ride',
+              iconAsset: AppAssets.ic3dRide,
+              serviceName: 'เรียกรถ',
+              onAvailable: () => context.push('/ride-landing'),
+            ),
           ),
           _buildServiceCard(
             context,
@@ -334,21 +340,60 @@ class _ServiceSelectionScreenState
             null,
             null,
             AppAssets.ic3dMessenger,
-            onTap: () {
-              // If a messenger order is already running, resume it instead of
-              // letting the customer start a second one.
-              final active =
-                  ref.read(activeOrdersControllerProvider).value ?? const [];
-              final ongoing = active.where((o) => o.isMessenger);
-              if (ongoing.isNotEmpty) {
-                context.push('/messenger/tracking/${ongoing.first.id}');
-              } else {
-                context.push('/messenger-booking');
-              }
-            },
+            onTap: () => _openWithZoneCheck(
+              service: 'messenger',
+              iconAsset: AppAssets.ic3dMessenger,
+              serviceName: 'ส่งพัสดุ',
+              onAvailable: () {
+                // If a messenger order is already running, resume it instead of
+                // letting the customer start a second one.
+                final active =
+                    ref.read(activeOrdersControllerProvider).value ?? const [];
+                final ongoing = active.where((o) => o.isMessenger);
+                if (ongoing.isNotEmpty) {
+                  context.push('/messenger/tracking/${ongoing.first.id}');
+                } else {
+                  context.push('/messenger-booking');
+                }
+              },
+            ),
           ),
         ],
       ),
+    );
+  }
+
+  /// Zone gate (SCRUM-99): check whether [service] is open at the customer's
+  /// current location before entering its flow. Fail-open — an unknown location
+  /// or any error / not-yet-shipped endpoint proceeds normally; only an explicit
+  /// `available:false` shows the out-of-area dialog with the section's 3D icon.
+  Future<void> _openWithZoneCheck({
+    required String service,
+    required String iconAsset,
+    required String serviceName,
+    required VoidCallback onAvailable,
+  }) async {
+    final loc = ref.read(homeControllerProvider).currentLocation;
+    if (loc == null) {
+      onAvailable(); // no location yet → don't gate
+      return;
+    }
+    final result = await ref
+        .read(serviceAreaRepositoryProvider)
+        .check(lat: loc.latitude, lng: loc.longitude, service: service);
+    if (!mounted) return;
+    if (result.available) {
+      onAvailable();
+      return;
+    }
+    final area =
+        result.areaName.isNotEmpty ? result.areaName : 'พื้นที่ของคุณ';
+    showComingSoonDialog(
+      context,
+      title: 'เร็วๆ นี้ในพื้นที่ของคุณ',
+      message: 'บริการ$serviceName ยังไม่เปิดให้บริการใน$area',
+      iconAsset: iconAsset,
+      locationLabel: 'ตำแหน่งของคุณ: $area',
     );
   }
 

@@ -117,6 +117,42 @@ class _MessengerTrackingScreenState
     }
   }
 
+  /// Customer fallback when they can't scan the driver's QR (dead battery / no
+  /// signal): switch the order to cash so the driver collects it in person.
+  Future<void> _confirmSwitchToCash(String orderId) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('จ่ายเงินสดแทน', style: AppTypography.heading4),
+        content: const Text(
+          'เปลี่ยนเป็นจ่ายเงินสดกับคนขับที่ปลายทาง/จุดรับแทนการสแกน QR ใช่หรือไม่?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('ยกเลิก', style: TextStyle(color: Colors.grey)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('ใช่, จ่ายเงินสด'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    final ok = await ref
+        .read(messengerTrackingControllerProvider.notifier)
+        .switchToCash();
+    if (!mounted || !ok) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('เปลี่ยนเป็นจ่ายเงินสดแล้ว — จ่ายกับคนขับได้เลย'),
+        backgroundColor: AppColors.success,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(messengerTrackingControllerProvider);
@@ -403,6 +439,26 @@ class _MessengerTrackingScreenState
                     ),
                   ),
                 ],
+              ),
+            ),
+            // Fallback if the customer can't scan (dead battery / no signal):
+            // switch to cash and let the driver collect it at the rider.
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton.icon(
+                onPressed: () => _confirmSwitchToCash(order.id),
+                icon: const Icon(
+                  Icons.payments_outlined,
+                  size: 18,
+                  color: AppColors.textSecondary,
+                ),
+                label: Text(
+                  'จ่ายเงินสดแทน',
+                  style: AppTypography.caption4.copyWith(
+                    color: AppColors.textSecondary,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
               ),
             ),
           ],

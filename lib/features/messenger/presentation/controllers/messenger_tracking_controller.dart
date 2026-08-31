@@ -155,4 +155,24 @@ class MessengerTrackingController extends _$MessengerTrackingController {
       return false;
     }
   }
+
+  /// Switch a still-unpaid PromptPay order to cash — the customer's fallback for
+  /// a dead battery / no signal. The driver then collects cash at the rider.
+  /// Refetches so the "scan the driver's QR" notice clears once the method flips.
+  Future<bool> switchToCash() async {
+    final id = state.orderId;
+    final order = state.order;
+    if (id == null || order == null || order.isPaid) return false;
+    try {
+      await ref.read(messengerRepositoryProvider).switchToCash(id);
+      await _loadOrder(id);
+      return true;
+    } catch (e) {
+      final msg = e.toString().replaceFirst('Exception: ', '');
+      state = state.copyWith(
+        error: msg == 'ORDER_ALREADY_PAID' ? 'ออเดอร์นี้ชำระเงินแล้ว' : msg,
+      );
+      return false;
+    }
+  }
 }

@@ -363,10 +363,10 @@ class _ServiceSelectionScreenState
     );
   }
 
-  /// Zone gate (SCRUM-99): check whether [service] is open at the customer's
-  /// current location before entering its flow. Fail-open — an unknown location
-  /// or any error / not-yet-shipped endpoint proceeds normally; only an explicit
-  /// `available:false` shows the out-of-area dialog with the section's 3D icon.
+  /// Zone check (SCRUM-99): when [service] isn't open at the customer's current
+  /// location, show a **heads-up** dialog — informational only, not a block.
+  /// Tapping "รับทราบ" continues into the flow ([onAvailable]) as normal. An
+  /// unknown location / error / not-yet-shipped endpoint just proceeds silently.
   Future<void> _openWithZoneCheck({
     required String service,
     required String iconAsset,
@@ -375,7 +375,7 @@ class _ServiceSelectionScreenState
   }) async {
     final loc = ref.read(homeControllerProvider).currentLocation;
     if (loc == null) {
-      onAvailable(); // no location yet → don't gate
+      onAvailable(); // no location yet → don't notify
       return;
     }
     final result = await ref
@@ -388,13 +388,16 @@ class _ServiceSelectionScreenState
     }
     final area =
         result.areaName.isNotEmpty ? result.areaName : 'พื้นที่ของคุณ';
-    showComingSoonDialog(
+    // Out of area → notify, then continue into the flow on acknowledge.
+    await showComingSoonDialog(
       context,
       title: 'เร็วๆ นี้ในพื้นที่ของคุณ',
-      message: 'บริการ$serviceName ยังไม่เปิดให้บริการใน$area',
+      message:
+          'บริการ$serviceName ใน$areaกำลังจะเปิดเร็วๆ นี้ ขณะนี้อาจยังไม่มีคนขับพร้อมให้บริการ',
       iconAsset: iconAsset,
       locationLabel: 'ตำแหน่งของคุณ: $area',
     );
+    if (mounted) onAvailable(); // proceed after the heads-up
   }
 
   Widget _buildServiceCard(

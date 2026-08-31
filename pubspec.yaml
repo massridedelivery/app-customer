@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.1+48
+version: 1.0.1+50
 
 environment:
   sdk: ^3.11.0
@@ -81,18 +81,21 @@ dev_dependencies:
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
-# Branded splash — matches the launcher icon (white M mark on brand red).
+# Branded splash — white M mark on brand red.
+# splash_m.png is a high-res (1024px) M cropped from the launcher foreground
+# with safe-zone padding, so it stays sharp and correctly sized on the Android
+# 12+ system splash (the old icon_m_mark.png was 409×288 → blurry + oversized).
 # Regenerate after changing color/image: dart run flutter_native_splash:create
 flutter_native_splash:
   color: "#B4312E"                       # brand color = adaptive_icon_background
-  image: assets/icon/icon_m_mark.png     # white logo, transparent background
+  image: assets/icon/splash_m.png        # white logo, transparent, padded
   android: true
   ios: true
   web: false
   # Android 12+ uses the system splash API (icon is circle-masked).
   android_12:
     color: "#B4312E"
-    image: assets/icon/icon_m_mark.png
+    image: assets/icon/splash_m.png
 
 # App launcher icon (run: dart run flutter_launcher_icons)
 flutter_launcher_icons:

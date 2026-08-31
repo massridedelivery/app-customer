@@ -105,10 +105,11 @@ abstract class MessengerOrder with _$MessengerOrder {
   /// Delivery fee has been settled.
   bool get isPaid => paymentStatus.toUpperCase() == 'PAID';
 
-  /// A sender-pays PromptPay order whose fee is still owed. The customer app
-  /// dispatches these unpaid and shows the QR only once a driver reaches pickup
-  /// (pay-after-match) — see the messenger tracking screen. Cash and
-  /// recipient-pays never route through the customer QR.
+  /// A sender-pays PromptPay order whose fee is still owed. QR is scanned in
+  /// person at the driver (the rider presents it) — the customer app never
+  /// opens its own QR — so this only drives a "scan the driver's QR" notice on
+  /// the tracking screen once the driver reaches pickup; the order flips to PAID
+  /// over WS/poll when the driver's collection completes.
   bool get isSenderPromptPayUnpaid =>
       !isRecipientPays &&
       paymentMethod.toUpperCase() == 'PROMPTPAY' &&

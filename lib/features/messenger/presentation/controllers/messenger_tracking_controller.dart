@@ -100,11 +100,11 @@ class MessengerTrackingController extends _$MessengerTrackingController {
     }
   }
 
-  /// Whether the sender should be shown the PromptPay QR now: a sender-pays
+  /// Whether to show the "scan the driver's QR" notice now: a sender-pays
   /// PromptPay order (dispatched unpaid) whose driver has reached pickup and
-  /// whose fee is still owed. Recomputed on every load, so it clears itself the
-  /// moment payment lands (PAID) — the screen listens for the false→true edge to
-  /// route to the QR exactly once, and reads the flag for a persistent CTA.
+  /// whose fee is still owed. QR is scanned in person at the driver — the app
+  /// never opens its own QR. Recomputed on every load, so it clears itself the
+  /// moment payment lands (PAID).
   bool _computeAwaitingPromptPay(MessengerOrder order) {
     return !order.isTerminal &&
         order.isSenderPromptPayUnpaid &&

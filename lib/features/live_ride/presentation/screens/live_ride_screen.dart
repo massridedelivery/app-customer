@@ -309,17 +309,25 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
     final sheetInner = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildHeaderTitle(uiState, liveState.jobStatus),
-        const SizedBox(height: 16),
-        _buildTimeline(uiState),
-        const SizedBox(height: 16),
-        Text(
-          'เลขการเดินทาง-${_getJobIdLabel()}', // Job ID
-          style: AppTypography.caption5.copyWith(
-            color: AppColors.semanticGrayNeutralFgLowOnWhite,
+        // Status card (messenger-style): title + subtitle + icon timeline + id.
+        _card(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildHeaderTitle(uiState, liveState.jobStatus),
+              const SizedBox(height: 16),
+              _buildTimeline(uiState),
+              const SizedBox(height: 12),
+              Text(
+                'เลขการเดินทาง-${_getJobIdLabel()}', // Job ID
+                style: AppTypography.caption5.copyWith(
+                  color: AppColors.semanticGrayNeutralFgLowOnWhite,
+                ),
+              ),
+            ],
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         if (uiState == RideUIState.finding)
           _buildFindingModeContent(
             pickupAddress,
@@ -334,6 +342,12 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
             bookingState,
             liveState,
           ),
+        // Bottom cancel button while still searching (messenger-style).
+        if (uiState == RideUIState.finding &&
+            liveState.jobStatus != 'CANCELLED') ...[
+          const SizedBox(height: 16),
+          _buildBottomCancel(liveState),
+        ],
       ],
     );
 
@@ -344,86 +358,50 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
           // Bottom Layer: Map (Visible after finding driver). Extracted so the
           // ~2s driver-location updates rebuild ONLY the map, not this whole
           // screen / bottom sheet.
+          // Map with the pickup→dropoff route, shown in every state (incl.
+          // finding) so the ride mirrors the messenger tracking UI — a live map
+          // under a draggable card sheet, not a static illustration.
           Positioned.fill(
-            child: uiState != RideUIState.finding
-                ? _LiveRideMap(
-                    pickup: pickup,
-                    dropoff: dropoff,
-                    pickupIcon: pickupIcon,
-                    dropoffIcon: dropoffIcon,
-                    driverIcon: driverIcon,
-                    routePoints: routePoints,
-                    onMapCreated: (controller) {
-                      _mapController = controller;
-                      _fitMapToMarkers(pickup, dropoff);
-                    },
-                  )
-                : const SizedBox.shrink(),
+            child: _LiveRideMap(
+              pickup: pickup,
+              dropoff: dropoff,
+              pickupIcon: pickupIcon,
+              dropoffIcon: dropoffIcon,
+              driverIcon: driverIcon,
+              routePoints: routePoints,
+              onMapCreated: (controller) {
+                _mapController = controller;
+                _fitMapToMarkers(pickup, dropoff);
+              },
+            ),
           ),
 
-          // Illustration Layer (Visible ONLY during finding/cancelled)
-          if (uiState == RideUIState.finding)
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              height: MediaQuery.of(context).size.height * 0.45,
-              child: _buildTopIllustration(),
-            ),
-
-          // Bottom Sheet Layer. While finding a driver it's a fixed tall panel
-          // (the illustration sits above it). Once a driver is confirmed it
-          // becomes a draggable sheet the rider can snap between 50% and 80% of
-          // the screen height.
-          if (uiState == RideUIState.finding)
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Container(
-                height: MediaQuery.of(context).size.height * 0.85,
-                decoration: _sheetDecoration,
-                child: Column(
-                  children: [
-                    _buildGrabHandle(),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        padding: const EdgeInsets.only(
-                          left: 20,
-                          right: 20,
-                          bottom: 30,
-                        ),
+          // Draggable card sheet over the map (messenger-style) for all states.
+          Positioned.fill(
+            child: DraggableScrollableSheet(
+              initialChildSize: 0.55,
+              minChildSize: 0.4,
+              maxChildSize: 0.85,
+              snap: true,
+              snapSizes: const [0.55, 0.85],
+              builder: (context, scrollController) {
+                return Container(
+                  decoration: _sheetDecoration,
+                  child: ListView(
+                    controller: scrollController,
+                    padding: const EdgeInsets.only(bottom: 30),
+                    children: [
+                      _buildGrabHandle(),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
                         child: sheetInner,
                       ),
-                    ),
-                  ],
-                ),
-              ),
-            )
-          else
-            Positioned.fill(
-              child: DraggableScrollableSheet(
-                initialChildSize: 0.5,
-                minChildSize: 0.5,
-                maxChildSize: 0.8,
-                snap: true,
-                snapSizes: const [0.5, 0.8],
-                builder: (context, scrollController) {
-                  return Container(
-                    decoration: _sheetDecoration,
-                    child: ListView(
-                      controller: scrollController,
-                      padding: const EdgeInsets.only(bottom: 30),
-                      children: [
-                        _buildGrabHandle(),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          child: sheetInner,
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
+                    ],
+                  ),
+                );
+              },
             ),
+          ),
 
           // Top action buttons (Close & Cancel)
           Positioned(
@@ -563,36 +541,35 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
     }
   }
 
-  Widget _buildTopIllustration() {
+  /// White, rounded, bordered card wrapper — matches the messenger tracking
+  /// cards so the ride sheet reads as the same stack of cards.
+  Widget _card({required Widget child}) {
     return Container(
-      color: const Color(0xFFE3F2FD), // Light Blue like finding mode
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Positioned(
-            bottom: 60,
-            child: Opacity(
-              opacity: 0.1,
-              child: const Icon(Icons.map, size: 160, color: Colors.black),
-            ),
-          ),
-          Positioned(
-            bottom: 40,
-            child: Container(
-              padding: const EdgeInsets.all(32),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-                boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 10)],
-              ),
-              child: const Icon(
-                Icons.person_search,
-                size: 64,
-                color: AppColors.accentRedDeep,
-              ),
-            ),
-          ),
-        ],
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.foundationGrayscale200),
+      ),
+      child: child,
+    );
+  }
+
+  /// Full-width outlined "cancel search" button in the sheet (messenger-style),
+  /// in addition to the top pill. Reuses the same confirm/fee flow.
+  Widget _buildBottomCancel(dynamic liveState) {
+    return OutlinedButton(
+      onPressed: liveState.isLoading ? null : () => _cancelRide(liveState),
+      style: OutlinedButton.styleFrom(
+        side: const BorderSide(color: AppColors.error),
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+      child: Text(
+        AppLocalizations.of(context)!.cancelSearch,
+        style: AppTypography.heading6.copyWith(color: AppColors.error),
       ),
     );
   }

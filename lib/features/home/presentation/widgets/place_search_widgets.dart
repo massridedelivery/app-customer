@@ -90,7 +90,10 @@ class PlaceSearchMainContent extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     final searchState = ref.watch(placeSearchControllerProvider);
 
-    if (searchState.hasError) {
+    // Only let a search failure take over the view while the user is actually
+    // searching (query non-empty). Otherwise a stale/failed search would hijack
+    // the recent/saved tabs and show "ค้นหาไม่สำเร็จ" even when they have data.
+    if (searchState.query.isNotEmpty && searchState.hasError) {
       return Expanded(
         child: _SearchErrorView(
           message: l10n.searchError,

@@ -1,5 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:customer_app/features/ride_booking/domain/models/vehicle_estimation.dart';
 import 'package:customer_app/features/ride_booking/presentation/states/booking_state.dart';
 import 'package:customer_app/features/ride_booking/domain/usecases/estimate_fare_usecase_impl.dart';
 import 'package:customer_app/features/ride_booking/domain/usecases/validate_promo_usecase_impl.dart';
@@ -12,6 +13,16 @@ class BookingController extends _$BookingController {
   @override
   FutureOr<BookingState> build() {
     return const BookingState();
+  }
+
+  /// The ride page ("การรับส่งผู้โดยสาร") is passenger transport only, but the
+  /// backend fare estimate can include messenger (delivery) vehicle types like
+  /// "Messenger Bike" / "รถส่งของ". Drop those so only passenger vehicles show.
+  List<VehicleEstimation> _passengerOnly(List<VehicleEstimation> all) {
+    return all.where((e) {
+      final key = '${e.vehicleTypeName} ${e.displayName}'.toLowerCase();
+      return !key.contains('messenger') && !key.contains('ส่งของ');
+    }).toList();
   }
 
   Future<void> estimateFare(
@@ -37,7 +48,7 @@ class BookingController extends _$BookingController {
 
       return previousState.copyWith(
         isLoading: false,
-        estimations: response.estimations,
+        estimations: _passengerOnly(response.estimations),
         nearbyDrivers: response.nearbyDrivers,
         distanceKm: response.distanceKm,
         durationMin: response.durationMin.toDouble(),
@@ -80,7 +91,7 @@ class BookingController extends _$BookingController {
       if (latest == null || latest.activeJobId != null) return;
       state = AsyncValue.data(
         latest.copyWith(
-          estimations: response.estimations,
+          estimations: _passengerOnly(response.estimations),
           nearbyDrivers: response.nearbyDrivers,
           distanceKm: response.distanceKm,
           durationMin: response.durationMin.toDouble(),

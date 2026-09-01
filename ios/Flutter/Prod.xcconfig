@@ -4,9 +4,6 @@
 // the matching Pods config + Generated.xcconfig first. See ENV_SETUP.md.
 APP_DISPLAY_NAME = Customer
 BUNDLE_ID_SUFFIX =
-// TEMP (prod-devapi testing): reuse the dev iOS Maps key, which is a working,
-// authorised Maps SDK for iOS key. The previous prod key was an unauthorised
-// placeholder, so the base map tiles rendered blank on prod builds.
-// TODO: replace with the real production iOS Google Maps SDK key (Maps SDK for
-// iOS enabled + billing + iOS app restriction incl. com.massdrive.customerApp).
-GOOGLE_MAPS_API_KEY = AIzaSyBhrfrq9d3ngim_8JScYuBlnrIGBoltJMw
+// Production iOS Google Maps SDK key (Maps SDK for iOS enabled + billing + iOS
+// app restriction incl. bundle id com.massdrive.customerApp).
+GOOGLE_MAPS_API_KEY = AIzaSyBn4SKAovpLIwTyNEY865E-lex4GJoMfH8

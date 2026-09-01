@@ -100,11 +100,11 @@ class MessengerTrackingController extends _$MessengerTrackingController {
     }
   }
 
-  /// Whether the sender should be shown the PromptPay QR now: a sender-pays
+  /// Whether to show the "scan the driver's QR" notice now: a sender-pays
   /// PromptPay order (dispatched unpaid) whose driver has reached pickup and
-  /// whose fee is still owed. Recomputed on every load, so it clears itself the
-  /// moment payment lands (PAID) — the screen listens for the false→true edge to
-  /// route to the QR exactly once, and reads the flag for a persistent CTA.
+  /// whose fee is still owed. QR is scanned in person at the driver — the app
+  /// never opens its own QR. Recomputed on every load, so it clears itself the
+  /// moment payment lands (PAID).
   bool _computeAwaitingPromptPay(MessengerOrder order) {
     return !order.isTerminal &&
         order.isSenderPromptPayUnpaid &&
@@ -151,6 +151,26 @@ class MessengerTrackingController extends _$MessengerTrackingController {
         error: msg == 'ORDER_ALREADY_PAID'
             ? 'ออเดอร์นี้ชำระเงินแล้ว ยกเลิกในแอปไม่ได้ กรุณาติดต่อฝ่ายบริการลูกค้าเพื่อขอคืนเงิน'
             : msg,
+      );
+      return false;
+    }
+  }
+
+  /// Switch a still-unpaid PromptPay order to cash — the customer's fallback for
+  /// a dead battery / no signal. The driver then collects cash at the rider.
+  /// Refetches so the "scan the driver's QR" notice clears once the method flips.
+  Future<bool> switchToCash() async {
+    final id = state.orderId;
+    final order = state.order;
+    if (id == null || order == null || order.isPaid) return false;
+    try {
+      await ref.read(messengerRepositoryProvider).switchToCash(id);
+      await _loadOrder(id);
+      return true;
+    } catch (e) {
+      final msg = e.toString().replaceFirst('Exception: ', '');
+      state = state.copyWith(
+        error: msg == 'ORDER_ALREADY_PAID' ? 'ออเดอร์นี้ชำระเงินแล้ว' : msg,
       );
       return false;
     }

@@ -223,6 +223,24 @@ class MessengerRepositoryImpl implements IMessengerRepository {
   }
 
   @override
+  Future<void> switchToCash(String id) async {
+    try {
+      await _apiService.dio.post(
+        '/api/messenger/customer/orders/$id/payment-method',
+        data: {'payment_method': 'CASH'},
+      );
+    } on DioException catch (e) {
+      // 409 = already paid — can't switch after the fact; point at support.
+      if (e.response?.statusCode == 409) {
+        throw Exception('ORDER_ALREADY_PAID');
+      }
+      _throwFrom(e, 'Failed to switch to cash');
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
+
+  @override
   Future<void> reviewOrder(
     String id, {
     required int rating,

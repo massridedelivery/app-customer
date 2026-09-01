@@ -58,6 +58,11 @@ abstract class IMessengerRepository {
   /// POST /api/messenger/customer/orders/{id}/cancel (PENDING/ACCEPTED only)
   Future<void> cancelOrder(String id, {String? reason});
 
+  /// POST /api/messenger/customer/orders/{id}/payment-method — switch a still
+  /// unpaid PromptPay order to CASH (customer fallback for dead battery / no
+  /// signal); the driver then collects cash at the rider. 409 if already paid.
+  Future<void> switchToCash(String id);
+
   /// POST /api/messenger/customer/orders/{id}/review — rating 1..5 required,
   /// optional comment. Only valid after DELIVERED (400 otherwise); 409 if the
   /// order was already reviewed.

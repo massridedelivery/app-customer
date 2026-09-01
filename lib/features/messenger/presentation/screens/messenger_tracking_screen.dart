@@ -59,19 +59,6 @@ class _MessengerTrackingScreenState
     );
   }
 
-  /// Open the PromptPay QR for this order (sender-pays, pay-after-match). Pushed
-  /// (not replaced) so a back-out / expiry returns to this live tracking screen;
-  /// the QR replaces itself with tracking on PAID.
-  void _openPromptPay(String orderId) {
-    context.push(
-      '/payment/promptpay',
-      extra: {
-        'orderId': orderId,
-        'onPaidRoute': '/messenger/tracking/$orderId',
-      },
-    );
-  }
-
   Future<void> _confirmCancel() async {
     final reasonController = TextEditingController();
     try {
@@ -130,6 +117,42 @@ class _MessengerTrackingScreenState
     }
   }
 
+  /// Customer fallback when they can't scan the driver's QR (dead battery / no
+  /// signal): switch the order to cash so the driver collects it in person.
+  Future<void> _confirmSwitchToCash(String orderId) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('จ่ายเงินสดแทน', style: AppTypography.heading4),
+        content: const Text(
+          'เปลี่ยนเป็นจ่ายเงินสดกับคนขับที่ปลายทาง/จุดรับแทนการสแกน QR ใช่หรือไม่?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('ยกเลิก', style: TextStyle(color: Colors.grey)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('ใช่, จ่ายเงินสด'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    final ok = await ref
+        .read(messengerTrackingControllerProvider.notifier)
+        .switchToCash();
+    if (!mounted || !ok) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('เปลี่ยนเป็นจ่ายเงินสดแล้ว — จ่ายกับคนขับได้เลย'),
+        backgroundColor: AppColors.success,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(messengerTrackingControllerProvider);
@@ -147,18 +170,11 @@ class _MessengerTrackingScreenState
       final nextOrder = next.order;
       if (nextOrder != null) _fitCamera(nextOrder);
 
-      // Pay-after-match (dev): a sender-pays PromptPay order dispatches unpaid
-      // and is charged once the driver reaches pickup. Route to the QR on the
-      // false→true edge so it opens exactly once; if the sender backs out, the
-      // flag stays true (no re-fire) and the CTA in the panel reopens it.
-      if (next.awaitingPromptPay && !(previous?.awaitingPromptPay ?? false)) {
-        final id = next.order?.id;
-        if (id != null) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (context.mounted) _openPromptPay(id);
-          });
-        }
-      }
+      // QR payment is scanned in person at the driver (rider presents the QR)
+      // for BOTH sender-pays and recipient-pays — the customer app never opens
+      // its own in-app PromptPay QR. When the driver reaches pickup the panel
+      // shows a "scan the driver's QR" notice; the order flips to PAID over
+      // WS/poll once the driver's collection completes.
 
       // Just delivered while watching live → go to the payment summary (mirrors
       // the ride flow: live → payment_summary → review). Guarded to a real
@@ -392,24 +408,56 @@ class _MessengerTrackingScreenState
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
           _buildStatusCard(order),
-          // Pay-after-match (dev): the driver has reached pickup and the
-          // sender-pays PromptPay fee is still owed. The QR auto-opens once; this
-          // CTA lets the sender reopen it after backing out or an expiry.
+          // The driver has reached pickup and the sender-pays PromptPay fee is
+          // still owed. QR is scanned in person at the driver — the customer app
+          // does NOT open its own QR — so this is an info notice, not a button.
           if (awaitingPromptPay) ...[
             const SizedBox(height: 12),
-            ElevatedButton.icon(
-              onPressed: () => _openPromptPay(order.id),
-              icon: const Icon(Icons.qr_code_2, size: 20, color: Colors.white),
-              label: Text(
-                'ชำระค่าส่ง ฿${order.amountDue.toStringAsFixed(0)} ด้วยพร้อมเพย์',
-                style: AppTypography.heading6.copyWith(color: Colors.white),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              decoration: BoxDecoration(
+                color: AppColors.foundationGrayscale100,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.foundationGreen500),
               ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.foundationGreen500,
-                elevation: 0,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.qr_code_2,
+                    size: 22,
+                    color: AppColors.foundationGreen600,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'สแกน QR ที่คนขับเพื่อชำระค่าส่ง '
+                      '฿${order.amountDue.toStringAsFixed(0)}',
+                      style: AppTypography.heading6.copyWith(
+                        color: AppColors.foundationGreen700,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Fallback if the customer can't scan (dead battery / no signal):
+            // switch to cash and let the driver collect it at the rider.
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton.icon(
+                onPressed: () => _confirmSwitchToCash(order.id),
+                icon: const Icon(
+                  Icons.payments_outlined,
+                  size: 18,
+                  color: AppColors.textSecondary,
+                ),
+                label: Text(
+                  'จ่ายเงินสดแทน',
+                  style: AppTypography.caption4.copyWith(
+                    color: AppColors.textSecondary,
+                    decoration: TextDecoration.underline,
+                  ),
                 ),
               ),
             ),

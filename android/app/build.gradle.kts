@@ -57,9 +57,10 @@ android {
         create("prod") {
             dimension = "env"
             resValue("string", "app_name", "Customer")
-            // TODO: replace with the production Google Maps SDK key.
+            // Production Google Maps SDK key (restricted to package
+            // com.massdrive.customer_app + the signing-cert SHA-1s).
             manifestPlaceholders["mapsApiKey"] =
-                "AIzaSyAx8IyTZMk6bif4eLcPzzKH8pj7tuzLxPQ"
+                "AIzaSyCFlJ-xOwNwPXItxUCi4Le6lUTLpBYmEUo"
         }
     }
 

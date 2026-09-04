@@ -6,6 +6,7 @@ import 'package:customer_app/core/widgets/coming_soon_dialog.dart';
 import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/core/localization/locale_controller.dart';
 import 'package:customer_app/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:customer_app/features/profile/data/datasources/account_remote_data_source.dart';
 import 'package:customer_app/features/profile/presentation/controllers/profile_controller.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -119,6 +120,19 @@ class ProfileScreen extends ConsumerWidget {
                       ),
                     ],
                   ),
+                  const SizedBox(height: 24),
+                  _SectionHeader(title: 'จัดการบัญชี'),
+                  const SizedBox(height: 8),
+                  _MenuCard(
+                    items: [
+                      _MenuTile(
+                        icon: Icons.delete_forever_rounded,
+                        title: 'ลบบัญชี',
+                        iconColor: AppColors.error,
+                        onTap: () => _confirmDeleteAccount(context, ref),
+                      ),
+                    ],
+                  ),
                   const SizedBox(height: 32),
                   SizedBox(
                     width: double.infinity,
@@ -174,6 +188,48 @@ class ProfileScreen extends ConsumerWidget {
 
   Future<void> _callSupport() async {
     await launchUrl(Uri(scheme: 'tel', path: _supportPhoneNumber));
+  }
+
+  /// Permanently delete the account (App Store 5.1.1 requires an in-app option).
+  /// Calls DELETE /api/customer/account, then signs the user out.
+  Future<void> _confirmDeleteAccount(BuildContext context, WidgetRef ref) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('ลบบัญชี', style: AppTypography.heading4),
+        content: const Text(
+          'การลบบัญชีจะลบข้อมูลทั้งหมดของคุณอย่างถาวรและไม่สามารถย้อนกลับได้ '
+          'ต้องการลบบัญชีใช่หรือไม่?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('ยกเลิก'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('ลบบัญชี', style: TextStyle(color: AppColors.error)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !context.mounted) return;
+    try {
+      await ref
+          .read(accountRemoteDataSourceProvider)
+          .requestDeletion('User requested account deletion from profile');
+      if (!context.mounted) return;
+      await ref.read(authControllerProvider.notifier).logout();
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('ลบบัญชีเรียบร้อยแล้ว')),
+      );
+    } catch (_) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('ลบบัญชีไม่สำเร็จ กรุณาลองใหม่')),
+      );
+    }
   }
 
   void _showLangSelector(

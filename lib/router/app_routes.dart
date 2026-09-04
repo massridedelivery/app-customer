@@ -102,6 +102,22 @@ final routerNotifierProvider = Provider<RouterNotifier>(
   (ref) => RouterNotifier(ref),
 );
 
+/// Account-based paths that require login. Everything else — home, service
+/// browse, place search, fare estimate, the booking forms — is open to guests
+/// so the app never gates non-account features behind login (App Store 5.1.1).
+/// The booking/checkout actions themselves still require login (gated in-screen).
+bool _requiresAuth(String path) {
+  const protectedPrefixes = <String>[
+    '/live', '/rating', '/payment', '/payment-summary',
+    '/chat', '/trips', '/trip',
+    '/profile', '/edit-profile', '/loyalty',
+    '/saved-places', '/saved-restaurants', '/add-address',
+    '/promos', '/referral', '/sos', '/privacy', '/credit-cards',
+    '/messenger/', '/food-order',
+  ];
+  return protectedPrefixes.any((p) => path == p || path.startsWith(p));
+}
+
 final routerProvider = Provider<GoRouter>((ref) {
   final notifier = ref.watch(routerNotifierProvider);
 
@@ -187,28 +203,19 @@ final routerProvider = Provider<GoRouter>((ref) {
           return '/main';
         }
       } else {
-        // Not authenticated
+        // Not authenticated — a guest may browse non-account features without
+        // logging in (App Store Guideline 5.1.1). Only account-based screens
+        // (booking result, profile, history, payment, …) force login.
         if (isSplash) {
-          // This should only happen if splashShown = true (handled above)
-          // but we still need to decide where to go next from splash.
-          if (!hasCompletedOnboarding) {
-            return '/onboarding';
-          } else {
-            return '/auth';
-          }
+          return hasCompletedOnboarding ? '/main' : '/onboarding';
         }
-
-        if (!hasCompletedOnboarding) {
-          if (!isOnboarding) {
-            return '/onboarding';
-          }
-        } else {
-          if (!isAuthPath && isOnboarding) {
-            return '/auth';
-          }
-          if (!isAuthPath && !isOnboarding) {
-            return '/auth';
-          }
+        // First run still shows onboarding once, then lands on /main as a guest.
+        if (!hasCompletedOnboarding && !isOnboarding && !isAuthPath) {
+          return '/onboarding';
+        }
+        // Gate only the account-based paths; everything else stays open.
+        if (_requiresAuth(currentPath)) {
+          return '/auth';
         }
       }
 

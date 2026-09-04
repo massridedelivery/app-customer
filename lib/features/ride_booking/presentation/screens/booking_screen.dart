@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/error/api_error.dart';
+import 'package:customer_app/core/utils/auth_gate.dart';
 import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
 import 'package:customer_app/features/ride_booking/presentation/controllers/booking_controller.dart';
@@ -467,6 +468,8 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
               },
               onRequest: () async {
                 if (pickup == null || dropoff == null) return;
+                // Booking is account-based — a guest must log in first.
+                if (!ensureLoggedIn(context, ref)) return;
 
                 await ref
                     .read(bookingControllerProvider.notifier)

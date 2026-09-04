@@ -2,7 +2,6 @@ import 'dart:io' show Platform;
 
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
-import 'package:customer_app/core/utils/auth_gate.dart';
 import 'package:customer_app/features/home/presentation/screens/service_selection_screen.dart';
 import 'package:customer_app/features/profile/presentation/screens/profile_screen.dart';
 import 'package:customer_app/features/trips/domain/models/history_order.dart';
@@ -146,8 +145,8 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () {
-          // Home (0) is open to guests; ประวัติ/โปรไฟล์ are account-based.
-          if (index != 0 && !ensureLoggedIn(context, ref)) return;
+          // Guests may open every tab; the account tabs (ประวัติ/โปรไฟล์) render
+          // an inline LoginRequiredView instead of their content.
           setState(() => _currentIndex = index);
           if (index == 0) {
             ref.read(activeOrdersControllerProvider.notifier).refresh();

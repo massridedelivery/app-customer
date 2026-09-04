@@ -103,4 +103,14 @@ flutter {
 
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
+
+    // shared_preferences pulls androidx.datastore, whose older native lib
+    // (libdatastore_shared_counter.so) isn't aligned to 16 KB memory pages —
+    // Play flags it for Android 15+ devices. Force a 16 KB-aligned release.
+    constraints {
+        implementation("androidx.datastore:datastore-core:1.1.7")
+        implementation("androidx.datastore:datastore-core-android:1.1.7")
+        implementation("androidx.datastore:datastore-preferences:1.1.7")
+        implementation("androidx.datastore:datastore-preferences-android:1.1.7")
+    }
 }

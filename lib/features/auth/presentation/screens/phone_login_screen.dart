@@ -104,11 +104,42 @@ class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
                   horizontal: 24,
                   vertical: 16,
                 ),
-                child: Text(
-                  'Mass Move',
-                  style: AppTypography.heading4.copyWith(
-                    color: AppColors.primary,
-                  ),
+                child: Row(
+                  children: [
+                    // Back button appears only when login was pushed (a guest
+                    // came here from a gated action / account tab) so they can
+                    // return to browsing; hidden when login is the root screen.
+                    if (context.canPop())
+                      Padding(
+                        padding: const EdgeInsets.only(right: 10),
+                        child: InkWell(
+                          onTap: () => context.pop(),
+                          borderRadius: BorderRadius.circular(19),
+                          child: Container(
+                            width: 38,
+                            height: 38,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: AppColors.foundationGrayscale200,
+                              ),
+                            ),
+                            child: const Icon(
+                              Icons.arrow_back_rounded,
+                              size: 20,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                        ),
+                      ),
+                    Text(
+                      'Mass Move',
+                      style: AppTypography.heading4.copyWith(
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),

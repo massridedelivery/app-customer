@@ -2,7 +2,6 @@ import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/features/auth/data/models/send_otp_response.dart';
 import 'package:customer_app/features/auth/presentation/controllers/auth_controller.dart';
-import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -72,139 +71,124 @@ class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     final authState = ref.watch(authControllerProvider);
+    final topInset = MediaQuery.of(context).padding.top;
 
     return Scaffold(
       backgroundColor: _kBg,
-      body: Stack(
+      body: Column(
         children: [
-          // Background aura accent (subtle brand tint).
-          Positioned(
-            bottom: -MediaQuery.of(context).size.width * 0.4,
-            right: -MediaQuery.of(context).size.width * 0.4,
-            child: Container(
-              width: MediaQuery.of(context).size.width * 0.8,
-              height: MediaQuery.of(context).size.width * 0.8,
-              decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.03),
-                shape: BoxShape.circle,
+          // ── Brand hero (red gradient, curved bottom) ───────────────────────
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.fromLTRB(24, topInset + 8, 24, 52),
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [AppColors.primary, AppColors.secondaryRed],
               ),
+              borderRadius: BorderRadius.vertical(bottom: Radius.circular(28)),
             ),
-          ),
-
-          // Top bar
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 16,
-                ),
-                child: Row(
-                  children: [
-                    // Back button appears only when login was pushed (a guest
-                    // came here from a gated action / account tab) so they can
-                    // return to browsing; hidden when login is the root screen.
-                    if (context.canPop())
-                      Padding(
-                        padding: const EdgeInsets.only(right: 10),
-                        child: InkWell(
-                          onTap: () => context.pop(),
-                          borderRadius: BorderRadius.circular(19),
-                          child: Container(
-                            width: 38,
-                            height: 38,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: AppColors.foundationGrayscale200,
-                              ),
-                            ),
-                            child: const Icon(
-                              Icons.arrow_back_rounded,
-                              size: 20,
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                        ),
-                      ),
-                    Text(
-                      'Mass Move',
-                      style: AppTypography.heading4.copyWith(
-                        color: AppColors.primary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-
-          SafeArea(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.fromLTRB(24, 80, 24, 24),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: 12),
-                        Text(
-                          l10n.enterNumber,
-                          style: AppTypography.heading3.copyWith(
-                            color: _kTextPrimary,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          l10n.phoneLoginSub,
-                          style: AppTypography.body1.copyWith(
-                            color: _kTextSecondary,
-                            height: 1.5,
-                          ),
-                        ),
-                        const SizedBox(height: 40),
-
-                        // Phone input section
-                        _buildLabel(l10n.phoneNumber),
-                        Container(
-                          decoration: BoxDecoration(
-                            color: _kFieldFill,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: _buildTextField(
-                            controller: _phoneController,
-                            hintText: '+66 999999999',
-                            keyboardType: TextInputType.phone,
-                          ),
-                        ),
-
-                        const SizedBox(height: 32),
-
-                        _buildContinueButton(l10n, authState.isLoading),
-
-                        if (authState.error != null)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 16),
-                            child: Text(
-                              authState.error!,
-                              style: TextStyle(color: AppColors.error),
-                              textAlign: TextAlign.center,
+                // Standard app back button (white on the hero). Shown only when
+                // login was pushed (guest arriving from a gate) — same icon the
+                // rest of the app uses.
+                SizedBox(
+                  height: 44,
+                  child: context.canPop()
+                      ? Align(
+                          alignment: Alignment.centerLeft,
+                          child: IconButton(
+                            padding: EdgeInsets.zero,
+                            onPressed: () => context.pop(),
+                            icon: const Icon(
+                              Icons.arrow_back_rounded,
+                              color: Colors.white,
                             ),
                           ),
-                        const SizedBox(height: 84),
-                      ],
-                    ),
+                        )
+                      : null,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Mass Move',
+                  style: AppTypography.heading2.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'รับส่ง · ส่งของ · สั่งอาหาร',
+                  style: AppTypography.body2.copyWith(
+                    color: Colors.white.withValues(alpha: 0.9),
                   ),
                 ),
               ],
+            ),
+          ),
+
+          // ── Floating form card (pulled up over the hero) ───────────────────
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+              child: Transform.translate(
+                offset: const Offset(0, -24),
+                child: Container(
+                  padding: const EdgeInsets.fromLTRB(22, 24, 22, 24),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.08),
+                        blurRadius: 24,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'ยินดีต้อนรับสู่ Mass Move',
+                        style: AppTypography.heading4.copyWith(
+                          color: _kTextPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'กรอกเบอร์โทรเพื่อเข้าสู่ระบบหรือสมัครใช้งาน',
+                        style: AppTypography.body2.copyWith(
+                          color: _kTextSecondary,
+                          height: 1.5,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      _buildLabel('เบอร์โทรศัพท์'),
+                      _buildTextField(
+                        controller: _phoneController,
+                        hintText: '+66 999999999',
+                        keyboardType: TextInputType.phone,
+                      ),
+                      const SizedBox(height: 24),
+                      _buildContinueButton(authState.isLoading),
+                      if (authState.error != null)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 16),
+                          child: Text(
+                            authState.error!,
+                            style: TextStyle(color: AppColors.error),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
             ),
           ),
         ],
@@ -212,12 +196,13 @@ class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
     );
   }
 
-  Widget _buildContinueButton(AppLocalizations l10n, bool isLoading) {
+  Widget _buildContinueButton(bool isLoading) {
+    const label = 'ขอรหัส OTP';
     final enabled = _isValidPhone && !isLoading;
     return Semantics(
       button: true,
       enabled: enabled,
-      label: l10n.continueLabel,
+      label: label,
       child: Material(
         color: Colors.transparent,
         child: InkWell(
@@ -257,7 +242,7 @@ class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
                       ),
                     )
                   : Text(
-                      l10n.continueLabel,
+                      label,
                       style: AppTypography.label2.copyWith(
                         color: enabled ? Colors.white : _kDisabledText,
                       ),

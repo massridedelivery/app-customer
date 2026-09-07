@@ -74,8 +74,11 @@ class ApiService {
           }
 
           if (!_tokenStorage.hasToken) {
-            // No token in storage, but got 401? Force logout for safety.
-            _handleLogout();
+            // Guest (no token): a 401 just means this endpoint needs an account,
+            // e.g. a token-scoped call reached while browsing. Surface it so the
+            // caller can handle it — do NOT force logout, which would reset a
+            // browsing guest (App Store 5.1.1 guest mode). There is nothing to
+            // refresh without a token anyway.
             return handler.next(error);
           }
 

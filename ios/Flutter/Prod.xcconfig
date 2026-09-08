@@ -2,7 +2,7 @@
 // Do NOT assign this file directly to a build configuration. It is #included by
 // the per-config files Debug-prod / Release-prod / Profile-prod, which pull in
 // the matching Pods config + Generated.xcconfig first. See ENV_SETUP.md.
-APP_DISPLAY_NAME = Customer
+APP_DISPLAY_NAME = Mass Delivery
 BUNDLE_ID_SUFFIX =
 // Production iOS Google Maps SDK key (Maps SDK for iOS enabled + billing + iOS
 // app restriction incl. bundle id com.massdrive.customerApp).

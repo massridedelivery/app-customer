@@ -56,7 +56,9 @@ android {
         }
         create("prod") {
             dimension = "env"
-            resValue("string", "app_name", "Customer")
+            // Launcher name must match the Play/App Store listing ("Mass
+            // Delivery") — a mismatch is a Play "misleading claims" rejection.
+            resValue("string", "app_name", "Mass Delivery")
             // Production Google Maps SDK key (restricted to package
             // com.massdrive.customer_app + the signing-cert SHA-1s).
             manifestPlaceholders["mapsApiKey"] =

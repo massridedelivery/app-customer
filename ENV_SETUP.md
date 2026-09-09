@@ -86,8 +86,8 @@ flutter run --flavor dev --dart-define-from-file=env/dev.json
 ## Android — done ✅
 
 `android/app/build.gradle.kts` defines `dev` / `prod` product flavors:
-- `dev` → applicationId `com.massdrive.customer_app.dev`, app name **Customer Dev**
-- `prod` → applicationId `com.massdrive.customer_app`, app name **Customer**
+- `dev` → applicationId `com.massdrive.customer_app.dev`, app name **Mass Delivery Dev**
+- `prod` → applicationId `com.massdrive.customer_app`, app name **Mass Delivery**
 - Google Maps SDK key comes from each flavor's `manifestPlaceholders["mapsApiKey"]`
   (AndroidManifest uses `${mapsApiKey}` and `@string/app_name`).
 

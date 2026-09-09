@@ -49,14 +49,14 @@ android {
             dimension = "env"
             // dev installs alongside prod: com.massdrive.customer_app.dev
             applicationIdSuffix = ".dev"
-            resValue("string", "app_name", "Customer Dev")
+            resValue("string", "app_name", "Mass Delivery Dev")
             // Google Maps SDK key for dev (fills the AndroidManifest placeholder).
             manifestPlaceholders["mapsApiKey"] =
                 "AIzaSyAx8IyTZMk6bif4eLcPzzKH8pj7tuzLxPQ"
         }
         create("prod") {
             dimension = "env"
-            resValue("string", "app_name", "Customer")
+            resValue("string", "app_name", "Mass Delivery")
             // Production Google Maps SDK key (restricted to package
             // com.massdrive.customer_app + the signing-cert SHA-1s).
             manifestPlaceholders["mapsApiKey"] =

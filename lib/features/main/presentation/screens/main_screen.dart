@@ -145,6 +145,8 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () {
+          // Guests may open every tab; the account tabs (ประวัติ/โปรไฟล์) render
+          // an inline LoginRequiredView instead of their content.
           setState(() => _currentIndex = index);
           if (index == 0) {
             ref.read(activeOrdersControllerProvider.notifier).refresh();

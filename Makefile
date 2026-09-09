@@ -1,4 +1,4 @@
-.PHONY: gen watch fix clean clean_cache test test_cov analyze pre_pr run_dev run_prod run_ios_dev run_ios_prod build_apk_dev build_apk_dev_arm64 install_dev build_apk_prod build_ios_dev build_ios_prod build_aab_dev build_aab_prod deploy_play_dev deploy_play_prod deploy_play_check run_prod_devapi build_apk_prod_devapi build_aab_prod_devapi ipa_prod_devapi deploy_prod_devapi deploy_play_prod_devapi upload_testflight_prod_devapi upload_play_prod_devapi deploy_both_prod_devapi
+.PHONY: gen watch fix clean clean_cache test test_cov analyze pre_pr run_dev run_prod run_ios_dev run_ios_prod build_apk_dev build_apk_dev_arm64 install_dev build_apk_prod build_ios_dev build_ios_prod build_aab_dev build_aab_prod deploy_play_dev deploy_play_prod deploy_play_check run_prod_devapi build_apk_prod_devapi build_aab_prod_devapi ipa_prod_devapi deploy_prod_devapi deploy_play_prod_devapi upload_testflight_prod_devapi upload_play_prod_devapi deploy_both_prod_devapi ipa_prod upload_testflight_prod upload_play_prod deploy_both_prod
 
 # ทุก target เป็นสเต็ปที่ต้องเรียงกัน (build ก่อน upload) — กัน -j สลับลำดับ
 .NOTPARALLEL:
@@ -155,6 +155,27 @@ deploy_play_prod: bump build_aab_prod
 		PLAY_PACKAGE_NAME=com.massdrive.customer_app \
 		AAB_PATH="$(CURDIR)/build/app/outputs/bundle/prodRelease/app-prod-release.aab" \
 		bundle exec fastlane deploy track:internal
+
+# 🍎 real-prod IPA (App Store export) + upload-only steps (no bump, no build) —
+# mirror the *_prod_devapi steps but on env/prod.json. Used by deploy_both_prod.
+ipa_prod:
+	flutter build ipa --flavor prod --dart-define-from-file=env/prod.json --export-method app-store
+
+upload_testflight_prod:
+	xcrun altool --upload-app --type ios \
+		-f build/ios/ipa/customer_app.ipa \
+		--apiKey M4PPU86374 --apiIssuer 03750a9c-5c4e-4be1-bb27-546000146161
+
+upload_play_prod:
+	cd android && \
+		PLAY_PACKAGE_NAME=com.massdrive.customer_app \
+		AAB_PATH="$(CURDIR)/build/app/outputs/bundle/prodRelease/app-prod-release.aab" \
+		bundle exec fastlane deploy track:internal
+
+# 🚀 real prod (env/prod.json): bump ONCE → build both → upload both, so the
+# iOS build number and the Android versionCode stay in lock-step. Use this
+# instead of running deploy_prod + deploy_play_prod separately (each bumps).
+deploy_both_prod: bump ipa_prod build_aab_prod upload_testflight_prod upload_play_prod
 
 # ─── ⚠️  ชั่วคราว: prod flavor → dev API ─────────────────────────────────────
 # backend prod (driver-api.nutchaphut.dev) ยังไม่ขึ้น (Cloudflare ตอบ 502) ชุดนี้จึง build

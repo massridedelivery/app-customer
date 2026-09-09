@@ -56,6 +56,8 @@ android {
         }
         create("prod") {
             dimension = "env"
+            // Launcher name must match the Play/App Store listing ("Mass
+            // Delivery") — a mismatch is a Play "misleading claims" rejection.
             resValue("string", "app_name", "Mass Delivery")
             // Production Google Maps SDK key (restricted to package
             // com.massdrive.customer_app + the signing-cert SHA-1s).
@@ -103,4 +105,14 @@ flutter {
 
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
+
+    // shared_preferences pulls androidx.datastore, whose older native lib
+    // (libdatastore_shared_counter.so) isn't aligned to 16 KB memory pages —
+    // Play flags it for Android 15+ devices. Force a 16 KB-aligned release.
+    constraints {
+        implementation("androidx.datastore:datastore-core:1.1.7")
+        implementation("androidx.datastore:datastore-core-android:1.1.7")
+        implementation("androidx.datastore:datastore-preferences:1.1.7")
+        implementation("androidx.datastore:datastore-preferences-android:1.1.7")
+    }
 }

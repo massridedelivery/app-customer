@@ -34,7 +34,7 @@ abstract class Env {
   /// Human-readable app name (used for logging / debug banners).
   static const String appName = String.fromEnvironment(
     'APP_NAME',
-    defaultValue: 'Customer Dev',
+    defaultValue: 'Mass Delivery Dev',
   );
 
   /// Optional per-environment Google Places keys. When empty, the platform

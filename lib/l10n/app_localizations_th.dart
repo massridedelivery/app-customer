@@ -9,7 +9,7 @@ class AppLocalizationsTh extends AppLocalizations {
   AppLocalizationsTh([String locale = 'th']) : super(locale);
 
   @override
-  String get appName => 'แอปพลิเคชันลูกค้า';
+  String get appName => 'Mass Delivery';
 
   @override
   String get navHome => 'หน้าแรก';

@@ -22,6 +22,11 @@ class PromptPayController extends _$PromptPayController {
   int _tick = 0;
   String? _jobId;
   String? _orderId;
+  // The method sent to POST /api/payment/intent. PROMPTPAY returns a
+  // `qr_code_url`; CARD (Beam hosted checkout, SCRUM-118) returns a `charge_url`
+  // to open in a WebView/browser. Both are polled to a terminal state the same
+  // way, so this controller stays provider-agnostic.
+  String _paymentMethod = 'PROMPTPAY';
   StreamSubscription<Map<String, dynamic>>? _socketSubscription;
 
   @override
@@ -63,18 +68,25 @@ class PromptPayController extends _$PromptPayController {
   }
 
   /// Create (or reuse) an intent for a ride [jobId] and begin polling.
-  Future<void> startForJob(String jobId) {
+  /// [paymentMethod] defaults to PROMPTPAY; pass `CARD` for the Beam hosted
+  /// checkout flow (SCRUM-118), which returns a `charge_url` instead of a QR.
+  Future<void> startForJob(String jobId, {String paymentMethod = 'PROMPTPAY'}) {
     _jobId = jobId;
     _orderId = null;
+    _paymentMethod = paymentMethod;
     return _start();
   }
 
   /// Create (or reuse) an intent for a messenger/food [orderId] and begin
   /// polling. NOTE: the backend rejects order intents until its order-total
   /// lookup ships (SCRUM-35 §3.3) — the error state covers that path.
-  Future<void> startForOrder(String orderId) {
+  Future<void> startForOrder(
+    String orderId, {
+    String paymentMethod = 'PROMPTPAY',
+  }) {
     _orderId = orderId;
     _jobId = null;
+    _paymentMethod = paymentMethod;
     return _start();
   }
 
@@ -100,14 +112,17 @@ class PromptPayController extends _$PromptPayController {
           return;
         }
 
-        // Still awaiting payment with a live QR → resume the same QR rather
-        // than issuing a new one. We require a confirmed *future* expiry: the
-        // by-job/by-order lookup may omit expires_at, and without it we can't
-        // prove the QR is still valid, so we fall through and create fresh.
+        // Still awaiting payment with a live payload (QR for PromptPay, or a
+        // charge_url for card) → resume it rather than issuing a new one. We
+        // require a confirmed *future* expiry: the by-job/by-order lookup may
+        // omit expires_at, and without it we can't prove the payload is still
+        // valid, so we fall through and create fresh.
         final expiry = DateTime.tryParse(existing.expiresAt ?? '');
+        final hasLivePayload = (existing.qrCodeUrl?.isNotEmpty ?? false) ||
+            (existing.chargeUrl?.isNotEmpty ?? false);
         final isResumable =
             existing.status == PaymentIntentStatus.awaitingPayment &&
-            (existing.qrCodeUrl?.isNotEmpty ?? false) &&
+            hasLivePayload &&
             expiry != null &&
             expiry.isAfter(DateTime.now());
         if (isResumable) {
@@ -126,10 +141,13 @@ class PromptPayController extends _$PromptPayController {
       PaymentIntent intent;
       try {
         intent = jobId != null
-            ? await repo.createIntent(jobId: jobId, paymentMethod: 'PROMPTPAY')
+            ? await repo.createIntent(
+                jobId: jobId,
+                paymentMethod: _paymentMethod,
+              )
             : await repo.createIntentForOrder(
                 orderId: orderId!,
-                paymentMethod: 'PROMPTPAY',
+                paymentMethod: _paymentMethod,
               );
       } catch (_) {
         // A live intent already exists → the backend answers POST with 409, not
@@ -164,6 +182,11 @@ class PromptPayController extends _$PromptPayController {
     await _start();
   }
 
+  /// Polls the current intent once, immediately. Used by the card checkout
+  /// screen's "I've paid / check status" action so the user doesn't have to
+  /// wait for the next 3s tick after returning from the Beam hosted page.
+  Future<void> pollNow() => _pollIntent();
+
   void _startTicker() {
     _ticker?.cancel();
     _ticker = Timer.periodic(const Duration(seconds: 1), (_) => _onTick());
@@ -188,7 +211,10 @@ class PromptPayController extends _$PromptPayController {
     }
 
     if (_tick % _pollEverySeconds != 0) return;
+    await _pollIntent();
+  }
 
+  Future<void> _pollIntent() async {
     final intentId = state.intent?.id;
     if (intentId == null) return;
 
@@ -204,6 +230,9 @@ class PromptPayController extends _$PromptPayController {
         qrCodeUrl: (updated.qrCodeUrl?.isNotEmpty ?? false)
             ? updated.qrCodeUrl
             : current?.qrCodeUrl,
+        chargeUrl: (updated.chargeUrl?.isNotEmpty ?? false)
+            ? updated.chargeUrl
+            : current?.chargeUrl,
         expiresAt: updated.expiresAt ?? current?.expiresAt,
       );
       state = state.copyWith(intent: merged);

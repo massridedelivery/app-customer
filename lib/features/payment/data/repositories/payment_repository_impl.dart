@@ -31,11 +31,13 @@ class PaymentRepositoryImpl implements IPaymentRepository {
   Future<PaymentIntent> createIntent({
     required String jobId,
     required String paymentMethod,
+    String? cardToken,
   }) async {
     try {
       final data = await _dataSource.createIntent(
         jobId: jobId,
         paymentMethod: paymentMethod,
+        cardToken: cardToken,
       );
       return PaymentIntent.fromJson(data);
     } on DioException catch (e) {
@@ -68,11 +70,13 @@ class PaymentRepositoryImpl implements IPaymentRepository {
   Future<PaymentIntent> createIntentForOrder({
     required String orderId,
     required String paymentMethod,
+    String? cardToken,
   }) async {
     try {
       final data = await _dataSource.createIntentForOrder(
         orderId: orderId,
         paymentMethod: paymentMethod,
+        cardToken: cardToken,
       );
       return PaymentIntent.fromJson(data);
     } on DioException catch (e) {

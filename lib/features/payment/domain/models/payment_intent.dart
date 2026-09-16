@@ -42,6 +42,9 @@ abstract class PaymentIntent with _$PaymentIntent {
     @Default(PaymentIntentStatus.pending)
     PaymentIntentStatus status,
     @JsonKey(name: 'qr_code_url') String? qrCodeUrl,
+    // 3DS / redirect-based methods (e.g. card via Beam) return a URL to open in
+    // a webview/browser; poll the intent to a terminal state afterwards.
+    @JsonKey(name: 'charge_url') String? chargeUrl,
     @JsonKey(name: 'expires_at') String? expiresAt,
     @JsonKey(name: 'paid_at') String? paidAt,
     @JsonKey(name: 'created_at') String? createdAt,

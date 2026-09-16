@@ -1,3 +1,4 @@
+import 'package:customer_app/core/services/idempotency.dart';
 import 'package:dio/dio.dart';
 
 /// Central repository that wraps all Customer API endpoints.
@@ -182,7 +183,12 @@ class ApiRepository {
 
   /// POST /api/customer/jobs/schedule
   Future<Map<String, dynamic>> scheduleJob(Map<String, dynamic> body) async {
-    final res = await _dio.post('/api/customer/jobs/schedule', data: body);
+    final res = await _dio.post(
+      '/api/customer/jobs/schedule',
+      data: body,
+      // Retry-safe create (SCRUM-50).
+      options: Options(headers: {kIdempotencyHeader: generateIdempotencyKey()}),
+    );
     return res.data as Map<String, dynamic>;
   }
 

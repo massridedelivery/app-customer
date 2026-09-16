@@ -1,5 +1,7 @@
 import 'package:customer_app/core/managers/providers.dart';
 import 'package:customer_app/core/services/api_service.dart';
+import 'package:customer_app/core/services/idempotency.dart';
+import 'package:dio/dio.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'ride_booking_remote_datasource.g.dart';
@@ -114,6 +116,9 @@ class RideBookingRemoteDataSourceImpl implements RideBookingRemoteDataSource {
         'vehicle_type_id': vehicleTypeId,
         'promo_code': ?promoCode,
       },
+      // Retry-safe create (SCRUM-50): a replay after a 503/timeout returns the
+      // original job instead of double-booking.
+      options: Options(headers: {kIdempotencyHeader: generateIdempotencyKey()}),
     );
     return response.data as Map<String, dynamic>;
   }

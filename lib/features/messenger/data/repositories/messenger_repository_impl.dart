@@ -1,5 +1,6 @@
 import 'package:customer_app/core/managers/providers.dart';
 import 'package:customer_app/core/services/api_service.dart';
+import 'package:customer_app/core/services/idempotency.dart';
 import 'package:customer_app/features/messenger/domain/models/messenger_estimate.dart';
 import 'package:customer_app/features/messenger/domain/models/messenger_order.dart';
 import 'package:customer_app/features/messenger/domain/models/messenger_vehicle_type.dart';
@@ -153,6 +154,10 @@ class MessengerRepositoryImpl implements IMessengerRepository {
           if (promoCode != null && promoCode.isNotEmpty)
             'promo_code': promoCode,
         },
+        // Retry-safe create (SCRUM-50).
+        options: Options(
+          headers: {kIdempotencyHeader: generateIdempotencyKey()},
+        ),
       );
       return MessengerOrder.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {

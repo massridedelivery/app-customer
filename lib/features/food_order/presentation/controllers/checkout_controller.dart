@@ -1,4 +1,4 @@
-import 'dart:math';
+import 'package:customer_app/core/services/idempotency.dart';
 import 'package:customer_app/features/food_order/data/repositories/food_order_repository_impl.dart';
 import 'package:customer_app/features/food_order/domain/models/food_models.dart';
 import 'package:customer_app/features/food_order/presentation/states/checkout_state.dart';
@@ -13,18 +13,6 @@ class Checkout extends _$Checkout {
   @override
   CheckoutState build() {
     return const CheckoutState();
-  }
-
-  String _generateUuid() {
-    final random = Random();
-    const hexDigits = '0123456789abcdef';
-    final charCodes = List<int>.generate(36, (index) {
-      if (index == 8 || index == 13 || index == 18 || index == 23) {
-        return 45; // '-' character
-      }
-      return hexDigits.codeUnitAt(random.nextInt(16));
-    });
-    return String.fromCharCodes(charCodes);
   }
 
   void updateWantCutlery(bool value) {
@@ -209,7 +197,7 @@ class Checkout extends _$Checkout {
       isLoading: true,
       error: null,
       placedOrder: null,
-      idempotencyKey: state.idempotencyKey ?? _generateUuid(),
+      idempotencyKey: state.idempotencyKey ?? generateIdempotencyKey(),
     );
     try {
       final repo = ref.read(foodOrderRepositoryProvider);
@@ -357,7 +345,7 @@ class Checkout extends _$Checkout {
 
     final notes = state.floorUnit.isNotEmpty ? '${state.floorUnit} ' : '';
 
-    final key = state.idempotencyKey ?? _generateUuid();
+    final key = state.idempotencyKey ?? generateIdempotencyKey();
     if (state.idempotencyKey == null) {
       state = state.copyWith(idempotencyKey: key);
     }

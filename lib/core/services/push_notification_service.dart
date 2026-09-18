@@ -156,7 +156,7 @@ class PushNotificationService {
     final notification = message.notification;
     if (notification == null) return; // Data-only: nothing to display.
 
-    final deeplink = message.data['deeplink'] as String?;
+    final deeplink = _targetPath(message.data);
     // Skip the banner when the user is already on the target screen — the
     // WebSocket-driven UI is the source of truth there.
     if (deeplink != null) {
@@ -190,7 +190,17 @@ class PushNotificationService {
   }
 
   void _handleMessageTap(RemoteMessage message) =>
-      _openDeeplink(message.data['deeplink'] as String?);
+      _openDeeplink(_targetPath(message.data));
+
+  /// The tap target from a push payload: the explicit `deeplink` path, or the
+  /// `route` some notifications send instead (e.g. the stuck-ride auto-cancel
+  /// sends `type=job_cancelled`, `route=/`, SCRUM-111). A bare "/" means home,
+  /// which is "/main" in this app's router.
+  String? _targetPath(Map<String, dynamic> data) {
+    final raw = (data['deeplink'] ?? data['route']) as String?;
+    if (raw == null || raw.isEmpty) return null;
+    return raw == '/' ? '/main' : raw;
+  }
 
   void _openDeeplink(String? deeplink) {
     if (deeplink == null || !deeplink.startsWith('/')) return;

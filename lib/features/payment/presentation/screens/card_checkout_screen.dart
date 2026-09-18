@@ -136,6 +136,17 @@ class _CardCheckoutScreenState extends ConsumerState<CardCheckoutScreen> {
       );
     }
 
+    if (state.status.isVoided) {
+      return _StatusMessage(
+        icon: Icons.info_outline_rounded,
+        color: AppColors.textSecondary,
+        title: 'เปลี่ยนเป็นชำระเงินสดแล้ว',
+        subtitle: 'รายการนี้ถูกยกเลิก ไม่ต้องชำระด้วยบัตร',
+        primaryLabel: 'กลับ',
+        onPrimary: () => context.pop(),
+      );
+    }
+
     if (state.status == PaymentIntentStatus.expired) {
       return _StatusMessage(
         icon: Icons.timer_off_rounded,

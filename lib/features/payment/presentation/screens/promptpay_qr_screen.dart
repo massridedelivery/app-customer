@@ -70,6 +70,24 @@ class _PromptPayQrScreenState extends ConsumerState<PromptPayQrScreen> {
       }
     });
 
+    // The driver switched the ride to cash → the intent is voided (SCRUM-121).
+    // Close the QR screen instead of leaving the customer staring at a dead QR.
+    ref.listen(promptPayControllerProvider.select((s) => s.status.isVoided), (
+      prev,
+      isVoided,
+    ) {
+      if (isVoided == true) {
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            const SnackBar(
+              content: Text('คนขับเปลี่ยนไปรับเงินสดแล้ว ไม่ต้องชำระด้วย QR'),
+            ),
+          );
+        if (context.canPop()) context.pop();
+      }
+    });
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -104,6 +122,17 @@ class _PromptPayQrScreenState extends ConsumerState<PromptPayQrScreen> {
             ref.read(promptPayControllerProvider.notifier).retry(),
         secondaryLabel: 'จ่ายเงินสดแทน',
         onSecondary: () => context.pop(),
+      );
+    }
+
+    if (state.status.isVoided) {
+      return _StatusMessage(
+        icon: Icons.info_outline_rounded,
+        color: AppColors.textSecondary,
+        title: 'เปลี่ยนเป็นชำระเงินสดแล้ว',
+        subtitle: 'คนขับเปลี่ยนวิธีชำระเป็นเงินสด ไม่ต้องชำระด้วย QR',
+        primaryLabel: 'กลับ',
+        onPrimary: () => context.pop(),
       );
     }
 

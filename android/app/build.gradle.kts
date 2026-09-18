@@ -39,7 +39,13 @@ android {
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
-        versionCode = flutter.versionCode
+        // Single source of truth for the Android versionCode across BOTH the
+        // Play AAB and locally-installed APKs: 2000 + the pubspec build number.
+        // The 2000 offset keeps every build above the legacy on-device ceiling
+        // (a device once carried 2068 from a manual +2068 pubspec bump), so a
+        // newer build always installs over an older one without an uninstall,
+        // and Play keeps receiving monotonically increasing codes.
+        versionCode = 2000 + flutter.versionCode
         versionName = flutter.versionName
     }
 

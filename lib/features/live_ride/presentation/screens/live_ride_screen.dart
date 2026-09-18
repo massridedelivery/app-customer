@@ -347,12 +347,6 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
             bookingState,
             liveState,
           ),
-        // Bottom cancel button while still searching (messenger-style).
-        if (uiState == RideUIState.finding &&
-            liveState.jobStatus != 'CANCELLED') ...[
-          const SizedBox(height: 16),
-          _buildBottomCancel(liveState),
-        ],
       ],
     );
 
@@ -384,11 +378,11 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
           // Draggable card sheet over the map (messenger-style) for all states.
           Positioned.fill(
             child: DraggableScrollableSheet(
-              initialChildSize: 0.55,
+              initialChildSize: 0.5,
               minChildSize: 0.4,
               maxChildSize: 0.85,
               snap: true,
-              snapSizes: const [0.55, 0.85],
+              snapSizes: const [0.5, 0.85],
               builder: (context, scrollController) {
                 return Container(
                   decoration: _sheetDecoration,
@@ -567,25 +561,6 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
     );
   }
 
-  /// Full-width outlined "cancel search" button in the sheet (messenger-style),
-  /// in addition to the top pill. Reuses the same confirm/fee flow.
-  Widget _buildBottomCancel(dynamic liveState) {
-    return OutlinedButton(
-      onPressed: liveState.isLoading ? null : () => _cancelRide(liveState),
-      style: OutlinedButton.styleFrom(
-        side: const BorderSide(color: AppColors.error),
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-      ),
-      child: Text(
-        AppLocalizations.of(context)!.cancelSearch,
-        style: AppTypography.heading6.copyWith(color: AppColors.error),
-      ),
-    );
-  }
-
   // Shared white, rounded-top sheet surface with a soft top shadow.
   static const BoxDecoration _sheetDecoration = BoxDecoration(
     color: AppColors.white,
@@ -661,10 +636,21 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
   }
 
   Widget _buildTimeline(RideUIState state) {
-    int activeStep = -1;
-    if (state == RideUIState.confirming) activeStep = 0;
-    if (state == RideUIState.pickupArrived) activeStep = 1;
-    if (state == RideUIState.onTrip) activeStep = 2;
+    // finding → step 0 (person_search active, first line animating), matching
+    // the messenger tracking timeline so both flows read the same.
+    int activeStep = 0;
+    switch (state) {
+      case RideUIState.finding:
+        activeStep = 0;
+        break;
+      case RideUIState.confirming:
+      case RideUIState.pickupArrived:
+        activeStep = 1;
+        break;
+      case RideUIState.onTrip:
+        activeStep = 2;
+        break;
+    }
 
     return Row(
       children: [

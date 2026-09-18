@@ -1,5 +1,7 @@
 import 'package:customer_app/core/managers/providers.dart';
 import 'package:customer_app/core/services/api_service.dart';
+import 'package:customer_app/core/services/idempotency.dart';
+import 'package:dio/dio.dart';
 import 'package:customer_app/features/food_order/domain/models/food_models.dart';
 import 'package:customer_app/features/food_order/domain/models/remote_cart.dart';
 import 'package:customer_app/features/home/domain/models/place.dart';
@@ -173,6 +175,11 @@ class FoodOrderRemoteDataSourceImpl implements FoodOrderRemoteDataSource {
     final response = await _apiService.dio.post(
       '/api/food/customer/orders',
       data: body,
+      // Retry-safe create (SCRUM-50): also send the key as the shared
+      // Idempotency-Key header so the retry layer will replay this create.
+      options: idempotencyKey != null
+          ? Options(headers: {kIdempotencyHeader: idempotencyKey})
+          : null,
     );
     return FoodOrderModel.fromJson(response.data as Map<String, dynamic>);
   }

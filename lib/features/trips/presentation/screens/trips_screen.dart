@@ -1,6 +1,8 @@
 import 'package:customer_app/core/constants/app_assets.dart';
 import 'package:customer_app/core/utils/error_text.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
+import 'package:customer_app/core/widgets/login_required_view.dart';
+import 'package:customer_app/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/constants/layout.dart';
 import 'package:customer_app/core/widgets/app_filter_chip.dart';
@@ -83,6 +85,14 @@ class _TripsScreenState extends ConsumerState<TripsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // History needs an account — a guest sees the login gate in place of the
+    // list (App Store 5.1.1) before any token-backed fetch runs.
+    if (!ref.watch(authControllerProvider).isAuthenticated) {
+      return const Scaffold(
+        backgroundColor: AppColors.semanticGrayNeutralBgWhite,
+        body: SafeArea(child: LoginRequiredView()),
+      );
+    }
     return Scaffold(
       backgroundColor: AppColors.semanticGrayNeutralBgWhite,
       appBar: AppBar(

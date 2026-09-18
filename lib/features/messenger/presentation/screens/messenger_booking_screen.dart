@@ -1,5 +1,6 @@
 import 'package:customer_app/core/constants/app_assets.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
+import 'package:customer_app/core/utils/auth_gate.dart';
 import 'package:customer_app/core/constants/app_icons.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/widgets/app_filter_chip.dart';
@@ -99,6 +100,9 @@ class _MessengerBookingScreenState
       _showSnack('กำลังคำนวณราคา กรุณารอสักครู่', isError: true);
       return;
     }
+
+    // Sending a parcel is account-based — a guest must log in first.
+    if (!ensureLoggedIn(context, ref)) return;
 
     ref.read(messengerBookingControllerProvider.notifier).createOrder(
           recipientName: _recipientNameController.text.trim(),

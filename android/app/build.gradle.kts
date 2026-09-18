@@ -39,7 +39,13 @@ android {
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
-        versionCode = flutter.versionCode
+        // Single source of truth for the Android versionCode across BOTH the
+        // Play AAB and locally-installed APKs: 2000 + the pubspec build number.
+        // The 2000 offset keeps every build above the legacy on-device ceiling
+        // (a device once carried 2068 from a manual +2068 pubspec bump), so a
+        // newer build always installs over an older one without an uninstall,
+        // and Play keeps receiving monotonically increasing codes.
+        versionCode = 2000 + flutter.versionCode
         versionName = flutter.versionName
     }
 
@@ -49,14 +55,16 @@ android {
             dimension = "env"
             // dev installs alongside prod: com.massdrive.customer_app.dev
             applicationIdSuffix = ".dev"
-            resValue("string", "app_name", "Customer Dev")
+            resValue("string", "app_name", "Mass Delivery Dev")
             // Google Maps SDK key for dev (fills the AndroidManifest placeholder).
             manifestPlaceholders["mapsApiKey"] =
                 "AIzaSyAx8IyTZMk6bif4eLcPzzKH8pj7tuzLxPQ"
         }
         create("prod") {
             dimension = "env"
-            resValue("string", "app_name", "Customer")
+            // Launcher name must match the Play/App Store listing ("Mass
+            // Delivery") — a mismatch is a Play "misleading claims" rejection.
+            resValue("string", "app_name", "Mass Delivery")
             // Production Google Maps SDK key (restricted to package
             // com.massdrive.customer_app + the signing-cert SHA-1s).
             manifestPlaceholders["mapsApiKey"] =
@@ -103,4 +111,14 @@ flutter {
 
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
+
+    // shared_preferences pulls androidx.datastore, whose older native lib
+    // (libdatastore_shared_counter.so) isn't aligned to 16 KB memory pages —
+    // Play flags it for Android 15+ devices. Force a 16 KB-aligned release.
+    constraints {
+        implementation("androidx.datastore:datastore-core:1.1.7")
+        implementation("androidx.datastore:datastore-core-android:1.1.7")
+        implementation("androidx.datastore:datastore-preferences:1.1.7")
+        implementation("androidx.datastore:datastore-preferences-android:1.1.7")
+    }
 }

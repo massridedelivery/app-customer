@@ -5,6 +5,7 @@ import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/utils/map_marker_providers.dart';
 import 'package:customer_app/core/widgets/route_stops.dart';
+import 'package:customer_app/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
 import 'package:customer_app/features/ride_booking/presentation/widgets/booking_map_widget.dart'
     show decodedPolylineProvider;
@@ -250,6 +251,10 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
 
         Future.delayed(const Duration(seconds: 2), () {
           if (context.mounted) {
+            // The job is terminal (completed/cancelled) — drop the recovery
+            // redirect so the router doesn't yank us back to /live on the way
+            // to the payment summary or home.
+            ref.read(authControllerProvider.notifier).clearActiveJob();
             if (isCompleted && next.jobId != null) {
               context.pushReplacement(
                 '/payment-summary/${next.jobId}',
@@ -413,6 +418,13 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
               children: [
                 GestureDetector(
                   onTap: () {
+                    // Escape hatch: drop the recovery redirect first, otherwise
+                    // the router forces us straight back to /live while an
+                    // active job is set — a stale/stuck job (e.g. one the
+                    // backend never closes) would trap the user here with no
+                    // way out. A genuine active ride is still reachable from the
+                    // home banner and re-recovers on the next app launch.
+                    ref.read(authControllerProvider.notifier).clearActiveJob();
                     if (context.canPop()) {
                       context.pop();
                     } else {

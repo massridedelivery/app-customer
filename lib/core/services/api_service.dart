@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:customer_app/core/configs/app_env.dart';
 import 'package:talker_dio_logger/talker_dio_logger.dart';
 import 'package:customer_app/core/data/token_storage.dart';
+import 'package:customer_app/core/services/retry_interceptor.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:customer_app/features/auth/presentation/controllers/auth_controller.dart';
 
@@ -74,8 +75,11 @@ class ApiService {
           }
 
           if (!_tokenStorage.hasToken) {
-            // No token in storage, but got 401? Force logout for safety.
-            _handleLogout();
+            // Guest (no token): a 401 just means this endpoint needs an account,
+            // e.g. a token-scoped call reached while browsing. Surface it so the
+            // caller can handle it — do NOT force logout, which would reset a
+            // browsing guest (App Store 5.1.1 guest mode). There is nothing to
+            // refresh without a token anyway.
             return handler.next(error);
           }
 
@@ -104,6 +108,11 @@ class ApiService {
         },
       ),
     );
+
+    // Transient-failure retry layer (SCRUM-50). Added AFTER the auth
+    // interceptor so a 401 is refreshed first; this only ever sees the
+    // 503/500/429/timeout errors the auth interceptor passes through.
+    _dio.interceptors.add(RetryInterceptor(_dio));
   }
 
   Future<void> _retry(

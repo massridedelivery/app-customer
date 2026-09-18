@@ -20,12 +20,14 @@ class PaymentDataSource {
   Future<Map<String, dynamic>> createIntent({
     required String jobId,
     required String paymentMethod,
+    String? cardToken,
   }) async {
     final response = await _apiService.dio.post(
       '/api/payment/intent',
       data: {
         'job_id': jobId,
         'payment_method': paymentMethod,
+        if (cardToken != null && cardToken.isNotEmpty) 'card_token': cardToken,
       },
     );
     return response.data as Map<String, dynamic>;
@@ -36,12 +38,14 @@ class PaymentDataSource {
   Future<Map<String, dynamic>> createIntentForOrder({
     required String orderId,
     required String paymentMethod,
+    String? cardToken,
   }) async {
     final response = await _apiService.dio.post(
       '/api/payment/intent',
       data: {
         'order_id': orderId,
         'payment_method': paymentMethod,
+        if (cardToken != null && cardToken.isNotEmpty) 'card_token': cardToken,
       },
     );
     return response.data as Map<String, dynamic>;

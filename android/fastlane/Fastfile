@@ -25,6 +25,10 @@ platform :android do
       skip_upload_images: true,
       skip_upload_screenshots: true,
       skip_upload_changelogs: true,
+      # Default Google-API timeout is 300s; the ~48MB AAB's prepare/upload step
+      # intermittently exceeds it (first attempt fails, retry succeeds). Give it
+      # more room. Overridable via `timeout:` option.
+      timeout: (options[:timeout] || 900).to_i,
     )
   end
 

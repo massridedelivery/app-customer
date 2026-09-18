@@ -71,7 +71,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         await ref
             .read(onboardingControllerProvider.notifier)
             .completeOnboarding();
-        if (context.mounted) context.go('/auth');
+        // Land on the home as a guest — non-account features are browsable
+        // without login (App Store 5.1.1); login is prompted at account actions.
+        if (context.mounted) context.go('/main');
       }
     }
 
@@ -149,7 +151,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                         await ref
                             .read(onboardingControllerProvider.notifier)
                             .completeOnboarding();
-                        if (context.mounted) context.go('/auth');
+                        // Land on the home as a guest — non-account features are browsable
+        // without login (App Store 5.1.1); login is prompted at account actions.
+        if (context.mounted) context.go('/main');
                       },
                       child: Text(
                         'ข้าม',

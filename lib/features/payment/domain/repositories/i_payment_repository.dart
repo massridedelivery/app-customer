@@ -5,9 +5,12 @@ abstract interface class IPaymentRepository {
 
   /// Creates a PromptPay payment intent for a ride [jobId] (SCRUM-35 §2.1).
   /// No `amount` is sent — the backend derives it from the job fare.
+  /// [cardToken] is optional and only sent for card payments (a provider card
+  /// token, e.g. Beam); omitted for PROMPTPAY/CASH.
   Future<PaymentIntent> createIntent({
     required String jobId,
     required String paymentMethod,
+    String? cardToken,
   });
 
   /// Creates a PromptPay payment intent for a messenger/food [orderId]
@@ -17,6 +20,7 @@ abstract interface class IPaymentRepository {
   Future<PaymentIntent> createIntentForOrder({
     required String orderId,
     required String paymentMethod,
+    String? cardToken,
   });
 
   /// Polls a single intent by its id (SCRUM-35 §2.2).

@@ -37,6 +37,10 @@ abstract class LiveRideState with _$LiveRideState {
     double? estimatedCancelFee,
     // Fee actually charged after a cancellation (from the cancel response).
     double? chargedCancelFee,
+    // Why a ride was cancelled, from a system-initiated CANCELLED frame
+    // (SCRUM-111), e.g. "driver_unavailable". Null for a user-initiated cancel;
+    // lets the UI show "the system cancelled this" rather than a bare error.
+    String? cancelReason,
     @Default('PENDING')
     String? jobStatus, // PENDING, ACCEPTED, PICKED_UP, COMPLETED, CANCELLED
     String? error,

@@ -8,7 +8,6 @@ import 'package:customer_app/features/live_ride/domain/usecases/cancel_ride_usec
 import 'package:customer_app/features/live_ride/domain/usecases/get_driver_profile_usecase.dart';
 import 'package:customer_app/features/live_ride/presentation/states/live_ride_state.dart';
 import 'package:customer_app/features/payment/data/repositories/payment_repository_impl.dart';
-import 'package:customer_app/features/payment/domain/models/payment_intent.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/widgets.dart';
 
@@ -136,8 +135,14 @@ class LiveRideController extends _$LiveRideController {
         // Handle top-level keys as per websocket_integration.md
         final status = ((data?['status'] ?? message['status']) as String?)
             ?.toUpperCase();
+        // System-initiated cancels carry a reason (SCRUM-111), e.g.
+        // "driver_unavailable"; a user-initiated cancel has none.
+        final reason = (data?['reason'] ?? message['reason']) as String?;
         if (status != null) {
-          state = state.copyWith(jobStatus: status);
+          state = state.copyWith(
+            jobStatus: status,
+            cancelReason: status == 'CANCELLED' ? reason : null,
+          );
           // A driver was (or is being) assigned but we don't have their details
           // yet — pull the authoritative job so the confirming screen populates.
           if (!_hasDriver && status != 'PENDING' && status != 'CANCELLED') {
@@ -295,7 +300,15 @@ class LiveRideController extends _$LiveRideController {
   /// latch [LiveRideState.awaitingPromptPay] so the screen routes to the QR once.
   /// Cleared on PAID so it never re-triggers after the customer has paid.
   Future<void> _checkDestinationPayment(String paymentStatus) async {
-    if (state.paymentMethod.toUpperCase() != 'PROMPTPAY') return;
+    // Driver switched the ride to cash (SCRUM-121): the method is no longer
+    // PROMPTPAY, so drop any pending-QR latch — the QR screen closes itself on
+    // the voided intent, and the live screen must stop expecting a QR payment.
+    if (state.paymentMethod.toUpperCase() != 'PROMPTPAY') {
+      if (state.awaitingPromptPay) {
+        state = state.copyWith(awaitingPromptPay: false);
+      }
+      return;
+    }
     if (paymentStatus.toUpperCase() == 'PAID') {
       if (state.awaitingPromptPay) {
         state = state.copyWith(awaitingPromptPay: false);
@@ -312,9 +325,13 @@ class LiveRideController extends _$LiveRideController {
       final intent =
           await ref.read(paymentRepositoryProvider).getIntentByJob(jobId);
       if (intent == null) return; // driver hasn't opened collection yet
-      if (intent.status == PaymentIntentStatus.paid) {
-        state = state.copyWith(awaitingPromptPay: false);
-      } else if (!intent.status.isTerminal) {
+      // Any terminal intent (paid, or voided when the driver switches to cash)
+      // clears the latch; only a live, non-terminal intent surfaces the QR.
+      if (intent.status.isTerminal) {
+        if (state.awaitingPromptPay) {
+          state = state.copyWith(awaitingPromptPay: false);
+        }
+      } else {
         state = state.copyWith(awaitingPromptPay: true);
       }
     } catch (e) {

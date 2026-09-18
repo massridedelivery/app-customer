@@ -271,9 +271,20 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
         });
 
         final cancelFee = next.chargedCancelFee ?? 0;
-        final cancelMsg = cancelFee > 0
-            ? 'ยกเลิกการเดินทางแล้ว • มีค่าบริการยกเลิก ฿${cancelFee.toStringAsFixed(0)}'
-            : l10n.rideCancelled;
+        final reason = next.cancelReason;
+        final String cancelMsg;
+        if (reason != null && reason.isNotEmpty) {
+          // System-initiated cancel (SCRUM-111): frame it as the system helping,
+          // not as an error the user caused.
+          cancelMsg = reason == 'driver_unavailable'
+              ? 'ระบบยกเลิกการเดินทางให้ เนื่องจากไม่พบคนขับที่ว่างในขณะนี้'
+              : 'ระบบยกเลิกการเดินทางให้อัตโนมัติ';
+        } else if (cancelFee > 0) {
+          cancelMsg =
+              'ยกเลิกการเดินทางแล้ว • มีค่าบริการยกเลิก ฿${cancelFee.toStringAsFixed(0)}';
+        } else {
+          cancelMsg = l10n.rideCancelled;
+        }
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(

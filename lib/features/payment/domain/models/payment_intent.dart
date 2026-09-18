@@ -17,11 +17,28 @@ enum PaymentIntentStatus {
   refunded,
   @JsonValue('EXPIRED')
   expired,
+  // The driver switched a QR ride to cash (SCRUM-121): the backend voids the
+  // intent so the customer can no longer pay it. Treat as terminal so the QR
+  // screen stops polling and closes instead of hanging on a dead QR. CANCELLED
+  // is accepted too in case the backend uses that spelling.
+  @JsonValue('VOIDED')
+  voided,
+  @JsonValue('CANCELLED')
+  cancelled,
   unknown;
 
   /// The user is done: no more polling needed.
   bool get isTerminal =>
-      this == paid || this == failed || this == expired || this == refunded;
+      this == paid ||
+      this == failed ||
+      this == expired ||
+      this == refunded ||
+      this == voided ||
+      this == cancelled;
+
+  /// The intent was cancelled/voided before payment (e.g. driver switched the
+  /// ride to cash) — distinct from a payment that actively failed.
+  bool get isVoided => this == voided || this == cancelled;
 }
 
 /// The create response uses `intent_id`; the GET response uses `id`.

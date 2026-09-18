@@ -116,7 +116,7 @@ ipa_dev:
 # ใช้ App Store Connect API key M4PPU86374 (.p8 อยู่ใน ~/.appstoreconnect/private_keys/)
 deploy_dev: bump ipa_dev
 	xcrun altool --upload-app --type ios \
-		-f build/ios/ipa/customer_app.ipa \
+		-f build/ios/ipa/*.ipa \
 		--apiKey M4PPU86374 --apiIssuer 03750a9c-5c4e-4be1-bb27-546000146161
 
 # ─── 🤖 Android / Google Play ───────────────────────────────────────────────
@@ -163,7 +163,7 @@ ipa_prod:
 
 upload_testflight_prod:
 	xcrun altool --upload-app --type ios \
-		-f build/ios/ipa/customer_app.ipa \
+		-f build/ios/ipa/*.ipa \
 		--apiKey M4PPU86374 --apiIssuer 03750a9c-5c4e-4be1-bb27-546000146161
 
 upload_play_prod:
@@ -204,7 +204,7 @@ ipa_prod_devapi:
 # ⬆️  ขั้น upload ล้วนๆ — ไม่ bump ไม่ build ใช้กับ artifact ที่ build ค้างไว้แล้ว
 upload_testflight_prod_devapi:
 	xcrun altool --upload-app --type ios \
-		-f build/ios/ipa/customer_app.ipa \
+		-f build/ios/ipa/*.ipa \
 		--apiKey M4PPU86374 --apiIssuer 03750a9c-5c4e-4be1-bb27-546000146161
 
 upload_play_prod_devapi:

@@ -1,4 +1,4 @@
-.PHONY: gen watch fix clean clean_cache test test_cov analyze pre_pr run_dev run_prod run_ios_dev run_ios_prod build_apk_dev build_apk_dev_arm64 install_dev build_apk_prod build_ios_dev build_ios_prod build_aab_dev build_aab_prod deploy_play_dev deploy_play_prod deploy_play_check run_prod_devapi build_apk_prod_devapi build_aab_prod_devapi ipa_prod_devapi deploy_prod_devapi deploy_play_prod_devapi upload_testflight_prod_devapi upload_play_prod_devapi deploy_both_prod_devapi ipa_prod upload_testflight_prod upload_play_prod deploy_both_prod
+.PHONY: gen watch fix clean clean_cache test test_cov analyze pre_pr run_dev run_prod run_ios_dev run_ios_prod build_apk_dev build_apk_dev_arm64 install_dev build_apk_prod build_ios_dev build_ios_prod build_aab_dev build_aab_prod deploy_play_dev deploy_play_prod deploy_play_check run_prod_devapi build_apk_prod_devapi build_aab_prod_devapi ipa_prod_devapi deploy_prod_devapi deploy_play_prod_devapi upload_testflight_prod_devapi upload_play_prod_devapi deploy_both_prod_devapi promote_play_prod ipa_prod upload_testflight_prod upload_play_prod deploy_both_prod
 
 # ทุก target เป็นสเต็ปที่ต้องเรียงกัน (build ก่อน upload) — กัน -j สลับลำดับ
 .NOTPARALLEL:
@@ -224,3 +224,13 @@ deploy_play_prod_devapi: bump build_aab_prod_devapi upload_play_prod_devapi
 # ลำดับสำคัญ: build ให้ครบทั้งสองก่อนค่อย upload — ฝั่งไหน build พังจะไม่มีอะไรหลุดขึ้นไปก่อน
 # (.NOTPARALLEL ด้านบนกันไม่ให้ -j สลับลำดับ)
 deploy_both_prod_devapi: bump ipa_prod_devapi build_aab_prod_devapi upload_testflight_prod_devapi upload_play_prod_devapi
+
+# 🚀 Promote a build already on Google Play internal → production (as DRAFT).
+# No re-upload — Google rejects a reused versionCode. Publish + set the rollout %
+# manually in the Play Console afterwards.
+# Usage: make promote_play_prod VERSION_CODE=2071
+promote_play_prod:
+	@test -n "$(VERSION_CODE)" || (echo "VERSION_CODE required, e.g. make promote_play_prod VERSION_CODE=2071" && exit 1)
+	cd android && \
+		PLAY_PACKAGE_NAME=com.massdrive.customer_app \
+		bundle exec fastlane promote version_code:$(VERSION_CODE)

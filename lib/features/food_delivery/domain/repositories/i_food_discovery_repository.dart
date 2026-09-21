@@ -23,6 +23,13 @@ abstract interface class IFoodDiscoveryRepository {
     int? limit,
     int? offset,
   });
+  Future<List<RestaurantProfileModel>> getSectionRestaurants({
+    required String sectionId,
+    required double lat,
+    required double lng,
+    int? limit,
+    int? offset,
+  });
   Future<List<RestaurantProfileModel>> getSavedRestaurants({
     required double lat,
     required double lng,

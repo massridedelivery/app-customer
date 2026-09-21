@@ -314,7 +314,13 @@ final routerProvider = Provider<GoRouter>((ref) {
           // Query params (not extra) so the screen is deeplinkable.
           final title = state.uri.queryParameters['title'] ?? 'รายการเมนู';
           final categoryId = state.uri.queryParameters['categoryId'];
-          return CategoryListScreen(title: title, categoryId: categoryId);
+          // sectionId → browse a home-feed section (SCRUM-8) instead of a category.
+          final sectionId = state.uri.queryParameters['sectionId'];
+          return CategoryListScreen(
+            title: title,
+            categoryId: categoryId,
+            sectionId: sectionId,
+          );
         },
       ),
       GoRoute(

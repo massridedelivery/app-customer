@@ -32,6 +32,42 @@ platform :android do
     )
   end
 
+  desc "Promote an existing Play release to another track — no re-upload.\n" \
+       "Google rejects a reused versionCode, so a build already on internal is\n" \
+       "moved between tracks rather than uploaded again.\n" \
+       "Options: version_code: <int> (required, or VERSION_CODE env), " \
+       "to: <alpha|beta|production> (default production), " \
+       "from: <track> (default internal), " \
+       "status: <completed|draft|halted|inProgress> (default draft)."
+  lane :promote do |options|
+    version_code = options[:version_code] || ENV["VERSION_CODE"]
+    if version_code.nil? || version_code.to_s.empty?
+      UI.user_error!("No version_code given (pass version_code: or set VERSION_CODE)")
+    end
+    from   = options[:from]   || "internal"
+    to     = options[:to]     || "production"
+    status = options[:status] || "draft"
+
+    UI.message("Promoting versionCode #{version_code}: #{from} → #{to} (#{status})")
+
+    # package_name + json_key come from the Appfile. Nothing is uploaded — we
+    # only move the existing release; status:draft leaves the final publish +
+    # rollout % to a human in the Play Console.
+    upload_to_play_store(
+      track: from,
+      track_promote_to: to,
+      track_promote_release_status: status,
+      version_code: version_code.to_i,
+      skip_upload_aab: true,
+      skip_upload_apk: true,
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      skip_upload_changelogs: true,
+      timeout: (options[:timeout] || 900).to_i,
+    )
+  end
+
   desc "Verify the Play service-account JSON authenticates for this package."
   lane :whoami do
     validate_play_store_json_key

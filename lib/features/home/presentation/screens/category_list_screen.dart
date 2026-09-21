@@ -1,38 +1,12 @@
-import 'package:customer_app/core/constants/map_defaults.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
-import 'package:customer_app/features/food_delivery/data/repositories/food_discovery_repository_impl.dart';
 import 'package:customer_app/features/food_order/domain/models/food_models.dart';
-import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
+import 'package:customer_app/features/home/presentation/controllers/category_restaurants_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:customer_app/core/widgets/app_network_image.dart';
 import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-
-final categoryRestaurantsProvider =
-    FutureProvider.family<List<RestaurantProfileModel>, String>((
-      ref,
-      categoryId,
-    ) async {
-      final location = ref.watch(
-        homeControllerProvider.select(
-          (state) =>
-              state.foodLocation ??
-              state.pickupLocation ??
-              state.currentLocation,
-        ),
-      );
-      final lat = location?.latitude ?? MapDefaults.bangkokLat;
-      final lng = location?.longitude ?? MapDefaults.bangkokLng;
-
-      final repo = ref.watch(foodDiscoveryRepositoryProvider);
-      return await repo.getCategoryRestaurants(
-        categoryId: categoryId,
-        lat: lat,
-        lng: lng,
-      );
-    });
 
 class CategoryListScreen extends ConsumerWidget {
   final String title;
@@ -66,7 +40,7 @@ class CategoryListScreen extends ConsumerWidget {
       );
     }
 
-    final itemsAsync = ref.watch(categoryRestaurantsProvider(categoryId!));
+    final feedAsync = ref.watch(categoryRestaurantsProvider(categoryId!));
 
     return Scaffold(
       backgroundColor: AppColors.semanticGrayNeutralBgWhite,
@@ -82,8 +56,9 @@ class CategoryListScreen extends ConsumerWidget {
           onPressed: () => context.pop(),
         ),
       ),
-      body: itemsAsync.when(
-        data: (items) {
+      body: feedAsync.when(
+        data: (feed) {
+          final items = feed.items;
           if (items.isEmpty) {
             return Center(
               child: Text(
@@ -96,19 +71,55 @@ class CategoryListScreen extends ConsumerWidget {
             onRefresh: () async {
               ref.invalidate(categoryRestaurantsProvider(categoryId!));
             },
-            child: GridView.builder(
-              padding: const EdgeInsets.all(16),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: 0.72,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-              ),
-              itemCount: items.length,
-              itemBuilder: (context, index) {
-                final item = items[index];
-                return _buildCategoryRestaurantCard(context, item);
+            // Endless scroll (SCRUM-8): fetch the next page as the user nears
+            // the bottom; a full page implies more, a short one ends it.
+            child: NotificationListener<ScrollNotification>(
+              onNotification: (n) {
+                if (feed.hasMore &&
+                    !feed.loadingMore &&
+                    n.metrics.pixels >= n.metrics.maxScrollExtent - 400) {
+                  ref
+                      .read(categoryRestaurantsProvider(categoryId!).notifier)
+                      .loadMore();
+                }
+                return false;
               },
+              child: CustomScrollView(
+                slivers: [
+                  SliverPadding(
+                    padding: const EdgeInsets.all(16),
+                    sliver: SliverGrid(
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        childAspectRatio: 0.72,
+                        crossAxisSpacing: 16,
+                        mainAxisSpacing: 16,
+                      ),
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) => _buildCategoryRestaurantCard(
+                          context,
+                          items[index],
+                        ),
+                        childCount: items.length,
+                      ),
+                    ),
+                  ),
+                  if (feed.loadingMore)
+                    const SliverToBoxAdapter(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 20),
+                        child: Center(
+                          child: SizedBox(
+                            width: 28,
+                            height: 28,
+                            child: CircularProgressIndicator(strokeWidth: 2.5),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
             ),
           );
         },

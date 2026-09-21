@@ -81,3 +81,52 @@ class CategoryRestaurants extends _$CategoryRestaurants {
     }
   }
 }
+
+/// Paginated restaurants for a home-feed section (SCRUM-8,
+/// `GET /api/discovery/sections/:id`). Same paging shape as
+/// [CategoryRestaurants], just a different source endpoint — used by the
+/// section "ดูทั้งหมด" browse.
+@riverpod
+class SectionRestaurants extends _$SectionRestaurants {
+  static const int _pageSize = 20;
+
+  @override
+  FutureOr<CategoryFeed> build(String sectionId) async {
+    final page = await _fetch(offset: 0);
+    return CategoryFeed(items: page, hasMore: page.length == _pageSize);
+  }
+
+  Future<List<RestaurantProfileModel>> _fetch({required int offset}) {
+    final location = ref.read(homeControllerProvider);
+    final loc =
+        location.foodLocation ??
+        location.pickupLocation ??
+        location.currentLocation;
+    final repo = ref.read(foodDiscoveryRepositoryProvider);
+    return repo.getSectionRestaurants(
+      sectionId: sectionId,
+      lat: loc?.latitude ?? MapDefaults.bangkokLat,
+      lng: loc?.longitude ?? MapDefaults.bangkokLng,
+      limit: _pageSize,
+      offset: offset,
+    );
+  }
+
+  Future<void> loadMore() async {
+    final current = state.asData?.value;
+    if (current == null || !current.hasMore || current.loadingMore) return;
+
+    state = AsyncData(current.copyWith(loadingMore: true));
+    try {
+      final next = await _fetch(offset: current.items.length);
+      state = AsyncData(
+        CategoryFeed(
+          items: [...current.items, ...next],
+          hasMore: next.length == _pageSize,
+        ),
+      );
+    } catch (_) {
+      state = AsyncData(current.copyWith(loadingMore: false));
+    }
+  }
+}

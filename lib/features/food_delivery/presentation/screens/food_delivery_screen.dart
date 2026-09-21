@@ -99,6 +99,28 @@ class _FoodDeliveryScreenState extends ConsumerState<FoodDeliveryScreen> {
                                       _sectionTitleTh(section.title!),
                                       style: AppTypography.heading4,
                                     ),
+                                    // "ดูทั้งหมด" → paginated section browse
+                                    // (SCRUM-8) when the feed marks more items.
+                                    if (section.isMore == true)
+                                      GestureDetector(
+                                        onTap: () {
+                                          final t = _sectionTitleTh(
+                                            section.title!,
+                                          );
+                                          context.push(
+                                            '/category-list?title='
+                                            '${Uri.encodeComponent(t)}'
+                                            '&sectionId='
+                                            '${Uri.encodeComponent(section.id)}',
+                                          );
+                                        },
+                                        child: Text(
+                                          'ดูทั้งหมด',
+                                          style: AppTypography.label2.copyWith(
+                                            color: AppColors.primary,
+                                          ),
+                                        ),
+                                      ),
                                   ],
                                 ),
                               ),

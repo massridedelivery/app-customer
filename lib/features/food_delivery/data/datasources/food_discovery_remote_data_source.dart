@@ -28,6 +28,13 @@ abstract interface class FoodDiscoveryRemoteDataSource {
     int? limit,
     int? offset,
   });
+  Future<List<RestaurantProfileModel>> getSectionRestaurants({
+    required String sectionId,
+    required double lat,
+    required double lng,
+    int? limit,
+    int? offset,
+  });
   Future<List<RestaurantProfileModel>> getSavedRestaurants({
     required double lat,
     required double lng,
@@ -112,6 +119,41 @@ class FoodDiscoveryRemoteDataSourceImpl
 
     final response = await _apiService.dio.get(
       '/api/discovery/categories/$categoryId',
+      queryParameters: queryParams,
+    );
+    final dynamic data = response.data;
+    if (data is List) {
+      return data
+          .map(
+            (e) => RestaurantProfileModel.fromJson(e as Map<String, dynamic>),
+          )
+          .toList();
+    } else if (data is Map && data['items'] is List) {
+      return (data['items'] as List)
+          .map(
+            (e) => RestaurantProfileModel.fromJson(e as Map<String, dynamic>),
+          )
+          .toList();
+    }
+    return [];
+  }
+
+  @override
+  Future<List<RestaurantProfileModel>> getSectionRestaurants({
+    required String sectionId,
+    required double lat,
+    required double lng,
+    int? limit,
+    int? offset,
+  }) async {
+    // GET /api/discovery/sections/:id (SCRUM-8) — paginated restaurants for a
+    // home-feed section (limit default 20, max 50). Response is a flat array.
+    final queryParams = <String, dynamic>{'lat': lat, 'lng': lng};
+    if (limit != null) queryParams['limit'] = limit;
+    if (offset != null) queryParams['offset'] = offset;
+
+    final response = await _apiService.dio.get(
+      '/api/discovery/sections/$sectionId',
       queryParameters: queryParams,
     );
     final dynamic data = response.data;

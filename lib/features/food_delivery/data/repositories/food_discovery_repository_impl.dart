@@ -97,6 +97,29 @@ class FoodDiscoveryRepositoryImpl implements IFoodDiscoveryRepository {
   }
 
   @override
+  Future<List<RestaurantProfileModel>> getSectionRestaurants({
+    required String sectionId,
+    required double lat,
+    required double lng,
+    int? limit,
+    int? offset,
+  }) async {
+    try {
+      return await _dataSource.getSectionRestaurants(
+        sectionId: sectionId,
+        lat: lat,
+        lng: lng,
+        limit: limit,
+        offset: offset,
+      );
+    } on DioException catch (e) {
+      throw mapDioErrorToException(e, 'Failed to load section restaurants');
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
+
+  @override
   Future<List<RestaurantProfileModel>> getSavedRestaurants({
     required double lat,
     required double lng,

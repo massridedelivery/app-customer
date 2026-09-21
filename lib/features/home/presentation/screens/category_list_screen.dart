@@ -11,12 +11,22 @@ import 'package:go_router/go_router.dart';
 class CategoryListScreen extends ConsumerWidget {
   final String title;
   final String? categoryId;
+  // When set, browse a home-feed section (SCRUM-8) via the section endpoint
+  // instead of a category; takes precedence over [categoryId].
+  final String? sectionId;
 
-  const CategoryListScreen({super.key, required this.title, this.categoryId});
+  const CategoryListScreen({
+    super.key,
+    required this.title,
+    this.categoryId,
+    this.sectionId,
+  });
+
+  bool get _useSection => sectionId != null && sectionId!.isNotEmpty;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    if (categoryId == null) {
+    if (!_useSection && categoryId == null) {
       return Scaffold(
         backgroundColor: AppColors.semanticGrayNeutralBgWhite,
         appBar: AppBar(
@@ -40,7 +50,15 @@ class CategoryListScreen extends ConsumerWidget {
       );
     }
 
-    final feedAsync = ref.watch(categoryRestaurantsProvider(categoryId!));
+    final feedAsync = _useSection
+        ? ref.watch(sectionRestaurantsProvider(sectionId!))
+        : ref.watch(categoryRestaurantsProvider(categoryId!));
+    void loadMore() => _useSection
+        ? ref.read(sectionRestaurantsProvider(sectionId!).notifier).loadMore()
+        : ref.read(categoryRestaurantsProvider(categoryId!).notifier).loadMore();
+    void refresh() => _useSection
+        ? ref.invalidate(sectionRestaurantsProvider(sectionId!))
+        : ref.invalidate(categoryRestaurantsProvider(categoryId!));
 
     return Scaffold(
       backgroundColor: AppColors.semanticGrayNeutralBgWhite,
@@ -68,9 +86,7 @@ class CategoryListScreen extends ConsumerWidget {
             );
           }
           return RefreshIndicator(
-            onRefresh: () async {
-              ref.invalidate(categoryRestaurantsProvider(categoryId!));
-            },
+            onRefresh: () async => refresh(),
             // Endless scroll (SCRUM-8): fetch the next page as the user nears
             // the bottom; a full page implies more, a short one ends it.
             child: NotificationListener<ScrollNotification>(
@@ -78,9 +94,7 @@ class CategoryListScreen extends ConsumerWidget {
                 if (feed.hasMore &&
                     !feed.loadingMore &&
                     n.metrics.pixels >= n.metrics.maxScrollExtent - 400) {
-                  ref
-                      .read(categoryRestaurantsProvider(categoryId!).notifier)
-                      .loadMore();
+                  loadMore();
                 }
                 return false;
               },

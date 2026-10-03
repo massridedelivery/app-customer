@@ -90,14 +90,12 @@ dev_dependencies:
 # Regenerate after changing color/image: dart run flutter_native_splash:create
 flutter_native_splash:
   color: "#F8F8F9"                       # = AppColors.foundationGrayscale75 (Flutter splash bg)
-  image: assets/icon/splash_icon.png     # red rounded icon + white M
   android: true
   ios: true
   web: false
   # Android 12+ uses the system splash API (icon is circle-masked).
   android_12:
     color: "#F8F8F9"
-    image: assets/icon/splash_icon.png
 
 # App launcher icon (run: dart run flutter_launcher_icons)
 flutter_launcher_icons:

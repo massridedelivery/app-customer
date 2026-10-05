@@ -14,10 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-/// Customer support line, shown + dialled from the profile "ติดต่อเจ้าหน้าที่"
-/// row.
-const String _supportPhoneNumber = '0899999999';
+import 'package:customer_app/core/data/support_config_provider.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -36,6 +33,10 @@ class ProfileScreen extends ConsumerWidget {
     }
 
     final profileAsync = ref.watch(profileControllerProvider);
+    // Support phone comes from the admin-managed API (SCRUM support config),
+    // not a hardcoded constant; fall back while loading / on error.
+    final supportPhone =
+        ref.watch(supportPhoneProvider).asData?.value ?? kSupportPhoneFallback;
 
     return Scaffold(
       backgroundColor: AppColors.semanticGrayNeutralBgWhite,
@@ -122,12 +123,12 @@ class ProfileScreen extends ConsumerWidget {
                         icon: Icons.headset_mic_outlined,
                         title: 'ติดต่อเจ้าหน้าที่',
                         trailing: Text(
-                          _supportPhoneNumber,
+                          supportPhone,
                           style: AppTypography.body3.copyWith(
                             color: AppColors.primary,
                           ),
                         ),
-                        onTap: () => _callSupport(),
+                        onTap: () => _callSupport(supportPhone),
                       ),
                     ],
                   ),
@@ -197,8 +198,8 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _callSupport() async {
-    await launchUrl(Uri(scheme: 'tel', path: _supportPhoneNumber));
+  Future<void> _callSupport(String phone) async {
+    await launchUrl(Uri(scheme: 'tel', path: phone));
   }
 
   /// Permanently delete the account (App Store 5.1.1 requires an in-app option).

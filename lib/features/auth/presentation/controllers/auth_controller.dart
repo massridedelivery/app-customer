@@ -92,7 +92,9 @@ class AuthController extends _$AuthController {
       final api = ref.read(apiServiceProvider);
       final response = await api.dio.post(
         '/auth/login',
-        data: {'email': email, 'password': password},
+        // role selects the customer account when one email/phone has several
+        // account types (driver/merchant/customer) — identity change, BE #133.
+        data: {'email': email, 'password': password, 'role': 'customer'},
       );
 
       final accessToken = response.data['access_token'];

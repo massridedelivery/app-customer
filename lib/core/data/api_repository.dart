@@ -11,10 +11,17 @@ class ApiRepository {
   // ─── AUTH ─────────────────────────────────────────────────────────────────
 
   /// POST /auth/otp/send
-  Future<Map<String, dynamic>> sendOtp(String phone, {String? deviceId}) async {
+  /// [role] scopes is_registered to the customer account (identity change,
+  /// BE #133) — a driver/merchant phone with no customer account gets
+  /// is_registered=false and is treated as a new customer.
+  Future<Map<String, dynamic>> sendOtp(
+    String phone, {
+    String role = 'customer',
+    String? deviceId,
+  }) async {
     final res = await _dio.post(
       '/auth/otp/send',
-      data: {'phone': phone, 'device_id': ?deviceId},
+      data: {'phone': phone, 'role': role, 'device_id': ?deviceId},
     );
     return res.data as Map<String, dynamic>;
   }

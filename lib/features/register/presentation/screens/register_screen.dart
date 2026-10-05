@@ -49,12 +49,34 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     final l10n = AppLocalizations.of(context)!;
     ref.listen<AsyncValue<void>>(registerControllerProvider, (previous, next) {
       if (next is AsyncError) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('ลงทะเบียนไม่สำเร็จ กรุณาลองใหม่อีกครั้ง'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        // 409 Conflict (multi-type identity): this email/phone already has a
+        // customer account → guide to login instead of a generic retry.
+        final err = next.error.toString().toLowerCase();
+        final isConflict = err.contains('already') ||
+            err.contains('registered') ||
+            err.contains('409') ||
+            err.contains('มีบัญชี') ||
+            err.contains('มีอยู่') ||
+            err.contains('ซ้ำ');
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            SnackBar(
+              content: Text(
+                isConflict
+                    ? 'อีเมลนี้มีบัญชีอยู่แล้ว กรุณาเข้าสู่ระบบ'
+                    : 'ลงทะเบียนไม่สำเร็จ กรุณาลองใหม่อีกครั้ง',
+              ),
+              backgroundColor: Colors.red,
+              action: isConflict
+                  ? SnackBarAction(
+                      label: 'เข้าสู่ระบบ',
+                      textColor: Colors.white,
+                      onPressed: () => context.go('/auth/email_login'),
+                    )
+                  : null,
+            ),
+          );
       } else if (next is AsyncData && previous is! AsyncData) {
         ref.read(authControllerProvider.notifier).setAuthenticated();
         context.go('/main');

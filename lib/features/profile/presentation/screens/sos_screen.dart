@@ -1,9 +1,11 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
+import 'package:customer_app/core/data/support_config_provider.dart';
 import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/features/profile/presentation/controllers/sos_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SOSScreen extends ConsumerWidget {
   const SOSScreen({super.key});
@@ -12,6 +14,9 @@ class SOSScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final historyAsync = ref.watch(sosHistoryProvider);
     final isTriggering = ref.watch(sosControllerProvider);
+    // Admin-managed call-center number (GET /api/config/support), not hardcoded.
+    final supportPhone =
+        ref.watch(supportPhoneProvider).asData?.value ?? kSupportPhoneFallback;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -87,7 +92,25 @@ class SOSScreen extends ConsumerWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 20),
+            // Call the customer-support / call-center line (admin-managed number).
+            OutlinedButton.icon(
+              onPressed: () =>
+                  launchUrl(Uri(scheme: 'tel', path: supportPhone)),
+              icon: const Icon(Icons.call, color: AppColors.error),
+              label: Text(
+                'โทรศูนย์บริการ $supportPhone',
+                style: AppTypography.label2.copyWith(color: AppColors.error),
+              ),
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 52),
+                side: const BorderSide(color: AppColors.error),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
             // Info card
             Container(
               width: double.infinity,

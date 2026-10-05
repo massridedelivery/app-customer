@@ -4,6 +4,7 @@ import 'package:customer_app/core/configs/theme.dart';
 import 'package:customer_app/core/managers/providers.dart';
 import 'package:customer_app/core/services/push_notification_service.dart';
 import 'package:customer_app/core/services/socket_service.dart';
+import 'package:customer_app/core/widgets/connectivity_banner.dart';
 import 'package:customer_app/router/app_routes.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
@@ -72,7 +73,8 @@ class _AppState extends ConsumerState<App> with WidgetsBindingObserver {
       builder: (context, child) => GestureDetector(
         behavior: HitTestBehavior.translucent,
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-        child: child,
+        // App-wide offline / weak-signal alert strip (with "go to settings").
+        child: ConnectivityBanner(child: child ?? const SizedBox.shrink()),
       ),
       localizationsDelegates: const [
         AppLocalizations.delegate,

@@ -10,7 +10,6 @@ import 'package:customer_app/features/home/presentation/controllers/home_control
 import 'package:customer_app/features/home/presentation/states/home_state.dart';
 import 'package:customer_app/features/messenger/domain/models/messenger_vehicle_type.dart';
 import 'package:customer_app/features/messenger/presentation/controllers/messenger_booking_controller.dart';
-import 'package:customer_app/features/messenger/domain/models/messenger_estimate.dart';
 import 'package:customer_app/features/messenger/presentation/states/messenger_booking_state.dart';
 import 'package:customer_app/features/messenger/presentation/util/delivery_service_levels.dart';
 import 'package:customer_app/features/messenger/presentation/screens/messenger_coupon_screen.dart';
@@ -387,115 +386,43 @@ class _MessengerBookingScreenState
               ),
             )
           else
-            ...[
-              for (final level in levels) ...[
-                _deliveryOption(
-                  level,
-                  selected: level.deliveryType == bookingState.deliveryType,
-                ),
-                if (level.deliveryType != levels.last.deliveryType)
-                  const SizedBox(height: 10),
-              ],
-            ],
-        ],
-      ),
-    );
-  }
-
-  Widget _deliveryOption(
-    MessengerServiceLevel level, {
-    required bool selected,
-  }) {
-    final bool isInstant = level.deliveryType == kDeliveryInstant;
-    final Color accent = isInstant
-        ? AppColors.foundationOrange600
-        : AppColors.foundationBlue700;
-    final String title = level.label.isNotEmpty
-        ? level.label
-        : level.deliveryType;
-    final String priceText = 'เริ่มต้น ฿${level.totalFare.toStringAsFixed(0)}';
-    final String? clock = formatDeliverBy(level.deliverBy);
-    final String pickup = level.pickupEtaMin != null
-        ? 'ไปรับใน ${level.pickupEtaMin} นาที'
-        : '';
-    final String subtitle = clock != null
-        ? 'ส่งถึงประมาณ $clock น.${pickup.isNotEmpty ? ' • $pickup' : ''}'
-        : pickup;
-
-    return GestureDetector(
-      onTap: () => ref
-          .read(messengerBookingControllerProvider.notifier)
-          .selectDeliveryType(level.deliveryType),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
-        decoration: BoxDecoration(
-          color: selected
-              ? AppColors.foundationGreen500.withValues(alpha: 0.06)
-              : AppColors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: selected
-                ? AppColors.foundationGreen500
-                : AppColors.foundationGrayscale300,
-            width: selected ? 2 : 1,
-          ),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: accent.withValues(alpha: 0.12),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                isInstant ? Icons.bolt_rounded : Icons.schedule_rounded,
-                color: accent,
-                size: 22,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          title,
-                          style: AppTypography.label1.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        priceText,
-                        style: AppTypography.caption3.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: selected
-                              ? AppColors.foundationGreen600
-                              : AppColors.textPrimary,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    subtitle,
-                    style: AppTypography.caption5.copyWith(
-                      color: AppColors.textSecondary,
+            // Same Style-D grid cards as the other pickers.
+            _grid2(
+              levels.map<Widget>((level) {
+                final bool isInstant =
+                    level.deliveryType == kDeliveryInstant;
+                final String title = level.label.isNotEmpty
+                    ? level.label
+                    : level.deliveryType;
+                final String? clock = formatDeliverBy(level.deliverBy);
+                final String pickup = level.pickupEtaMin != null
+                    ? 'ไปรับใน ${level.pickupEtaMin} นาที'
+                    : '';
+                final String subtitle = clock != null
+                    ? 'ส่งถึงประมาณ $clock น.${pickup.isNotEmpty ? '\n$pickup' : ''}'
+                    : pickup;
+                return _selectableCard(
+                  selected:
+                      level.deliveryType == bookingState.deliveryType,
+                  onTap: () => ref
+                      .read(messengerBookingControllerProvider.notifier)
+                      .selectDeliveryType(level.deliveryType),
+                  icon: isInstant
+                      ? Icons.bolt_rounded
+                      : Icons.schedule_rounded,
+                  title: title,
+                  subtitle: subtitle.isEmpty ? null : subtitle,
+                  trailing: Text(
+                    '฿${level.totalFare.toStringAsFixed(0)}',
+                    style: AppTypography.caption4.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
                     ),
                   ),
-                ],
-              ),
+                );
+              }).toList(),
             ),
-          ],
-        ),
+        ],
       ),
     );
   }

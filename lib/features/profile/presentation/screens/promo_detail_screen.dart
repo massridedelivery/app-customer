@@ -102,32 +102,40 @@ class PromoDetailScreen extends ConsumerWidget {
 
   Widget _buildHeader(Map<String, dynamic> promo) {
     final barColor = Color(promo['color'] as int? ?? 0xFF00236F);
+    final String tag = (promo['tag'] ?? '').toString().trim();
+    final String desc = (promo['description'] ?? '').toString().trim();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          decoration: BoxDecoration(
-            color: barColor.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(6),
-          ),
-          child: Text(
-            promo['tag'] ?? '',
-            style: AppTypography.caption4.copyWith(
-              color: barColor,
-              fontWeight: FontWeight.bold,
+        // Hide blanks when the backend omits a field, instead of leaving an
+        // empty chip / empty line.
+        if (tag.isNotEmpty) ...[
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: barColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Text(
+              tag,
+              style: AppTypography.caption4.copyWith(
+                color: barColor,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
-        ),
-        const SizedBox(height: 12),
+          const SizedBox(height: 12),
+        ],
         Text(promo['title'] ?? '', style: AppTypography.heading4),
-        const SizedBox(height: 8),
-        Text(
-          promo['description'] ?? '',
-          style: AppTypography.caption4.copyWith(
-            color: AppColors.semanticGrayNeutralFgHigh,
+        if (desc.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          Text(
+            desc,
+            style: AppTypography.caption4.copyWith(
+              color: AppColors.semanticGrayNeutralFgHigh,
+            ),
           ),
-        ),
+        ],
       ],
     );
   }
@@ -250,6 +258,9 @@ class PromoDetailScreen extends ConsumerWidget {
 
   Widget _buildTermsSection(Map<String, dynamic> promo) {
     final terms = promo['terms'] as List<dynamic>? ?? [];
+    // Hide the whole section when the backend sends no terms, so it doesn't
+    // leave a dangling header.
+    if (terms.isEmpty) return const SizedBox.shrink();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

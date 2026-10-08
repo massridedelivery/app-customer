@@ -56,7 +56,7 @@ class HomePromoBanner extends ConsumerWidget {
               ),
             ),
             SizedBox(
-              height: 116,
+              height: 134,
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -82,6 +82,8 @@ class _PromoCard extends StatelessWidget {
 
   String? get _code => promo['code']?.toString();
 
+  String get _id => (promo['id'] ?? '').toString();
+
   num get _minSpend {
     final v = promo['min_order'] ?? promo['min_spend'] ?? 0;
     return v is num ? v : num.tryParse(v.toString()) ?? 0;
@@ -101,66 +103,115 @@ class _PromoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Per-promo brand color (admin-set) → a full-bleed gradient card; falls
+    // back to brand red. Tapping opens the promo's detail directly.
+    final Color base = Color((promo['color'] as int?) ?? 0xFFC0343E);
+    final Color dark = Color.lerp(base, Colors.black, 0.28)!;
+    final bool hasCode = _code != null && _code!.isNotEmpty;
     return GestureDetector(
-      onTap: () => context.push('/promos'),
+      onTap: () =>
+          context.push(_id.isNotEmpty ? '/promos/$_id' : '/promos'),
       child: Container(
-        width: 268,
-        padding: const EdgeInsets.all(16),
+        width: 280,
+        clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          gradient: const LinearGradient(
+          gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [AppColors.foundationRed600, AppColors.foundationRed900],
+            colors: [base, dark],
           ),
         ),
-        child: Row(
+        child: Stack(
           children: [
-            const Icon(Icons.local_offer, color: Colors.white, size: 28),
-            const SizedBox(width: 12),
-            Expanded(
+            // Faint oversized "%" watermark.
+            Positioned(
+              right: -10,
+              bottom: -30,
+              child: Text(
+                '%',
+                style: TextStyle(
+                  fontSize: 120,
+                  fontWeight: FontWeight.w800,
+                  height: 1,
+                  color: Colors.white.withValues(alpha: 0.12),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(14),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    _headline,
-                    style: AppTypography.heading5.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    _minSpend > 0 ? 'ขั้นต่ำ ฿${_minSpend.toStringAsFixed(0)}' : _title,
-                    style: AppTypography.caption5.copyWith(
-                      color: Colors.white.withValues(alpha: 0.9),
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  if (_code != null && _code!.isNotEmpty) ...[
-                    const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 3,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        _code!,
-                        style: AppTypography.caption5.copyWith(
-                          color: AppColors.primary,
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _headline,
+                        style: AppTypography.heading4.copyWith(
+                          color: Colors.white,
                           fontWeight: FontWeight.bold,
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 2),
+                      Text(
+                        _minSpend > 0
+                            ? '$_title · ขั้นต่ำ ฿${_minSpend.toStringAsFixed(0)}'
+                            : _title,
+                        style: AppTypography.caption5.copyWith(
+                          color: Colors.white.withValues(alpha: 0.9),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      if (hasCode)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.22),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.7),
+                            ),
+                          ),
+                          child: Text(
+                            _code!,
+                            style: AppTypography.caption5.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      const Spacer(),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 5,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Text(
+                          'ใช้เลย ›',
+                          style: AppTypography.caption4.copyWith(
+                            color: base,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),

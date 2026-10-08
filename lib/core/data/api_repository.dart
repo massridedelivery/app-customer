@@ -104,6 +104,12 @@ class ApiRepository {
     await _dio.delete('/api/customer/devices', data: {'token': token});
   }
 
+  /// Sync the user's language (th|en) to the backend so push notifications are
+  /// delivered in that language. Backend default is 'th'.
+  Future<void> updateLanguage(String lang) async {
+    await _dio.put('/api/customer/profile', data: {'language': lang});
+  }
+
   // ─── TRIPS ────────────────────────────────────────────────────────────────
 
   /// GET /api/customer/trips

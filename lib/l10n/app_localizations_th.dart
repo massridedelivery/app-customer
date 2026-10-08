@@ -193,6 +193,21 @@ class AppLocalizationsTh extends AppLocalizations {
   String get newPriceSure => 'ราคาใหม่ ถูกกว่าชัวร์';
 
   @override
+  String get msgVehicleBike => 'มอเตอร์ไซค์';
+
+  @override
+  String get msgVehicleCar => 'รถยนต์';
+
+  @override
+  String get msgSizeSmall => 'ขนาดเล็ก';
+
+  @override
+  String get msgSizeMedium => 'ขนาดกลาง';
+
+  @override
+  String get msgSizeLarge => 'ขนาดใหญ่';
+
+  @override
   String get gelPromo => 'เติมเกลแล้ว เรียกเลย';
 
   @override

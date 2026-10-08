@@ -193,6 +193,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get newPriceSure => 'New price, cheaper for sure';
 
   @override
+  String get msgVehicleBike => 'Bike';
+
+  @override
+  String get msgVehicleCar => 'Car';
+
+  @override
+  String get msgSizeSmall => 'Small';
+
+  @override
+  String get msgSizeMedium => 'Medium';
+
+  @override
+  String get msgSizeLarge => 'Large';
+
+  @override
   String get gelPromo => 'Add Gel then call now';
 
   @override

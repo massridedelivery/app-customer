@@ -185,6 +185,18 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
                   color: Colors.white.withValues(alpha: 0.9),
                 ),
               ),
+              Text(
+                l10n.newPriceSure,
+                style: AppTypography.caption3.copyWith(
+                  color: Colors.white.withValues(alpha: 0.9),
+                ),
+              ),
+              Text(
+                l10n.readyCallNow,
+                style: AppTypography.caption3.copyWith(
+                  color: Colors.white.withValues(alpha: 0.9),
+                ),
+              ),
               const SizedBox(height: 20),
 
               // Search bar.
@@ -469,18 +481,6 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Text(
-            l10n.experienceTitle,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
-            ),
-          ),
-        ),
-        const SizedBox(height: 14),
         SizedBox(
           height: 208,
           child: ListView.separated(

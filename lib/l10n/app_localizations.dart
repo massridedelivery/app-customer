@@ -476,6 +476,12 @@ abstract class AppLocalizations {
   /// **'Ready to go'**
   String get readyToGo;
 
+  /// No description provided for @readyCallNow.
+  ///
+  /// In en, this message translates to:
+  /// **'All set — ride now'**
+  String get readyCallNow;
+
   /// No description provided for @whereToToday.
   ///
   /// In en, this message translates to:

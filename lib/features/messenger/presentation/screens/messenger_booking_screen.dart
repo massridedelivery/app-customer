@@ -142,7 +142,7 @@ class _MessengerBookingScreenState
     });
 
     return Scaffold(
-      backgroundColor: AppColors.foundationGrayscale100,
+      backgroundColor: AppColors.white,
       body: Column(
         children: [
           _buildHero(context),
@@ -1339,8 +1339,15 @@ class _MessengerBookingScreenState
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.foundationGrayscale200),
+        borderRadius: BorderRadius.circular(18),
+        // White page, borderless cards that float on a clear soft shadow.
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF110C0A).withValues(alpha: 0.10),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
       child: child,
     );

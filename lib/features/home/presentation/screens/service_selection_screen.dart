@@ -106,15 +106,14 @@ class _ServiceSelectionScreenState
                       ActiveOrdersBanner(),
                       // Nudge the service grid up toward the search bar.
                       Transform.translate(
-                        offset: const Offset(0, -12),
+                        offset: const Offset(0, -4),
                         child: _buildServiceGrid(context),
                       ),
                       // Real promotions — hides itself when there are none —
                       // sits tight under the grid (no extra gap).
                       const HomePromoBanner(),
-                      // Latest articles from the website — fills out the home
-                      // and links back to massridedelivery.com.
-                      const SizedBox(height: 10),
+                      // Latest articles — the gap above it is owned by the promo
+                      // banner (so it collapses when there are no promos).
                       _buildArticlesSection(context),
                       // Hardcoded promo/restaurant sections with fake ids — see
                       // FeatureFlags.foodHomePromoSections. Hidden until wired

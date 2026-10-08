@@ -196,6 +196,9 @@ class AppLocalizationsTh extends AppLocalizations {
   String get gelPromo => 'เติมเกลแล้ว เรียกเลย';
 
   @override
+  String get readyToGo => 'พร้อมเดินทางแล้ว';
+
+  @override
   String get whereToToday => 'วันนี้ให้เราไปส่งคุณที่ไหนดี?';
 
   @override

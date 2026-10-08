@@ -180,13 +180,7 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
               ),
               const SizedBox(height: 6),
               Text(
-                l10n.newPriceSure,
-                style: AppTypography.caption3.copyWith(
-                  color: Colors.white.withValues(alpha: 0.9),
-                ),
-              ),
-              Text(
-                l10n.gelPromo,
+                l10n.readyToGo,
                 style: AppTypography.caption3.copyWith(
                   color: Colors.white.withValues(alpha: 0.9),
                 ),

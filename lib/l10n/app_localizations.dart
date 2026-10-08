@@ -470,6 +470,12 @@ abstract class AppLocalizations {
   /// **'Add Gel then call now'**
   String get gelPromo;
 
+  /// No description provided for @readyToGo.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to go'**
+  String get readyToGo;
+
   /// No description provided for @whereToToday.
   ///
   /// In en, this message translates to:

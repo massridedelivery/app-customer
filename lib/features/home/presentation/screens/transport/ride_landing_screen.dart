@@ -74,7 +74,7 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
         ? recentTrips
         : homeState.recentPlaces;
     return Scaffold(
-      backgroundColor: AppColors.foundationGrayscale75,
+      backgroundColor: AppColors.white,
       // Header stays fixed while the content below scrolls (same pattern as the
       // messenger booking screen).
       body: Column(
@@ -251,12 +251,13 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(18),
+          // White page, borderless card floating on a clear soft shadow.
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 3),
+              color: const Color(0xFF110C0A).withValues(alpha: 0.10),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
             ),
           ],
         ),
@@ -507,6 +508,7 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
           height: 180,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
+            clipBehavior: Clip.none,
             padding: const EdgeInsets.symmetric(horizontal: 20),
             itemCount: items.length,
             separatorBuilder: (_, _) => const SizedBox(width: 14),
@@ -524,12 +526,12 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
       width: 210,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+            color: const Color(0xFF110C0A).withValues(alpha: 0.10),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
@@ -546,7 +548,7 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
                 colors: item.colors,
               ),
               borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(16),
+                top: Radius.circular(18),
               ),
             ),
             child: Icon(item.icon, color: Colors.white, size: 40),

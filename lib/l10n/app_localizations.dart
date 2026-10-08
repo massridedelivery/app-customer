@@ -1391,8 +1391,44 @@ abstract class AppLocalizations {
   /// No description provided for @experienceTitle.
   ///
   /// In en, this message translates to:
-  /// **'A new experience with Mass Move'**
+  /// **'Why Mass Move'**
   String get experienceTitle;
+
+  /// No description provided for @expRidesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A ride for every journey'**
+  String get expRidesTitle;
+
+  /// No description provided for @expRidesSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Motorbike, car, taxi, or premium — choose what fits each trip'**
+  String get expRidesSub;
+
+  /// No description provided for @expSafetyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Safety comes first'**
+  String get expSafetyTitle;
+
+  /// No description provided for @expSafetySub.
+  ///
+  /// In en, this message translates to:
+  /// **'Background-checked drivers and safety features that look after you the whole way'**
+  String get expSafetySub;
+
+  /// No description provided for @expFareTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Transparent fares, no surprises'**
+  String get expFareTitle;
+
+  /// No description provided for @expFareSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Know the price up front before you ride — no hidden charges'**
+  String get expFareSub;
 
   /// No description provided for @experiencePremiumTitle.
   ///

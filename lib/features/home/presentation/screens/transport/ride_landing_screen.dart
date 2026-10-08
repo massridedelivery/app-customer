@@ -448,38 +448,21 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
   // the lower half of the screen.
   // ---------------------------------------------------------------------------
   Widget _buildExperienceSection(AppLocalizations l10n) {
-    final items = <({
-      IconData icon,
-      String title,
-      String subtitle,
-      List<Color> colors,
-    })>[
+    final items = <({String image, String title, String subtitle})>[
       (
-        icon: Icons.workspace_premium_rounded,
-        title: l10n.experiencePremiumTitle,
-        subtitle: l10n.experiencePremiumSubtitle,
-        colors: [AppColors.foundationRed600, AppColors.foundationRed800],
+        image: 'assets/images/exp_rides.webp',
+        title: l10n.expRidesTitle,
+        subtitle: l10n.expRidesSub,
       ),
       (
-        icon: Icons.flight_takeoff_rounded,
-        title: l10n.experienceAirportTitle,
-        subtitle: l10n.experienceAirportSubtitle,
-        colors: [const Color(0xFF3B82F6), const Color(0xFF1D4ED8)],
+        image: 'assets/images/exp_safety.webp',
+        title: l10n.expSafetyTitle,
+        subtitle: l10n.expSafetySub,
       ),
       (
-        icon: Icons.verified_user_rounded,
-        title: l10n.experienceSafetyTitle,
-        subtitle: l10n.experienceSafetySubtitle,
-        colors: [AppColors.success, const Color(0xFF059669)],
-      ),
-      (
-        icon: Icons.savings_rounded,
-        title: l10n.experienceValueTitle,
-        subtitle: l10n.experienceValueSubtitle,
-        colors: [
-          AppColors.foundationOrange500,
-          AppColors.foundationOrange700,
-        ],
+        image: 'assets/images/exp_fare.webp',
+        title: l10n.expFareTitle,
+        subtitle: l10n.expFareSub,
       ),
     ];
 
@@ -499,7 +482,7 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
         ),
         const SizedBox(height: 14),
         SizedBox(
-          height: 180,
+          height: 208,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             clipBehavior: Clip.none,
@@ -514,10 +497,10 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
   }
 
   Widget _experienceCard(
-    ({IconData icon, String title, String subtitle, List<Color> colors}) item,
+    ({String image, String title, String subtitle}) item,
   ) {
     return Container(
-      width: 210,
+      width: 232,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(18),
@@ -532,23 +515,19 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            height: 88,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: item.colors,
-              ),
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(18),
-              ),
+          // Real photo (massridedelivery.com) banner on top of the card.
+          ClipRRect(
+            borderRadius:
+                const BorderRadius.vertical(top: Radius.circular(18)),
+            child: Image.asset(
+              item.image,
+              height: 100,
+              width: double.infinity,
+              fit: BoxFit.cover,
             ),
-            child: Icon(item.icon, color: Colors.white, size: 40),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
+            padding: const EdgeInsets.fromLTRB(14, 10, 14, 14),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -556,6 +535,7 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
                   item.title,
                   style: AppTypography.label1.copyWith(
                     color: AppColors.textPrimary,
+                    fontWeight: FontWeight.bold,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -567,7 +547,7 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
                     color: AppColors.textSecondary,
                     height: 1.35,
                   ),
-                  maxLines: 2,
+                  maxLines: 3,
                   overflow: TextOverflow.ellipsis,
                 ),
               ],

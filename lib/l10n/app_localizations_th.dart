@@ -673,7 +673,27 @@ class AppLocalizationsTh extends AppLocalizations {
   String get map => 'แผนที่';
 
   @override
-  String get experienceTitle => 'สัมผัสประสบการณ์ใหม่กับ Mass Move';
+  String get experienceTitle => 'ทำไมต้อง Mass Move';
+
+  @override
+  String get expRidesTitle => 'ประเภทรถที่ตอบทุกการเดินทาง';
+
+  @override
+  String get expRidesSub =>
+      'มอเตอร์ไซค์ รถยนต์ แท็กซี่ ไปจนถึงรถพรีเมียม เลือกได้ทุกการเดินทาง';
+
+  @override
+  String get expSafetyTitle => 'ความปลอดภัยที่มาเป็นอันดับหนึ่ง';
+
+  @override
+  String get expSafetySub =>
+      'คนขับผ่านการตรวจสอบประวัติ พร้อมระบบดูแลคุณตลอดการเดินทาง';
+
+  @override
+  String get expFareTitle => 'ค่าโดยสารโปร่งใส ไม่มีเซอร์ไพรส์';
+
+  @override
+  String get expFareSub => 'รู้ราคาชัดเจนก่อนเดินทาง ไม่มีค่าใช้จ่ายแอบแฝง';
 
   @override
   String get experiencePremiumTitle => 'การเดินทางระดับพรีเมียม';

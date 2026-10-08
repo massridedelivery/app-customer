@@ -16,6 +16,7 @@ import 'package:customer_app/core/widgets/app_network_image.dart';
 import 'package:customer_app/core/widgets/hero_header.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ServiceSelectionScreen extends ConsumerStatefulWidget {
   const ServiceSelectionScreen({super.key});
@@ -112,6 +113,10 @@ class _ServiceSelectionScreenState
                       // Real promotions from GET /api/customer/promo/list —
                       // hides itself when there are none.
                       const HomePromoBanner(),
+                      // Latest articles from the website — fills out the home
+                      // and links back to massridedelivery.com.
+                      const SizedBox(height: 20),
+                      _buildArticlesSection(context),
                       // Hardcoded promo/restaurant sections with fake ids — see
                       // FeatureFlags.foodHomePromoSections. Hidden until wired
                       // to the discovery feed.
@@ -477,6 +482,152 @@ class _ServiceSelectionScreenState
                 width: 62,
                 height: 62,
                 fit: BoxFit.contain,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ─── Latest articles (massridedelivery.com/blog) ──────────────────────────
+  Widget _buildArticlesSection(BuildContext context) {
+    final articles =
+        <({String image, String category, String title, String date, String url})>[
+      (
+        image: 'assets/images/article_mass.webp',
+        category: 'แนะนำบริการ',
+        title: 'MASS คืออะไร? รู้จักซูเปอร์แอปสัญชาติไทยที่ครบจบในแอปเดียว',
+        date: '15 มิถุนายน 2026',
+        url: 'https://massridedelivery.com/blog/what-is-mass-super-app',
+      ),
+      (
+        image: 'assets/images/article_food.webp',
+        category: 'เคล็ดลับ',
+        title: '5 เคล็ดลับสั่งอาหารเดลิเวอรีให้คุ้มค่าและอร่อยเหมือนทานที่ร้าน',
+        date: '22 มิถุนายน 2026',
+        url: 'https://massridedelivery.com/blog/food-delivery-tips',
+      ),
+      (
+        image: 'assets/images/article_ride.webp',
+        category: 'ความปลอดภัย',
+        title: 'เดินทางปลอดภัยกับ MASS Ride: ฟีเจอร์ความปลอดภัยที่คุณควรรู้',
+        date: '28 มิถุนายน 2026',
+        url: 'https://massridedelivery.com/blog/ride-safety-features',
+      ),
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+          child: Text(
+            'ความรู้และเคล็ดลับจาก MASS',
+            style: AppTypography.heading5.copyWith(
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary,
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        SizedBox(
+          height: 240,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            clipBehavior: Clip.none,
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            itemCount: articles.length,
+            separatorBuilder: (_, _) => const SizedBox(width: 14),
+            itemBuilder: (context, i) => _articleCard(articles[i]),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _articleCard(
+    ({String image, String category, String title, String date, String url})
+    a,
+  ) {
+    return GestureDetector(
+      onTap: () =>
+          launchUrl(Uri.parse(a.url), mode: LaunchMode.externalApplication),
+      child: Container(
+        width: 280,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF110C0A).withValues(alpha: 0.10),
+              blurRadius: 16,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(18)),
+              child: Image.asset(
+                a.image,
+                height: 120,
+                width: double.infinity,
+                fit: BoxFit.cover,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: AppColors.foundationRed100,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      a.category,
+                      style: AppTypography.caption5.copyWith(
+                        color: AppColors.foundationRed700,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    a.title,
+                    style: AppTypography.label1.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                      height: 1.3,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.calendar_today_rounded,
+                        size: 12,
+                        color: AppColors.textSecondary,
+                      ),
+                      const SizedBox(width: 5),
+                      Text(
+                        a.date,
+                        style: AppTypography.caption5.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ],

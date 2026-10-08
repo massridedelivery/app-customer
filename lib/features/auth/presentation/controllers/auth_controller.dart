@@ -10,6 +10,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 // Added imports for PhoneLoginUseCase and Failure
 import 'package:customer_app/core/error/failures.dart';
+import 'package:customer_app/core/localization/locale_controller.dart';
 
 // Added imports for LiveRideController
 import 'package:customer_app/features/active_orders/data/repositories/active_orders_repository_impl.dart';
@@ -53,6 +54,7 @@ class AuthController extends _$AuthController {
       // Small delay to allow build to finish before calling async check
       Future.microtask(() => checkActiveJob());
       _openSocket();
+      _syncLanguage();
       return const AuthState(isAuthenticated: true);
     }
     return const AuthState(isAuthenticated: false);
@@ -68,6 +70,15 @@ class AuthController extends _$AuthController {
   /// the app on its REST polling fallback.
   void _openSocket() {
     ref.read(socketServiceProvider).ensureConnected();
+  }
+
+  /// Pushes the app's current language (th|en) to the backend so push
+  /// notifications are localized. Best-effort — never blocks or fails auth.
+  void _syncLanguage() {
+    try {
+      final lang = ref.read(localeControllerProvider).languageCode;
+      ref.read(apiRepositoryProvider).updateLanguage(lang).catchError((_) {});
+    } catch (_) {}
   }
 
   Future<void> checkActiveJob() async {
@@ -106,6 +117,7 @@ class AuthController extends _$AuthController {
             .saveTokens(accessToken: accessToken, refreshToken: refreshToken);
         state = state.copyWith(isLoading: false, isAuthenticated: true);
         _openSocket();
+        _syncLanguage();
 
         // Check for active job after login
         await checkActiveJob();
@@ -268,6 +280,7 @@ class AuthController extends _$AuthController {
           if (isRegistered) {
             state = state.copyWith(isLoading: false, isAuthenticated: true);
             _openSocket();
+            _syncLanguage();
             await checkActiveJob(); // Keep existing behavior
           } else {
             state = state.copyWith(isLoading: false);
@@ -286,5 +299,6 @@ class AuthController extends _$AuthController {
   void setAuthenticated() {
     state = state.copyWith(isAuthenticated: true);
     _openSocket();
+    _syncLanguage();
   }
 }

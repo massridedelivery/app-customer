@@ -7,6 +7,7 @@ import 'package:customer_app/core/data/token_storage.dart';
 import 'package:customer_app/core/services/retry_interceptor.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:customer_app/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:customer_app/core/localization/locale_controller.dart';
 
 class ApiService {
   final Dio _dio;
@@ -58,6 +59,10 @@ class ApiService {
           if (token != null) {
             options.headers['Authorization'] = 'Bearer $token';
           }
+          // Localize backend error messages (th|en) to the user's chosen
+          // language; omitting it defaults to English server-side.
+          options.headers['X-Lang'] =
+              _ref.read(localeControllerProvider).languageCode;
           return handler.next(options);
         },
         onError: (DioException error, handler) async {

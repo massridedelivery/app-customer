@@ -3,7 +3,6 @@ import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/utils/auth_gate.dart';
 import 'package:customer_app/core/constants/app_icons.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
-import 'package:customer_app/core/widgets/app_filter_chip.dart';
 import 'package:customer_app/core/widgets/hero_header.dart';
 import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/core/constants/feature_flags.dart';
@@ -155,7 +154,9 @@ class _MessengerBookingScreenState
                 children: [
             _buildLocationCard(homeState),
             const SizedBox(height: 12),
-            _buildVehicleAndSizeCard(bookingState),
+            _buildVehicleCard(bookingState),
+            const SizedBox(height: 12),
+            _buildSizeCard(bookingState),
             const SizedBox(height: 12),
             _buildPackageCard(bookingState),
             const SizedBox(height: 12),
@@ -498,7 +499,7 @@ class _MessengerBookingScreenState
     );
   }
 
-  Widget _buildVehicleAndSizeCard(MessengerBookingState bookingState) {
+  Widget _buildVehicleCard(MessengerBookingState bookingState) {
     if (bookingState.isLoadingVehicles) {
       return _card(
         child: const Center(
@@ -534,80 +535,185 @@ class _MessengerBookingScreenState
     }
 
     final List<MessengerVehicleType> vehicles = bookingState.vehicleTypes;
-    final MessengerVehicleType? vehicle = bookingState.selectedVehicle;
 
     return _card(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'ประเภทรถและขนาดพัสดุ',
+            'ประเภทรถ',
             style: AppTypography.heading6.copyWith(fontWeight: FontWeight.bold),
           ),
-          if (vehicles.length > 1) ...[
-            const SizedBox(height: 12),
-            // Horizontally scrollable so 3+ vehicle types (or long names) never
-            // overflow the row.
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: vehicles
-                    .map<Widget>(
-                      (v) => Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: AppFilterChip(
-                          label: v.displayName.isNotEmpty
-                              ? v.displayName
-                              : v.name,
-                          selected: v.id == bookingState.vehicleTypeId,
-                          onTap: () => ref
-                              .read(messengerBookingControllerProvider.notifier)
-                              .selectVehicle(v.id),
-                        ),
-                      ),
-                    )
-                    .toList(),
-              ),
-            ),
-          ],
           const SizedBox(height: 12),
-          if (vehicle != null)
-            Column(
-              children: vehicle.sizeTiers
-                  .map<Widget>(
-                    (tier) => _selectableRow(
-                      selected: tier.tier.toUpperCase() ==
-                          bookingState.sizeTier.toUpperCase(),
-                      onTap: () => ref
-                          .read(messengerBookingControllerProvider.notifier)
-                          .selectSizeTier(tier.tier),
-                      badgeText: tier.tier.toUpperCase(),
-                      title: 'ขนาด ${tier.tier.toUpperCase()}',
-                      subtitle:
-                          '≤ ${tier.maxWeightKg} กก. · ${tier.maxLengthCm}×${tier.maxWidthCm}×${tier.maxHeightCm} ซม.',
-                      trailing: Text(
-                        tier.surchargeThb > 0
-                            ? '+฿${tier.surchargeThb}'
-                            : 'ฟรี',
-                        style: AppTypography.caption4.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.foundationGreen500,
-                        ),
-                      ),
-                    ),
-                  )
-                  .toList(),
-            ),
+          // 3D render + short label, same Style-D selected treatment.
+          _grid2(
+            vehicles
+                .map<Widget>(
+                  (v) => _vehicleCard(
+                    selected: v.id == bookingState.vehicleTypeId,
+                    onTap: () => ref
+                        .read(messengerBookingControllerProvider.notifier)
+                        .selectVehicle(v.id),
+                    imagePath: _msgVehicleImage(v),
+                    title: _msgVehicleLabel(v),
+                  ),
+                )
+                .toList(),
+          ),
         ],
       ),
     );
   }
 
-  /// Shared selectable card row used by the size, payer, and payment pickers so
-  /// all three match the delivery-type card ([_deliveryOption]): a circular
-  /// leading badge (an [icon] or a short [badgeText]), title + optional
-  /// subtitle, optional [trailing], and a green outline + tint when selected.
-  Widget _selectableRow({
+  /// Parcel size-tier picker — its own card, shown once a vehicle is selected.
+  Widget _buildSizeCard(MessengerBookingState bookingState) {
+    final MessengerVehicleType? vehicle = bookingState.selectedVehicle;
+    if (vehicle == null || vehicle.sizeTiers.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    return _card(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'ขนาดพัสดุ',
+            style: AppTypography.heading6.copyWith(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 12),
+          _grid2(
+            vehicle.sizeTiers
+                .map<Widget>(
+                  (tier) => _selectableCard(
+                    selected: tier.tier.toUpperCase() ==
+                        bookingState.sizeTier.toUpperCase(),
+                    onTap: () => ref
+                        .read(messengerBookingControllerProvider.notifier)
+                        .selectSizeTier(tier.tier),
+                    badgeText: tier.tier.toUpperCase(),
+                    title: 'ขนาด ${tier.tier.toUpperCase()}',
+                    subtitle:
+                        '≤ ${tier.maxWeightKg} กก.\n${tier.maxLengthCm}×${tier.maxWidthCm}×${tier.maxHeightCm} ซม.',
+                    trailing: Text(
+                      tier.surchargeThb > 0 ? '+฿${tier.surchargeThb}' : 'ฟรี',
+                      style: AppTypography.caption4.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.foundationGreen500,
+                      ),
+                    ),
+                  ),
+                )
+                .toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// A 3D vehicle render for a messenger type (bike vs car) — the API has no
+  /// image field, so pick from the shared icon set by name.
+  String _msgVehicleImage(MessengerVehicleType v) {
+    final n = '${v.name} ${v.displayName}'.toLowerCase();
+    if (n.contains('bike') ||
+        n.contains('motor') ||
+        n.contains('มอเตอร์')) {
+      return 'assets/images/icons/3d/ic_car_scooter.png';
+    }
+    return 'assets/images/icons/3d/ic_car_economy.png';
+  }
+
+  /// Short label — drops the "Messenger" prefix so the card reads "Bike" / "Car".
+  String _msgVehicleLabel(MessengerVehicleType v) {
+    final raw = v.displayName.isNotEmpty ? v.displayName : v.name;
+    final stripped =
+        raw.replaceAll(RegExp('messenger', caseSensitive: false), '').trim();
+    return stripped.isNotEmpty ? stripped : raw;
+  }
+
+  /// Style-D card for a vehicle type: a 3D render on top with a centered label,
+  /// matching the size/payer/payment cards' selected treatment.
+  Widget _vehicleCard({
+    required bool selected,
+    required VoidCallback onTap,
+    required String imagePath,
+    required String title,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOut,
+        transform: Matrix4.translationValues(0, selected ? -2 : 0, 0),
+        padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: selected
+                ? AppColors.primary
+                : AppColors.foundationGrayscale300,
+            width: selected ? 1.5 : 1,
+          ),
+          boxShadow: selected
+              ? [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.18),
+                    blurRadius: 16,
+                    offset: const Offset(0, 8),
+                  ),
+                ]
+              : null,
+        ),
+        child: Column(
+          children: [
+            SizedBox(
+              height: 54,
+              child: Image.asset(imagePath, fit: BoxFit.contain),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              title,
+              style: AppTypography.label1.copyWith(
+                fontWeight: FontWeight.bold,
+                color: selected
+                    ? AppColors.foundationRed700
+                    : AppColors.textPrimary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Lays selectable cards out in a 2-column grid (paired rows of equal
+  /// height). An odd last card keeps its half-width slot, left-aligned.
+  Widget _grid2(List<Widget> cells) {
+    const double gap = 8;
+    final List<Widget> rows = [];
+    for (int i = 0; i < cells.length; i += 2) {
+      rows.add(
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(child: cells[i]),
+            const SizedBox(width: gap),
+            if (i + 1 < cells.length)
+              Expanded(child: cells[i + 1])
+            else
+              const Expanded(child: SizedBox()),
+          ],
+        ),
+      );
+      if (i + 2 < cells.length) rows.add(const SizedBox(height: gap));
+    }
+    return Column(children: rows);
+  }
+
+  /// Shared selectable grid card used by the size, payer, and payment pickers
+  /// so all three match: a circular leading badge (an [icon] or short
+  /// [badgeText]) with optional [trailing] on the same row, then title +
+  /// optional subtitle below, and a red outline + tint when selected.
+  Widget _selectableCard({
     required bool selected,
     required VoidCallback onTap,
     required String title,
@@ -616,72 +722,80 @@ class _MessengerBookingScreenState
     String? badgeText,
     Widget? trailing,
   }) {
-    final Color badgeContent =
-        selected ? AppColors.foundationGreen600 : AppColors.textSecondary;
+    final Color badgeFg = selected ? Colors.white : AppColors.textSecondary;
+    final Color badgeBg =
+        selected ? AppColors.primary : AppColors.foundationGrayscale200;
+    // Selected: card lifts with a soft black shadow and a thin red border.
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 10),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOut,
+        transform: Matrix4.translationValues(0, selected ? -2 : 0, 0),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: selected
-              ? AppColors.foundationGreen500.withValues(alpha: 0.06)
-              : AppColors.white,
-          borderRadius: BorderRadius.circular(12),
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: selected
-                ? AppColors.foundationGreen500
+                ? AppColors.primary
                 : AppColors.foundationGrayscale300,
-            width: selected ? 2 : 1,
+            width: selected ? 1.5 : 1,
           ),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: badgeContent.withValues(alpha: 0.12),
-                shape: BoxShape.circle,
-              ),
-              child: badgeText != null
-                  ? Text(
-                      badgeText,
-                      style: AppTypography.label1.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: badgeContent,
-                      ),
-                    )
-                  : Icon(icon, size: 22, color: badgeContent),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: AppTypography.label1.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                    ),
+          boxShadow: selected
+              ? [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.18),
+                    blurRadius: 16,
+                    offset: const Offset(0, 8),
                   ),
-                  if (subtitle != null) ...[
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitle,
-                      style: AppTypography.caption5.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ],
-                ],
+                ]
+              : null,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: badgeBg,
+                    shape: BoxShape.circle,
+                  ),
+                  child: badgeText != null
+                      ? Text(
+                          badgeText,
+                          style: AppTypography.label1.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: badgeFg,
+                          ),
+                        )
+                      : Icon(icon, size: 20, color: badgeFg),
+                ),
+                if (trailing != null) ...[const Spacer(), trailing],
+              ],
+            ),
+            const SizedBox(height: 10),
+            Text(
+              title,
+              style: AppTypography.label1.copyWith(
+                fontWeight: FontWeight.bold,
+                color: selected
+                    ? AppColors.foundationRed700
+                    : AppColors.textPrimary,
               ),
             ),
-            if (trailing != null) ...[
-              const SizedBox(width: 8),
-              trailing,
+            if (subtitle != null) ...[
+              const SizedBox(height: 2),
+              Text(
+                subtitle,
+                style: AppTypography.caption5.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+              ),
             ],
           ],
         ),
@@ -861,32 +975,30 @@ class _MessengerBookingScreenState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'ใครออกค่าส่ง?',
+            'ใครชำระค่าส่ง?',
             style: AppTypography.heading6.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
-          Column(
-            children: [
-              _selectableRow(
-                selected: payer == 'SENDER',
-                onTap: () => ref
-                    .read(messengerBookingControllerProvider.notifier)
-                    .setPayer('SENDER'),
-                icon: Icons.person_outline,
-                title: 'ผู้ส่ง (คุณ)',
-                subtitle: 'จ่ายค่าส่งตอนนี้',
-              ),
-              _selectableRow(
-                selected: payer == 'RECIPIENT',
-                onTap: () => ref
-                    .read(messengerBookingControllerProvider.notifier)
-                    .setPayer('RECIPIENT'),
-                icon: Icons.pin_drop_outlined,
-                title: 'ผู้รับปลายทาง',
-                subtitle: 'เก็บเงินตอนส่งของ',
-              ),
-            ],
-          ),
+          _grid2([
+            _selectableCard(
+              selected: payer == 'SENDER',
+              onTap: () => ref
+                  .read(messengerBookingControllerProvider.notifier)
+                  .setPayer('SENDER'),
+              icon: Icons.person_outline,
+              title: 'ผู้ส่ง (คุณ)',
+              subtitle: 'จ่ายค่าส่งตอนนี้',
+            ),
+            _selectableCard(
+              selected: payer == 'RECIPIENT',
+              onTap: () => ref
+                  .read(messengerBookingControllerProvider.notifier)
+                  .setPayer('RECIPIENT'),
+              icon: Icons.pin_drop_outlined,
+              title: 'ผู้รับปลายทาง',
+              subtitle: 'เก็บเงินตอนส่งของ',
+            ),
+          ]),
           if (bookingState.isRecipientPays) ...[
             const SizedBox(height: 10),
             Row(
@@ -928,40 +1040,38 @@ class _MessengerBookingScreenState
             style: AppTypography.heading6.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
-          Column(
-            children: [
-              _selectableRow(
-                selected: method == 'CASH',
+          _grid2([
+            _selectableCard(
+              selected: method == 'CASH',
+              onTap: () => ref
+                  .read(messengerBookingControllerProvider.notifier)
+                  .setPaymentMethod('CASH'),
+              icon: Icons.payments_outlined,
+              title: 'เงินสด',
+            ),
+            // PromptPay is gated off until the messenger backend accepts
+            // digital payment (SCRUM-41 phase 1 = CASH|COD; PROMPTPAY 400s).
+            if (FeatureFlags.messengerPromptPayEnabled)
+              _selectableCard(
+                selected: method == 'PROMPTPAY',
                 onTap: () => ref
                     .read(messengerBookingControllerProvider.notifier)
-                    .setPaymentMethod('CASH'),
-                icon: Icons.payments_outlined,
-                title: 'เงินสด',
+                    .setPaymentMethod('PROMPTPAY'),
+                icon: Icons.qr_code_2_rounded,
+                title: 'พร้อมเพย์',
               ),
-              // PromptPay is gated off until the messenger backend accepts
-              // digital payment (SCRUM-41 phase 1 = CASH|COD; PROMPTPAY 400s).
-              if (FeatureFlags.messengerPromptPayEnabled)
-                _selectableRow(
-                  selected: method == 'PROMPTPAY',
-                  onTap: () => ref
-                      .read(messengerBookingControllerProvider.notifier)
-                      .setPaymentMethod('PROMPTPAY'),
-                  icon: Icons.qr_code_2_rounded,
-                  title: 'พร้อมเพย์',
-                ),
-              // COD hidden behind a flag until its collection/settlement flow
-              // is finalised (FeatureFlags.messengerCodEnabled).
-              if (FeatureFlags.messengerCodEnabled)
-                _selectableRow(
-                  selected: method == 'COD',
-                  onTap: () => ref
-                      .read(messengerBookingControllerProvider.notifier)
-                      .setPaymentMethod('COD'),
-                  icon: Icons.local_atm,
-                  title: 'เก็บเงินปลายทาง',
-                ),
-            ],
-          ),
+            // COD hidden behind a flag until its collection/settlement flow
+            // is finalised (FeatureFlags.messengerCodEnabled).
+            if (FeatureFlags.messengerCodEnabled)
+              _selectableCard(
+                selected: method == 'COD',
+                onTap: () => ref
+                    .read(messengerBookingControllerProvider.notifier)
+                    .setPaymentMethod('COD'),
+                icon: Icons.local_atm,
+                title: 'เก็บเงินปลายทาง',
+              ),
+          ]),
           if (FeatureFlags.messengerCodEnabled && isCod) ...[
             const SizedBox(height: 12),
             TextFormField(

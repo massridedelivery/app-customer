@@ -196,7 +196,10 @@ class BookingController extends _$BookingController {
     if (n.contains('comfort')) {
       return 'assets/images/icons/3d/ic_car_comfort.png';
     }
-    // economy / saver / eco / tuk-tuk and anything else → the clean sedan.
+    if (n.contains('tuk')) {
+      return 'assets/images/icons/3d/ic_car_tuktuk.png';
+    }
+    // economy / saver / eco and anything else → the clean sedan.
     return 'assets/images/icons/3d/ic_car_economy.png';
   }
 

@@ -71,11 +71,15 @@ class VehicleSelectionItem extends StatelessWidget {
                     padding: const EdgeInsets.all(12),
                     child: Row(
                       children: [
-                        Image.asset(
-                          iconPath,
-                          width: 60,
-                          height: 40,
-                          fit: BoxFit.cover,
+                        // Selected: the vehicle grows ~1.25x and the card
+                        // expands to match. Icons are framed 3:2 so contain
+                        // shows the whole vehicle (no cropping).
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 280),
+                          curve: Curves.easeOutBack,
+                          width: isSelected ? 82 : 66,
+                          height: isSelected ? 55 : 44,
+                          child: Image.asset(iconPath, fit: BoxFit.contain),
                         ),
 
                           const SizedBox(width: 16),

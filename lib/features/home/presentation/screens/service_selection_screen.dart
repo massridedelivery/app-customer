@@ -104,18 +104,17 @@ class _ServiceSelectionScreenState
                   child: Column(
                     children: [
                       ActiveOrdersBanner(),
-                      // ดัน grid ขึ้นให้ชิดด้านบนอีก — ปรับเลข -8 (ยิ่งลบมากยิ่งขึ้น)
+                      // Nudge the service grid up toward the search bar.
                       Transform.translate(
                         offset: const Offset(0, -12),
                         child: _buildServiceGrid(context),
                       ),
-                      const SizedBox(height: 12),
-                      // Real promotions from GET /api/customer/promo/list —
-                      // hides itself when there are none.
+                      // Real promotions — hides itself when there are none —
+                      // sits tight under the grid (no extra gap).
                       const HomePromoBanner(),
                       // Latest articles from the website — fills out the home
                       // and links back to massridedelivery.com.
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 10),
                       _buildArticlesSection(context),
                       // Hardcoded promo/restaurant sections with fake ids — see
                       // FeatureFlags.foodHomePromoSections. Hidden until wired
@@ -309,7 +308,7 @@ class _ServiceSelectionScreenState
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         crossAxisCount: 2,
-        childAspectRatio: 1.5,
+        childAspectRatio: 1.72,
         mainAxisSpacing: 14,
         crossAxisSpacing: 14,
         children: [

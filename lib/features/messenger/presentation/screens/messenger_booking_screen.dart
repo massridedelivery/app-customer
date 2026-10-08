@@ -14,6 +14,7 @@ import 'package:customer_app/features/messenger/domain/models/messenger_estimate
 import 'package:customer_app/features/messenger/presentation/states/messenger_booking_state.dart';
 import 'package:customer_app/features/messenger/presentation/util/delivery_service_levels.dart';
 import 'package:customer_app/features/messenger/presentation/screens/messenger_coupon_screen.dart';
+import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -590,7 +591,7 @@ class _MessengerBookingScreenState
                         .read(messengerBookingControllerProvider.notifier)
                         .selectSizeTier(tier.tier),
                     badgeText: tier.tier.toUpperCase(),
-                    title: 'ขนาด ${tier.tier.toUpperCase()}',
+                    title: _msgSizeLabel(tier.tier),
                     subtitle:
                         '≤ ${tier.maxWeightKg} กก.\n${tier.maxLengthCm}×${tier.maxWidthCm}×${tier.maxHeightCm} ซม.',
                     trailing: Text(
@@ -621,12 +622,37 @@ class _MessengerBookingScreenState
     return 'assets/images/icons/3d/ic_car_economy.png';
   }
 
-  /// Short label — drops the "Messenger" prefix so the card reads "Bike" / "Car".
+  /// Localized vehicle label (th: มอเตอร์ไซค์/รถยนต์, en: Bike/Car), picked from
+  /// the API type name; falls back to the API label without the "Messenger"
+  /// prefix for any other type.
   String _msgVehicleLabel(MessengerVehicleType v) {
+    final l10n = AppLocalizations.of(context)!;
+    final n = '${v.name} ${v.displayName}'.toLowerCase();
+    if (n.contains('bike') || n.contains('motor') || n.contains('มอเตอร์')) {
+      return l10n.msgVehicleBike;
+    }
+    if (n.contains('car')) {
+      return l10n.msgVehicleCar;
+    }
     final raw = v.displayName.isNotEmpty ? v.displayName : v.name;
     final stripped =
         raw.replaceAll(RegExp('messenger', caseSensitive: false), '').trim();
     return stripped.isNotEmpty ? stripped : raw;
+  }
+
+  /// Localized parcel-size label (th: ขนาดเล็ก/กลาง/ใหญ่, en: Small/Medium/Large).
+  String _msgSizeLabel(String tier) {
+    final l10n = AppLocalizations.of(context)!;
+    switch (tier.toUpperCase()) {
+      case 'S':
+        return l10n.msgSizeSmall;
+      case 'M':
+        return l10n.msgSizeMedium;
+      case 'L':
+        return l10n.msgSizeLarge;
+      default:
+        return 'ขนาด ${tier.toUpperCase()}';
+    }
   }
 
   /// Style-D card for a vehicle type: a 3D render on top with a centered label,

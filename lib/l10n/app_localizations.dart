@@ -464,6 +464,36 @@ abstract class AppLocalizations {
   /// **'New price, cheaper for sure'**
   String get newPriceSure;
 
+  /// No description provided for @msgVehicleBike.
+  ///
+  /// In en, this message translates to:
+  /// **'Bike'**
+  String get msgVehicleBike;
+
+  /// No description provided for @msgVehicleCar.
+  ///
+  /// In en, this message translates to:
+  /// **'Car'**
+  String get msgVehicleCar;
+
+  /// No description provided for @msgSizeSmall.
+  ///
+  /// In en, this message translates to:
+  /// **'Small'**
+  String get msgSizeSmall;
+
+  /// No description provided for @msgSizeMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get msgSizeMedium;
+
+  /// No description provided for @msgSizeLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Large'**
+  String get msgSizeLarge;
+
   /// No description provided for @gelPromo.
   ///
   /// In en, this message translates to:

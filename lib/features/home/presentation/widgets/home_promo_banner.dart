@@ -32,7 +32,7 @@ class HomePromoBanner extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
               child: Row(
                 children: [
                   Text(
@@ -66,6 +66,9 @@ class HomePromoBanner extends ConsumerWidget {
                 itemBuilder: (context, i) => _PromoCard(promo: promos[i]),
               ),
             ),
+            // Bottom gap kept inside the banner so it collapses with it when
+            // there are no promos (no dangling space above the next section).
+            const SizedBox(height: 26),
           ],
         );
       },

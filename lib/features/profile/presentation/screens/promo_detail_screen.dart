@@ -3,6 +3,7 @@ import 'package:customer_app/core/utils/error_text.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/features/profile/data/datasources/promo_remote_data_source.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -36,18 +37,62 @@ class PromoDetailScreen extends ConsumerWidget {
         ),
         body: const Center(child: MassLoadingM(size: 72)),
       ),
-      error: (e, s) => Scaffold(
-        backgroundColor: AppColors.background,
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () => Navigator.of(context).pop(),
+      error: (e, s) {
+        final int? status =
+            e is DioException ? e.response?.statusCode : null;
+        // 404 = promo closed/removed, 400 = bad id → a message + "back";
+        // anything else (5xx / network) → message + "retry", never a stuck spinner.
+        final bool gone = status == 404 || status == 400;
+        final String msg = status == 404
+            ? 'ไม่พบโปรโมชันนี้'
+            : status == 400
+                ? 'รหัสโปรโมชันไม่ถูกต้อง'
+                : friendlyError(e);
+        return Scaffold(
+          backgroundColor: AppColors.background,
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
           ),
-        ),
-        body: Center(child: Text(friendlyError(e))),
-      ),
+          body: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    msg,
+                    textAlign: TextAlign.center,
+                    style: AppTypography.body2,
+                  ),
+                  const SizedBox(height: 16),
+                  if (gone)
+                    OutlinedButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: const Text('กลับ'),
+                    )
+                  else
+                    ElevatedButton(
+                      onPressed: () =>
+                          ref.invalidate(promoDetailProvider(promoId)),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                      ),
+                      child: const Text(
+                        'ลองใหม่',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
       data: (promo) => Scaffold(
         backgroundColor: AppColors.background,
         body: CustomScrollView(
@@ -62,6 +107,7 @@ class PromoDetailScreen extends ConsumerWidget {
                     _buildHeader(promo),
                     const SizedBox(height: 24),
                     _buildCodeSection(context, promo),
+                    _buildExpiry(promo),
                     const SizedBox(height: 32),
                     _buildTermsSection(promo),
                     const SizedBox(height: 100),
@@ -77,7 +123,8 @@ class PromoDetailScreen extends ConsumerWidget {
 
   Widget _buildAppBar(BuildContext context, Map<String, dynamic> promo) {
     final bannerUrl = promo['banner_url'];
-    final barColor = Color(promo['color'] as int? ?? 0xFF00236F);
+    final barColor =
+        Color((promo['color'] as num?)?.toInt() ?? 0xFFC0343E);
 
     return SliverAppBar(
       expandedHeight: 200,
@@ -101,7 +148,8 @@ class PromoDetailScreen extends ConsumerWidget {
   }
 
   Widget _buildHeader(Map<String, dynamic> promo) {
-    final barColor = Color(promo['color'] as int? ?? 0xFF00236F);
+    final barColor =
+        Color((promo['color'] as num?)?.toInt() ?? 0xFFC0343E);
     final String tag = (promo['tag'] ?? '').toString().trim();
     final String desc = (promo['description'] ?? '').toString().trim();
     return Column(
@@ -142,7 +190,8 @@ class PromoDetailScreen extends ConsumerWidget {
 
   Widget _buildCodeSection(BuildContext context, Map<String, dynamic> promo) {
     final code = promo['code'] ?? '';
-    final barColor = Color(promo['color'] as int? ?? 0xFF00236F);
+    final barColor =
+        Color((promo['color'] as num?)?.toInt() ?? 0xFFC0343E);
 
     return Container(
       decoration: BoxDecoration(
@@ -252,6 +301,38 @@ class PromoDetailScreen extends ConsumerWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  /// Expiry, converted from the ISO-8601 UTC `expires_at` to Thai time
+  /// (Asia/Bangkok, UTC+7) regardless of the device timezone.
+  Widget _buildExpiry(Map<String, dynamic> promo) {
+    final raw = (promo['expires_at'] ?? '').toString();
+    if (raw.isEmpty) return const SizedBox.shrink();
+    final DateTime? parsed = DateTime.tryParse(raw);
+    if (parsed == null) return const SizedBox.shrink();
+    final bkk = parsed.toUtc().add(const Duration(hours: 7));
+    String two(int n) => n.toString().padLeft(2, '0');
+    final text =
+        'ใช้ได้ถึง ${two(bkk.day)}/${two(bkk.month)}/${bkk.year} ${two(bkk.hour)}:${two(bkk.minute)} น.';
+    return Padding(
+      padding: const EdgeInsets.only(top: 16),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.schedule_rounded,
+            size: 16,
+            color: AppColors.textSecondary,
+          ),
+          const SizedBox(width: 6),
+          Text(
+            text,
+            style: AppTypography.caption4.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ],
       ),
     );
   }

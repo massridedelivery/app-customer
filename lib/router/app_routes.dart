@@ -113,7 +113,9 @@ bool _requiresAuth(String path) {
     '/chat', '/trips', '/trip',
     '/profile', '/edit-profile', '/loyalty',
     '/saved-places', '/saved-restaurants', '/add-address',
-    '/promos', '/referral', '/sos', '/privacy', '/credit-cards',
+    // '/promos' is public (guest can browse promos + detail via the public
+    // endpoint); applying a code still happens at checkout, which needs auth.
+    '/referral', '/sos', '/privacy', '/credit-cards',
     '/messenger/', '/food-order',
   ];
   return protectedPrefixes.any((p) => path == p || path.startsWith(p));

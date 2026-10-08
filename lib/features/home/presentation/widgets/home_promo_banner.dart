@@ -105,7 +105,9 @@ class _PromoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     // Per-promo brand color (admin-set) → a full-bleed gradient card; falls
     // back to brand red. Tapping opens the promo's detail directly.
-    final Color base = Color((promo['color'] as int?) ?? 0xFFC0343E);
+    // color is an ARGB int that can exceed 2^31 (e.g. 4290786366), so read it
+    // as num → 64-bit int; null falls back to brand red.
+    final Color base = Color((promo['color'] as num?)?.toInt() ?? 0xFFC0343E);
     final Color dark = Color.lerp(base, Colors.black, 0.28)!;
     final bool hasCode = _code != null && _code!.isNotEmpty;
     return GestureDetector(

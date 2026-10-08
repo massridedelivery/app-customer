@@ -199,6 +199,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get readyToGo => 'Ready to go';
 
   @override
+  String get readyCallNow => 'All set — ride now';
+
+  @override
   String get whereToToday => 'Where shall we drop you off today?';
 
   @override

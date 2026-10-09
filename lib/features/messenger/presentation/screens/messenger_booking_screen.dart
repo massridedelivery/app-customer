@@ -147,7 +147,10 @@ class _MessengerBookingScreenState
     final double statusPadding = MediaQuery.of(context).padding.top;
     const double heroBody = 172; // red height below the status bar
     final double heroHeight = statusPadding + heroBody;
-    const double overlap = 28; // how far the first card tucks under the wave
+    // Small gap so the first card sits clear below the wave at rest — the
+    // deepest dip is on the left, right over the pickup/dropoff pins, so any
+    // overlap would cover them. Content still scrolls up under the wave.
+    const double topGap = 12;
 
     return Scaffold(
       backgroundColor: AppColors.white,
@@ -157,7 +160,7 @@ class _MessengerBookingScreenState
             child: Form(
               key: _formKey,
               child: ListView(
-                padding: EdgeInsets.fromLTRB(16, heroHeight - overlap, 16, 24),
+                padding: EdgeInsets.fromLTRB(16, heroHeight + topGap, 16, 24),
                 children: [
                   _buildLocationCard(homeState),
                   const SizedBox(height: 12),

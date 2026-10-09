@@ -141,37 +141,51 @@ class _MessengerBookingScreenState
       }
     });
 
+    // Floating wave hero over a scrolling list: the cards scroll up UNDER the
+    // red wave and the first card tucks beneath the curve, so content peeks
+    // through the transparent dip (matches the home header's overlap).
+    final double statusPadding = MediaQuery.of(context).padding.top;
+    const double heroBody = 172; // red height below the status bar
+    final double heroHeight = statusPadding + heroBody;
+    const double overlap = 28; // how far the first card tucks under the wave
+
     return Scaffold(
       backgroundColor: AppColors.white,
-      body: Column(
+      body: Stack(
         children: [
-          _buildHero(context),
-          Expanded(
+          Positioned.fill(
             child: Form(
               key: _formKey,
               child: ListView(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+                padding: EdgeInsets.fromLTRB(16, heroHeight - overlap, 16, 24),
                 children: [
-            _buildLocationCard(homeState),
-            const SizedBox(height: 12),
-            _buildVehicleCard(bookingState),
-            const SizedBox(height: 12),
-            _buildSizeCard(bookingState),
-            const SizedBox(height: 12),
-            _buildPackageCard(bookingState),
-            const SizedBox(height: 12),
-            _buildRecipientCard(),
-            const SizedBox(height: 12),
-            _buildDeliveryTypeCard(bookingState),
-            const SizedBox(height: 12),
-            _buildPayerCard(bookingState),
-            const SizedBox(height: 12),
-            _buildPaymentCard(bookingState),
-            const SizedBox(height: 12),
-            _buildEstimateCard(bookingState),
+                  _buildLocationCard(homeState),
+                  const SizedBox(height: 12),
+                  _buildVehicleCard(bookingState),
+                  const SizedBox(height: 12),
+                  _buildSizeCard(bookingState),
+                  const SizedBox(height: 12),
+                  _buildPackageCard(bookingState),
+                  const SizedBox(height: 12),
+                  _buildRecipientCard(),
+                  const SizedBox(height: 12),
+                  _buildDeliveryTypeCard(bookingState),
+                  const SizedBox(height: 12),
+                  _buildPayerCard(bookingState),
+                  const SizedBox(height: 12),
+                  _buildPaymentCard(bookingState),
+                  const SizedBox(height: 12),
+                  _buildEstimateCard(bookingState),
                 ],
               ),
             ),
+          ),
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: heroHeight,
+            child: _buildHero(context),
           ),
         ],
       ),

@@ -187,24 +187,6 @@ class _PromoCard extends StatelessWidget {
                             ),
                           ),
                         ),
-                      const Spacer(),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 5,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(999),
-                        ),
-                        child: Text(
-                          'ใช้เลย ›',
-                          style: AppTypography.caption4.copyWith(
-                            color: base,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
                     ],
                   ),
                 ],

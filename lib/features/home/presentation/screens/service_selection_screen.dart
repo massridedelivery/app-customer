@@ -11,6 +11,7 @@ import 'package:customer_app/features/home/presentation/states/home_state.dart';
 import 'package:customer_app/features/active_orders/presentation/controllers/active_orders_controller.dart';
 import 'package:customer_app/features/home/presentation/widgets/home_promo_banner.dart';
 import 'package:customer_app/features/active_orders/presentation/widgets/active_orders_banner.dart';
+import 'package:customer_app/features/profile/presentation/screens/promo_list_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:customer_app/core/widgets/app_network_image.dart';
 import 'package:customer_app/core/widgets/hero_header.dart';
@@ -33,116 +34,128 @@ class _ServiceSelectionScreenState
     final homeState = ref.watch(homeControllerProvider);
     final bottomPadding = MediaQuery.of(context).padding.bottom;
     final statusPadding = MediaQuery.of(context).padding.top;
+    const double heroHeight = 190; // fixed header height (no collapse)
 
     return Scaffold(
       backgroundColor: AppColors.semanticGrayNeutralBgWhite,
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            pinned: true,
-            stretch: true,
-            expandedHeight: 175,
-            collapsedHeight: 65 + statusPadding,
-            scrolledUnderElevation: 0.0,
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            automaticallyImplyLeading: false,
-            flexibleSpace: LayoutBuilder(
-              builder: (context, constraints) {
-                final double top = constraints.biggest.height;
-                final double expandedHeight = 175;
-                final double collapsedHeight = 65 + statusPadding;
-                final double t =
-                    ((top - collapsedHeight) /
-                            (expandedHeight - collapsedHeight))
-                        .clamp(0.0, 1.0);
-
-                return Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    // S-Shape Background
-                    ClipPath(
-                      clipper: SShapeClipper(progress: t),
-                      child: Container(
-                        decoration: const BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              AppColors.accentRedDeep,
-                              AppColors.primary,
-                            ],
-                          ),
+      // Fixed wave header (does NOT collapse/scroll away) floating over the
+      // scrolling content — same flow as the messenger screen. The content
+      // panel tucks 6px up under the wave.
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: RefreshIndicator(
+              onRefresh: _handleRefresh,
+              color: AppColors.primary,
+              // Content scrolls UNDER the fixed header, so push the spinner down
+              // below the wave instead of letting it hide behind the red header.
+              edgeOffset: heroHeight - 24,
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Reserve the header's height so content starts below it, then
+                  // scrolls up underneath the fixed wave.
+                  const SizedBox(height: heroHeight),
+                  Transform.translate(
+                    offset: const Offset(0, -6),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: AppColors.semanticGrayNeutralBgWhite,
+                        borderRadius: const BorderRadius.vertical(
+                          top: Radius.circular(24),
                         ),
-                        // Faint delivery-icon texture, clipped to the S-shape.
-                        child: const Stack(children: [HeroPatternOverlay()]),
+                      ),
+                      child: Padding(
+                        // Reserve the floating bottom nav so the last content clears it.
+                        padding: EdgeInsets.only(
+                          top: 2,
+                          bottom: bottomPadding + kFloatingNavReserve,
+                        ),
+                        child: Column(
+                          children: [
+                            ActiveOrdersBanner(),
+                            // Nudge the service grid up toward the search bar.
+                            Transform.translate(
+                              offset: const Offset(0, -4),
+                              child: _buildServiceGrid(context),
+                            ),
+                            // Real promotions — hides itself when there are none —
+                            // sits tight under the grid (no extra gap).
+                            const HomePromoBanner(),
+                            // Latest articles — the gap above it is owned by the
+                            // promo banner (collapses when there are no promos).
+                            _buildArticlesSection(context),
+                            // Hardcoded promo/restaurant sections with fake ids —
+                            // see FeatureFlags.foodHomePromoSections. Hidden until
+                            // wired to the discovery feed.
+                            if (FeatureFlags.foodHomePromoSections) ...[
+                              _buildPromoBanner(context),
+                              const SizedBox(height: 20),
+                              _buildSectionHeader(
+                                context,
+                                title: 'เมนูลด 60%',
+                                emoji: '🔥',
+                              ),
+                              _buildHorizontalFoodList(context),
+                              const SizedBox(height: 20),
+                              _buildPromoCodeCard(context),
+                              const SizedBox(height: 20),
+                              _buildSectionHeader(context, title: 'ร้านยอดนิยม'),
+                              _buildHorizontalRestaurantList(context),
+                            ],
+                            const SizedBox(height: 40),
+                          ],
+                        ),
                       ),
                     ),
-                    // Header Content
-                    _buildHeaderContent(context, homeState, t, statusPadding),
-                  ],
-                );
-              },
+                  ),
+                ],
+              ),
+              ),
             ),
           ),
-          SliverToBoxAdapter(
-            child: Transform.translate(
-              offset: const Offset(0, -6),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: AppColors.semanticGrayNeutralBgWhite,
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(24),
-                  ),
-                ),
-                child: Padding(
-                  // Reserve the floating bottom nav so the last content clears it.
-                  padding: EdgeInsets.only(
-                    top: 2,
-                    bottom: bottomPadding + kFloatingNavReserve,
-                  ),
-                  child: Column(
-                    children: [
-                      ActiveOrdersBanner(),
-                      // Nudge the service grid up toward the search bar.
-                      Transform.translate(
-                        offset: const Offset(0, -4),
-                        child: _buildServiceGrid(context),
+          // The fixed header itself — constant full (expanded) state, t = 1.0.
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: heroHeight,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                ClipPath(
+                  clipper: SShapeClipper(progress: 1.0),
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [AppColors.accentRedDeep, AppColors.primary],
                       ),
-                      // Real promotions — hides itself when there are none —
-                      // sits tight under the grid (no extra gap).
-                      const HomePromoBanner(),
-                      // Latest articles — the gap above it is owned by the promo
-                      // banner (so it collapses when there are no promos).
-                      _buildArticlesSection(context),
-                      // Hardcoded promo/restaurant sections with fake ids — see
-                      // FeatureFlags.foodHomePromoSections. Hidden until wired
-                      // to the discovery feed.
-                      if (FeatureFlags.foodHomePromoSections) ...[
-                        _buildPromoBanner(context),
-                        const SizedBox(height: 20),
-                        _buildSectionHeader(
-                          context,
-                          title: 'เมนูลด 60%',
-                          emoji: '🔥',
-                        ),
-                        _buildHorizontalFoodList(context),
-                        const SizedBox(height: 20),
-                        _buildPromoCodeCard(context),
-                        const SizedBox(height: 20),
-                        _buildSectionHeader(context, title: 'ร้านยอดนิยม'),
-                        _buildHorizontalRestaurantList(context),
-                      ],
-                      const SizedBox(height: 40),
-                    ],
+                    ),
+                    // Faint delivery-icon texture, clipped to the S-shape.
+                    child: const Stack(children: [HeroPatternOverlay()]),
                   ),
                 ),
-              ),
+                _buildHeaderContent(context, homeState, 1.0, statusPadding),
+              ],
             ),
           ),
         ],
       ),
     );
+  }
+
+  /// Pull-to-refresh: reload the live home content — saved/default places,
+  /// active orders and promotions. Articles are static so they're left as-is.
+  Future<void> _handleRefresh() async {
+    await Future.wait([
+      ref.read(homeControllerProvider.notifier).refreshSavedPlaces(),
+      ref.read(activeOrdersControllerProvider.notifier).refresh(),
+      ref.refresh(promoListProvider.future),
+    ]);
   }
 
   Widget _buildHeaderContent(

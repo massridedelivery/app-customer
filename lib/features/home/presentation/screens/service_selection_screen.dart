@@ -11,6 +11,7 @@ import 'package:customer_app/features/home/presentation/states/home_state.dart';
 import 'package:customer_app/features/active_orders/presentation/controllers/active_orders_controller.dart';
 import 'package:customer_app/features/home/presentation/widgets/home_promo_banner.dart';
 import 'package:customer_app/features/active_orders/presentation/widgets/active_orders_banner.dart';
+import 'package:customer_app/features/profile/presentation/screens/promo_list_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:customer_app/core/widgets/app_network_image.dart';
 import 'package:customer_app/core/widgets/hero_header.dart';
@@ -43,8 +44,15 @@ class _ServiceSelectionScreenState
       body: Stack(
         children: [
           Positioned.fill(
-            child: SingleChildScrollView(
-              child: Column(
+            child: RefreshIndicator(
+              onRefresh: _handleRefresh,
+              color: AppColors.primary,
+              // Content scrolls UNDER the fixed header, so push the spinner down
+              // below the wave instead of letting it hide behind the red header.
+              edgeOffset: heroHeight - 24,
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // Reserve the header's height so content starts below it, then
@@ -105,6 +113,7 @@ class _ServiceSelectionScreenState
                   ),
                 ],
               ),
+              ),
             ),
           ),
           // The fixed header itself — constant full (expanded) state, t = 1.0.
@@ -137,6 +146,16 @@ class _ServiceSelectionScreenState
         ],
       ),
     );
+  }
+
+  /// Pull-to-refresh: reload the live home content — saved/default places,
+  /// active orders and promotions. Articles are static so they're left as-is.
+  Future<void> _handleRefresh() async {
+    await Future.wait([
+      ref.read(homeControllerProvider.notifier).refreshSavedPlaces(),
+      ref.read(activeOrdersControllerProvider.notifier).refresh(),
+      ref.refresh(promoListProvider.future),
+    ]);
   }
 
   Widget _buildHeaderContent(

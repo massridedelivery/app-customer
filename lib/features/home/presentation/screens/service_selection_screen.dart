@@ -543,7 +543,7 @@ class _ServiceSelectionScreenState
         ),
         const SizedBox(height: 12),
         SizedBox(
-          height: 240,
+          height: 208,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             clipBehavior: Clip.none,
@@ -565,7 +565,7 @@ class _ServiceSelectionScreenState
       onTap: () =>
           launchUrl(Uri.parse(a.url), mode: LaunchMode.externalApplication),
       child: Container(
-        width: 280,
+        width: 220,
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(18),
@@ -585,13 +585,13 @@ class _ServiceSelectionScreenState
                   const BorderRadius.vertical(top: Radius.circular(18)),
               child: Image.asset(
                 a.image,
-                height: 120,
+                height: 90,
                 width: double.infinity,
                 fit: BoxFit.cover,
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
+              padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

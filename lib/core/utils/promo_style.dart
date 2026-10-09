@@ -49,3 +49,71 @@ String promoHeadlineOf(Map<String, dynamic> promo, {String? fallback}) {
   if (_type(promo) == 'percentage') return 'ลด ${value.toStringAsFixed(0)}%';
   return 'ลด ฿${value.toStringAsFixed(0)}';
 }
+
+num _discountValueOf(Map<String, dynamic> promo) {
+  if (_type(promo) == 'free_shipping') return 1 << 20; // rank free shipping high
+  final raw = promo['discount_value'] ?? promo['discount'] ?? 0;
+  return raw is num ? raw : num.tryParse(raw.toString()) ?? 0;
+}
+
+/// True when [promo] applies to [serviceKey] ('ride' | 'food' | 'messenger').
+///
+/// Prefers a structured backend field (`service`/`service_type`/`services`),
+/// then falls back to keyword-matching the `tag`/`sub_tag`/`title` text so
+/// promos authored before the structured field shipped still map correctly.
+bool promoAppliesToService(Map<String, dynamic> promo, String serviceKey) {
+  final key = serviceKey.toLowerCase();
+
+  // 1) Structured fields, if the backend sends them.
+  final single =
+      (promo['service'] ?? promo['service_type'] ?? '').toString().toLowerCase();
+  if (single.isNotEmpty) {
+    if (single == 'all') return true;
+    if (single.split(RegExp(r'[,\s]+')).contains(key)) return true;
+  }
+  final many = promo['services'];
+  if (many is List &&
+      many.map((e) => e.toString().toLowerCase()).contains(key)) {
+    return true;
+  }
+
+  // 2) Keyword fallback on human-readable fields.
+  final hay =
+      '${promo['tag'] ?? ''} ${promo['sub_tag'] ?? ''} ${promo['title'] ?? ''}'
+          .toLowerCase();
+  switch (key) {
+    case 'ride':
+      return hay.contains('ride') ||
+          hay.contains('เดินทาง') ||
+          hay.contains('เรียกรถ') ||
+          hay.contains('โดยสาร');
+    case 'food':
+      return hay.contains('food') ||
+          hay.contains('อาหาร') ||
+          hay.contains('ร้านอาหาร');
+    case 'messenger':
+      return hay.contains('messenger') ||
+          hay.contains('ส่งของ') ||
+          hay.contains('พัสดุ') ||
+          hay.contains('delivery');
+  }
+  return false;
+}
+
+/// The strongest active promo badge for a home service card, or `null` when the
+/// customer has no promo for that service — so the card renders no badge.
+///
+/// [serviceKey] is 'ride' | 'food' | 'messenger'. The returned [text] carries a
+/// trailing `*` ("เงื่อนไขเป็นไปตามที่กำหนด"), matching the card style.
+({String text, Color color})? serviceBadgeOf(
+  List<Map<String, dynamic>> promos,
+  String serviceKey,
+) {
+  final matched =
+      promos.where((p) => promoAppliesToService(p, serviceKey)).toList();
+  if (matched.isEmpty) return null;
+  // Show the best offer: free shipping first, then the largest discount.
+  matched.sort((a, b) => _discountValueOf(b).compareTo(_discountValueOf(a)));
+  final best = matched.first;
+  return (text: '${promoHeadlineOf(best)}*', color: promoColorOf(best));
+}

@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
 
 /// Shared styling for promotion cards/banners (home Style-B card + detail),
-/// derived from the backend `discount_type` so the three promo kinds get a
+/// derived from the backend `promo_type` so the three promo kinds get a
 /// consistent brand color and headline without the admin having to pick a color.
 ///
 /// - `fixed`         → red,    "ลด ฿{value}"
 /// - `percentage`    → orange, "ลด {value}%"
-/// - `free_shipping` → green,  "ส่งฟรี"
+/// - `free_shipping` → green,  "ส่งฟรี"  (value not shown)
+///
+/// `promo_type` is the display kind and is distinct from `discount_type`, which
+/// the pricing engine uses to compute money (free shipping is a 100% discount on
+/// delivery, i.e. discount_type "percentage"). We key the card styling off
+/// `promo_type`, falling back to `discount_type` only for pre-rollout payloads
+/// that don't carry it yet. An unknown type falls back to the red/`fixed` look.
 ///
 /// An explicit `color` on the promo (ARGB int) overrides the type color.
 
@@ -15,7 +21,9 @@ const Color _promoOrange = Color(0xFFE08A00);
 const Color _promoGreen = Color(0xFF1E9E63);
 
 String _type(Map<String, dynamic> promo) =>
-    (promo['discount_type'] ?? '').toString().toLowerCase();
+    (promo['promo_type'] ?? promo['discount_type'] ?? '')
+        .toString()
+        .toLowerCase();
 
 /// Card color: the admin-set `color` (64-bit ARGB int) if present, otherwise a
 /// brand color chosen by `discount_type`.

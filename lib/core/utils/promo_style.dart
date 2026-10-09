@@ -58,13 +58,21 @@ num _discountValueOf(Map<String, dynamic> promo) {
 
 /// True when [promo] applies to [serviceKey] ('ride' | 'food' | 'messenger').
 ///
-/// Prefers a structured backend field (`service`/`service_type`/`services`),
-/// then falls back to keyword-matching the `tag`/`sub_tag`/`title` text so
-/// promos authored before the structured field shipped still map correctly.
+/// Keys off the backend's `applies_to` ("ALL" | "RIDE" | "FOOD" | "MESSENGER";
+/// see promo.Promotion), which the promo list already returns. Falls back to a
+/// structured `service`/`services` field, then to keyword-matching
+/// `tag`/`sub_tag`/`title`, only for payloads that don't carry `applies_to`.
 bool promoAppliesToService(Map<String, dynamic> promo, String serviceKey) {
   final key = serviceKey.toLowerCase();
 
-  // 1) Structured fields, if the backend sends them.
+  // 1) Primary: the backend's `applies_to`. When present it is authoritative —
+  // a promo scoped to another service must NOT fall through to a keyword guess.
+  final appliesTo = (promo['applies_to'] ?? '').toString().toUpperCase();
+  if (appliesTo.isNotEmpty) {
+    return appliesTo == 'ALL' || appliesTo == key.toUpperCase();
+  }
+
+  // 2) Structured service field, for any other payload shape.
   final single =
       (promo['service'] ?? promo['service_type'] ?? '').toString().toLowerCase();
   if (single.isNotEmpty) {
@@ -77,7 +85,7 @@ bool promoAppliesToService(Map<String, dynamic> promo, String serviceKey) {
     return true;
   }
 
-  // 2) Keyword fallback on human-readable fields.
+  // 3) Keyword fallback on human-readable fields.
   final hay =
       '${promo['tag'] ?? ''} ${promo['sub_tag'] ?? ''} ${promo['title'] ?? ''}'
           .toLowerCase();

@@ -75,19 +75,28 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
         : homeState.recentPlaces;
     return Scaffold(
       backgroundColor: AppColors.white,
-      // Header stays fixed while the content below scrolls (same pattern as the
-      // messenger booking screen).
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      // Floating wave hero over the scrolling content (same pattern as the
+      // messenger booking screen): the content scrolls up UNDER the red wave and
+      // shows through its transparent dip. An invisible copy of the header at the
+      // top of the scroll reserves its exact height, so the content always
+      // starts just below the wave regardless of text / status-bar height.
+      body: Stack(
         children: [
-          _buildHeader(context, l10n),
-          Expanded(
+          Positioned.fill(
             child: SingleChildScrollView(
               padding: const EdgeInsets.only(bottom: 40),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 20),
+                  Visibility(
+                    visible: false,
+                    maintainSize: true,
+                    maintainAnimation: true,
+                    maintainState: true,
+                    child: _buildHeader(context, l10n),
+                  ),
+                  // Small gap so the content clears the wave at rest.
+                  const SizedBox(height: 12),
                   _buildQuickActions(context, l10n, homeState.savedPlaces),
                   const SizedBox(height: 28),
                   // Recent trips — the customer's latest ride destinations (from
@@ -101,6 +110,12 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
                 ],
               ),
             ),
+          ),
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: _buildHeader(context, l10n),
           ),
         ],
       ),

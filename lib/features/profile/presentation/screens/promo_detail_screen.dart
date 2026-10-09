@@ -1,5 +1,6 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/utils/error_text.dart';
+import 'package:customer_app/core/utils/promo_style.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/features/profile/data/datasources/promo_remote_data_source.dart';
@@ -123,8 +124,7 @@ class PromoDetailScreen extends ConsumerWidget {
 
   Widget _buildAppBar(BuildContext context, Map<String, dynamic> promo) {
     final bannerUrl = promo['banner_url'];
-    final barColor =
-        Color((promo['color'] as num?)?.toInt() ?? 0xFFC0343E);
+    final barColor = promoColorOf(promo);
 
     return SliverAppBar(
       expandedHeight: 200,
@@ -148,8 +148,7 @@ class PromoDetailScreen extends ConsumerWidget {
   }
 
   Widget _buildHeader(Map<String, dynamic> promo) {
-    final barColor =
-        Color((promo['color'] as num?)?.toInt() ?? 0xFFC0343E);
+    final barColor = promoColorOf(promo);
     final String tag = (promo['tag'] ?? '').toString().trim();
     final String desc = (promo['description'] ?? '').toString().trim();
     return Column(
@@ -190,8 +189,7 @@ class PromoDetailScreen extends ConsumerWidget {
 
   Widget _buildCodeSection(BuildContext context, Map<String, dynamic> promo) {
     final code = promo['code'] ?? '';
-    final barColor =
-        Color((promo['color'] as num?)?.toInt() ?? 0xFFC0343E);
+    final barColor = promoColorOf(promo);
 
     return Container(
       decoration: BoxDecoration(

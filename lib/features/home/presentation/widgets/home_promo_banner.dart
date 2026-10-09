@@ -1,5 +1,6 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
+import 'package:customer_app/core/utils/promo_style.dart';
 import 'package:customer_app/features/profile/presentation/screens/promo_list_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -92,25 +93,14 @@ class _PromoCard extends StatelessWidget {
     return v is num ? v : num.tryParse(v.toString()) ?? 0;
   }
 
-  /// Headline like "ลด ฿100" / "ลด 20%", derived from discount_type + value.
-  String get _headline {
-    final type = (promo['discount_type'] ?? '').toString().toLowerCase();
-    final rawVal = promo['discount_value'] ?? promo['discount'] ?? 0;
-    final num value = rawVal is num
-        ? rawVal
-        : num.tryParse(rawVal.toString()) ?? 0;
-    if (value <= 0) return _title;
-    if (type == 'percentage') return 'ลด ${value.toStringAsFixed(0)}%';
-    return 'ลด ฿${value.toStringAsFixed(0)}';
-  }
+  /// Headline like "ลด ฿100" / "ลด 20%" / "ส่งฟรี", derived from discount_type.
+  String get _headline => promoHeadlineOf(promo, fallback: _title);
 
   @override
   Widget build(BuildContext context) {
-    // Per-promo brand color (admin-set) → a full-bleed gradient card; falls
-    // back to brand red. Tapping opens the promo's detail directly.
-    // color is an ARGB int that can exceed 2^31 (e.g. 4290786366), so read it
-    // as num → 64-bit int; null falls back to brand red.
-    final Color base = Color((promo['color'] as num?)?.toInt() ?? 0xFFC0343E);
+    // Card color: admin-set `color` if present, else auto by discount_type
+    // (fixed→red, percentage→orange, free_shipping→green). Tapping opens detail.
+    final Color base = promoColorOf(promo);
     final Color dark = Color.lerp(base, Colors.black, 0.28)!;
     final bool hasCode = _code != null && _code!.isNotEmpty;
     return GestureDetector(

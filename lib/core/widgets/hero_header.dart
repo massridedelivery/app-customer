@@ -1,16 +1,25 @@
 import 'package:flutter/material.dart';
 
 /// Wave-clipped bottom edge shared by the branded red hero headers (ride
-/// landing + messenger booking), so the curve stays identical across screens.
+/// landing + messenger booking + food), so the curve stays identical across
+/// screens — and matches the home header's S-curve (see `SShapeClipper` at full
+/// progress): a deep trough on the left (~0.25w) sweeping up to a crest on the
+/// right (~0.8w). The cubic's control points reach past the box, but the curve
+/// itself only cuts ~38px up at the crest, so it stays clear of the search bar
+/// with the heroes' existing bottom padding.
 class HeroWaveClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
     final w = size.width;
     final h = size.height;
+    const curve = 30.0;
     final path = Path()
-      ..lineTo(0, h - 36)
-      ..quadraticBezierTo(w * 0.25, h, w * 0.52, h - 16)
-      ..quadraticBezierTo(w * 0.80, h - 40, w, h - 6)
+      ..lineTo(0, h - curve)
+      ..cubicTo(
+        w * 0.3, h + curve * 1.2, // dip down on the left
+        w * 0.7, h - curve * 2.5, // arch up on the right
+        w, h - curve * 0.8, // end point
+      )
       ..lineTo(w, 0)
       ..close();
     return path;

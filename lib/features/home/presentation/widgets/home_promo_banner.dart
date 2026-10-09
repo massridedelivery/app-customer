@@ -57,7 +57,7 @@ class HomePromoBanner extends ConsumerWidget {
               ),
             ),
             SizedBox(
-              height: 134,
+              height: 104,
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -107,7 +107,7 @@ class _PromoCard extends StatelessWidget {
       onTap: () =>
           context.push(_id.isNotEmpty ? '/promos/$_id' : '/promos'),
       child: Container(
-        width: 280,
+        width: 224,
         clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
@@ -126,7 +126,7 @@ class _PromoCard extends StatelessWidget {
               child: Text(
                 '%',
                 style: TextStyle(
-                  fontSize: 120,
+                  fontSize: 84,
                   fontWeight: FontWeight.w800,
                   height: 1,
                   color: Colors.white.withValues(alpha: 0.12),
@@ -134,7 +134,7 @@ class _PromoCard extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(14),
+              padding: const EdgeInsets.all(10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,

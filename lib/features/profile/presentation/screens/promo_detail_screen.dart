@@ -98,15 +98,16 @@ class PromoDetailScreen extends ConsumerWidget {
         backgroundColor: AppColors.background,
         body: CustomScrollView(
           slivers: [
-            _buildAppBar(context, promo),
+            _buildAppBar(context),
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.all(20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildHeader(promo),
-                    const SizedBox(height: 24),
+                    _PromoDetailHeader(promo: promo),
+                    const SizedBox(height: 20),
+                    _buildDescription(promo),
                     _buildCodeSection(context, promo),
                     _buildExpiry(promo),
                     const SizedBox(height: 32),
@@ -122,68 +123,34 @@ class PromoDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildAppBar(BuildContext context, Map<String, dynamic> promo) {
-    final bannerUrl = promo['banner_url'];
-    final barColor = promoColorOf(promo);
-
+  // Slim bar — the promo hero now lives in the body, so the app bar is just a
+  // back button over the page background (no empty coloured block).
+  Widget _buildAppBar(BuildContext context) {
     return SliverAppBar(
-      expandedHeight: 200,
       pinned: true,
-      backgroundColor: barColor,
+      backgroundColor: AppColors.background,
+      surfaceTintColor: Colors.transparent,
+      elevation: 0,
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: Colors.white),
+        icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
         onPressed: () => Navigator.of(context).pop(),
-      ),
-      flexibleSpace: FlexibleSpaceBar(
-        background: bannerUrl != null
-            ? Image.network(
-                bannerUrl,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) =>
-                    Container(color: barColor),
-              )
-            : Container(color: barColor),
       ),
     );
   }
 
-  Widget _buildHeader(Map<String, dynamic> promo) {
-    final barColor = promoColorOf(promo);
-    final String tag = (promo['tag'] ?? '').toString().trim();
+  // The promo title + tag moved into [_PromoDetailHeader]; the body keeps only
+  // the longer description, hidden entirely when the backend sends none.
+  Widget _buildDescription(Map<String, dynamic> promo) {
     final String desc = (promo['description'] ?? '').toString().trim();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Hide blanks when the backend omits a field, instead of leaving an
-        // empty chip / empty line.
-        if (tag.isNotEmpty) ...[
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: barColor.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: Text(
-              tag,
-              style: AppTypography.caption4.copyWith(
-                color: barColor,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-        ],
-        Text(promo['title'] ?? '', style: AppTypography.heading4),
-        if (desc.isNotEmpty) ...[
-          const SizedBox(height: 8),
-          Text(
-            desc,
-            style: AppTypography.caption4.copyWith(
-              color: AppColors.semanticGrayNeutralFgHigh,
-            ),
-          ),
-        ],
-      ],
+    if (desc.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20),
+      child: Text(
+        desc,
+        style: AppTypography.caption4.copyWith(
+          color: AppColors.semanticGrayNeutralFgHigh,
+        ),
+      ),
     );
   }
 
@@ -375,5 +342,191 @@ class PromoDetailScreen extends ConsumerWidget {
       ],
     );
   }
+}
 
+/// Coupon-ticket hero for the promo detail page. Colour and glyph follow the
+/// promo type (fixed → red "฿", percentage → orange "%", free shipping →
+/// green truck), the headline reuses [promoHeadlineOf], and the bottom edge
+/// has a dashed perforation with two notches so it reads as a tear-off ticket.
+class _PromoDetailHeader extends StatelessWidget {
+  final Map<String, dynamic> promo;
+  const _PromoDetailHeader({required this.promo});
+
+  @override
+  Widget build(BuildContext context) {
+    final Color base = promoColorOf(promo);
+    final Color dark = Color.lerp(base, Colors.black, 0.28)!;
+    final String title = (promo['title'] ?? '').toString().trim();
+    final String headline = promoHeadlineOf(promo, fallback: title);
+    final String tag = (promo['tag'] ?? '').toString().trim();
+    final String type = (promo['promo_type'] ?? promo['discount_type'] ?? '')
+        .toString()
+        .toLowerCase();
+    final String banner = (promo['banner_url'] ?? '').toString().trim();
+
+    return ClipRRect(
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+      child: SizedBox(
+        height: 190,
+        child: Stack(
+          children: [
+            // Brand gradient, with the admin banner faded over it when present.
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [base, dark],
+                  ),
+                ),
+              ),
+            ),
+            if (banner.isNotEmpty)
+              Positioned.fill(
+                child: Opacity(
+                  opacity: 0.22,
+                  child: Image.network(
+                    banner,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, _, _) => const SizedBox.shrink(),
+                  ),
+                ),
+              ),
+            // Oversized type glyph watermark.
+            Positioned(right: -16, top: -26, child: _HeaderGlyph(type: type)),
+            // Tag · headline · title, anchored bottom-left.
+            Padding(
+              padding: const EdgeInsets.fromLTRB(22, 18, 22, 30),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  if (tag.isNotEmpty)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.22),
+                        borderRadius: BorderRadius.circular(999),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.5),
+                        ),
+                      ),
+                      child: Text(
+                        tag,
+                        style: AppTypography.caption5.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  const Spacer(),
+                  Text(
+                    headline,
+                    style: AppTypography.heading3.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w900,
+                      fontSize: 36,
+                      height: 1.05,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (title.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      title,
+                      style: AppTypography.label1.copyWith(
+                        color: Colors.white.withValues(alpha: 0.95),
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            // Dashed perforation along the bottom edge.
+            Positioned(
+              left: 14,
+              right: 14,
+              bottom: 13,
+              child: CustomPaint(
+                size: const Size(double.infinity, 1.5),
+                painter: _DashedLinePainter(
+                  color: Colors.white.withValues(alpha: 0.5),
+                ),
+              ),
+            ),
+            // Half-circle notches biting into the two edges.
+            const Positioned(left: -9, bottom: 5, child: _Notch()),
+            const Positioned(right: -9, bottom: 5, child: _Notch()),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// The faint oversized glyph behind the headline, chosen by promo type.
+class _HeaderGlyph extends StatelessWidget {
+  final String type;
+  const _HeaderGlyph({required this.type});
+
+  @override
+  Widget build(BuildContext context) {
+    final Color c = Colors.white.withValues(alpha: 0.16);
+    if (type == 'free_shipping') {
+      return Icon(Icons.local_shipping_rounded, size: 150, color: c);
+    }
+    return Text(
+      type == 'percentage' ? '%' : '฿',
+      style: TextStyle(
+        fontSize: 160,
+        fontWeight: FontWeight.w900,
+        height: 1,
+        color: c,
+      ),
+    );
+  }
+}
+
+/// A background-coloured circle that reads as a punched-out ticket notch.
+class _Notch extends StatelessWidget {
+  const _Notch();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 18,
+      height: 18,
+      decoration: const BoxDecoration(
+        color: AppColors.background,
+        shape: BoxShape.circle,
+      ),
+    );
+  }
+}
+
+class _DashedLinePainter extends CustomPainter {
+  final Color color;
+  const _DashedLinePainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    const double dash = 5, gap = 4;
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 1.5
+      ..strokeCap = StrokeCap.round;
+    for (double x = 0; x < size.width; x += dash + gap) {
+      canvas.drawLine(Offset(x, 0), Offset(x + dash, 0), paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _DashedLinePainter old) => old.color != color;
 }

@@ -92,6 +92,29 @@ class _MessengerBookingScreenState
       _showSnack('กรุณาเลือกจุดส่งพัสดุ', isError: true);
       return;
     }
+
+    // Recipient name/phone live in the "ข้อมูลผู้รับ" card near the bottom of the
+    // ListView. ListView builds its children lazily, so those TextFormFields may
+    // not be mounted when the user never scrolled down to them — and an unmounted
+    // field is not registered with the Form, so `_formKey.validate()` silently
+    // skips it and the order goes through with no recipient. Guard with the
+    // controllers directly (they always hold the current text), so these two
+    // fields can never be bypassed regardless of scroll position.
+    final recipientName = _recipientNameController.text.trim();
+    final recipientPhone = _recipientPhoneController.text.trim();
+    if (recipientName.isEmpty) {
+      _showSnack('กรุณาระบุชื่อผู้รับ', isError: true);
+      return;
+    }
+    if (recipientPhone.isEmpty) {
+      _showSnack('กรุณาระบุเบอร์โทรผู้รับ', isError: true);
+      return;
+    }
+    if (!_thaiPhoneRegex.hasMatch(recipientPhone)) {
+      _showSnack('รูปแบบเบอร์โทรผู้รับไม่ถูกต้อง', isError: true);
+      return;
+    }
+
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
     final bookingState = ref.read(messengerBookingControllerProvider);
@@ -104,8 +127,8 @@ class _MessengerBookingScreenState
     if (!ensureLoggedIn(context, ref)) return;
 
     ref.read(messengerBookingControllerProvider.notifier).createOrder(
-          recipientName: _recipientNameController.text.trim(),
-          recipientPhone: _recipientPhoneController.text.trim(),
+          recipientName: recipientName,
+          recipientPhone: recipientPhone,
           notes: _notesController.text.trim(),
         );
   }

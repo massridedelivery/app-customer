@@ -5,13 +5,14 @@ import 'package:customer_app/core/widgets/coming_soon_dialog.dart';
 import 'package:customer_app/core/constants/layout.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/constants/feature_flags.dart';
+import 'package:customer_app/core/utils/promo_style.dart';
+import 'package:customer_app/features/profile/presentation/screens/promo_list_screen.dart';
 import 'package:customer_app/features/home/data/repositories/service_area_repository.dart';
 import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
 import 'package:customer_app/features/home/presentation/states/home_state.dart';
 import 'package:customer_app/features/active_orders/presentation/controllers/active_orders_controller.dart';
 import 'package:customer_app/features/home/presentation/widgets/home_promo_banner.dart';
 import 'package:customer_app/features/active_orders/presentation/widgets/active_orders_banner.dart';
-import 'package:customer_app/features/profile/presentation/screens/promo_list_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:customer_app/core/widgets/app_network_image.dart';
 import 'package:customer_app/core/widgets/hero_header.dart';
@@ -32,6 +33,19 @@ class _ServiceSelectionScreenState
   @override
   Widget build(BuildContext context) {
     final homeState = ref.watch(homeControllerProvider);
+    // Service-card promo badges come from the customer's real active promos
+    // (GET /api/customer/promo/list). While loading, on error, or when empty,
+    // this stays an empty list so the cards simply show no badge.
+    final promos = ref.watch(promoListProvider).maybeWhen(
+          data: (raw) => raw
+              .map(
+                (e) => e is Map<String, dynamic>
+                    ? e
+                    : Map<String, dynamic>.from(e as Map),
+              )
+              .toList(),
+          orElse: () => const <Map<String, dynamic>>[],
+        );
     final bottomPadding = MediaQuery.of(context).padding.bottom;
     final statusPadding = MediaQuery.of(context).padding.top;
     const double heroHeight = 190; // fixed header height (no collapse)
@@ -79,7 +93,7 @@ class _ServiceSelectionScreenState
                             // Nudge the service grid up toward the search bar.
                             Transform.translate(
                               offset: const Offset(0, -4),
-                              child: _buildServiceGrid(context),
+                              child: _buildServiceGrid(context, promos),
                             ),
                             // Real promotions — hides itself when there are none —
                             // sits tight under the grid (no extra gap).
@@ -313,7 +327,14 @@ class _ServiceSelectionScreenState
     );
   }
 
-  Widget _buildServiceGrid(BuildContext context) {
+  Widget _buildServiceGrid(
+    BuildContext context,
+    List<Map<String, dynamic>> promos,
+  ) {
+    // Badge per service, derived from the real promo list. Null → no badge.
+    final rideBadge = serviceBadgeOf(promos, 'ride');
+    final foodBadge = serviceBadgeOf(promos, 'food');
+    final messengerBadge = serviceBadgeOf(promos, 'messenger');
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12),
       child: GridView.count(
@@ -328,8 +349,8 @@ class _ServiceSelectionScreenState
             context,
             'เรียกรถ',
             'เรียกครั้งแรก',
-            'ลด ฿100*',
-            Colors.red,
+            rideBadge?.text,
+            rideBadge?.color,
             AppAssets.ic3dRide,
             onTap: () => _openWithZoneCheck(
               service: 'ride',
@@ -342,8 +363,8 @@ class _ServiceSelectionScreenState
             context,
             'สั่งอาหาร',
             'ถูกสุดทุกวัน',
-            'ลด ฿100*',
-            Colors.red,
+            foodBadge?.text,
+            foodBadge?.color,
             AppAssets.ic3dFood,
             // Food ordering isn't live yet — show a "coming soon" notice instead
             // of opening the unfinished flow.
@@ -353,8 +374,8 @@ class _ServiceSelectionScreenState
             context,
             'เมสเซนเจอร์',
             'ส่งของ พัสดุ',
-            null,
-            null,
+            messengerBadge?.text,
+            messengerBadge?.color,
             AppAssets.ic3dMessenger,
             onTap: () => _openWithZoneCheck(
               service: 'messenger',

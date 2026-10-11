@@ -467,7 +467,14 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                 }
               },
               onRequest: () async {
-                if (pickup == null || dropoff == null) return;
+                // Tell the user instead of silently ignoring the tap — e.g.
+                // location is off and no pickup was chosen manually.
+                if (pickup == null || dropoff == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(l10n.selectPickupFirst)),
+                  );
+                  return;
+                }
                 // Booking is account-based — a guest must log in first.
                 if (!ensureLoggedIn(context, ref)) return;
 
@@ -476,8 +483,10 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                     .dispatchRide(
                       pickup: pickup,
                       dropoff: dropoff,
+                      // Pickup coordinates are set here; a null address only
+                      // means reverse geocoding failed, i.e. the GPS position.
                       pickupAddress:
-                          pickupAddress ?? 'ไม่ระบุจุดรับ',
+                          pickupAddress ?? l10n.currentLocation,
                       dropoffAddress:
                           dropoffAddress ?? 'ไม่ระบุจุดส่ง',
                     );

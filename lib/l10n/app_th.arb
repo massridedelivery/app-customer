@@ -268,5 +268,9 @@
   "experienceSafetyTitle": "ปลอดภัยทุกเส้นทาง",
   "experienceSafetySubtitle": "แชร์ตำแหน่งเรียลไทม์ + ปุ่ม SOS",
   "experienceValueTitle": "ราคาคุ้มค่า ถูกกว่าชัวร์",
-  "experienceValueSubtitle": "ค่าโดยสารโปร่งใส รู้ราคาก่อนเรียก"
+  "experienceValueSubtitle": "ค่าโดยสารโปร่งใส รู้ราคาก่อนเรียก",
+  "locationPermissionHint": "อนุญาตการเข้าถึงตำแหน่ง เพื่อใช้ตำแหน่งปัจจุบันเป็นจุดรับ",
+  "locationServiceOffHint": "เปิดบริการตำแหน่ง (GPS) เพื่อใช้ตำแหน่งปัจจุบัน",
+  "locationUnavailableHint": "ระบุตำแหน่งปัจจุบันไม่สำเร็จ",
+  "allowLocation": "อนุญาต"
 }

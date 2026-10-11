@@ -99,14 +99,14 @@ class PromoDetailScreen extends ConsumerWidget {
         body: CustomScrollView(
           slivers: [
             _buildAppBar(context, promo),
+            SliverToBoxAdapter(child: _buildFloatingHeader(promo)),
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildHeader(promo),
-                    const SizedBox(height: 24),
+                    _buildDescription(promo),
                     _buildCodeSection(context, promo),
                     _buildExpiry(promo),
                     const SizedBox(height: 32),
@@ -122,69 +122,149 @@ class PromoDetailScreen extends ConsumerWidget {
     );
   }
 
+  /// Short pinned bar in the promo's color; the floating card below carries
+  /// the promo's headline.
   Widget _buildAppBar(BuildContext context, Map<String, dynamic> promo) {
-    final bannerUrl = promo['banner_url'];
-    final barColor = promoColorOf(promo);
-
     return SliverAppBar(
-      expandedHeight: 200,
       pinned: true,
-      backgroundColor: barColor,
+      backgroundColor: promoColorOf(promo),
+      elevation: 0,
+      scrolledUnderElevation: 0,
       leading: IconButton(
         icon: const Icon(Icons.arrow_back, color: Colors.white),
         onPressed: () => Navigator.of(context).pop(),
       ),
-      flexibleSpace: FlexibleSpaceBar(
-        background: bannerUrl != null
-            ? Image.network(
-                bannerUrl,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) =>
-                    Container(color: barColor),
-              )
-            : Container(color: barColor),
+    );
+  }
+
+  /// "Floating card" header: a short color band continuing the app bar, with a
+  /// white card overlapping it that sums up the promo — service scope, tag,
+  /// expiry date, the discount headline and the title.
+  Widget _buildFloatingHeader(Map<String, dynamic> promo) {
+    final barColor = promoColorOf(promo);
+    final bannerUrl = (promo['banner_url'] ?? '').toString();
+    final scope = promoScopeOf(promo);
+    final tag = (promo['tag'] ?? '').toString().trim();
+    final title = (promo['title'] ?? promo['name'] ?? '').toString();
+    final expiry = _expiryDate(promo);
+
+    return Stack(
+      children: [
+        SizedBox(
+          height: 72,
+          width: double.infinity,
+          child: bannerUrl.isNotEmpty
+              ? Image.network(
+                  bannerUrl,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) =>
+                      ColoredBox(color: barColor),
+                )
+              : ColoredBox(color: barColor),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(18),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.10),
+                  blurRadius: 24,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    _pill(scope.label, scope.foreground, scope.background),
+                    if (tag.isNotEmpty) ...[
+                      const SizedBox(width: 6),
+                      _pill(tag, barColor, barColor.withValues(alpha: 0.1)),
+                    ],
+                    const Spacer(),
+                    if (expiry != null)
+                      Text(
+                        'ถึง $expiry',
+                        style: AppTypography.caption5.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  promoHeadlineOf(promo, fallback: title),
+                  style: TextStyle(
+                    fontSize: 30,
+                    fontWeight: FontWeight.w800,
+                    height: 1.1,
+                    color: barColor,
+                  ),
+                ),
+                if (title.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    title,
+                    style: AppTypography.label1.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _pill(String text, Color fg, Color bg) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        text,
+        style: AppTypography.caption5.copyWith(
+          color: fg,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }
 
-  Widget _buildHeader(Map<String, dynamic> promo) {
-    final barColor = promoColorOf(promo);
-    final String tag = (promo['tag'] ?? '').toString().trim();
-    final String desc = (promo['description'] ?? '').toString().trim();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Hide blanks when the backend omits a field, instead of leaving an
-        // empty chip / empty line.
-        if (tag.isNotEmpty) ...[
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: barColor.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: Text(
-              tag,
-              style: AppTypography.caption4.copyWith(
-                color: barColor,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-        ],
-        Text(promo['title'] ?? '', style: AppTypography.heading4),
-        if (desc.isNotEmpty) ...[
-          const SizedBox(height: 8),
-          Text(
-            desc,
-            style: AppTypography.caption4.copyWith(
-              color: AppColors.semanticGrayNeutralFgHigh,
-            ),
-          ),
-        ],
-      ],
+  /// The promo's description, hidden when the backend omits it.
+  Widget _buildDescription(Map<String, dynamic> promo) {
+    final desc = (promo['description'] ?? '').toString().trim();
+    if (desc.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20),
+      child: Text(
+        desc,
+        style: AppTypography.caption4.copyWith(
+          color: AppColors.semanticGrayNeutralFgHigh,
+        ),
+      ),
     );
+  }
+
+  /// `expires_at` as a Bangkok-time date (dd/MM/yyyy), or null.
+  String? _expiryDate(Map<String, dynamic> promo) {
+    final parsed = DateTime.tryParse((promo['expires_at'] ?? '').toString());
+    if (parsed == null) return null;
+    final bkk = parsed.toUtc().add(const Duration(hours: 7));
+    String two(int n) => n.toString().padLeft(2, '0');
+    return '${two(bkk.day)}/${two(bkk.month)}/${bkk.year}';
   }
 
   Widget _buildCodeSection(BuildContext context, Map<String, dynamic> promo) {

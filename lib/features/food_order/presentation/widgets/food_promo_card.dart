@@ -1,11 +1,13 @@
-import 'package:customer_app/core/constants/app_colors.dart';
-import 'package:customer_app/core/constants/app_typography.dart';
-import 'package:customer_app/core/widgets/promo_card.dart';
+import 'package:customer_app/core/widgets/coupon_card.dart';
 import 'package:customer_app/features/food_order/domain/models/food_models.dart';
 import 'package:customer_app/features/food_order/presentation/controllers/checkout_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+/// Food checkout coupon — the shared ticket [CouponCard] (same look as every
+/// other promo list), plus the food-only rules: a promo whose minimum order
+/// isn't met yet is greyed out and can't be applied, with an "order ฿X more"
+/// shortcut back to the menu.
 class FoodPromoCard extends ConsumerWidget {
   final PromoModel promo;
   final bool isSelected;
@@ -22,150 +24,18 @@ class FoodPromoCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isUsable = foodTotal >= promo.minOrder;
     final amountNeeded = promo.minOrder - foodTotal;
-    final accentColor = isSelected
-        ? AppColors.primary
-        : isUsable
-            ? AppColors.primary
-            : Colors.grey[300]!;
 
-    return PromoCardShell(
+    return CouponCard(
+      data: CouponCardData.fromFoodPromo(promo),
       isSelected: isSelected,
-      accentColor: accentColor,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              PromoIconTile(active: isSelected || isUsable),
-              const SizedBox(width: 12),
-              // Promo details – Expanded ensures bounded width
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Code + badges
-                    Wrap(
-                      spacing: 6,
-                      runSpacing: 4,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        Text(
-                          promo.code,
-                          style: AppTypography.label2.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: isSelected
-                                ? AppColors.primary
-                                : isUsable
-                                    ? Colors.black87
-                                    : Colors.grey[500],
-                          ),
-                        ),
-                        _StatusBadge(isUsable: isUsable, promo: promo),
-                        if (promo.tag != null && promo.tag!.isNotEmpty)
-                          _TagBadge(tag: promo.tag!),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      promo.title,
-                      style: AppTypography.caption4.copyWith(
-                        color: isUsable ? Colors.black87 : Colors.grey[500],
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      promo.description,
-                      style: AppTypography.caption5.copyWith(
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    // Apply / Cancel button
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: PromoApplyButton(
-                        isSelected: isSelected,
-                        isEnabled: isUsable,
-                        onApply: () => ref
-                            .read(checkoutProvider.notifier)
-                            .updatePromoCode(promo.code),
-                        onCancel: () => ref
-                            .read(checkoutProvider.notifier)
-                            .updatePromoCode(null),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          // "Add more food" banner for almost-usable promos
-          if (!isUsable && amountNeeded > 0) ...[
-            const SizedBox(height: 12),
-            _AddMoreBanner(amountNeeded: amountNeeded, context: context),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────
-// Sub-widgets (extracted for readability)
-// ─────────────────────────────────────────
-
-class _StatusBadge extends StatelessWidget {
-  final bool isUsable;
-  final PromoModel promo;
-  const _StatusBadge({required this.isUsable, required this.promo});
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 250),
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-        color: isUsable ? AppColors.foundationRed100 : Colors.amber[50],
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Text(
-        isUsable
-            ? 'ใช้ได้'
-            : 'สั่งขั้นต่ำ ฿${promo.minOrder.toStringAsFixed(0)}',
-        style: TextStyle(
-          fontSize: 9,
-          color: isUsable ? AppColors.primary : Colors.amber[800],
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    );
-  }
-}
-
-class _TagBadge extends StatelessWidget {
-  final String tag;
-  const _TagBadge({required this.tag});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-        color: Colors.blue[50],
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Text(
-        tag,
-        style: TextStyle(
-          fontSize: 9,
-          color: Colors.blue[700],
-          fontWeight: FontWeight.bold,
-        ),
-      ),
+      isEnabled: isSelected || isUsable,
+      onApply: () =>
+          ref.read(checkoutProvider.notifier).updatePromoCode(promo.code),
+      onCancel: () =>
+          ref.read(checkoutProvider.notifier).updatePromoCode(null),
+      footer: (!isUsable && amountNeeded > 0)
+          ? _AddMoreBanner(amountNeeded: amountNeeded, context: context)
+          : null,
     );
   }
 }

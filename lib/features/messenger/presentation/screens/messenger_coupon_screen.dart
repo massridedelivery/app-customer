@@ -1,5 +1,6 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
+import 'package:customer_app/core/utils/promo_style.dart';
 import 'package:customer_app/core/widgets/coupon_card.dart';
 import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/features/profile/presentation/screens/promo_list_screen.dart';
@@ -71,12 +72,15 @@ class _MessengerCouponScreenState extends ConsumerState<MessengerCouponScreen> {
                 ),
               ),
               data: (raw) {
+                // Only promos usable on a messenger order (applies_to ALL or
+                // MESSENGER) — a ride/food-only code can't be applied here.
                 final promos = raw
                     .map(
                       (e) => e is Map<String, dynamic>
                           ? e
                           : Map<String, dynamic>.from(e as Map),
                     )
+                    .where((p) => promoAppliesToService(p, 'messenger'))
                     .toList();
                 if (promos.isEmpty) {
                   return Center(

@@ -1,6 +1,8 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
+import 'package:customer_app/core/utils/promo_style.dart';
 import 'package:customer_app/core/widgets/promo_card.dart';
+import 'package:customer_app/features/food_order/domain/models/food_models.dart';
 import 'package:customer_app/features/ride_booking/domain/models/ride_promo.dart';
 import 'package:flutter/material.dart';
 
@@ -23,6 +25,17 @@ class CouponCardData {
   /// e.g. "ใช้ถึง 31/12/68". Null when there's no/invalid expiry.
   final String? expiryLabel;
 
+  /// Ticket-stub color, by discount kind (see [promoColorOf]): fixed → red,
+  /// percentage → orange, free shipping → green.
+  final Color color;
+
+  /// Small line above [discountValue] in the stub — "ลด", or empty for
+  /// "ส่งฟรี" which reads on its own.
+  final String stubPrefix;
+
+  /// Which service the promo is for; shown as a text label. Null hides it.
+  final PromoScope? scope;
+
   const CouponCardData({
     required this.code,
     required this.title,
@@ -31,6 +44,9 @@ class CouponCardData {
     this.subDiscount,
     this.minSpend = 0,
     this.expiryLabel,
+    this.color = AppColors.primary,
+    this.stubPrefix = 'ลด',
+    this.scope,
   });
 
   factory CouponCardData.fromRidePromo(RidePromo p) {
@@ -47,6 +63,8 @@ class CouponCardData {
           : null,
       minSpend: p.minSpend,
       expiryLabel: _expiry(p.validUntil),
+      color: promoColorOf({'discount_type': p.discountType}),
+      scope: PromoScope.fromAppliesTo(p.appliesTo),
     );
   }
 
@@ -55,17 +73,40 @@ class CouponCardData {
     final val = _num(m['discount_value'] ?? m['discount']);
     final isPct = type == 'percentage';
     final maxV = _num(m['max_discount']);
+    // Free shipping is a 100% discount on delivery in the pricing engine, so
+    // key it off `promo_type` and show "ส่งฟรี" instead of "ลด 100%".
+    final isFreeShip =
+        (m['promo_type'] ?? '').toString().toLowerCase() == 'free_shipping';
     return CouponCardData(
       code: (m['code'] ?? '').toString(),
       title: (m['title'] ?? m['name'] ?? 'โปรโมชั่น').toString(),
       description: (m['description'] ?? '').toString(),
-      discountValue:
-          val <= 0 ? '' : (isPct ? '${_fmt(val)}%' : '฿${_fmt(val)}'),
+      discountValue: isFreeShip
+          ? 'ส่งฟรี'
+          : (val <= 0 ? '' : (isPct ? '${_fmt(val)}%' : '฿${_fmt(val)}')),
       subDiscount:
-          (isPct && maxV > 0) ? 'สูงสุด ฿${_fmt(maxV)}' : null,
+          (!isFreeShip && isPct && maxV > 0) ? 'สูงสุด ฿${_fmt(maxV)}' : null,
       minSpend: _num(m['min_order'] ?? m['min_spend']),
       expiryLabel:
           _expiry((m['valid_until'] ?? m['expires_at'] ?? '').toString()),
+      color: promoColorOf(m),
+      stubPrefix: isFreeShip ? '' : 'ลด',
+      scope: promoScopeOf(m),
+    );
+  }
+
+  /// Food checkout promos come pre-scoped to food and only carry a flat baht
+  /// `discount` (no discount type).
+  factory CouponCardData.fromFoodPromo(PromoModel p) {
+    return CouponCardData(
+      code: p.code,
+      title: p.title,
+      description: p.description,
+      discountValue: p.discount <= 0 ? '' : '฿${_fmt(p.discount)}',
+      minSpend: p.minOrder,
+      expiryLabel: _expiry(p.expiresAt),
+      color: p.color != null ? Color(p.color!) : AppColors.primary,
+      scope: PromoScope.food,
     );
   }
 
@@ -85,27 +126,59 @@ class CouponCardData {
   }
 }
 
-/// Ticket-style coupon card shared by the ride & messenger coupon pickers: a
-/// brand-red value stub on the left, a dashed perforation, then the code /
-/// details and an apply-cancel toggle on the right.
+/// Ticket-style promo card used everywhere a promo is listed — the
+/// "โปรโมชั่นของฉัน" list and the ride / messenger / food coupon pickers — so a
+/// promo looks the same wherever it appears: a value stub on the left colored by
+/// discount kind, a dashed perforation, then the code, a service-scope label,
+/// details and the trailing action.
+///
+/// Two modes:
+/// - picker (default): [onApply] / [onCancel] drive an apply-cancel toggle.
+/// - browse: pass [onTap] and leave [onApply] null — the whole card opens the
+///   promo and the action becomes a "ดูรายละเอียด" link.
 class CouponCard extends StatelessWidget {
   final CouponCardData data;
   final bool isSelected;
-  final VoidCallback onApply;
-  final VoidCallback onCancel;
+  final VoidCallback? onApply;
+  final VoidCallback? onCancel;
   final String applyLabel;
+
+  /// Browse mode: tapping the card (e.g. opening the promo detail).
+  final VoidCallback? onTap;
+
+  /// False greys the card out and disables applying (e.g. a food promo whose
+  /// minimum order isn't met yet).
+  final bool isEnabled;
+
+  /// Optional extra row under the card body (e.g. "order ฿X more").
+  final Widget? footer;
 
   const CouponCard({
     super.key,
     required this.data,
-    required this.isSelected,
-    required this.onApply,
-    required this.onCancel,
+    this.isSelected = false,
+    this.onApply,
+    this.onCancel,
     this.applyLabel = 'ใช้คูปอง',
+    this.onTap,
+    this.isEnabled = true,
+    this.footer,
   });
+
+  bool get _browse => onApply == null;
 
   @override
   Widget build(BuildContext context) {
+    final card = _buildCard();
+    if (!_browse || onTap == null) return card;
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: card,
+    );
+  }
+
+  Widget _buildCard() {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -129,11 +202,15 @@ class CouponCard extends StatelessWidget {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(14),
-        child: IntrinsicHeight(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            IntrinsicHeight(
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _ValueStub(data: data),
+              _ValueStub(data: data, enabled: isEnabled),
               const _DashedDivider(),
               Expanded(
                 child: Padding(
@@ -142,15 +219,27 @@ class CouponCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        data.code.isEmpty ? data.title : data.code,
-                        style: AppTypography.label1.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                          letterSpacing: 0.3,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              data.code.isEmpty ? data.title : data.code,
+                              style: AppTypography.label1.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: isEnabled
+                                    ? Colors.black87
+                                    : Colors.grey[500],
+                                letterSpacing: 0.3,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          if (data.scope != null) ...[
+                            const SizedBox(width: 6),
+                            _ScopeLabel(scope: data.scope!),
+                          ],
+                        ],
                       ),
                       if (data.code.isNotEmpty && data.title.isNotEmpty) ...[
                         const SizedBox(height: 2),
@@ -213,12 +302,21 @@ class CouponCard extends StatelessWidget {
                       const SizedBox(height: 10),
                       Align(
                         alignment: Alignment.centerRight,
-                        child: PromoApplyButton(
-                          isSelected: isSelected,
-                          onApply: onApply,
-                          onCancel: onCancel,
-                          applyLabel: applyLabel,
-                        ),
+                        child: _browse
+                            ? Text(
+                                'ดูรายละเอียด ›',
+                                style: AppTypography.caption4.copyWith(
+                                  color: data.color,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              )
+                            : PromoApplyButton(
+                                isSelected: isSelected,
+                                isEnabled: isEnabled,
+                                onApply: onApply!,
+                                onCancel: onCancel ?? () {},
+                                applyLabel: applyLabel,
+                              ),
                       ),
                     ],
                   ),
@@ -226,6 +324,39 @@ class CouponCard extends StatelessWidget {
               ),
             ],
           ),
+            ),
+            if (footer != null)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                child: footer,
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Text-only service-scope label, e.g. "เฉพาะเรียกรถ".
+class _ScopeLabel extends StatelessWidget {
+  final PromoScope scope;
+  const _ScopeLabel({required this.scope});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        color: scope.background,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        scope.label,
+        maxLines: 1,
+        style: TextStyle(
+          fontSize: 10,
+          color: scope.foreground,
+          fontWeight: FontWeight.bold,
         ),
       ),
     );
@@ -234,18 +365,20 @@ class CouponCard extends StatelessWidget {
 
 class _ValueStub extends StatelessWidget {
   final CouponCardData data;
-  const _ValueStub({required this.data});
+  final bool enabled;
+  const _ValueStub({required this.data, this.enabled = true});
 
   @override
   Widget build(BuildContext context) {
+    final base = enabled ? data.color : Colors.grey.shade400;
     return Container(
       width: 96,
       padding: const EdgeInsets.symmetric(horizontal: 8),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [AppColors.accentRedDeep, AppColors.primary],
+          colors: [Color.lerp(base, Colors.black, 0.25)!, base],
         ),
       ),
       child: Center(
@@ -258,18 +391,19 @@ class _ValueStub extends StatelessWidget {
             : Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    'ลด',
-                    style: AppTypography.caption5.copyWith(
-                      color: Colors.white.withValues(alpha: 0.9),
+                  if (data.stubPrefix.isNotEmpty)
+                    Text(
+                      data.stubPrefix,
+                      style: AppTypography.caption5.copyWith(
+                        color: Colors.white.withValues(alpha: 0.9),
+                      ),
                     ),
-                  ),
                   Text(
                     data.discountValue,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: Colors.white,
-                      fontSize: 24,
+                      fontSize: data.discountValue.length > 4 ? 20 : 24,
                       fontWeight: FontWeight.w800,
                       height: 1.05,
                     ),

@@ -125,3 +125,42 @@ bool promoAppliesToService(Map<String, dynamic> promo, String serviceKey) {
   final best = matched.first;
   return (text: '${promoHeadlineOf(best)}*', color: promoColorOf(best));
 }
+
+/// Which service a promo can be used on, from the backend's `applies_to`
+/// ("ALL" | "RIDE" | "FOOD" | "MESSENGER"). Shown as a text-only label on the
+/// promo cards and used to filter the "โปรโมชั่นของฉัน" list.
+enum PromoScope {
+  all('ลดทั่วไป', Color(0xFF9A2832), Color(0xFFFBE9EA)),
+  ride('เฉพาะเรียกรถ', Color(0xFF1D4ED8), Color(0xFFE6EFFF)),
+  food('เฉพาะอาหาร', Color(0xFFB45309), Color(0xFFFFF1DF)),
+  messenger('เฉพาะส่งของ', Color(0xFF047857), Color(0xFFE3F6EE));
+
+  const PromoScope(this.label, this.foreground, this.background);
+
+  /// Card label, e.g. "เฉพาะเรียกรถ".
+  final String label;
+  final Color foreground;
+  final Color background;
+
+  /// Short name for a filter tab, e.g. "เรียกรถ".
+  String get tabLabel => switch (this) {
+        PromoScope.all => 'ทั่วไป',
+        PromoScope.ride => 'เรียกรถ',
+        PromoScope.food => 'อาหาร',
+        PromoScope.messenger => 'ส่งของ',
+      };
+
+  /// Parses an `applies_to` value. Missing or unknown values count as
+  /// [PromoScope.all] — the backend's default scope.
+  static PromoScope fromAppliesTo(Object? raw) =>
+      switch ((raw ?? '').toString().trim().toUpperCase()) {
+        'RIDE' => PromoScope.ride,
+        'FOOD' => PromoScope.food,
+        'MESSENGER' => PromoScope.messenger,
+        _ => PromoScope.all,
+      };
+}
+
+/// The service scope of [promo] (see [PromoScope]).
+PromoScope promoScopeOf(Map<String, dynamic> promo) =>
+    PromoScope.fromAppliesTo(promo['applies_to']);

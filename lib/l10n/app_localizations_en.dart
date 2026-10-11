@@ -738,4 +738,18 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get experienceValueSubtitle =>
       'Transparent fares — know the price before you ride';
+
+  @override
+  String get locationPermissionHint =>
+      'Allow location access to use your current location as the pickup.';
+
+  @override
+  String get locationServiceOffHint =>
+      'Turn on location services to use your current location.';
+
+  @override
+  String get locationUnavailableHint => 'Couldn\'t get your current location.';
+
+  @override
+  String get allowLocation => 'Allow';
 }

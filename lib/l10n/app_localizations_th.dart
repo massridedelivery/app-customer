@@ -736,4 +736,18 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get experienceValueSubtitle => 'ค่าโดยสารโปร่งใส รู้ราคาก่อนเรียก';
+
+  @override
+  String get locationPermissionHint =>
+      'อนุญาตการเข้าถึงตำแหน่ง เพื่อใช้ตำแหน่งปัจจุบันเป็นจุดรับ';
+
+  @override
+  String get locationServiceOffHint =>
+      'เปิดบริการตำแหน่ง (GPS) เพื่อใช้ตำแหน่งปัจจุบัน';
+
+  @override
+  String get locationUnavailableHint => 'ระบุตำแหน่งปัจจุบันไม่สำเร็จ';
+
+  @override
+  String get allowLocation => 'อนุญาต';
 }

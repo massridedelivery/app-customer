@@ -71,28 +71,39 @@ class HomeController extends _$HomeController {
     );
   }
 
+  /// Re-run the location bootstrap — e.g. after the user allows location or
+  /// turns location services back on in Settings.
+  Future<void> retryLocation() => _initLocation();
+
+  // A failure is recorded in [HomeState.locationAccess] only. It must never be
+  // written into `pickupAddress`: that string is shown as the pickup and sent to
+  // the backend as `pickup_address`, and a non-empty value made screens treat
+  // the pickup as set. Leaving it alone also keeps a saved default place.
   Future<void> _initLocation() async {
     try {
-      bool serviceEnabled;
-      PermissionStatus permissionGranted;
-
-      serviceEnabled = await _location.serviceEnabled();
+      var serviceEnabled = await _location.serviceEnabled();
       if (!serviceEnabled) {
         serviceEnabled = await _location.requestService();
         if (!serviceEnabled) {
-          state = state.copyWith(pickupAddress: 'Location disabled');
+          state = state.copyWith(locationAccess: LocationAccess.serviceDisabled);
           return;
         }
       }
 
-      permissionGranted = await _location.hasPermission();
-      if (permissionGranted == PermissionStatus.denied) {
-        permissionGranted = await _location.requestPermission();
-        if (permissionGranted != PermissionStatus.granted) {
-          state = state.copyWith(pickupAddress: 'Permission denied');
-          return;
-        }
+      var permission = await _location.hasPermission();
+      if (permission == PermissionStatus.denied) {
+        permission = await _location.requestPermission();
       }
+      if (permission == PermissionStatus.deniedForever) {
+        state = state.copyWith(locationAccess: LocationAccess.deniedForever);
+        return;
+      }
+      if (permission != PermissionStatus.granted &&
+          permission != PermissionStatus.grantedLimited) {
+        state = state.copyWith(locationAccess: LocationAccess.denied);
+        return;
+      }
+      state = state.copyWith(locationAccess: LocationAccess.granted);
 
       // 1. Get Coordinates (Fastest)
       final locationData = await _location.getLocation();
@@ -125,11 +136,13 @@ class HomeController extends _$HomeController {
           );
         }
       } catch (e) {
-        state = state.copyWith(pickupAddress: 'Unknown Address');
+        // The coordinates are good; only reverse-geocoding failed. Keep the
+        // address null so the UI falls back to its "current location" label.
+        debugPrint('Reverse geocoding failed: $e');
       }
     } catch (e) {
       debugPrint('Error initializing location: $e');
-      state = state.copyWith(pickupAddress: 'Failed to locate');
+      state = state.copyWith(locationAccess: LocationAccess.unavailable);
     }
   }
 

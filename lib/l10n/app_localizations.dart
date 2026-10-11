@@ -1513,6 +1513,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Transparent fares — know the price before you ride'**
   String get experienceValueSubtitle;
+
+  /// No description provided for @locationPermissionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow location access to use your current location as the pickup.'**
+  String get locationPermissionHint;
+
+  /// No description provided for @locationServiceOffHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on location services to use your current location.'**
+  String get locationServiceOffHint;
+
+  /// No description provided for @locationUnavailableHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t get your current location.'**
+  String get locationUnavailableHint;
+
+  /// No description provided for @allowLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow'**
+  String get allowLocation;
 }
 
 class _AppLocalizationsDelegate

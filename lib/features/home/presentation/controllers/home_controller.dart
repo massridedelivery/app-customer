@@ -10,6 +10,7 @@ import 'package:customer_app/features/home/domain/usecases/get_recent_places_use
 import 'package:customer_app/features/home/domain/usecases/get_saved_places_usecase_impl.dart';
 import 'package:customer_app/features/home/presentation/states/home_state.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart' show AppLifecycleListener;
 import 'package:geocoding/geocoding.dart' as geocoding;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
@@ -54,8 +55,26 @@ class HomeController extends _$HomeController {
   /// re-calling the Roads API and re-animating.
   LatLng? _lastSnapResult;
 
+  /// True once the user picks a pickup themselves (map / search). A resume
+  /// refresh must never replace a pickup the user chose.
+  bool _pickupIsManual = false;
+
+  /// When the app went to the background, for the resume refresh below.
+  DateTime? _backgroundedAt;
+
+  /// Re-locate the pickup on returning to the app after at least this long —
+  /// the user has likely moved.
+  static const _kResumeRefreshAfter = Duration(minutes: 5);
+
   @override
   HomeState build() {
+    // Pickup = current location: resolved on every app launch (here), and
+    // refreshed when the app comes back after a while (see _onAppResumed).
+    final lifecycle = AppLifecycleListener(
+      onHide: () => _backgroundedAt = DateTime.now(),
+      onShow: _onAppResumed,
+    );
+    ref.onDispose(lifecycle.dispose);
     _initLocation();
     _loadSavedPlaces();
     _loadDefaultPlace();
@@ -74,6 +93,22 @@ class HomeController extends _$HomeController {
   /// Re-run the location bootstrap — e.g. after the user allows location or
   /// turns location services back on in Settings.
   Future<void> retryLocation() => _initLocation();
+
+  /// Back in the foreground: after [_kResumeRefreshAfter] in the background,
+  /// move the pickup to where the user is now — unless they chose a pickup
+  /// themselves. Only when location is already granted, so this never pops a
+  /// permission prompt on resume (the LocationAccessHint handles that path).
+  void _onAppResumed() {
+    final since = _backgroundedAt;
+    _backgroundedAt = null;
+    if (since == null ||
+        DateTime.now().difference(since) < _kResumeRefreshAfter) {
+      return;
+    }
+    if (_pickupIsManual) return;
+    if (state.locationAccess != LocationAccess.granted) return;
+    _initLocation();
+  }
 
   // A failure is recorded in [HomeState.locationAccess] only. It must never be
   // written into `pickupAddress`: that string is shown as the pickup and sent to
@@ -265,6 +300,7 @@ class HomeController extends _$HomeController {
     if (state.tempLocation == null || state.tempAddress == null) return false;
 
     if (state.selectionMode == RideSelectionMode.pickup) {
+      _pickupIsManual = true;
       state = state.copyWith(
         pickupAddress: state.tempAddress,
         pickupLocation: state.tempLocation,
@@ -324,6 +360,7 @@ class HomeController extends _$HomeController {
   }
 
   void setPickupLocation(LatLng location, String address) {
+    _pickupIsManual = true;
     state = state.copyWith(pickupLocation: location, pickupAddress: address);
   }
 

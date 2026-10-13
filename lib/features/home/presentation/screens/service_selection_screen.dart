@@ -13,12 +13,37 @@ import 'package:customer_app/features/home/presentation/states/home_state.dart';
 import 'package:customer_app/features/active_orders/presentation/controllers/active_orders_controller.dart';
 import 'package:customer_app/features/home/presentation/widgets/home_promo_banner.dart';
 import 'package:customer_app/features/active_orders/presentation/widgets/active_orders_banner.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:customer_app/core/widgets/app_network_image.dart';
 import 'package:customer_app/core/widgets/hero_header.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+/// Bottom of the home search bar below the status bar, at the header's
+/// expanded state (t = 1): the bar's top sits at +60 and it is 48 tall.
+const double kHomeSearchBarBottom = 108;
+
+/// Height of the fixed home header, derived from the device rather than a
+/// constant: the status bar (≈24 on Android, ≈47–59 on notched / Dynamic Island
+/// iPhones) + the location/search block + a red band under the search bar sized
+/// as a share of the screen height (iOS 9%, Android 8%, clamped 56–96).
+///
+/// The S-curve cuts up to ~38px into the bottom of the header, so the band
+/// keeps the wave clear of the search bar on every phone. The old fixed 190
+/// left only ~23px under the search bar on a Dynamic Island iPhone, so the wave
+/// ran into it.
+@visibleForTesting
+double homeHeroHeight({
+  required double statusPadding,
+  required double screenHeight,
+  required TargetPlatform platform,
+}) {
+  final ratio = platform == TargetPlatform.iOS ? 0.09 : 0.08;
+  final band = (screenHeight * ratio).clamp(56.0, 96.0);
+  return statusPadding + kHomeSearchBarBottom + band;
+}
 
 class ServiceSelectionScreen extends ConsumerStatefulWidget {
   const ServiceSelectionScreen({super.key});
@@ -48,7 +73,11 @@ class _ServiceSelectionScreenState
         );
     final bottomPadding = MediaQuery.of(context).padding.bottom;
     final statusPadding = MediaQuery.of(context).padding.top;
-    const double heroHeight = 190; // fixed header height (no collapse)
+    final heroHeight = homeHeroHeight(
+      statusPadding: statusPadding,
+      screenHeight: MediaQuery.sizeOf(context).height,
+      platform: defaultTargetPlatform,
+    );
 
     return Scaffold(
       backgroundColor: AppColors.semanticGrayNeutralBgWhite,
@@ -71,7 +100,7 @@ class _ServiceSelectionScreenState
                 children: [
                   // Reserve the header's height so content starts below it, then
                   // scrolls up underneath the fixed wave.
-                  const SizedBox(height: heroHeight),
+                  SizedBox(height: heroHeight),
                   Transform.translate(
                     offset: const Offset(0, -6),
                     child: Container(
@@ -340,6 +369,11 @@ class _ServiceSelectionScreenState
       child: GridView.count(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
+        // Explicit padding: with none, GridView pads itself by the device's
+        // MediaQuery insets (status bar on top, home indicator / nav bar at
+        // the bottom) — ~24px on Android but ~62 + 34px on a Dynamic Island
+        // iPhone, which left a big white gap around the grid on iOS.
+        padding: const EdgeInsets.only(top: 14, bottom: 22),
         crossAxisCount: 2,
         childAspectRatio: 1.72,
         mainAxisSpacing: 14,

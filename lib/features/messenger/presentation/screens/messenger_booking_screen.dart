@@ -13,6 +13,7 @@ import 'package:customer_app/features/messenger/presentation/controllers/messeng
 import 'package:customer_app/features/messenger/presentation/states/messenger_booking_state.dart';
 import 'package:customer_app/features/messenger/presentation/util/delivery_service_levels.dart';
 import 'package:customer_app/features/messenger/presentation/screens/messenger_coupon_screen.dart';
+import 'package:customer_app/core/widgets/location_access_hint.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -88,6 +89,10 @@ class _MessengerBookingScreenState
 
   void _submit() {
     final homeState = ref.read(homeControllerProvider);
+    if (homeState.pickupLocation == null) {
+      _showSnack('กรุณาเลือกจุดรับพัสดุ', isError: true);
+      return;
+    }
     if (homeState.dropoffLocation == null) {
       _showSnack('กรุณาเลือกจุดส่งพัสดุ', isError: true);
       return;
@@ -289,8 +294,14 @@ class _MessengerBookingScreenState
   // ─── Location ──────────────────────────────────────────────────────────────
 
   Widget _buildLocationCard(HomeState homeState) {
-    final bool hasPickup =
-        homeState.pickupAddress != null && homeState.pickupAddress!.isNotEmpty;
+    // A pickup is set when it has coordinates — the address may still be null
+    // (reverse geocoding failed), and an address alone used to be faked by
+    // location-error text.
+    final bool hasPickup = homeState.pickupLocation != null;
+    final String pickupLabel = homeState.pickupAddress ??
+        (hasPickup
+            ? AppLocalizations.of(context)!.currentLocation
+            : 'เลือกจุดรับพัสดุ');
     final bool hasDropoff = homeState.dropoffAddress != null &&
         homeState.dropoffAddress!.isNotEmpty;
     return _card(
@@ -333,7 +344,7 @@ class _MessengerBookingScreenState
             child: Column(
               children: [
                 _addressPill(
-                  address: homeState.pickupAddress ?? 'เลือกจุดรับพัสดุ',
+                  address: pickupLabel,
                   isPlaceholder: !hasPickup,
                   onTap: () {
                     ref
@@ -355,6 +366,7 @@ class _MessengerBookingScreenState
                     context.push('/messenger-place-search');
                   },
                 ),
+                const LocationAccessHint(),
               ],
             ),
           ),

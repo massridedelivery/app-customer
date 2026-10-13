@@ -6,6 +6,27 @@ part 'home_state.freezed.dart';
 
 enum RideSelectionMode { none, pickup, dropoff, savePlace, food, messengerDropoff }
 
+/// Outcome of the device-location bootstrap. Kept separate from
+/// [HomeState.pickupAddress] so a failure is never shown (or sent to the
+/// backend) as if it were an address.
+enum LocationAccess {
+  /// Not resolved yet.
+  unknown,
+  granted,
+
+  /// Denied this time — asking again can still show the system prompt.
+  denied,
+
+  /// Permanently denied — only the app's system Settings can re-enable it.
+  deniedForever,
+
+  /// Location services (GPS) are switched off on the device.
+  serviceDisabled,
+
+  /// Permission granted but the fix itself failed.
+  unavailable,
+}
+
 @freezed
 abstract class HomeState with _$HomeState {
   const factory HomeState({
@@ -27,6 +48,7 @@ abstract class HomeState with _$HomeState {
     @Default(0) int mapSnapNonce,
     @Default([]) List<Place> savedPlaces,
     @Default([]) List<Place> recentPlaces,
+    @Default(LocationAccess.unknown) LocationAccess locationAccess,
     String? error,
   }) = _HomeState;
 }

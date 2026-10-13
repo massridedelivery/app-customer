@@ -4,6 +4,7 @@ import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_icons.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/widgets/app_pill_tab.dart';
+import 'package:customer_app/core/widgets/location_access_hint.dart';
 import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
 import 'package:customer_app/features/home/presentation/controllers/place_search_controller.dart';
 import 'package:customer_app/features/home/presentation/states/home_state.dart';
@@ -38,8 +39,12 @@ class _PlaceSearchScreenState extends ConsumerState<PlaceSearchScreen>
     _tabController = TabController(length: 3, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final state = ref.read(homeControllerProvider);
-      _pickupController.text =
-          state.pickupAddress ?? AppLocalizations.of(context)!.currentLocation;
+      // Only label the pickup "current location" when we actually have one;
+      // otherwise leave it empty so the placeholder + location hint show.
+      _pickupController.text = state.pickupAddress ??
+          (state.pickupLocation != null
+              ? AppLocalizations.of(context)!.currentLocation
+              : '');
       _dropoffController.text = state.dropoffAddress ?? '';
       _dropoffFocusNode.requestFocus();
 
@@ -195,6 +200,15 @@ class _PlaceSearchScreenState extends ConsumerState<PlaceSearchScreen>
   }
 
   Widget _buildSearchHeader(AppLocalizations l10n) {
+    final access = ref.watch(
+      homeControllerProvider.select((s) => s.locationAccess),
+    );
+    // "Current location" is only a sensible pickup placeholder when location
+    // can actually be used; otherwise ask for a pickup point.
+    final pickupHint =
+        access == LocationAccess.unknown || access == LocationAccess.granted
+        ? l10n.currentLocation
+        : l10n.pickupPoint;
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       child: Row(
@@ -236,7 +250,7 @@ class _PlaceSearchScreenState extends ConsumerState<PlaceSearchScreen>
                 _buildSearchInput(
                   _pickupController,
                   _pickupFocusNode,
-                  l10n.currentLocation,
+                  pickupHint,
                   isDropoff: false,
                 ),
                 const SizedBox(height: 12),
@@ -246,6 +260,8 @@ class _PlaceSearchScreenState extends ConsumerState<PlaceSearchScreen>
                   l10n.searchDropoffHint,
                   isDropoff: true,
                 ),
+                // Below both fields so the pin column stays aligned with them.
+                const LocationAccessHint(),
               ],
             ),
           ),

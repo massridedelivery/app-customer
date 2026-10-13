@@ -268,5 +268,9 @@
   "experienceSafetyTitle": "Safe on every route",
   "experienceSafetySubtitle": "Live location sharing + SOS button",
   "experienceValueTitle": "Great value, cheaper for sure",
-  "experienceValueSubtitle": "Transparent fares — know the price before you ride"
+  "experienceValueSubtitle": "Transparent fares — know the price before you ride",
+  "locationPermissionHint": "Allow location access to use your current location as the pickup.",
+  "locationServiceOffHint": "Turn on location services to use your current location.",
+  "locationUnavailableHint": "Couldn't get your current location.",
+  "allowLocation": "Allow"
 }

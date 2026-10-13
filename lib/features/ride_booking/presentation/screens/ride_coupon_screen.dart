@@ -1,7 +1,12 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
+import 'package:customer_app/core/utils/auth_gate.dart';
+import 'package:customer_app/core/utils/error_text.dart';
+import 'package:customer_app/core/utils/promo_style.dart';
 import 'package:customer_app/core/widgets/coupon_card.dart';
 import 'package:customer_app/core/widgets/mass_loading_m.dart';
+import 'package:customer_app/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:customer_app/features/profile/presentation/screens/promo_list_screen.dart';
 import 'package:customer_app/features/ride_booking/presentation/controllers/booking_controller.dart';
 import 'package:customer_app/features/ride_booking/presentation/providers/discover_promos_provider.dart';
 import 'package:flutter/material.dart';
@@ -27,6 +32,8 @@ class _RideCouponScreenState extends ConsumerState<RideCouponScreen> {
 
   Future<void> _applyPromo(String code) async {
     if (code.isEmpty) return;
+    // Validating / applying a code is account-based; a guest logs in first.
+    if (!ensureLoggedIn(context, ref)) return;
 
     setState(() {
       _isLoading = true;
@@ -80,7 +87,12 @@ class _RideCouponScreenState extends ConsumerState<RideCouponScreen> {
   Widget build(BuildContext context) {
     final bookingState = ref.watch(bookingControllerProvider).value;
     final appliedPromoCode = bookingState?.appliedPromoCode;
-    final promosAsync = ref.watch(discoverPromosProvider);
+    // `promos/context` is token-scoped: as a guest it answered 401 "missing
+    // authorization header" (shown raw) — so guests browse the public promo
+    // list instead, narrowed to what applies to a ride.
+    final isAuthed = ref.watch(
+      authControllerProvider.select((s) => s.isAuthenticated),
+    );
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
@@ -124,86 +136,133 @@ class _RideCouponScreenState extends ConsumerState<RideCouponScreen> {
 
                 // SECTION 2: List of promotions (Scrollable)
                 Expanded(
-                  child: promosAsync.when(
-                    loading: () => const Center(
-                      child: MassLoadingM(size: 72),
-                    ),
-                    error: (err, stack) => Center(
-                      child: Text(
-                        'ไม่สามารถโหลดคูปองได้: $err',
-                        style: AppTypography.caption4.copyWith(
-                          color: AppColors.error,
-                        ),
-                      ),
-                    ),
-                    data: (promos) {
-                      return RefreshIndicator(
-                        onRefresh: () =>
-                            ref.refresh(discoverPromosProvider.future),
-                        color: AppColors.primary,
-                        child: ListView.builder(
-                          padding: const EdgeInsets.fromLTRB(
-                            16.0,
-                            0.0,
-                            16.0,
-                            16.0,
-                          ),
-                          itemCount: promos.isEmpty ? 2 : promos.length + 2,
-                          itemBuilder: (context, index) {
-                            if (index == 0) {
-                              return Padding(
-                                padding: const EdgeInsets.only(
-                                  top: 16.0,
-                                  bottom: 12.0,
-                                ),
-                                child: Text(
-                                  'คูปองส่วนลดที่มี',
-                                  style: AppTypography.label1.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              );
-                            }
-                            if (index ==
-                                (promos.isEmpty ? 1 : promos.length + 1)) {
-                              return const SizedBox(height: 20);
-                            }
-
-                            final promoIndex = index - 1;
-                            if (promos.isEmpty) {
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 64.0,
-                                ),
-                                child: Center(
-                                  child: Text(
-                                    'ไม่มีคูปองที่สามารถใช้งานได้ในขณะนี้',
-                                    style: AppTypography.label2.copyWith(
-                                      color: Colors.grey,
-                                    ),
-                                  ),
-                                ),
-                              );
-                            }
-
-                            final promo = promos[promoIndex];
-                            final isSelected = appliedPromoCode == promo.code;
-                            return CouponCard(
-                              data: CouponCardData.fromRidePromo(promo),
-                              isSelected: isSelected,
-                              onApply: () => _applyPromo(promo.code),
-                              onCancel: _cancelPromo,
-                            );
-                          },
-                        ),
-                      );
-                    },
-                  ),
+                  child: isAuthed
+                      ? _buildMemberList(appliedPromoCode)
+                      : _buildGuestList(),
                 ),
               ],
         ),
       ),
     );
   }
+
+  Widget _buildMemberList(String? appliedPromoCode) {
+    final promosAsync = ref.watch(discoverPromosProvider);
+    return promosAsync.when(
+      loading: () => const Center(child: MassLoadingM(size: 72)),
+      error: (err, stack) => _ErrorView(
+        message: friendlyError(err, fallback: 'โหลดคูปองไม่สำเร็จ'),
+        onRetry: () => ref.invalidate(discoverPromosProvider),
+      ),
+      data: (promos) => _CouponList(
+        onRefresh: () => ref.refresh(discoverPromosProvider.future),
+        cards: [
+          for (final promo in promos)
+            CouponCard(
+              data: CouponCardData.fromRidePromo(promo),
+              isSelected: appliedPromoCode == promo.code,
+              onApply: () => _applyPromo(promo.code),
+              onCancel: _cancelPromo,
+            ),
+        ],
+      ),
+    );
+  }
+
+  /// Guest view: public promos that apply to a ride. Tapping "ใช้คูปอง" asks
+  /// the guest to log in (see [_applyPromo]).
+  Widget _buildGuestList() {
+    final promosAsync = ref.watch(promoListProvider);
+    return promosAsync.when(
+      loading: () => const Center(child: MassLoadingM(size: 72)),
+      error: (err, stack) => _ErrorView(
+        message: friendlyError(err, fallback: 'โหลดคูปองไม่สำเร็จ'),
+        onRetry: () => ref.invalidate(promoListProvider),
+      ),
+      data: (raw) {
+        final promos = raw
+            .whereType<Map>()
+            .map((e) => Map<String, dynamic>.from(e))
+            .where((p) => promoAppliesToService(p, 'ride'))
+            .toList();
+        return _CouponList(
+          onRefresh: () => ref.refresh(promoListProvider.future),
+          cards: [
+            for (final promo in promos)
+              CouponCard(
+                data: CouponCardData.fromMap(promo),
+                onApply: () => _applyPromo((promo['code'] ?? '').toString()),
+                onCancel: _cancelPromo,
+              ),
+          ],
+        );
+      },
+    );
+  }
 }
 
+/// "คูปองส่วนลดที่มี" header + cards (or an empty message), pull-to-refresh.
+class _CouponList extends StatelessWidget {
+  final List<Widget> cards;
+  final Future<Object?> Function() onRefresh;
+  const _CouponList({required this.cards, required this.onRefresh});
+
+  @override
+  Widget build(BuildContext context) {
+    return RefreshIndicator(
+      onRefresh: onRefresh,
+      color: AppColors.primary,
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 36),
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 16, bottom: 12),
+            child: Text(
+              'คูปองส่วนลดที่มี',
+              style: AppTypography.label1.copyWith(fontWeight: FontWeight.bold),
+            ),
+          ),
+          if (cards.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 64),
+              child: Center(
+                child: Text(
+                  'ไม่มีคูปองที่สามารถใช้งานได้ในขณะนี้',
+                  style: AppTypography.label2.copyWith(color: Colors.grey),
+                ),
+              ),
+            )
+          else
+            ...cards,
+        ],
+      ),
+    );
+  }
+}
+
+class _ErrorView extends StatelessWidget {
+  final String message;
+  final VoidCallback onRetry;
+  const _ErrorView({required this.message, required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: AppTypography.caption4.copyWith(color: AppColors.error),
+            ),
+            TextButton(onPressed: onRetry, child: const Text('ลองใหม่')),
+          ],
+        ),
+      ),
+    );
+  }
+}

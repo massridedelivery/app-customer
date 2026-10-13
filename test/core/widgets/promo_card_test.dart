@@ -11,34 +11,6 @@ Widget _host(Widget child) => MaterialApp(
 );
 
 void main() {
-  group('PromoCardShell', () {
-    testWidgets('renders its child content', (tester) async {
-      await tester.pumpWidget(
-        _host(
-          const SizedBox(
-            width: 360,
-            child: PromoCardShell(
-              isSelected: false,
-              accentColor: Colors.red,
-              child: Text('CONTENT'),
-            ),
-          ),
-        ),
-      );
-      expect(find.text('CONTENT'), findsOneWidget);
-    });
-  });
-
-  group('PromoIconTile', () {
-    testWidgets('renders the coupon icon in both states', (tester) async {
-      await tester.pumpWidget(_host(const PromoIconTile()));
-      expect(find.byIcon(Icons.local_offer_outlined), findsOneWidget);
-
-      await tester.pumpWidget(_host(const PromoIconTile(active: false)));
-      expect(find.byIcon(Icons.local_offer_outlined), findsOneWidget);
-    });
-  });
-
   group('PromoApplyButton', () {
     testWidgets('apply state shows the use label and fires onApply', (
       tester,

@@ -180,10 +180,10 @@ class CouponCard extends StatelessWidget {
 
   Widget _buildCard() {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
         color: isSelected ? const Color(0xFFFFF5F5) : Colors.white,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: isSelected
               ? AppColors.primary.withAlpha(150)
@@ -201,7 +201,7 @@ class CouponCard extends StatelessWidget {
         ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(12),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -214,7 +214,9 @@ class CouponCard extends StatelessWidget {
               const _DashedDivider(),
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(14, 14, 12, 12),
+                  // Compact: ~30% shorter than before — the action shares the
+                  // expiry row and the description is a single line.
+                  padding: const EdgeInsets.fromLTRB(11, 9, 10, 9),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
@@ -224,7 +226,8 @@ class CouponCard extends StatelessWidget {
                           Expanded(
                             child: Text(
                               data.code.isEmpty ? data.title : data.code,
-                              style: AppTypography.label1.copyWith(
+                              style: TextStyle(
+                                fontSize: 14,
                                 fontWeight: FontWeight.bold,
                                 color: isEnabled
                                     ? Colors.black87
@@ -241,82 +244,78 @@ class CouponCard extends StatelessWidget {
                           ],
                         ],
                       ),
-                      if (data.code.isNotEmpty && data.title.isNotEmpty) ...[
-                        const SizedBox(height: 2),
+                      if (data.code.isNotEmpty && data.title.isNotEmpty)
                         Text(
                           data.title,
-                          style: AppTypography.caption4.copyWith(
+                          style: const TextStyle(
+                            fontSize: 12,
                             color: Colors.black87,
                             fontWeight: FontWeight.w500,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                      ],
-                      if (data.description.isNotEmpty) ...[
-                        const SizedBox(height: 3),
+                      if (data.description.isNotEmpty)
                         Text(
                           data.description,
-                          style: AppTypography.caption5.copyWith(
+                          style: TextStyle(
+                            fontSize: 11,
                             color: Colors.grey[600],
                           ),
-                          maxLines: 2,
+                          maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                      ],
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 6),
                       Row(
                         children: [
-                          if (data.minSpend > 0)
+                          if (data.minSpend > 0) ...[
                             _Chip(
                               'ขั้นต่ำ ฿${data.minSpend.toStringAsFixed(0)}',
                             ),
-                          if (data.expiryLabel != null) ...[
-                            if (data.minSpend > 0) const SizedBox(width: 6),
-                            Flexible(
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    Icons.schedule_rounded,
-                                    size: 12,
-                                    color: Colors.grey[500],
-                                  ),
-                                  const SizedBox(width: 3),
-                                  Flexible(
-                                    child: Text(
-                                      data.expiryLabel!,
-                                      style: AppTypography.caption5.copyWith(
+                            const SizedBox(width: 6),
+                          ],
+                          Expanded(
+                            child: data.expiryLabel == null
+                                ? const SizedBox.shrink()
+                                : Row(
+                                    children: [
+                                      Icon(
+                                        Icons.schedule_rounded,
+                                        size: 11,
                                         color: Colors.grey[500],
                                       ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
+                                      const SizedBox(width: 3),
+                                      Flexible(
+                                        child: Text(
+                                          data.expiryLabel!,
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            color: Colors.grey[500],
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: _browse
-                            ? Text(
-                                'ดูรายละเอียด ›',
-                                style: AppTypography.caption4.copyWith(
-                                  color: data.color,
-                                  fontWeight: FontWeight.bold,
+                          ),
+                          const SizedBox(width: 6),
+                          _browse
+                              ? Text(
+                                  'ดูรายละเอียด ›',
+                                  style: AppTypography.caption5.copyWith(
+                                    color: data.color,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                )
+                              : PromoApplyButton(
+                                  isSelected: isSelected,
+                                  isEnabled: isEnabled,
+                                  onApply: onApply!,
+                                  onCancel: onCancel ?? () {},
+                                  applyLabel: applyLabel,
                                 ),
-                              )
-                            : PromoApplyButton(
-                                isSelected: isSelected,
-                                isEnabled: isEnabled,
-                                onApply: onApply!,
-                                onCancel: onCancel ?? () {},
-                                applyLabel: applyLabel,
-                              ),
+                        ],
                       ),
                     ],
                   ),
@@ -345,7 +344,7 @@ class _ScopeLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 1),
       decoration: BoxDecoration(
         color: scope.background,
         borderRadius: BorderRadius.circular(999),
@@ -354,7 +353,7 @@ class _ScopeLabel extends StatelessWidget {
         scope.label,
         maxLines: 1,
         style: TextStyle(
-          fontSize: 10,
+          fontSize: 9,
           color: scope.foreground,
           fontWeight: FontWeight.bold,
         ),
@@ -372,8 +371,8 @@ class _ValueStub extends StatelessWidget {
   Widget build(BuildContext context) {
     final base = enabled ? data.color : Colors.grey.shade400;
     return Container(
-      width: 96,
-      padding: const EdgeInsets.symmetric(horizontal: 8),
+      width: 72,
+      padding: const EdgeInsets.symmetric(horizontal: 4),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -395,6 +394,7 @@ class _ValueStub extends StatelessWidget {
                     Text(
                       data.stubPrefix,
                       style: AppTypography.caption5.copyWith(
+                        fontSize: 10,
                         color: Colors.white.withValues(alpha: 0.9),
                       ),
                     ),
@@ -403,7 +403,7 @@ class _ValueStub extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: data.discountValue.length > 4 ? 20 : 24,
+                      fontSize: data.discountValue.length > 4 ? 14 : 18,
                       fontWeight: FontWeight.w800,
                       height: 1.05,
                     ),
@@ -433,7 +433,7 @@ class _Chip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
       decoration: BoxDecoration(
         color: const Color(0xFFFFF8E1),
         borderRadius: BorderRadius.circular(4),
@@ -441,7 +441,7 @@ class _Chip extends StatelessWidget {
       child: Text(
         text,
         style: const TextStyle(
-          fontSize: 10,
+          fontSize: 9,
           color: Color(0xFFFF8F00),
           fontWeight: FontWeight.bold,
         ),

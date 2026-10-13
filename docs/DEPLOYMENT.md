@@ -172,7 +172,7 @@ make deploy_both_prod_devapi   # bump ครั้งเดียว → iOS IPA
 | Workflow | Trigger | ผลลัพธ์ |
 |---|---|---|
 | `ci.yml` | PR / push → `main`,`develop` | format check + `flutter analyze` + tests |
-| `deploy-ios.yml` | `workflow_dispatch` **หรือ** tag `release/*` | prod → TestFlight (fastlane `beta`) |
+| `deploy-ios.yml` | `workflow_dispatch` (เลือก `api` dev/prod + `version`) **หรือ** tag `release/*` | prod flavor (`com.massdrive.customerApp`) → TestFlight (fastlane `beta`) |
 | `deploy-ios-dev.yml` | `workflow_dispatch` **หรือ** tag `dev/*` | dev → TestFlight (fastlane `dev`) |
 | `deploy-preprod.yml` | `workflow_dispatch` **หรือ** push → `main`/`master` | prod AAB → Play *Internal testing* |
 
@@ -185,6 +185,16 @@ git tag dev/1.2.3     && git push origin dev/1.2.3       # → dev TestFlight
 - `X.Y.Z` ใน tag → `--build-name` (ถ้า dispatch เฉยๆ จะ fallback เป็น pubspec)
 - **build number / versionCode บน CI = `GITHUB_RUN_NUMBER + 10`** (iOS และ Android นับแยกกัน;
   Android สุดท้ายได้ `versionCode = 2000 + run + 10`)
+
+### 5.1.1 prod ชี้ dev API ผ่าน CI (แทน `make deploy_prod_devapi`)
+
+GitHub → Actions → **Deploy to TestFlight (iOS)** → Run workflow (เลือก branch เช่น `develop`):
+- `api` = **dev** → ใช้ `env/prod-devapi.json` (prod flavor, bundle id จริง ไม่ใช่ `.develop`, API = dev)
+  · **prod** → ใช้ `env/prod.json` จาก secret `PROD_ENV_JSON`
+- `version` = `x.y.z` — ต้องสูงกว่าเวอร์ชันที่ปล่อยบน App Store แล้ว (ปล่อยแล้ว = รับ build เพิ่มไม่ได้)
+- `build_number` (ไม่ใส่ก็ได้) — default `GITHUB_RUN_NUMBER + 10`; ต้องสูงกว่า build ที่อัปไปแล้วของเวอร์ชันเดียวกัน
+- step *Select env file* ใน log จะพิมพ์ `FLAVOR` / `API_BASE_URL` ให้เช็คว่าชี้ API ไหน
+- tag `release/*` ยังใช้ `env/prod.json` (secret) เสมอ
 
 ### 5.2 กลไกเซ็น CI
 - iOS: `setup_ci` + `match(readonly:true)` (auth เฉพาะ git ผ่าน `MATCH_GIT_BASIC_AUTHORIZATION`,

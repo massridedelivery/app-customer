@@ -1,17 +1,40 @@
 name: Deploy to TestFlight (iOS)
 
-# Build a signed iOS release and upload it to TestFlight.
+# Build the PROD flavor (bundle id com.massdrive.customerApp — NOT the .develop
+# dev app) and upload it to the "Mass Delivery" TestFlight / App Store app.
 #
-# Trigger is MANUAL only for now. Signing depends on external setup that must
-# exist first (see README "iOS" section):
+# Signing depends on external setup (see docs/DEPLOYMENT.md):
 #   - the build machine's Apple account is a member of team Q7742Z74Q3
 #   - a fastlane match repo holds the Apple Distribution cert + App Store profile
 #   - an App Store Connect API key exists
 #   - the app record exists in App Store Connect
-# Once the secrets below are configured, uncomment the `push` block to deploy
-# automatically on merges to main.
+#
+# Which API the build talks to:
+#   - manual run (Actions → Run workflow): pick `api`
+#       dev  → env/prod-devapi.json (committed) — CI twin of `make deploy_prod_devapi`,
+#              the path in use while the prod backend is not up yet
+#       prod → env/prod.json, recreated from the PROD_ENV_JSON secret
+#   - release/x.x.x tag push: always env/prod.json (PROD_ENV_JSON)
+# Once the prod backend is live, drop the `dev` choice together with the
+# *_prod_devapi Makefile targets and env/prod-devapi.json.
 on:
   workflow_dispatch:
+    inputs:
+      api:
+        description: "Backend the build points at (dev = env/prod-devapi.json, prod = PROD_ENV_JSON secret)"
+        type: choice
+        options:
+          - dev
+          - prod
+        default: dev
+      version:
+        description: "App version x.y.z — must be higher than the version already live on the App Store"
+        type: string
+        required: true
+      build_number:
+        description: "Build number (optional; default = run number + 10). Must be higher than any build already uploaded for this version"
+        type: string
+        required: false
   push:
     # Auto-deploy prod when a release/x.x.x tag is pushed. `*` does not match
     # `/`, so this matches release/1.2.3 (one segment after the slash).
@@ -59,31 +82,58 @@ jobs:
       - name: Generate code (freezed / riverpod / json_serializable)
         run: dart run build_runner build --delete-conflicting-outputs
 
-      # env/prod.json is gitignored; recreate it from the secret so the build
-      # reads FLAVOR / API_BASE_URL / etc. via --dart-define-from-file.
-      - name: Create env/prod.json
+      # Pick the dart-define file. env/prod-devapi.json is committed; env/prod.json
+      # is gitignored, so it is recreated from the secret. Tag pushes have no
+      # inputs, so they always take the real-prod path.
+      - name: Select env file
         env:
+          API: ${{ inputs.api || 'prod' }}
           PROD_ENV_JSON: ${{ secrets.PROD_ENV_JSON }}
-        run: printf '%s' "$PROD_ENV_JSON" > env/prod.json
+        run: |
+          if [ "$API" = "dev" ]; then
+            ENV_FILE=env/prod-devapi.json
+          else
+            ENV_FILE=env/prod.json
+            printf '%s' "$PROD_ENV_JSON" > "$ENV_FILE"
+          fi
+          echo "ENV_FILE=$ENV_FILE" >> "$GITHUB_ENV"
+          # Log the non-secret routing values so the run shows which API it used.
+          grep -E '"(FLAVOR|APP_NAME|API_BASE_URL|WS_BASE_URL)"' "$ENV_FILE"
 
       # --config-only compiles no binary; it writes the dart-defines, version
-      # name (from pubspec.yaml) and build number into ios/Flutter/Generated.xcconfig
-      # so the subsequent fastlane/gym archive picks them up.
+      # name and build number into ios/Flutter/Generated.xcconfig so the
+      # subsequent fastlane/gym archive picks them up.
       # --flavor prod selects the `prod` scheme / Release-prod configuration,
       # which resolves BUNDLE_ID_SUFFIX to empty -> com.massdrive.customerApp.
-      # Build number = run number + 10, matching the Android pipeline's scheme.
+      # Default build number = run number + 10, matching the Android pipeline's
+      # scheme; the build_number input overrides it.
       - name: Configure iOS build (dart-defines + version + build number)
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+          INPUT_BUILD_NUMBER: ${{ inputs.build_number }}
         run: |
-          # On a release/x.x.x tag, take x.x.x as the app version (CFBundleShortVersionString);
-          # on manual dispatch (a branch ref) fall back to pubspec.yaml's version.
-          BUILD_NAME_ARG=""
-          if [ "$GITHUB_REF_TYPE" = "tag" ]; then
-            BUILD_NAME_ARG="--build-name=${GITHUB_REF_NAME##*/}"
+          # Version: the dispatch input, else x.x.x from a release/x.x.x tag,
+          # else pubspec.yaml's version.
+          VERSION="$INPUT_VERSION"
+          if [ -z "$VERSION" ] && [ "$GITHUB_REF_TYPE" = "tag" ]; then
+            VERSION="${GITHUB_REF_NAME##*/}"
           fi
+          BUILD_NAME_ARG=""
+          if [ -n "$VERSION" ]; then
+            if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo "::error::version must be x.y.z, got '$VERSION'"; exit 1
+            fi
+            BUILD_NAME_ARG="--build-name=$VERSION"
+          fi
+          BUILD_NUMBER="${INPUT_BUILD_NUMBER:-$((GITHUB_RUN_NUMBER + 10))}"
+          if ! [[ "$BUILD_NUMBER" =~ ^[0-9]+$ ]]; then
+            echo "::error::build_number must be an integer, got '$BUILD_NUMBER'"; exit 1
+          fi
+          echo "Building com.massdrive.customerApp ${VERSION:-<pubspec>} ($BUILD_NUMBER) with $ENV_FILE"
           flutter build ios --config-only --release --flavor prod \
-            --dart-define-from-file=env/prod.json \
+            --dart-define-from-file="$ENV_FILE" \
             $BUILD_NAME_ARG \
-            --build-number=$((GITHUB_RUN_NUMBER + 10))
+            --build-number="$BUILD_NUMBER"
 
       - name: Install CocoaPods
         working-directory: ios

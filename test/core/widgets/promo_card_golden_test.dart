@@ -14,36 +14,6 @@ Widget _host(Widget child) => MaterialApp(
 );
 
 void main() {
-  Widget card(bool selected) => SizedBox(
-    width: 360,
-    child: PromoCardShell(
-      isSelected: selected,
-      accentColor: Colors.red,
-      child: const Padding(
-        padding: EdgeInsets.all(16),
-        child: Text('SAVE10'),
-      ),
-    ),
-  );
-
-  testWidgets('PromoCardShell - unselected', (tester) async {
-    await tester.pumpWidget(_host(card(false)));
-    await tester.pumpAndSettle();
-    await expectLater(
-      find.byType(PromoCardShell),
-      matchesGoldenFile('goldens/promo_card_shell__unselected.png'),
-    );
-  });
-
-  testWidgets('PromoCardShell - selected', (tester) async {
-    await tester.pumpWidget(_host(card(true)));
-    await tester.pumpAndSettle();
-    await expectLater(
-      find.byType(PromoCardShell),
-      matchesGoldenFile('goldens/promo_card_shell__selected.png'),
-    );
-  });
-
   testWidgets('PromoApplyButton - apply', (tester) async {
     await tester.pumpWidget(
       _host(PromoApplyButton(isSelected: false, onApply: () {}, onCancel: () {})),

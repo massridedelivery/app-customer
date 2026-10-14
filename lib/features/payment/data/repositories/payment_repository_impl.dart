@@ -41,7 +41,7 @@ class PaymentRepositoryImpl implements IPaymentRepository {
       );
       return PaymentIntent.fromJson(data);
     } on DioException catch (e) {
-      throw ServerException(_message(e, 'สร้างรายการชำระเงินไม่สำเร็จ'));
+      throw _serverError(e, 'สร้างรายการชำระเงินไม่สำเร็จ');
     }
   }
 
@@ -80,7 +80,7 @@ class PaymentRepositoryImpl implements IPaymentRepository {
       );
       return PaymentIntent.fromJson(data);
     } on DioException catch (e) {
-      throw ServerException(_message(e, 'สร้างรายการชำระเงินไม่สำเร็จ'));
+      throw _serverError(e, 'สร้างรายการชำระเงินไม่สำเร็จ');
     }
   }
 
@@ -93,6 +93,17 @@ class PaymentRepositoryImpl implements IPaymentRepository {
       if (e.response?.statusCode == 404) return null;
       throw ServerException(_message(e, 'ตรวจสอบรายการชำระเงินไม่สำเร็จ'));
     }
+  }
+
+  /// Keeps the status code and body `code` so callers can tell a 409 (the
+  /// backend refusing a new intent) from a genuine failure.
+  ServerException _serverError(DioException e, String fallback) {
+    final data = e.response?.data;
+    return ServerException(
+      _message(e, fallback),
+      statusCode: e.response?.statusCode,
+      code: data is Map ? data['code']?.toString() : null,
+    );
   }
 
   String _message(DioException e, String fallback) {

@@ -192,16 +192,18 @@ class LoyaltyScreen extends ConsumerWidget {
   }
 }
 
-// Additional providers scoped to this page
-final loyaltySummaryProvider = FutureProvider<Map<String, dynamic>>((ref) async {
+// Additional providers scoped to this page. autoDispose so every visit reads
+// fresh balances — points come back after a cancelled trip (and change after a
+// completed one) while the page isn't open.
+final loyaltySummaryProvider = FutureProvider.autoDispose<Map<String, dynamic>>((ref) async {
   return ref.watch(loyaltyRemoteDataSourceProvider).getSummary();
 });
 
-final _loyaltyPointsProvider = FutureProvider<Map<String, dynamic>>((ref) async {
+final _loyaltyPointsProvider = FutureProvider.autoDispose<Map<String, dynamic>>((ref) async {
   return ref.watch(loyaltyRemoteDataSourceProvider).getPoints();
 });
 
-final _cashbackProvider = FutureProvider<List<dynamic>>((ref) async {
+final _cashbackProvider = FutureProvider.autoDispose<List<dynamic>>((ref) async {
   return ref.watch(loyaltyRemoteDataSourceProvider).getCashbackHistory();
 });
 

@@ -1,6 +1,5 @@
 import 'package:customer_app/core/managers/providers.dart';
 import 'package:customer_app/features/auth/presentation/controllers/auth_controller.dart';
-import 'package:customer_app/features/auth/presentation/screens/login_screen.dart';
 import 'package:customer_app/features/auth/presentation/screens/otp_screen.dart';
 import 'package:customer_app/features/auth/presentation/screens/phone_login_screen.dart';
 import 'package:customer_app/features/register/presentation/screens/register_screen.dart';
@@ -256,7 +255,8 @@ final routerProvider = Provider<GoRouter>((ref) {
         routes: [
           GoRoute(
             path: 'email_login',
-            builder: (context, state) => const LoginScreen(),
+            builder: (context, state) =>
+                const PhoneLoginScreen(initialMethod: LoginMethod.email),
           ),
           GoRoute(
             path: 'register',

@@ -1,22 +1,29 @@
 import 'package:customer_app/core/constants/app_colors.dart';
-import 'package:customer_app/core/constants/app_typography.dart';
+import 'package:customer_app/core/widgets/hero_header.dart';
+import 'package:customer_app/core/widgets/pill_tabs.dart';
 import 'package:customer_app/features/auth/data/models/send_otp_response.dart';
 import 'package:customer_app/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-// Neutral slate palette shared with the rest of the auth flow (see otp_screen).
-// Kept as named constants so the values live in one place.
-const Color _kBg = Color(0xFFF8FAFC);
-const Color _kFieldFill = Color(0xFFF1F5F9);
-const Color _kTextPrimary = Color(0xFF0F172A);
-const Color _kTextSecondary = Color(0xFF64748B);
-const Color _kDisabledBg = Color(0xFFE2E8F0);
-const Color _kDisabledText = Color(0xFF94A3B8);
+// Field / text tokens of the login card (RodChao login spec, Mass red brand).
+const Color _kFieldFill = Color(0xFFF8F8F9);
+const Color _kFieldBorder = Color(0xFFEBECEF);
+const Color _kInk = Color(0xFF1C1B1B);
+const Color _kInkSoft = Color(0xFF444651);
+const Color _kMuted = Color(0xFF6A6E83);
 
+enum LoginMethod { phone, email }
+
+/// Login: one screen with "เบอร์โทร / อีเมล" pill tabs under a red wave hero. Phone → POST /auth/otp/send, then the OTP screen
+/// (which also starts sign-up for a new number); email → password login.
 class PhoneLoginScreen extends ConsumerStatefulWidget {
-  const PhoneLoginScreen({super.key});
+  const PhoneLoginScreen({super.key, this.initialMethod = LoginMethod.phone});
+
+  final LoginMethod initialMethod;
 
   @override
   ConsumerState<PhoneLoginScreen> createState() => _PhoneLoginScreenState();
@@ -24,23 +31,35 @@ class PhoneLoginScreen extends ConsumerStatefulWidget {
 
 class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
   final _phoneController = TextEditingController();
-  bool _isValidPhone = false;
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _phoneFocus = FocusNode();
+
+  late LoginMethod _method = widget.initialMethod;
+  bool _obscurePassword = true;
 
   @override
   void initState() {
     super.initState();
-    _phoneController.addListener(() {
-      setState(() {
-        _isValidPhone = _phoneController.text.trim().length >= 9;
-      });
-    });
+    for (final c in [_phoneController, _emailController, _passwordController]) {
+      c.addListener(() => setState(() {}));
+    }
   }
 
   @override
   void dispose() {
     _phoneController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _phoneFocus.dispose();
     super.dispose();
   }
+
+  bool get _isValidPhone => _phoneController.text.trim().length >= 9;
+
+  bool get _isValidEmail =>
+      _emailController.text.contains('@') &&
+      _passwordController.text.isNotEmpty;
 
   Future<void> _requestOtp() async {
     if (!_isValidPhone) return;
@@ -69,237 +88,369 @@ class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
     }
   }
 
+  void _loginEmail() {
+    if (!_isValidEmail) return;
+    ref
+        .read(authControllerProvider.notifier)
+        .login(_emailController.text.trim(), _passwordController.text);
+  }
+
+  /// Sign-up starts from a phone number (OTP, then the profile form), so the
+  /// footer link brings the user to the phone tab.
+  void _startSignUp() {
+    setState(() => _method = LoginMethod.phone);
+    _phoneFocus.requestFocus();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(authControllerProvider);
-    final topInset = MediaQuery.of(context).padding.top;
+    final l10n = AppLocalizations.of(context)!;
+    final isLoading = ref.watch(
+      authControllerProvider.select((s) => s.isLoading),
+    );
 
-    return Scaffold(
-      backgroundColor: _kBg,
-      body: Column(
-        children: [
-          // ── Brand hero (red gradient, curved bottom) ───────────────────────
-          Container(
-            width: double.infinity,
-            padding: EdgeInsets.fromLTRB(24, topInset + 8, 24, 52),
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [AppColors.primary, AppColors.secondaryRed],
-              ),
-              borderRadius: BorderRadius.vertical(bottom: Radius.circular(28)),
+    ref.listen(authControllerProvider.select((s) => s.error), (prev, next) {
+      // The OTP / sign-up screens pushed on top report their own errors.
+      if (ModalRoute.of(context)?.isCurrent != true) return;
+      if (next != null && next != prev) {
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            SnackBar(
+              content: Text(next),
+              backgroundColor: AppColors.error,
+              behavior: SnackBarBehavior.floating,
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Standard app back button (white on the hero). Shown only when
-                // login was pushed (guest arriving from a gate) — same icon the
-                // rest of the app uses.
-                SizedBox(
-                  height: 44,
-                  child: context.canPop()
-                      ? Align(
-                          alignment: Alignment.centerLeft,
-                          child: IconButton(
+          );
+      }
+    });
+
+    // White status-bar icons over the red hero.
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light,
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: SafeArea(
+          top: false,
+          child: AutofillGroup(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _Hero(canPop: context.canPop(), onBack: () => context.pop()),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 6, 20, 0),
+                    child: _form(l10n, isLoading),
+                  ),
+                  const SizedBox(height: 24),
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      const Text(
+                        'ยังไม่มีบัญชี?',
+                        style: TextStyle(color: _kInkSoft),
+                      ),
+                      TextButton(
+                        key: const Key('loginGoRegister'),
+                        onPressed: _startSignUp,
+                        style: _textButtonStyle,
+                        child: const Text('สมัครสมาชิก'),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _form(AppLocalizations l10n, bool isLoading) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        PillTabs<LoginMethod>(
+          key: const Key('loginMethodTabs'),
+          items: const [
+            PillTabItem(value: LoginMethod.phone, label: 'เบอร์โทร'),
+            PillTabItem(value: LoginMethod.email, label: 'อีเมล'),
+          ],
+          selected: _method,
+          onChanged: (m) => setState(() => _method = m),
+        ),
+        const SizedBox(height: 18),
+        if (_method == LoginMethod.phone)
+          ..._phoneSection(l10n, isLoading)
+        else
+          ..._emailSection(l10n, isLoading),
+      ],
+    );
+  }
+
+  List<Widget> _phoneSection(AppLocalizations l10n, bool isLoading) {
+    return [
+      TextField(
+        key: const Key('loginPhone'),
+        controller: _phoneController,
+        focusNode: _phoneFocus,
+        keyboardType: TextInputType.phone,
+        autofillHints: const [AutofillHints.telephoneNumber],
+        inputFormatters: [
+          FilteringTextInputFormatter.allow(RegExp(r'[0-9+]')),
+          LengthLimitingTextInputFormatter(15),
+        ],
+        style: const TextStyle(fontSize: 16, color: _kInk),
+        decoration: _decoration(
+          label: l10n.phoneNumber,
+          hint: '812345678',
+          prefix: '+66 ',
+        ),
+      ),
+      const SizedBox(height: 14),
+      _PrimaryButton(
+        key: const Key('loginRequestOtp'),
+        label: 'ขอรหัส OTP',
+        loading: isLoading,
+        onPressed: _isValidPhone && !isLoading ? _requestOtp : null,
+      ),
+    ];
+  }
+
+  List<Widget> _emailSection(AppLocalizations l10n, bool isLoading) {
+    return [
+      TextField(
+        key: const Key('loginIdentifier'),
+        controller: _emailController,
+        keyboardType: TextInputType.emailAddress,
+        autofillHints: const [AutofillHints.username, AutofillHints.email],
+        textInputAction: TextInputAction.next,
+        style: const TextStyle(fontSize: 16, color: _kInk),
+        decoration: _decoration(label: 'อีเมล', hint: 'you@email.com'),
+      ),
+      const SizedBox(height: 14),
+      TextField(
+        key: const Key('loginPassword'),
+        controller: _passwordController,
+        obscureText: _obscurePassword,
+        autofillHints: const [AutofillHints.password],
+        textInputAction: TextInputAction.done,
+        onSubmitted: (_) => _loginEmail(),
+        style: const TextStyle(fontSize: 16, color: _kInk),
+        decoration: _decoration(label: l10n.password).copyWith(
+          suffixIcon: IconButton(
+            tooltip: _obscurePassword ? 'แสดงรหัสผ่าน' : 'ซ่อนรหัสผ่าน',
+            icon: Icon(
+              _obscurePassword
+                  ? Icons.visibility_outlined
+                  : Icons.visibility_off_outlined,
+              color: _kInkSoft,
+            ),
+            onPressed: () =>
+                setState(() => _obscurePassword = !_obscurePassword),
+          ),
+        ),
+      ),
+      Align(
+        alignment: AlignmentDirectional.centerEnd,
+        child: TextButton(
+          onPressed: () => context.push('/auth/forgot-password'),
+          style: _textButtonStyle,
+          child: Text(l10n.forgotPassword),
+        ),
+      ),
+      const SizedBox(height: 6),
+      _PrimaryButton(
+        key: const Key('loginSubmit'),
+        label: l10n.signIn,
+        loading: isLoading,
+        onPressed: _isValidEmail && !isLoading ? _loginEmail : null,
+      ),
+    ];
+  }
+
+  InputDecoration _decoration({
+    required String label,
+    String? hint,
+    String? prefix,
+  }) {
+    OutlineInputBorder border(Color color, [double width = 1]) =>
+        OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: color, width: width),
+        );
+    return InputDecoration(
+      labelText: label,
+      hintText: hint,
+      // Keep the label up so the "+66" prefix and the hint show before focus.
+      floatingLabelBehavior: FloatingLabelBehavior.always,
+      prefixText: prefix,
+      prefixStyle: const TextStyle(fontSize: 16, color: _kInkSoft),
+      labelStyle: const TextStyle(color: _kMuted),
+      floatingLabelStyle: const TextStyle(color: AppColors.primary),
+      hintStyle: const TextStyle(color: _kMuted),
+      filled: true,
+      fillColor: _kFieldFill,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
+      border: border(_kFieldBorder),
+      enabledBorder: border(_kFieldBorder),
+      focusedBorder: border(AppColors.primary, 1.5),
+    );
+  }
+}
+
+final ButtonStyle _textButtonStyle = TextButton.styleFrom(
+  foregroundColor: AppColors.primary,
+  minimumSize: const Size(48, 48),
+  textStyle: const TextStyle(fontWeight: FontWeight.w600),
+);
+
+/// Brand-red gradient hero with the S-curve wave bottom shared by the home,
+/// ride and messenger headers: back button, the white M mark beside the
+/// welcome copy.
+class _Hero extends StatelessWidget {
+  const _Hero({required this.canPop, required this.onBack});
+
+  final bool canPop;
+  final VoidCallback onBack;
+
+  @override
+  Widget build(BuildContext context) {
+    final topPad = MediaQuery.of(context).padding.top;
+    return ClipPath(
+      clipper: HeroWaveClipper(),
+      child: Container(
+        width: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [AppColors.foundationRed700, AppColors.foundationRed900],
+          ),
+        ),
+        child: Stack(
+          children: [
+            const HeroPatternOverlay(),
+            Padding(
+              padding: EdgeInsets.fromLTRB(24, topPad + 12, 24, 64),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    height: 40,
+                    child: canPop
+                        ? IconButton(
+                            onPressed: onBack,
                             padding: EdgeInsets.zero,
-                            onPressed: () => context.pop(),
+                            alignment: Alignment.centerLeft,
+                            constraints: const BoxConstraints(
+                              minWidth: 40,
+                              minHeight: 40,
+                            ),
                             icon: const Icon(
                               Icons.arrow_back_rounded,
                               color: Colors.white,
                             ),
-                          ),
-                        )
-                      : null,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Mass Move',
-                  style: AppTypography.heading2.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
+                          )
+                        : null,
                   ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  'รับส่ง · ส่งของ · สั่งอาหาร',
-                  style: AppTypography.body2.copyWith(
-                    color: Colors.white.withValues(alpha: 0.9),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // ── Floating form card (pulled up over the hero) ───────────────────
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-              child: Transform.translate(
-                offset: const Offset(0, -24),
-                child: Container(
-                  padding: const EdgeInsets.fromLTRB(22, 24, 22, 24),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.08),
-                        blurRadius: 24,
-                        offset: const Offset(0, 8),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  const SizedBox(height: 8),
+                  Row(
                     children: [
-                      Text(
-                        'ยินดีต้อนรับสู่ Mass Move',
-                        style: AppTypography.heading4.copyWith(
-                          color: _kTextPrimary,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'กรอกเบอร์โทรเพื่อเข้าสู่ระบบหรือสมัครใช้งาน',
-                        style: AppTypography.body2.copyWith(
-                          color: _kTextSecondary,
-                          height: 1.5,
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      _buildLabel('เบอร์โทรศัพท์'),
-                      _buildTextField(
-                        controller: _phoneController,
-                        hintText: '+66 999999999',
-                        keyboardType: TextInputType.phone,
-                      ),
-                      const SizedBox(height: 24),
-                      _buildContinueButton(authState.isLoading),
-                      if (authState.error != null)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 16),
-                          child: Text(
-                            authState.error!,
-                            style: TextStyle(color: AppColors.error),
-                            textAlign: TextAlign.center,
+                      // The mark PNG has a faint white rounded-square outline
+                      // baked into its outer few pixels; trim it so the logo
+                      // doesn't sit in a box on the red.
+                      ClipRect(
+                        child: Align(
+                          widthFactor: 0.92,
+                          heightFactor: 0.92,
+                          child: Image.asset(
+                            'assets/icon/icon_m_mark.png',
+                            width: 56,
+                            semanticLabel: 'Mass Move',
                           ),
                         ),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'ยินดีต้อนรับ',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 24,
+                                fontWeight: FontWeight.w800,
+                                height: 1.2,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'เข้าสู่ระบบเพื่อเรียกรถ ส่งของ และสั่งอาหาร',
+                              style: TextStyle(
+                                color: Colors.white.withValues(alpha: 0.9),
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
-                ),
+                ],
               ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildContinueButton(bool isLoading) {
-    const label = 'ขอรหัส OTP';
-    final enabled = _isValidPhone && !isLoading;
-    return Semantics(
-      button: true,
-      enabled: enabled,
-      label: label,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(12),
-          onTap: enabled ? _requestOtp : null,
-          child: Ink(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            decoration: BoxDecoration(
-              gradient: enabled
-                  ? LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [AppColors.primary, AppColors.secondaryRed],
-                    )
-                  : null,
-              color: enabled ? null : _kDisabledBg,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: enabled
-                  ? [
-                      BoxShadow(
-                        color: AppColors.primary.withValues(alpha: 0.15),
-                        blurRadius: 15,
-                        offset: const Offset(0, 10),
-                      ),
-                    ]
-                  : null,
-            ),
-            child: Center(
-              child: isLoading
-                  ? const SizedBox(
-                      height: 24,
-                      width: 24,
-                      child: CircularProgressIndicator(
-                        color: Colors.white,
-                        strokeWidth: 2,
-                      ),
-                    )
-                  : Text(
-                      label,
-                      style: AppTypography.label2.copyWith(
-                        color: enabled ? Colors.white : _kDisabledText,
-                      ),
-                    ),
-            ),
-          ),
+          ],
         ),
       ),
     );
   }
+}
 
-  Widget _buildLabel(String label) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 4, bottom: 8),
-      child: Text(
-        label,
-        style: AppTypography.caption4.copyWith(color: _kTextSecondary),
-      ),
-    );
-  }
+/// Full-width 52px red button; a white spinner replaces the label while busy.
+class _PrimaryButton extends StatelessWidget {
+  const _PrimaryButton({
+    super.key,
+    required this.label,
+    required this.loading,
+    required this.onPressed,
+  });
 
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String hintText,
-    bool obscureText = false,
-    TextInputType? keyboardType,
-  }) {
-    return TextField(
-      controller: controller,
-      obscureText: obscureText,
-      keyboardType: keyboardType,
-      autofillHints: const [AutofillHints.telephoneNumber],
-      style: AppTypography.body1.copyWith(color: _kTextPrimary),
-      decoration: InputDecoration(
-        hintText: hintText,
-        hintStyle: AppTypography.caption3.copyWith(
-          color: _kTextSecondary.withValues(alpha: 0.5),
-        ),
-        fillColor: _kFieldFill,
-        filled: true,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.primary, width: 1),
-        ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 20,
-          vertical: 18,
-        ),
+  final String label;
+  final bool loading;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return FilledButton(
+      onPressed: onPressed,
+      style: FilledButton.styleFrom(
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
+        disabledBackgroundColor: loading
+            ? AppColors.primary
+            : AppColors.semanticDisabledBgLow,
+        disabledForegroundColor: loading
+            ? Colors.white
+            : AppColors.semanticDisabledFgOnGray,
+        minimumSize: const Size.fromHeight(52),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
       ),
+      child: loading
+          ? const SizedBox(
+              width: 22,
+              height: 22,
+              child: CircularProgressIndicator(
+                strokeWidth: 2.5,
+                color: Colors.white,
+              ),
+            )
+          : Text(label),
     );
   }
 }

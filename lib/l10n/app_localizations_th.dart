@@ -51,6 +51,21 @@ class AppLocalizationsTh extends AppLocalizations {
   String get noTripsYet => 'คุณยังไม่มีประวัติการเดินทาง';
 
   @override
+  String get noFoodOrdersYet => 'คุณยังไม่มีคำสั่งซื้ออาหาร';
+
+  @override
+  String get noDeliveriesYet => 'คุณยังไม่มีรายการส่งของ';
+
+  @override
+  String get noOrdersYet => 'คุณยังไม่มีคำสั่งซื้อ';
+
+  @override
+  String get fareEstimateFailed => 'คำนวณราคาไม่สำเร็จ';
+
+  @override
+  String get choosePickupAction => 'เลือกจุดรับ';
+
+  @override
   String get retry => 'ลองใหม่';
 
   @override

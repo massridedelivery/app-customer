@@ -182,6 +182,36 @@ abstract class AppLocalizations {
   /// **'You haven\'t taken any trips yet.'**
   String get noTripsYet;
 
+  /// No description provided for @noFoodOrdersYet.
+  ///
+  /// In en, this message translates to:
+  /// **'You haven\'t ordered any food yet.'**
+  String get noFoodOrdersYet;
+
+  /// No description provided for @noDeliveriesYet.
+  ///
+  /// In en, this message translates to:
+  /// **'You haven\'t sent any parcels yet.'**
+  String get noDeliveriesYet;
+
+  /// No description provided for @noOrdersYet.
+  ///
+  /// In en, this message translates to:
+  /// **'You don\'t have any orders yet.'**
+  String get noOrdersYet;
+
+  /// No description provided for @fareEstimateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t calculate the fare'**
+  String get fareEstimateFailed;
+
+  /// No description provided for @choosePickupAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose pickup'**
+  String get choosePickupAction;
+
   /// No description provided for @retry.
   ///
   /// In en, this message translates to:

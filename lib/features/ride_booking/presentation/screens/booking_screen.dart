@@ -412,6 +412,13 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
             builder: (context, scrollController) => VehicleSelectionSheet(
               scrollController: scrollController,
               estimations: bookingState.estimations,
+              isMissingLocation: pickup == null || dropoff == null,
+              onPickLocation: () => context.pushReplacement('/place-search'),
+              onRetryEstimate: pickup == null || dropoff == null
+                  ? null
+                  : () => ref
+                        .read(bookingControllerProvider.notifier)
+                        .estimateFare(pickup, dropoff),
               onVehicleSelected: (id) {
                 ref
                     .read(bookingControllerProvider.notifier)

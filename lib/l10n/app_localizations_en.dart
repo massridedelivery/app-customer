@@ -51,6 +51,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noTripsYet => 'You haven\'t taken any trips yet.';
 
   @override
+  String get noFoodOrdersYet => 'You haven\'t ordered any food yet.';
+
+  @override
+  String get noDeliveriesYet => 'You haven\'t sent any parcels yet.';
+
+  @override
+  String get noOrdersYet => 'You don\'t have any orders yet.';
+
+  @override
+  String get fareEstimateFailed => 'Couldn\'t calculate the fare';
+
+  @override
+  String get choosePickupAction => 'Choose pickup';
+
+  @override
   String get retry => 'Retry';
 
   @override

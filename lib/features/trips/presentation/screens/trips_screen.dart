@@ -131,6 +131,7 @@ class _TripsScreenState extends ConsumerState<TripsScreen> {
                 onRetry: () => _loadHistory(isRefresh: true),
               )
             : _TripsListBody(
+                type: _selectedType!,
                 scrollController: _scrollController,
                 onRetry: () => _loadHistory(isRefresh: true),
               ),
@@ -201,10 +202,15 @@ class _TripsFilterBar extends StatelessWidget implements PreferredSizeWidget {
 }
 
 class _TripsListBody extends ConsumerWidget {
+  final HistoryType type;
   final ScrollController scrollController;
   final VoidCallback onRetry;
 
-  const _TripsListBody({required this.scrollController, required this.onRetry});
+  const _TripsListBody({
+    required this.type,
+    required this.scrollController,
+    required this.onRetry,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -242,7 +248,13 @@ class _TripsListBody extends ConsumerWidget {
     }
 
     if (orders.isEmpty) {
-      return Center(child: Text(AppLocalizations.of(context)!.noTripsYet));
+      final l10n = AppLocalizations.of(context)!;
+      // "No trips" only fits rides; the food tab is about orders.
+      return Center(
+        child: Text(
+          type == HistoryType.ride ? l10n.noTripsYet : l10n.noFoodOrdersYet,
+        ),
+      );
     }
 
     // Ongoing orders first, then the rest — preserving the API order within
@@ -554,7 +566,7 @@ class _MessengerHistoryBody extends ConsumerWidget {
               child: SizedBox(
                 height: constraints.maxHeight,
                 child: Center(
-                  child: Text(AppLocalizations.of(context)!.noTripsYet),
+                  child: Text(AppLocalizations.of(context)!.noDeliveriesYet),
                 ),
               ),
             ),
@@ -839,7 +851,7 @@ class _AllHistoryBody extends ConsumerWidget {
     ];
 
     if (sorted.isEmpty) {
-      return Center(child: Text(AppLocalizations.of(context)!.noTripsYet));
+      return Center(child: Text(AppLocalizations.of(context)!.noOrdersYet));
     }
 
     return ListView.separated(

@@ -1,4 +1,5 @@
 import 'package:customer_app/core/error/api_error.dart';
+import 'package:customer_app/core/utils/promo_rejection.dart';
 import 'package:customer_app/features/ride_booking/data/datasources/ride_booking_remote_datasource.dart';
 import 'package:customer_app/features/ride_booking/domain/models/fare_estimation_response.dart';
 import 'package:customer_app/features/ride_booking/domain/models/ride_promo.dart';
@@ -67,7 +68,7 @@ class RideBookingRepositoryImpl implements RideBookingRepository {
               item is Map &&
               item['code']?.toString().toUpperCase() == upperCode);
       if (!isApplied) {
-        throw Exception('Promo code not applied');
+        throw Exception(promoRejectionMessage(response, upperCode));
       }
       // Prefer the server-computed total; fall back to summing applied lines.
       final total = (response['total_discount'] as num?)?.toDouble();
@@ -82,12 +83,12 @@ class RideBookingRepositoryImpl implements RideBookingRepository {
     } on DioException catch (e) {
       final data = e.response?.data;
       if (data is Map) {
-        final message = data['message'] ?? data['error'] ?? 'Invalid Promo Code';
-        throw Exception(message);
+        final message = data['message'] ?? data['error'];
+        throw Exception(
+          promoReasonToThai(message?.toString()) ?? kPromoRejectedFallback,
+        );
       }
-      throw Exception('Failed to validate promo code: ${e.message}');
-    } catch (e) {
-      throw Exception(e.toString());
+      throw Exception(kPromoRejectedFallback);
     }
   }
 

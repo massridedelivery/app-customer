@@ -274,23 +274,6 @@ class ApiRepository {
 
   // ─── GEO / PIN SNAP ──────────────────────────────────────────────────────
 
-  /// GET /api/geospatial/place-search?query=X&lat=Y&lng=Z
-  Future<List<dynamic>> searchPlaces(
-    String query, {
-    double? lat,
-    double? lng,
-  }) async {
-    final res = await _dio.get(
-      '/api/geospatial/place-search',
-      queryParameters: {
-        'query': query,
-        'lat': ?lat,
-        'lng': ?lng,
-      },
-    );
-    return res.data as List<dynamic>;
-  }
-
   /// GET /api/customer/pin-snap?lat=X&lng=Y
   Future<Map<String, dynamic>> pinSnap({
     required double lat,

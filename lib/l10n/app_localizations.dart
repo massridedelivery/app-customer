@@ -1424,6 +1424,12 @@ abstract class AppLocalizations {
   /// **'Coupon discount'**
   String get couponDiscount;
 
+  /// No description provided for @couponNotAppliedToFare.
+  ///
+  /// In en, this message translates to:
+  /// **'Code {code} hasn\'t been taken off the fare'**
+  String couponNotAppliedToFare(String code);
+
   /// No description provided for @selectVehicleFirst.
   ///
   /// In en, this message translates to:

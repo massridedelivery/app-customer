@@ -687,6 +687,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get couponDiscount => 'Coupon discount';
 
   @override
+  String couponNotAppliedToFare(String code) {
+    return 'Code $code hasn\'t been taken off the fare';
+  }
+
+  @override
   String get selectVehicleFirst => 'Choose a vehicle type first';
 
   @override

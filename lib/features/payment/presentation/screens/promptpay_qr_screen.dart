@@ -70,8 +70,10 @@ class _PromptPayQrScreenState extends ConsumerState<PromptPayQrScreen> {
       }
     });
 
-    // The driver switched the ride to cash → the intent is voided (SCRUM-121).
-    // Close the QR screen instead of leaving the customer staring at a dead QR.
+    // The intent is voided and couldn't be replaced (the controller re-issues
+    // one when only the amount changed): the trip went cash, was cancelled or
+    // is paid another way. Close the QR screen so the customer is back on the
+    // trip's live status instead of staring at a dead QR.
     ref.listen(promptPayControllerProvider.select((s) => s.status.isVoided), (
       prev,
       isVoided,
@@ -81,7 +83,7 @@ class _PromptPayQrScreenState extends ConsumerState<PromptPayQrScreen> {
           ..hideCurrentSnackBar()
           ..showSnackBar(
             const SnackBar(
-              content: Text('คนขับเปลี่ยนไปรับเงินสดแล้ว ไม่ต้องชำระด้วย QR'),
+              content: Text('ไม่ต้องชำระด้วย QR นี้แล้ว'),
             ),
           );
         if (context.canPop()) context.pop();
@@ -129,8 +131,8 @@ class _PromptPayQrScreenState extends ConsumerState<PromptPayQrScreen> {
       return _StatusMessage(
         icon: Icons.info_outline_rounded,
         color: AppColors.textSecondary,
-        title: 'เปลี่ยนเป็นชำระเงินสดแล้ว',
-        subtitle: 'คนขับเปลี่ยนวิธีชำระเป็นเงินสด ไม่ต้องชำระด้วย QR',
+        title: 'ไม่ต้องชำระด้วย QR นี้แล้ว',
+        subtitle: 'รายการนี้ถูกยกเลิก เช่น เปลี่ยนเป็นเงินสดหรือเที่ยวถูกยกเลิก',
         primaryLabel: 'กลับ',
         onPrimary: () => context.pop(),
       );
@@ -182,6 +184,7 @@ class _PromptPayQrScreenState extends ConsumerState<PromptPayQrScreen> {
       qrUrl: qrUrl,
       amount: intent.amount,
       secondsLeft: state.secondsLeft < 0 ? 0 : state.secondsLeft,
+      notice: state.notice,
     );
   }
 }
@@ -190,11 +193,13 @@ class _QrView extends StatelessWidget {
   final String qrUrl;
   final double? amount;
   final int secondsLeft;
+  final String? notice;
 
   const _QrView({
     required this.qrUrl,
     required this.amount,
     required this.secondsLeft,
+    this.notice,
   });
 
   String get _countdown {
@@ -207,6 +212,37 @@ class _QrView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
+        // The previous QR was voided because the amount changed (waiting
+        // time / tolls); say why there's a new one.
+        if (notice != null) ...[
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(
+              color: AppColors.semanticWarningBgLowOnWhite,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.info_outline_rounded,
+                  size: 18,
+                  color: AppColors.semanticWarningFgHigh,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    notice!,
+                    style: AppTypography.label2.copyWith(
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
         const SizedBox(height: 8),
         Text(
           'สแกน QR นี้ด้วยแอปธนาคารเพื่อชำระเงิน',

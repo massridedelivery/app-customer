@@ -140,8 +140,8 @@ class _CardCheckoutScreenState extends ConsumerState<CardCheckoutScreen> {
       return _StatusMessage(
         icon: Icons.info_outline_rounded,
         color: AppColors.textSecondary,
-        title: 'เปลี่ยนเป็นชำระเงินสดแล้ว',
-        subtitle: 'รายการนี้ถูกยกเลิก ไม่ต้องชำระด้วยบัตร',
+        title: 'ไม่ต้องชำระด้วยบัตรแล้ว',
+        subtitle: 'รายการนี้ถูกยกเลิก เช่น เปลี่ยนเป็นเงินสดหรือเที่ยวถูกยกเลิก',
         primaryLabel: 'กลับ',
         onPrimary: () => context.pop(),
       );

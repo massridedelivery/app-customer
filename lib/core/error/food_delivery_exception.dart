@@ -2,9 +2,8 @@ import 'package:customer_app/core/error/server_exception.dart';
 import 'package:dio/dio.dart';
 
 sealed class FoodDeliveryException extends ServerException {
-  final int? statusCode;
-
-  FoodDeliveryException(super.message, [this.statusCode]);
+  FoodDeliveryException(super.message, [int? statusCode])
+    : super(statusCode: statusCode);
 }
 
 class BelowMinOrderAmountException extends FoodDeliveryException {

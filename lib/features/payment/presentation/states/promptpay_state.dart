@@ -12,6 +12,9 @@ abstract class PromptPayState with _$PromptPayState {
     @Default(true) bool isCreating,
     String? error,
     @Default(0) int secondsLeft,
+    // Shown above the QR after the backend voided the previous intent because
+    // the amount changed (waiting time / tolls) and a new one was issued.
+    String? notice,
   }) = _PromptPayState;
 
   PaymentIntentStatus get status =>

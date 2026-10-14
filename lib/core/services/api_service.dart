@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:customer_app/core/auth/account_block.dart';
 import 'package:customer_app/core/configs/app_env.dart';
 import 'package:talker_dio_logger/talker_dio_logger.dart';
 import 'package:customer_app/core/data/token_storage.dart';
@@ -66,6 +67,14 @@ class ApiService {
           return handler.next(options);
         },
         onError: (DioException error, handler) async {
+          // Suspended / deleted account: no refresh, no retry — drop the
+          // session and let the router show the account-blocked screen.
+          final block = accountBlockOf(error.response);
+          if (block != null) {
+            _handleAccountBlocked(block);
+            return handler.next(error);
+          }
+
           // Only 401s go through the refresh flow; everything else surfaces.
           if (error.response?.statusCode != 401) {
             return handler.next(error);
@@ -151,6 +160,19 @@ class ApiService {
     }
   }
 
+  void _handleAccountBlocked(AccountBlock reason) {
+    // Several in-flight calls can come back blocked at once; act on the first.
+    if (_ref.read(accountBlockProvider) != null) return;
+    _tokenStorage.clearTokens();
+    // Deferred for the same re-entrancy reason as [_handleLogout].
+    Future.microtask(() {
+      _ref.read(accountBlockProvider.notifier).block(reason);
+      try {
+        _ref.read(authControllerProvider.notifier).logout();
+      } catch (_) {}
+    });
+  }
+
   void _handleLogout() {
     _tokenStorage.clearTokens();
     // Reset auth state on a microtask. Calling AuthController.logout() straight
@@ -211,6 +233,11 @@ class ApiService {
           return true;
         }
       }
+      return false;
+    } on DioException catch (e) {
+      // The refresh itself can be refused for a suspended/deleted account.
+      final block = accountBlockOf(e.response);
+      if (block != null) _handleAccountBlocked(block);
       return false;
     } catch (e) {
       return false;

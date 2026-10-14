@@ -28,6 +28,13 @@ class PromptPayController extends _$PromptPayController {
   // way, so this controller stays provider-agnostic.
   String _paymentMethod = 'PROMPTPAY';
   StreamSubscription<Map<String, dynamic>>? _socketSubscription;
+  // Voided intents we already tried to replace — a second VOIDED for the same
+  // id (or a refused re-issue) must not loop into creating intents over and
+  // over (the backend answers 409 for those cases).
+  final Set<String> _reissuedFrom = {};
+
+  static const amountChangedNotice =
+      'ยอดชำระมีการเปลี่ยนแปลง กรุณาสแกน QR ใหม่นี้แทน QR เดิม';
 
   @override
   PromptPayState build() {
@@ -235,6 +242,13 @@ class PromptPayController extends _$PromptPayController {
             : current?.chargeUrl,
         expiresAt: updated.expiresAt ?? current?.expiresAt,
       );
+      // VOIDED mid-payment: the amount changed (waiting time, tolls) and the
+      // old QR/charge must not be paid. Swap in a fresh intent instead of
+      // publishing the voided one (which would close the screen as "cash").
+      if (updated.status.isVoided && !_reissuedFrom.contains(updated.id)) {
+        await _reissueAfterVoid(merged);
+        return;
+      }
       state = state.copyWith(intent: merged);
       if (updated.status.isTerminal) {
         _ticker?.cancel();
@@ -243,6 +257,63 @@ class PromptPayController extends _$PromptPayController {
       // Transient poll failure — keep the timer running and try next tick.
       debugPrint('PromptPay poll failed: $e');
     }
+  }
+
+  /// Replaces a [voided] intent with a new one. The backend voids the old QR
+  /// when the amount changes; creating again then returns the new amount. When
+  /// it refuses (409: already paid, another live charge, the trip went cash or
+  /// was cancelled) we settle on whatever the trip's current intent is, and
+  /// otherwise leave the voided state in place — never retrying in a loop.
+  Future<void> _reissueAfterVoid(PaymentIntent voided) async {
+    _ticker?.cancel();
+    _reissuedFrom.add(voided.id);
+    final jobId = _jobId;
+    final orderId = _orderId;
+    if (jobId == null && orderId == null) {
+      state = state.copyWith(intent: voided);
+      return;
+    }
+    // Take the old QR off screen right away so it can't be scanned.
+    state = state.copyWith(isCreating: true, notice: null);
+
+    final repo = ref.read(paymentRepositoryProvider);
+    PaymentIntent? next;
+    try {
+      next = jobId != null
+          ? await repo.createIntent(jobId: jobId, paymentMethod: _paymentMethod)
+          : await repo.createIntentForOrder(
+              orderId: orderId!,
+              paymentMethod: _paymentMethod,
+            );
+    } catch (e) {
+      debugPrint('PromptPay: re-issue after VOIDED refused: $e');
+      try {
+        next = jobId != null
+            ? await repo.getIntentByJob(jobId)
+            : await repo.getIntentByOrder(orderId!);
+      } catch (_) {
+        next = null;
+      }
+    }
+
+    final usable =
+        next != null && next.id != voided.id && !next.status.isVoided;
+    if (!usable) {
+      state = state.copyWith(intent: voided, isCreating: false);
+      return;
+    }
+
+    _expiresAt = DateTime.tryParse(next.expiresAt ?? '');
+    state = state.copyWith(
+      intent: next,
+      isCreating: false,
+      error: null,
+      notice: next.status == PaymentIntentStatus.paid
+          ? null
+          : amountChangedNotice,
+      secondsLeft: _computeSecondsLeft(),
+    );
+    if (!next.status.isTerminal) _startTicker();
   }
 
   int _computeSecondsLeft() {

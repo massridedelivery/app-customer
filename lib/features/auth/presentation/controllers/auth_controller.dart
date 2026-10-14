@@ -15,6 +15,9 @@ import 'package:customer_app/core/localization/locale_controller.dart';
 // Added imports for LiveRideController
 import 'package:customer_app/features/active_orders/data/repositories/active_orders_repository_impl.dart';
 import 'package:customer_app/features/live_ride/presentation/controllers/live_ride_controller.dart';
+import 'package:customer_app/features/profile/presentation/screens/loyalty_screen.dart';
+import 'package:customer_app/features/profile/presentation/screens/promo_list_screen.dart';
+import 'package:customer_app/features/ride_booking/presentation/providers/discover_promos_provider.dart';
 import 'package:customer_app/features/profile/data/repositories/profile_repository_impl.dart';
 
 part 'auth_controller.g.dart';
@@ -42,6 +45,14 @@ class AuthController extends _$AuthController {
       if (previous?.jobStatus != next.jobStatus) {
         if (next.jobStatus == 'CANCELLED' || next.jobStatus == 'COMPLETED') {
           clearActiveJob();
+        }
+        // Any cancel (customer, driver or system) makes the backend return the
+        // promo code and loyalty points and void/refund the QR — drop the
+        // cached copies so coupon lists and points show them again.
+        if (next.jobStatus == 'CANCELLED') {
+          ref.invalidate(promoListProvider);
+          ref.invalidate(discoverPromosProvider);
+          ref.invalidate(loyaltySummaryProvider);
         } else if (next.jobStatus == 'ACCEPTED') {
           checkActiveJob();
         }

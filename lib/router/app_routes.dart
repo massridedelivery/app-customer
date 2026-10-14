@@ -59,6 +59,8 @@ import 'package:customer_app/features/trips/presentation/screens/trip_detail_scr
     as customer_app_trip_detail;
 import 'package:customer_app/features/trips/presentation/screens/trips_screen.dart';
 import 'package:customer_app/features/trips/domain/models/history_order.dart';
+import 'package:customer_app/core/auth/account_block.dart';
+import 'package:customer_app/features/auth/presentation/screens/account_blocked_screen.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -84,6 +86,10 @@ class RouterNotifier extends ChangeNotifier {
   }
 
   RouterNotifier(this._ref) {
+    // A suspended/deleted account must land on its notice immediately.
+    _ref.listen(accountBlockProvider, (previous, next) {
+      if (previous != next) notifyListeners();
+    });
     _ref.listen(authControllerProvider, (previous, next) {
       // If the user's authentication state changes (e.g., login/logout),
       // we reset splashShown so they see the splash screen again.
@@ -136,6 +142,13 @@ final routerProvider = Provider<GoRouter>((ref) {
       final isAuthenticated = authState.isAuthenticated;
       final activeJobId = authState.activeJobId;
       final currentPath = state.matchedLocation;
+
+      // Suspended / deleted account (403 from the backend): hold the app on
+      // the notice — it outranks the splash gate and every other rule.
+      if (ref.read(accountBlockProvider) != null) {
+        return currentPath == '/account-blocked' ? null : '/account-blocked';
+      }
+      if (currentPath == '/account-blocked') return '/main';
 
       final isAuthPath = currentPath.startsWith('/auth');
       final isSplash = currentPath == '/splash';
@@ -228,6 +241,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/splash',
         builder: (context, state) => const SplashScreen(),
+      ),
+      GoRoute(
+        path: '/account-blocked',
+        builder: (context, state) => const AccountBlockedScreen(),
       ),
       GoRoute(
         path: '/onboarding',

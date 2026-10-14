@@ -279,44 +279,16 @@ class VehicleSelectionSheet extends ConsumerWidget {
             ),
           ),
 
-          // Coupon discount summary — a soft success chip with its own breathing
-          // room so it doesn't read as cramped against the payment row / button.
-          if (bookingState.promoDiscount > 0)
-            Container(
-              margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              decoration: BoxDecoration(
-                color: _kSuccessBg,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.local_offer_rounded,
-                    size: 16,
-                    color: _kSuccessFg,
-                  ),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: Text(
-                      bookingState.appliedPromoCode != null
-                          ? '${l10n.couponDiscount} ${bookingState.appliedPromoCode}'
-                          : l10n.couponDiscount,
-                      style: AppTypography.label2.copyWith(
-                        color: _kSuccessFg,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  Text(
-                    '-฿${bookingState.promoDiscount.toStringAsFixed(0)}',
-                    style: AppTypography.label2.copyWith(
-                      color: _kSuccessFg,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
+          // Coupon summary. The amount is what the fare estimate actually took
+          // off (the selected vehicle's `discount`), not the validate call's
+          // figure — otherwise the chip promised a discount the price didn't
+          // show. A code the estimate didn't apply gets a neutral note instead.
+          if (bookingState.appliedPromoCode != null &&
+              !bookingAsync.isLoading &&
+              estimations.isNotEmpty)
+            _CouponSummary(
+              code: bookingState.appliedPromoCode!,
+              discount: (selectedEstimation ?? estimations.first).discount,
             ),
 
           // Request button. Disabled until a vehicle is picked — and the label
@@ -452,6 +424,53 @@ class _EmptyEstimate extends StatelessWidget {
           OutlinedButton(onPressed: onAction, child: Text(actionLabel!)),
         ],
       ],
+    );
+  }
+}
+
+/// The applied-coupon chip under the vehicle list: green with the amount when
+/// the estimate discounted the fare, a neutral note when it didn't.
+class _CouponSummary extends StatelessWidget {
+  final String code;
+  final double discount;
+
+  const _CouponSummary({required this.code, required this.discount});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final applied = discount > 0;
+    final fg = applied ? _kSuccessFg : AppColors.textSecondary;
+    final style = AppTypography.label2.copyWith(
+      color: fg,
+      fontWeight: FontWeight.bold,
+    );
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: applied ? _kSuccessBg : AppColors.semanticGrayNeutralBgMidgray,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            applied ? Icons.local_offer_rounded : Icons.info_outline_rounded,
+            size: 16,
+            color: fg,
+          ),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text(
+              applied
+                  ? '${l10n.couponDiscount} $code'
+                  : l10n.couponNotAppliedToFare(code),
+              style: style,
+            ),
+          ),
+          if (applied) Text('-฿${discount.toStringAsFixed(0)}', style: style),
+        ],
+      ),
     );
   }
 }

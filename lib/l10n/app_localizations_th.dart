@@ -687,6 +687,11 @@ class AppLocalizationsTh extends AppLocalizations {
   String get couponDiscount => 'ส่วนลดคูปอง';
 
   @override
+  String couponNotAppliedToFare(String code) {
+    return 'โค้ด $code ยังไม่ถูกหักจากค่าโดยสาร';
+  }
+
+  @override
   String get selectVehicleFirst => 'เลือกประเภทรถก่อน';
 
   @override

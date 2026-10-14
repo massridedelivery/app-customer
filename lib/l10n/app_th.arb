@@ -243,6 +243,7 @@
   "promptPay": "พร้อมเพย์",
   "selectPaymentMethod": "เลือกวิธีชำระเงิน",
   "couponDiscount": "ส่วนลดคูปอง",
+  "couponNotAppliedToFare": "โค้ด {code} ยังไม่ถูกหักจากค่าโดยสาร",
   "selectVehicleFirst": "เลือกประเภทรถก่อน",
   "couponApplied": "ใช้คูปอง \"{code}\" สำเร็จ",
   "@couponApplied": {

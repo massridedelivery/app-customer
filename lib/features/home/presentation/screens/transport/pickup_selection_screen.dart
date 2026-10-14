@@ -72,6 +72,9 @@ class _PickupSelectionScreenState extends ConsumerState<PickupSelectionScreen> {
             mapToolbarEnabled: true,
             onMapCreated: (controller) {
               _mapController = controller;
+              ref
+                  .read(homeControllerProvider.notifier)
+                  .seedMapCenter(initialTarget ?? MapDefaults.bangkokCenter);
               // The GPS fix can land while this map's platform view is still
               // being created, so the recenter listener above fires with a
               // null controller and is dropped — leaving the camera on the BKK

@@ -23,6 +23,15 @@ class VehicleSelectionSheet extends ConsumerWidget {
   final VoidCallback onRequest;
   final VoidCallback onPromoTap;
 
+  /// Pickup or dropoff is still unset, so no estimate can be requested.
+  final bool isMissingLocation;
+
+  /// Opens the pickup/dropoff picker (shown when [isMissingLocation]).
+  final VoidCallback? onPickLocation;
+
+  /// Re-runs the fare estimate after it failed.
+  final VoidCallback? onRetryEstimate;
+
   const VehicleSelectionSheet({
     super.key,
     required this.scrollController,
@@ -30,6 +39,9 @@ class VehicleSelectionSheet extends ConsumerWidget {
     required this.onRequest,
     required this.onPromoTap,
     required this.onVehicleSelected,
+    this.isMissingLocation = false,
+    this.onPickLocation,
+    this.onRetryEstimate,
   });
 
   @override
@@ -101,7 +113,24 @@ class VehicleSelectionSheet extends ConsumerWidget {
                     children: [
                       SizedBox(
                         height: 160,
-                        child: Center(child: Text(l10n.calculatingPrice)),
+                        child: _EmptyEstimate(
+                          // Without a pickup/dropoff no estimate is ever sent,
+                          // and a failed one never retries on its own — so
+                          // only say "calculating" while one can still land.
+                          message: isMissingLocation
+                              ? l10n.selectPickupFirst
+                              : bookingAsync.hasError
+                              ? l10n.fareEstimateFailed
+                              : l10n.calculatingPrice,
+                          actionLabel: isMissingLocation
+                              ? l10n.choosePickupAction
+                              : bookingAsync.hasError
+                              ? l10n.retry
+                              : null,
+                          onAction: isMissingLocation
+                              ? onPickLocation
+                              : onRetryEstimate,
+                        ),
                       ),
                     ],
                   )
@@ -222,7 +251,8 @@ class VehicleSelectionSheet extends ConsumerWidget {
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
-                                bookingState.appliedPromoCode ?? l10n.promoLabel,
+                                bookingState.appliedPromoCode ??
+                                    l10n.promoLabel,
                                 style: AppTypography.label2.copyWith(
                                   fontWeight: FontWeight.bold,
                                   color: bookingState.appliedPromoCode != null
@@ -308,8 +338,7 @@ class VehicleSelectionSheet extends ConsumerWidget {
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
                   disabledBackgroundColor: AppColors.semanticDisabledBgLow,
-                  disabledForegroundColor:
-                      AppColors.semanticDisabledFgOnGray,
+                  disabledForegroundColor: AppColors.semanticDisabledFgOnGray,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(28),
                   ),
@@ -395,6 +424,34 @@ class VehicleSelectionSheet extends ConsumerWidget {
           ),
         );
       },
+    );
+  }
+}
+
+/// Placeholder for the vehicle list when there are no estimations yet, with
+/// an optional action (pick a location / retry).
+class _EmptyEstimate extends StatelessWidget {
+  final String message;
+  final String? actionLabel;
+  final VoidCallback? onAction;
+
+  const _EmptyEstimate({
+    required this.message,
+    this.actionLabel,
+    this.onAction,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(message, textAlign: TextAlign.center),
+        if (actionLabel != null && onAction != null) ...[
+          const SizedBox(height: 12),
+          OutlinedButton(onPressed: onAction, child: Text(actionLabel!)),
+        ],
+      ],
     );
   }
 }

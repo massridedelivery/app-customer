@@ -362,7 +362,10 @@ class _ServiceSelectionScreenState
   ) {
     // Badge per service, derived from the real promo list. Null → no badge.
     final rideBadge = serviceBadgeOf(promos, 'ride');
-    final foodBadge = serviceBadgeOf(promos, 'food');
+    // Food ordering isn't live (the card opens "coming soon"), so it gets no
+    // badge — a discount on a service nobody can use reads as bait. Restore
+    // `serviceBadgeOf(promos, 'food')` when the card opens the real flow.
+    const ({String text, Color color})? foodBadge = null;
     final messengerBadge = serviceBadgeOf(promos, 'messenger');
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12),

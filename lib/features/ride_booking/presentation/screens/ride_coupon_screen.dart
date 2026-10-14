@@ -35,6 +35,14 @@ class _RideCouponScreenState extends ConsumerState<RideCouponScreen> {
     // Validating / applying a code is account-based; a guest logs in first.
     if (!ensureLoggedIn(context, ref)) return;
 
+    // A code is checked against the fare; with no estimate yet the subtotal
+    // would be 0 and the backend answers a bare "invalid request".
+    final booking = ref.read(bookingControllerProvider).value;
+    if (booking == null || booking.estimations.isEmpty) {
+      setState(() => _errorMessage = 'กรุณาเลือกจุดรับ-ส่งก่อนใช้คูปอง');
+      return;
+    }
+
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -60,13 +68,11 @@ class _RideCouponScreenState extends ConsumerState<RideCouponScreen> {
         });
       }
     } catch (e) {
-      final errorMsg = e.toString();
       setState(() {
-        if (errorMsg.startsWith('Exception: ')) {
-          _errorMessage = errorMsg.substring('Exception: '.length);
-        } else {
-          _errorMessage = errorMsg;
-        }
+        _errorMessage = friendlyError(
+          e,
+          fallback: 'ใช้คูปองนี้ไม่ได้ กรุณาลองใหม่',
+        );
       });
     } finally {
       if (mounted) {

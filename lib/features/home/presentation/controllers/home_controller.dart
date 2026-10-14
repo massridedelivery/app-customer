@@ -285,10 +285,24 @@ class HomeController extends _$HomeController {
   }
 
   void startSelection({RideSelectionMode mode = RideSelectionMode.pickup}) {
+    // Drop whatever the previous selection left behind. A stale tempAddress
+    // or map centre from an earlier map let ถัดไป commit an old address with
+    // a different pin — the booking then priced a route to the wrong place.
+    _liveMapCenter = null;
+    _geocodeLookup++;
     state = state.copyWith(
       selectionMode: mode,
       isSearching: true,
+      tempLocation: null,
+      tempAddress: null,
     );
+  }
+
+  /// Seeds the live map centre with a freshly created map's camera target, so
+  /// its first [onCameraIdle] resolves THIS map's centre rather than the last
+  /// position of a map that was open before it.
+  void seedMapCenter(LatLng target) {
+    _liveMapCenter = target;
   }
 
   /// Commits the map's current centre as the pickup/dropoff/… for the active

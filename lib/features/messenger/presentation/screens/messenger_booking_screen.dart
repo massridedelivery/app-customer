@@ -8,6 +8,7 @@ import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/core/constants/feature_flags.dart';
 import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
 import 'package:customer_app/features/home/presentation/states/home_state.dart';
+import 'package:customer_app/features/messenger/domain/models/messenger_estimate.dart';
 import 'package:customer_app/features/messenger/domain/models/messenger_vehicle_type.dart';
 import 'package:customer_app/features/messenger/presentation/controllers/messenger_booking_controller.dart';
 import 'package:customer_app/features/messenger/presentation/states/messenger_booking_state.dart';
@@ -1216,27 +1217,7 @@ class _MessengerBookingScreenState
             'ระยะทาง',
             '${estimate.distanceKm.toStringAsFixed(1)} กม. (~${estimate.durationMin.round()} นาที)',
           ),
-          _priceRow('ค่าส่ง', '฿${estimate.baseFare.toStringAsFixed(0)}'),
-          if (estimate.surcharge > 0)
-            _priceRow(
-              'ค่าธรรมเนียมขนาด',
-              '฿${estimate.surcharge.toStringAsFixed(0)}',
-            ),
-          if (estimate.discount > 0)
-            _priceRow(
-              'ส่วนลด',
-              '-฿${estimate.discount.toStringAsFixed(0)}',
-              valueColor: AppColors.foundationGreen500,
-            ),
-          // STOPGAP: reconcile the line items with the per-mode total until BE
-          // sends real per-mode pricing (SCRUM-71).
-          if (bookingState.deliveryType == kDeliveryTwoHour &&
-              estimate.totalFare > bookingState.displayTotalFare)
-            _priceRow(
-              'ปรับตามโหมด (ส่ง 2 ชม.)',
-              '-฿${(estimate.totalFare - bookingState.displayTotalFare).toStringAsFixed(0)}',
-              valueColor: AppColors.foundationGreen500,
-            ),
+          ..._fareLines(bookingState, estimate),
           const Divider(height: 16, color: AppColors.foundationGrayscale200),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1259,6 +1240,53 @@ class _MessengerBookingScreenState
         ],
       ),
     );
+  }
+
+  /// Fare line items for the selected delivery mode. The per-mode entry in
+  /// `service_levels[]` splits the size and express surcharges; the top-level
+  /// `surcharge` lumps them together (and only for INSTANT), so it must not be
+  /// labelled as the size fee.
+  List<Widget> _fareLines(
+    MessengerBookingState bookingState,
+    MessengerEstimate estimate,
+  ) {
+    final level = bookingState.selectedServiceLevel;
+    if (level != null) {
+      return [
+        _priceRow('ค่าส่ง', '฿${level.baseFare.toStringAsFixed(0)}'),
+        if (level.sizeSurcharge > 0)
+          _priceRow(
+            'ค่าธรรมเนียมขนาด',
+            '฿${level.sizeSurcharge.toStringAsFixed(0)}',
+          ),
+        if (level.expressSurcharge > 0)
+          _priceRow(
+            'ค่าส่งด่วน',
+            '฿${level.expressSurcharge.toStringAsFixed(0)}',
+          ),
+        if (level.discount > 0)
+          _priceRow(
+            'ส่วนลด',
+            '-฿${level.discount.toStringAsFixed(0)}',
+            valueColor: AppColors.foundationGreen500,
+          ),
+      ];
+    }
+    // No per-mode pricing from BE: show the top-level lines as they are.
+    return [
+      _priceRow('ค่าส่ง', '฿${estimate.baseFare.toStringAsFixed(0)}'),
+      if (estimate.surcharge > 0)
+        _priceRow(
+          'ค่าธรรมเนียมเพิ่มเติม',
+          '฿${estimate.surcharge.toStringAsFixed(0)}',
+        ),
+      if (estimate.discount > 0)
+        _priceRow(
+          'ส่วนลด',
+          '-฿${estimate.discount.toStringAsFixed(0)}',
+          valueColor: AppColors.foundationGreen500,
+        ),
+    ];
   }
 
   Widget _priceRow(String label, String value, {Color? valueColor}) {

@@ -45,9 +45,7 @@ Widget _wrap(HomeState state) {
 }
 
 ElevatedButton _confirmButton(WidgetTester tester) =>
-    tester.widget<ElevatedButton>(
-      find.widgetWithText(ElevatedButton, 'ถัดไป'),
-    );
+    tester.widget<ElevatedButton>(find.widgetWithText(ElevatedButton, 'ถัดไป'));
 
 void main() {
   group('confirmSelection', () {
@@ -87,7 +85,10 @@ void main() {
       final notifier = container.read(homeControllerProvider.notifier);
 
       expect(notifier.confirmSelection(), isFalse);
-      expect(container.read(homeControllerProvider).dropoffLocation, _oldPickup);
+      expect(
+        container.read(homeControllerProvider).dropoffLocation,
+        _oldPickup,
+      );
     });
 
     test('commits once both the coordinate and the address are in', () {
@@ -108,6 +109,29 @@ void main() {
       expect(state.selectionMode, RideSelectionMode.none);
       expect(state.tempLocation, isNull);
       expect(state.tempAddress, isNull);
+    });
+  });
+
+  group('startSelection', () {
+    test('drops a previous selection\'s pin and address', () {
+      // Leftovers from an earlier map: confirming them on a freshly opened
+      // map committed an old address with a different pin.
+      final container = _container(
+        const HomeState(tempLocation: _oldPickup, tempAddress: 'Stale place'),
+      );
+      final notifier = container.read(homeControllerProvider.notifier);
+
+      notifier.startSelection(mode: RideSelectionMode.dropoff);
+
+      final state = container.read(homeControllerProvider);
+      expect(state.selectionMode, RideSelectionMode.dropoff);
+      expect(state.tempLocation, isNull);
+      expect(state.tempAddress, isNull);
+      expect(
+        notifier.confirmSelection(),
+        isFalse,
+        reason: 'nothing settled on the new map yet',
+      );
     });
   });
 

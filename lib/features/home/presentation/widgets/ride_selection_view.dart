@@ -180,12 +180,33 @@ class RideSelectionView extends ConsumerWidget {
                               if (!notifier.confirmSelection()) return;
                               if (homeState.selectionMode ==
                                   RideSelectionMode.dropoff) {
+                                // No pickup yet (location off, nothing picked):
+                                // the booking screen can't price the trip, so
+                                // go back to the pickup field instead.
+                                if (ref
+                                        .read(homeControllerProvider)
+                                        .pickupLocation ==
+                                    null) {
+                                  ScaffoldMessenger.of(context)
+                                    ..hideCurrentSnackBar()
+                                    ..showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          AppLocalizations.of(
+                                            context,
+                                          )!.selectPickupFirst,
+                                        ),
+                                      ),
+                                    );
+                                  context.pop();
+                                  return;
+                                }
                                 context.push('/booking');
                               } else {
                                 context.pop();
                               }
                             },
-                       style: ElevatedButton.styleFrom(
+                      style: ElevatedButton.styleFrom(
                         backgroundColor: isFromAddAddress
                             ? AppColors.primary
                             : AppColors.foundationGreen500,

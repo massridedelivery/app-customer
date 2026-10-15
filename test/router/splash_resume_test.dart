@@ -1,3 +1,5 @@
+import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
+import 'package:customer_app/features/home/presentation/states/home_state.dart';
 import 'package:customer_app/app.dart';
 import 'package:customer_app/core/managers/providers.dart';
 import 'package:customer_app/core/services/push_notification_service.dart';
@@ -28,6 +30,18 @@ class _NoopPush implements PushNotificationService {
   dynamic noSuchMethod(Invocation invocation) => null;
 }
 
+/// The splash now creates HomeController at launch (to ask for location
+/// early); keep its GPS / network bootstrap out of these tests.
+class _FakeHomeController extends HomeController {
+  static int builds = 0;
+
+  @override
+  HomeState build() {
+    builds++;
+    return const HomeState();
+  }
+}
+
 void main() {
   testWidgets(
     'returning to foreground does not re-show the splash screen',
@@ -41,6 +55,7 @@ void main() {
             sharedPreferencesProvider.overrideWithValue(prefs),
             pushNotificationServiceProvider.overrideWithValue(_NoopPush()),
             authControllerProvider.overrideWith(_FakeAuthController.new),
+            homeControllerProvider.overrideWith(_FakeHomeController.new),
           ],
           child: const App(),
         ),
@@ -48,6 +63,12 @@ void main() {
 
       // Cold start lands on the splash gate.
       expect(find.byType(SplashScreen), findsOneWidget);
+      expect(
+        _FakeHomeController.builds,
+        1,
+        reason: 'the splash starts the location bootstrap (permission ask) '
+            'at launch, before onboarding/home',
+      );
 
       // Splash auto-advances after its 2s delay. Pump manually (not
       // pumpAndSettle) because the splash pulse animation repeats forever.

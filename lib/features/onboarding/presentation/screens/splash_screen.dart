@@ -5,6 +5,7 @@ import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:customer_app/router/app_routes.dart';
+import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -31,6 +32,12 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     _scale = Tween<double>(begin: 0.97, end: 1.05).animate(
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
+    // Ask for location as soon as the app opens (iOS + Android): creating
+    // the keep-alive HomeController starts its location bootstrap, which shows
+    // the system permission dialog on first launch. Doing it here rather than
+    // when home first renders means the current location is usually ready by
+    // the time the home screen appears.
+    ref.read(homeControllerProvider);
     _navigateToNextScreen();
   }
 

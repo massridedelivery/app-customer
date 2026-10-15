@@ -1,3 +1,4 @@
+import 'package:customer_app/features/profile/data/welcome_promo_store.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:customer_app/features/ride_booking/domain/models/vehicle_estimation.dart';
@@ -189,6 +190,11 @@ class BookingController extends _$BookingController {
       );
     });
 
+    if (jobId != null) {
+      // The welcome code is single-use: stop pre-filling it once a ride is
+      // booked with it.
+      await ref.read(welcomePromoStoreProvider).consume(currentState.appliedPromoCode);
+    }
     return jobId != null;
   }
 

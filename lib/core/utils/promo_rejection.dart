@@ -43,6 +43,7 @@ String? promoReasonToThai(String? reason, {String? languageCode}) {
   final l10n = AppLanguage.l10n(languageCode);
   final s = raw.toLowerCase();
   // Checked before the generic "limit" / "minimum" matches below.
+  if (s.contains('referred friend')) return l10n.promoRejectReferredOnly;
   if (s.contains('fully redeemed')) return l10n.promoRejectFullyRedeemed;
   if (s.contains('not available') || s.contains('not active')) {
     return l10n.promoRejectNotAvailable;

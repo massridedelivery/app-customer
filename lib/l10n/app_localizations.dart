@@ -3586,7 +3586,7 @@ abstract class AppLocalizations {
   /// No description provided for @profileReferralTitle.
   ///
   /// In en, this message translates to:
-  /// **'Invite friends'**
+  /// **'Refer a friend'**
   String get profileReferralTitle;
 
   /// No description provided for @profileReferralHeadline.
@@ -5118,6 +5118,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Not now'**
   String get homeLocationPromptLater;
+
+  /// No description provided for @referralRewardSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Your friend gets ฿{friendValue} off · you get {points} points after their first order'**
+  String referralRewardSummary(String friendValue, int points);
+
+  /// No description provided for @referralShareText.
+  ///
+  /// In en, this message translates to:
+  /// **'Use code {code} on Mass Move and get ฿{value} off'**
+  String referralShareText(String code, String value);
+
+  /// No description provided for @referralStatInvited.
+  ///
+  /// In en, this message translates to:
+  /// **'Invited'**
+  String get referralStatInvited;
+
+  /// No description provided for @referralStatCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get referralStatCompleted;
+
+  /// No description provided for @referralStatPoints.
+  ///
+  /// In en, this message translates to:
+  /// **'Points earned'**
+  String get referralStatPoints;
+
+  /// No description provided for @referralStatPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting on {count} friends\' first order ({points} points)'**
+  String referralStatPending(int count, int points);
+
+  /// No description provided for @referralApplySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a friend\'s code to get ฿{value} off your first order'**
+  String referralApplySubtitle(String value);
+
+  /// No description provided for @referralApplyBefore.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter by {date}'**
+  String referralApplyBefore(String date);
+
+  /// No description provided for @referralUseWelcomeCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t forget to use {code} on your first order'**
+  String referralUseWelcomeCode(String code);
+
+  /// No description provided for @referralApplySuccessPromo.
+  ///
+  /// In en, this message translates to:
+  /// **'You got code {code}: ฿{value} off'**
+  String referralApplySuccessPromo(String code, String value);
+
+  /// No description provided for @referralErrInvalidCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid code'**
+  String get referralErrInvalidCode;
+
+  /// No description provided for @referralErrSelf.
+  ///
+  /// In en, this message translates to:
+  /// **'You can\'t use your own code'**
+  String get referralErrSelf;
+
+  /// No description provided for @referralErrAlreadyUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve already used a referral code'**
+  String get referralErrAlreadyUsed;
+
+  /// No description provided for @referralErrNotNewCustomer.
+  ///
+  /// In en, this message translates to:
+  /// **'Referral codes are for new customers before their first order'**
+  String get referralErrNotNewCustomer;
+
+  /// No description provided for @referralErrWindowClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'The time to enter a referral code has passed'**
+  String get referralErrWindowClosed;
+
+  /// No description provided for @referralErrCodeFull.
+  ///
+  /// In en, this message translates to:
+  /// **'This code has reached its limit'**
+  String get referralErrCodeFull;
+
+  /// No description provided for @referralErrExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'This code has expired'**
+  String get referralErrExpired;
+
+  /// No description provided for @referralErrDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Referral codes aren\'t available right now'**
+  String get referralErrDisabled;
+
+  /// No description provided for @promoRejectReferredOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'This code is for referred friends only'**
+  String get promoRejectReferredOnly;
 }
 
 class _AppLocalizationsDelegate

@@ -1906,7 +1906,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Can\'t submit your request right now';
 
   @override
-  String get profileReferralTitle => 'Invite friends';
+  String get profileReferralTitle => 'Refer a friend';
 
   @override
   String get profileReferralHeadline => 'Invite friends to MASS';
@@ -2741,4 +2741,79 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homeLocationPromptLater => 'Not now';
+
+  @override
+  String referralRewardSummary(String friendValue, int points) {
+    return 'Your friend gets ฿$friendValue off · you get $points points after their first order';
+  }
+
+  @override
+  String referralShareText(String code, String value) {
+    return 'Use code $code on Mass Move and get ฿$value off';
+  }
+
+  @override
+  String get referralStatInvited => 'Invited';
+
+  @override
+  String get referralStatCompleted => 'Completed';
+
+  @override
+  String get referralStatPoints => 'Points earned';
+
+  @override
+  String referralStatPending(int count, int points) {
+    return 'Waiting on $count friends\' first order ($points points)';
+  }
+
+  @override
+  String referralApplySubtitle(String value) {
+    return 'Enter a friend\'s code to get ฿$value off your first order';
+  }
+
+  @override
+  String referralApplyBefore(String date) {
+    return 'Enter by $date';
+  }
+
+  @override
+  String referralUseWelcomeCode(String code) {
+    return 'Don\'t forget to use $code on your first order';
+  }
+
+  @override
+  String referralApplySuccessPromo(String code, String value) {
+    return 'You got code $code: ฿$value off';
+  }
+
+  @override
+  String get referralErrInvalidCode => 'Invalid code';
+
+  @override
+  String get referralErrSelf => 'You can\'t use your own code';
+
+  @override
+  String get referralErrAlreadyUsed => 'You\'ve already used a referral code';
+
+  @override
+  String get referralErrNotNewCustomer =>
+      'Referral codes are for new customers before their first order';
+
+  @override
+  String get referralErrWindowClosed =>
+      'The time to enter a referral code has passed';
+
+  @override
+  String get referralErrCodeFull => 'This code has reached its limit';
+
+  @override
+  String get referralErrExpired => 'This code has expired';
+
+  @override
+  String get referralErrDisabled =>
+      'Referral codes aren\'t available right now';
+
+  @override
+  String get promoRejectReferredOnly =>
+      'This code is for referred friends only';
 }

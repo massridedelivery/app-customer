@@ -3,6 +3,7 @@ import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/features/profile/data/datasources/loyalty_remote_data_source.dart';
+import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -25,6 +26,7 @@ class LoyaltyScreen extends ConsumerWidget {
     final summaryAsync = ref.watch(loyaltySummaryProvider);
     final pointsAsync = ref.watch(_loyaltyPointsProvider);
     final cashbackAsync = ref.watch(_cashbackProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -38,7 +40,7 @@ class LoyaltyScreen extends ConsumerWidget {
       body: summaryAsync.when(
         loading: () => const Center(child: MassLoadingM(size: 72)),
         error: (e, s) => Center(
-          child: Text('ไม่สามารถโหลดข้อมูลได้', style: AppTypography.body2),
+          child: Text(l10n.profileLoyaltyLoadFailed, style: AppTypography.body2),
         ),
         data: (summary) => SingleChildScrollView(
           padding: const EdgeInsets.all(20),
@@ -51,14 +53,14 @@ class LoyaltyScreen extends ConsumerWidget {
               Row(
                 children: [
                   _StatCard(
-                    label: 'แต้มสะสม',
+                    label: l10n.profileLoyaltyPointsBalance,
                     value: '${summary['points_balance'] ?? 0}',
                     icon: Icons.stars_rounded,
                     color: const Color(0xFFEB8C00),
                   ),
                   const SizedBox(width: 12),
                   _StatCard(
-                    label: 'เงินคืน (฿)',
+                    label: l10n.profileLoyaltyCashbackBalance,
                     value:
                         _safeAmount(summary['cashback_balance']),
                     icon: Icons.account_balance_wallet_rounded,
@@ -77,7 +79,7 @@ class LoyaltyScreen extends ConsumerWidget {
                     summary['points_balance'] ?? 0,
                   ),
                   icon: const Icon(Icons.redeem),
-                  label: const Text('แลกแต้ม'),
+                  label: Text(l10n.profileLoyaltyRedeemPoints),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
@@ -92,7 +94,10 @@ class LoyaltyScreen extends ConsumerWidget {
               // Points transactions
               Align(
                 alignment: Alignment.centerLeft,
-                child: Text('ประวัติแต้ม', style: AppTypography.heading4),
+                child: Text(
+                  l10n.profileLoyaltyPointsHistory,
+                  style: AppTypography.heading4,
+                ),
               ),
               const SizedBox(height: 12),
               pointsAsync.when(
@@ -117,7 +122,10 @@ class LoyaltyScreen extends ConsumerWidget {
               const SizedBox(height: 24),
               Align(
                 alignment: Alignment.centerLeft,
-                child: Text('ประวัติเงินคืน', style: AppTypography.heading4),
+                child: Text(
+                  l10n.profileLoyaltyCashbackHistory,
+                  style: AppTypography.heading4,
+                ),
               ),
               const SizedBox(height: 12),
               cashbackAsync.when(
@@ -140,21 +148,25 @@ class LoyaltyScreen extends ConsumerWidget {
   }
 
   void _showRedeemDialog(BuildContext context, WidgetRef ref, int points) {
+    final l10n = AppLocalizations.of(context)!;
     final controller = TextEditingController();
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('แลกแต้ม'),
+        title: Text(l10n.profileLoyaltyRedeemPoints),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('คุณมี $points แต้ม', style: AppTypography.body2),
+            Text(
+              l10n.profileLoyaltyYouHavePoints('$points'),
+              style: AppTypography.body2,
+            ),
             const SizedBox(height: 12),
             TextField(
               controller: controller,
               keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'จำนวนแต้มที่ต้องการแลก',
+              decoration: InputDecoration(
+                labelText: l10n.profileLoyaltyRedeemAmountLabel,
               ),
             ),
           ],
@@ -162,7 +174,7 @@ class LoyaltyScreen extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('ยกเลิก'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -175,7 +187,7 @@ class LoyaltyScreen extends ConsumerWidget {
                   if (ctx.mounted) {
                     Navigator.pop(ctx);
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('แลกแต้มสำเร็จ!')),
+                      SnackBar(content: Text(l10n.profileLoyaltyRedeemSuccess)),
                     );
                   }
                 } catch (e) {
@@ -183,7 +195,7 @@ class LoyaltyScreen extends ConsumerWidget {
                 }
               }
             },
-            child: const Text('แลก'),
+            child: Text(l10n.profileLoyaltyRedeem),
           ),
         ],
       ),
@@ -221,6 +233,7 @@ class _TierCard extends StatelessWidget {
     final progress = (points / (points + toNext)).clamp(0.0, 1.0);
     final cashbackPct = ((summary['cashback_rate'] ?? 0.0) * 100)
         .toStringAsFixed(0);
+    final l10n = AppLocalizations.of(context)!;
 
     return Container(
       width: double.infinity,
@@ -266,7 +279,7 @@ class _TierCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  'คืน $cashbackPct%',
+                  l10n.profileLoyaltyCashbackRate(cashbackPct),
                   style: AppTypography.caption4.copyWith(color: Colors.white),
                 ),
               ),
@@ -274,7 +287,7 @@ class _TierCard extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           Text(
-            '$points แต้ม',
+            l10n.profileLoyaltyPoints('$points'),
             style: AppTypography.heading2.copyWith(color: Colors.white),
           ),
           const SizedBox(height: 12),
@@ -282,11 +295,11 @@ class _TierCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'ไปยังระดับ $nextTier',
+                l10n.profileLoyaltyNextTier('$nextTier'),
                 style: AppTypography.caption5.copyWith(color: Colors.white60),
               ),
               Text(
-                'อีก $toNext แต้ม',
+                l10n.profileLoyaltyPointsToGo('$toNext'),
                 style: AppTypography.caption5.copyWith(color: Colors.white70),
               ),
             ],

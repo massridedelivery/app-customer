@@ -2,6 +2,7 @@ import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/features/profile/data/datasources/account_remote_data_source.dart';
+import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -11,10 +12,11 @@ class PrivacyPdpaScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AppColors.semanticGrayNeutralBgWhite,
       appBar: AppBar(
-        title: Text('ความเป็นส่วนตัว PDPA', style: AppTypography.heading4),
+        title: Text(l10n.profilePdpaTitle, style: AppTypography.heading4),
         backgroundColor: AppColors.background,
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
@@ -44,14 +46,14 @@ class PrivacyPdpaScreen extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'สิทธิ์ตาม PDPA',
+                        l10n.profilePdpaRightsTitle,
                         style: AppTypography.heading4.copyWith(
                           color: AppColors.primary,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'คุณมีสิทธิ์จัดการข้อมูลส่วนบุคคลของคุณตามพระราชบัญญัติ PDPA',
+                        l10n.profilePdpaRightsBody,
                         style: AppTypography.body2.copyWith(
                           color: AppColors.textSecondary,
                         ),
@@ -63,34 +65,34 @@ class PrivacyPdpaScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 24),
-          Text('การจัดการข้อมูล', style: AppTypography.heading4),
+          Text(l10n.profilePdpaDataManagement, style: AppTypography.heading4),
           const SizedBox(height: 14),
           _PdpaTile(
             icon: Icons.download_rounded,
             iconColor: AppColors.primary,
-            title: 'ส่งออกข้อมูลของฉัน',
-            subtitle: 'ดาวน์โหลดข้อมูลส่วนบุคคลทั้งหมดในรูปแบบ JSON',
+            title: l10n.profilePdpaExportTitle,
+            subtitle: l10n.profilePdpaExportSubtitle,
             onTap: () => _exportData(context, ref),
           ),
           const SizedBox(height: 12),
           _PdpaTile(
             icon: Icons.history_edu_rounded,
             iconColor: AppColors.primary,
-            title: 'ประวัติความยินยอม',
-            subtitle: 'ดูสถานะความยินยอมของคุณ',
+            title: l10n.profilePdpaConsentHistoryTitle,
+            subtitle: l10n.profilePdpaConsentHistorySubtitle,
             onTap: () => _showConsentDialog(context, ref),
           ),
           const SizedBox(height: 32),
           Text(
-            'อันตราย',
+            l10n.profilePdpaDangerZone,
             style: AppTypography.heading4.copyWith(color: AppColors.error),
           ),
           const SizedBox(height: 14),
           _PdpaTile(
             icon: Icons.delete_forever_rounded,
             iconColor: AppColors.error,
-            title: 'ยื่นคำร้องลบบัญชี',
-            subtitle: 'ส่งคำขอลบบัญชีและข้อมูลทั้งหมด (ไม่สามารถย้อนกลับได้)',
+            title: l10n.profilePdpaDeletionTitle,
+            subtitle: l10n.profilePdpaDeletionSubtitle,
             onTap: () => _requestDeletion(context, ref),
             bgColor: AppColors.foundationRed100,
           ),
@@ -100,12 +102,16 @@ class PrivacyPdpaScreen extends ConsumerWidget {
   }
 
   void _exportData(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (ctx) => const AlertDialog(
-        title: Text('กำลังส่งออกข้อมูล...'),
-        content: Center(heightFactor: 1.5, child: MassLoadingM(size: 48)),
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.profilePdpaExporting),
+        content: const Center(
+          heightFactor: 1.5,
+          child: MassLoadingM(size: 48),
+        ),
       ),
     );
     try {
@@ -113,39 +119,38 @@ class PrivacyPdpaScreen extends ConsumerWidget {
       if (context.mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('ส่งออกข้อมูลสำเร็จ ตรวจสอบอีเมลของคุณ'),
-          ),
+          SnackBar(content: Text(l10n.profilePdpaExportSuccess)),
         );
       }
     } catch (e) {
       if (context.mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('ไม่สามารถส่งออกข้อมูลได้ในขณะนี้')),
+          SnackBar(content: Text(l10n.profilePdpaExportFailed)),
         );
       }
     }
   }
 
   void _showConsentDialog(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('ความยินยอม'),
-        content: const Column(
+        title: Text(l10n.profilePdpaConsentTitle),
+        content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('นโยบายความเป็นส่วนตัว v2.1'),
-            SizedBox(height: 4),
-            Text('สถานะ: ยินยอมแล้ว ✓'),
+            Text(l10n.profilePdpaConsentPolicyVersion),
+            const SizedBox(height: 4),
+            Text(l10n.profilePdpaConsentStatus),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('ปิด'),
+            child: Text(l10n.profileClose),
           ),
         ],
       ),
@@ -153,22 +158,23 @@ class PrivacyPdpaScreen extends ConsumerWidget {
   }
 
   void _requestDeletion(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context)!;
     final reasonCtrl = TextEditingController();
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('ยื่นคำร้องลบบัญชี'),
+        title: Text(l10n.profilePdpaDeletionTitle),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('กรุณาระบุเหตุผลในการขอลบบัญชี'),
+            Text(l10n.profilePdpaDeletionReasonPrompt),
             const SizedBox(height: 12),
             TextField(
               controller: reasonCtrl,
               maxLines: 3,
-              decoration: const InputDecoration(
-                hintText: 'เหตุผล...',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                hintText: l10n.profilePdpaDeletionReasonHint,
+                border: const OutlineInputBorder(),
               ),
             ),
           ],
@@ -176,14 +182,14 @@ class PrivacyPdpaScreen extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('ยกเลิก'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
-            child: const Text(
-              'ยื่นคำร้อง',
-              style: TextStyle(color: Colors.white),
+            child: Text(
+              l10n.profilePdpaSubmitRequest,
+              style: const TextStyle(color: Colors.white),
             ),
           ),
         ],
@@ -196,15 +202,13 @@ class PrivacyPdpaScreen extends ConsumerWidget {
             .requestDeletion(reasonCtrl.text);
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('รับคำร้องแล้ว ทีมงานจะดำเนินการภายใน 30 วัน'),
-            ),
+            SnackBar(content: Text(l10n.profilePdpaDeletionReceived)),
           );
         }
       } catch (e) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('ไม่สามารถยื่นคำร้องได้ในขณะนี้')),
+            SnackBar(content: Text(l10n.profilePdpaDeletionFailed)),
           );
         }
       }

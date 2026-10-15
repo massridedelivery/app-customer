@@ -33,8 +33,10 @@ class PromptPayController extends _$PromptPayController {
   // over (the backend answers 409 for those cases).
   final Set<String> _reissuedFrom = {};
 
-  static const amountChangedNotice =
-      'ยอดชำระมีการเปลี่ยนแปลง กรุณาสแกน QR ใหม่นี้แทน QR เดิม';
+  /// Sentinel put in [PromptPayState.notice] when a voided QR was replaced
+  /// because the amount changed; the screen shows the localized message
+  /// (`payAmountChangedNotice`).
+  static const amountChangedNotice = 'amount_changed';
 
   @override
   PromptPayState build() {

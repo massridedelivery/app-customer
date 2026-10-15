@@ -92,7 +92,9 @@ class _ForgotPasswordOtpScreenState
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
         ..showSnackBar(
-          const SnackBar(content: Text('รหัส OTP ไม่ถูกต้อง กรุณาลองใหม่')),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.authInvalidOtp),
+          ),
         );
     }
   }

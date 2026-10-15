@@ -2,6 +2,7 @@ import 'package:customer_app/core/auth/account_block.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/data/support_config_provider.dart';
+import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -20,6 +21,7 @@ class AccountBlockedScreen extends ConsumerWidget {
     final phone =
         ref.watch(supportPhoneProvider).value ?? kSupportPhoneFallback;
     final isDeleted = reason == AccountBlock.deleted;
+    final l10n = AppLocalizations.of(context)!;
 
     return PopScope(
       canPop: false,
@@ -46,15 +48,15 @@ class AccountBlockedScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  isDeleted ? 'บัญชีนี้ถูกลบแล้ว' : 'บัญชีนี้ถูกระงับ',
+                  isDeleted ? l10n.authAccountDeletedTitle : l10n.authAccountSuspendedTitle,
                   style: AppTypography.heading3,
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 12),
                 Text(
                   isDeleted
-                      ? 'กรุณาติดต่อบริษัทหากมีข้อสงสัย หรือสมัครใหม่ด้วยเบอร์โทรเดิมเพื่อเริ่มบัญชีใหม่'
-                      : 'ไม่สามารถใช้งานบัญชีนี้ได้ในขณะนี้ กรุณาติดต่อบริษัท',
+                      ? l10n.authAccountDeletedBody
+                      : l10n.authAccountSuspendedBody,
                   style: AppTypography.body2.copyWith(
                     color: AppColors.textSecondary,
                   ),
@@ -64,7 +66,7 @@ class AccountBlockedScreen extends ConsumerWidget {
                 // The number is shown as text too: a tel: link may do nothing
                 // on some devices, and the user can copy it.
                 SelectableText(
-                  'ติดต่อเจ้าหน้าที่ $phone',
+                  l10n.authContactSupportPhone(phone),
                   style: AppTypography.label1,
                   textAlign: TextAlign.center,
                 ),
@@ -82,7 +84,7 @@ class AccountBlockedScreen extends ConsumerWidget {
                       }
                     },
                     icon: const Icon(Icons.call_outlined),
-                    label: const Text('โทรหาเจ้าหน้าที่'),
+                    label: Text(l10n.authCallSupport),
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -98,7 +100,7 @@ class AccountBlockedScreen extends ConsumerWidget {
                       backgroundColor: AppColors.primary,
                       foregroundColor: Colors.white,
                     ),
-                    child: const Text('ตกลง'),
+                    child: Text(l10n.authOk),
                   ),
                 ),
               ],

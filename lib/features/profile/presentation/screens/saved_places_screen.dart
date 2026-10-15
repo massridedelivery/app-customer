@@ -3,6 +3,7 @@ import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/features/home/domain/models/place.dart';
 import 'package:customer_app/features/profile/presentation/controllers/saved_places_controller.dart';
+import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -18,11 +19,12 @@ class _SavedPlacesScreenState extends ConsumerState<SavedPlacesScreen> {
   @override
   Widget build(BuildContext context) {
     final stateAsync = ref.watch(savedPlacesControllerProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text('ที่อยู่สำหรับส่ง', style: AppTypography.heading4),
+        title: Text(l10n.profileSavedPlacesTitle, style: AppTypography.heading4),
         backgroundColor: AppColors.background,
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
@@ -33,13 +35,16 @@ class _SavedPlacesScreenState extends ConsumerState<SavedPlacesScreen> {
           stateAsync.when(
             loading: () => const Center(child: MassLoadingM(size: 72)),
             error: (e, s) => Center(
-              child: Text('โหลดข้อมูลไม่สำเร็จ', style: AppTypography.body2),
+              child: Text(l10n.profileLoadFailed, style: AppTypography.body2),
             ),
             data: (stateData) {
               return stateData.places.when(
                 loading: () => const Center(child: MassLoadingM(size: 72)),
                 error: (e, s) => Center(
-                  child: Text('โหลดข้อมูลไม่สำเร็จ', style: AppTypography.body2),
+                  child: Text(
+                    l10n.profileLoadFailed,
+                    style: AppTypography.body2,
+                  ),
                 ),
                 data: (places) => places.isEmpty
                     ? const _EmptyPlaces()
@@ -73,7 +78,7 @@ class _SavedPlacesScreenState extends ConsumerState<SavedPlacesScreen> {
           ref.read(savedPlacesControllerProvider.notifier).refreshPlaces();
         },
         icon: const Icon(Icons.add_location_alt_rounded),
-        label: Text('เพิ่มที่อยู่', style: AppTypography.label2),
+        label: Text(l10n.addAddress, style: AppTypography.label2),
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
       ),
@@ -81,20 +86,24 @@ class _SavedPlacesScreenState extends ConsumerState<SavedPlacesScreen> {
   }
 
   Future<void> _deletePlace(String id) async {
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('ลบที่อยู่'),
-        content: const Text('ต้องการลบที่อยู่นี้ใช่หรือไม่?'),
+        title: Text(l10n.profileDeleteAddressTitle),
+        content: Text(l10n.profileDeleteAddressConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('ยกเลิก'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
-            child: const Text('ลบ', style: TextStyle(color: Colors.white)),
+            child: Text(
+              l10n.profileDelete,
+              style: const TextStyle(color: Colors.white),
+            ),
           ),
         ],
       ),
@@ -105,7 +114,7 @@ class _SavedPlacesScreenState extends ConsumerState<SavedPlacesScreen> {
           .deletePlace(id);
       if (!success && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('ไม่สามารถลบได้ในขณะนี้')),
+          SnackBar(content: Text(l10n.profileDeleteAddressFailed)),
         );
       }
     }
@@ -181,7 +190,8 @@ class _PlaceCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  place.address ?? 'ไม่มีข้อมูลที่อยู่',
+                  place.address ??
+                      AppLocalizations.of(context)!.profileNoAddressInfo,
                   style: AppTypography.caption5.copyWith(
                     color: AppColors.textSecondary,
                   ),
@@ -208,6 +218,7 @@ class _EmptyPlaces extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24.0),
@@ -221,14 +232,14 @@ class _EmptyPlaces extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              'ยังไม่มีที่อยู่ที่บันทึก',
+              l10n.profileNoSavedAddresses,
               style: AppTypography.heading4.copyWith(
                 color: AppColors.textSecondary,
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              'เพิ่มที่อยู่เพื่อส่งได้รวดเร็วขึ้น',
+              l10n.profileNoSavedAddressesHint,
               style: AppTypography.body2.copyWith(
                 color: AppColors.textDisabled,
               ),

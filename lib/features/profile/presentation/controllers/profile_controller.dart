@@ -1,6 +1,9 @@
+import 'package:customer_app/core/localization/locale_controller.dart';
 import 'package:customer_app/features/profile/data/repositories/profile_repository_impl.dart';
 import 'package:customer_app/features/profile/data/services/avatar_upload_service.dart';
 import 'package:customer_app/features/profile/presentation/states/profile_state.dart';
+import 'package:customer_app/l10n/app_localizations.dart';
+import 'package:flutter/widgets.dart' show Locale;
 import 'package:image_picker/image_picker.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'dart:async';
@@ -62,7 +65,9 @@ class ProfileController extends _$ProfileController {
         pendingAvatarFileKey: fileKey ?? after.pendingAvatarFileKey,
         isUploadingAvatar: false,
         error: fileKey == null
-            ? 'อัปโหลดรูปไม่สำเร็จ กรุณาลองใหม่อีกครั้ง'
+            ? lookupAppLocalizations(
+                Locale(ref.read(localeControllerProvider).languageCode),
+              ).profileAvatarUploadFailed
             : null,
       ),
     );

@@ -2,6 +2,7 @@ import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/features/payment/presentation/controllers/credit_cards_controller.dart';
 import 'package:customer_app/features/payment/presentation/screens/credit_card_list_screen.dart';
+import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -67,16 +68,19 @@ class _AddCreditCardScreenState extends ConsumerState<AddCreditCardScreen> {
     );
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
-      ..showSnackBar(const SnackBar(content: Text('เพิ่มบัตรเรียบร้อยแล้ว')));
+      ..showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(context)!.payCardAdded)),
+      );
     context.pop();
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AppColors.semanticGrayNeutralBgWhite,
       appBar: AppBar(
-        title: const Text('เพิ่มบัตรเครดิต', style: AppTypography.heading4),
+        title: Text(l10n.payAddCreditCard, style: AppTypography.heading4),
         backgroundColor: AppColors.semanticGrayNeutralBgWhite,
         elevation: 0,
         surfaceTintColor: Colors.transparent,
@@ -107,8 +111,7 @@ class _AddCreditCardScreenState extends ConsumerState<AddCreditCardScreen> {
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            'อยู่ระหว่างพัฒนา — ยังใช้ชำระเงินจริงไม่ได้ '
-                            'และข้อมูลบัตรจะไม่ถูกบันทึกถาวร',
+                            l10n.payCardDevNotice,
                             style: AppTypography.caption5.copyWith(
                               color: AppColors.foundationOrange600,
                             ),
@@ -128,7 +131,7 @@ class _AddCreditCardScreenState extends ConsumerState<AddCreditCardScreen> {
                     expiry: _expiryController.text,
                   ),
                   const SizedBox(height: 28),
-                  _label('หมายเลขบัตร'),
+                  _label(l10n.payCardNumber),
                   _field(
                     controller: _numberController,
                     hint: '1234 5678 9012 3456',
@@ -140,10 +143,10 @@ class _AddCreditCardScreenState extends ConsumerState<AddCreditCardScreen> {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  _label('ชื่อบนบัตร'),
+                  _label(l10n.payCardNameOnCard),
                   _field(
                     controller: _nameController,
-                    hint: 'ชื่อ นามสกุล',
+                    hint: l10n.payCardNameHint,
                     textCapitalization: TextCapitalization.characters,
                   ),
                   const SizedBox(height: 16),
@@ -154,7 +157,7 @@ class _AddCreditCardScreenState extends ConsumerState<AddCreditCardScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _label('วันหมดอายุ'),
+                            _label(l10n.payCardExpiryDate),
                             _field(
                               controller: _expiryController,
                               hint: 'MM/YY',
@@ -212,7 +215,7 @@ class _AddCreditCardScreenState extends ConsumerState<AddCreditCardScreen> {
                     ),
                   ),
                   child: Text(
-                    'บันทึกบัตร',
+                    l10n.payCardSave,
                     style: AppTypography.heading4.copyWith(color: Colors.white),
                   ),
                 ),

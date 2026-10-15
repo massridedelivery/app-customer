@@ -4,6 +4,7 @@ import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/features/payment/domain/models/payment_intent.dart';
 import 'package:customer_app/features/payment/presentation/controllers/promptpay_controller.dart';
 import 'package:customer_app/features/payment/presentation/states/promptpay_state.dart';
+import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -72,7 +73,9 @@ class _CardCheckoutScreenState extends ConsumerState<CardCheckoutScreen> {
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
         ..showSnackBar(
-          const SnackBar(content: Text('เปิดหน้าชำระเงินไม่สำเร็จ')),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.payCardOpenFailed),
+          ),
         );
     }
   }
@@ -102,7 +105,10 @@ class _CardCheckoutScreenState extends ConsumerState<CardCheckoutScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text('ชำระเงินด้วยบัตร', style: AppTypography.heading4),
+        title: Text(
+          AppLocalizations.of(context)!.payCardTitle,
+          style: AppTypography.heading4,
+        ),
         backgroundColor: AppColors.background,
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
@@ -118,6 +124,7 @@ class _CardCheckoutScreenState extends ConsumerState<CardCheckoutScreen> {
   }
 
   Widget _buildBody(PromptPayState state) {
+    final l10n = AppLocalizations.of(context)!;
     if (state.isCreating) {
       return const Center(child: MassLoadingM(size: 72));
     }
@@ -126,12 +133,12 @@ class _CardCheckoutScreenState extends ConsumerState<CardCheckoutScreen> {
       return _StatusMessage(
         icon: Icons.error_outline_rounded,
         color: AppColors.error,
-        title: 'เริ่มการชำระเงินไม่สำเร็จ',
+        title: l10n.payCardStartFailed,
         subtitle: state.error!,
-        primaryLabel: 'ลองอีกครั้ง',
+        primaryLabel: l10n.payTryAgain,
         onPrimary: () =>
             ref.read(promptPayControllerProvider.notifier).retry(),
-        secondaryLabel: 'ยกเลิก',
+        secondaryLabel: l10n.cancel,
         onSecondary: () => context.pop(),
       );
     }
@@ -140,9 +147,9 @@ class _CardCheckoutScreenState extends ConsumerState<CardCheckoutScreen> {
       return _StatusMessage(
         icon: Icons.info_outline_rounded,
         color: AppColors.textSecondary,
-        title: 'ไม่ต้องชำระด้วยบัตรแล้ว',
-        subtitle: 'รายการนี้ถูกยกเลิก เช่น เปลี่ยนเป็นเงินสดหรือเที่ยวถูกยกเลิก',
-        primaryLabel: 'กลับ',
+        title: l10n.payCardVoidedTitle,
+        subtitle: l10n.payVoidedSubtitle,
+        primaryLabel: l10n.payBack,
         onPrimary: () => context.pop(),
       );
     }
@@ -151,12 +158,12 @@ class _CardCheckoutScreenState extends ConsumerState<CardCheckoutScreen> {
       return _StatusMessage(
         icon: Icons.timer_off_rounded,
         color: AppColors.error,
-        title: 'รายการหมดอายุแล้ว',
-        subtitle: 'กรุณาเริ่มการชำระเงินใหม่อีกครั้ง',
-        primaryLabel: 'เริ่มใหม่',
+        title: l10n.payCardExpiredTitle,
+        subtitle: l10n.payCardExpiredSubtitle,
+        primaryLabel: l10n.payStartOver,
         onPrimary: () =>
             ref.read(promptPayControllerProvider.notifier).retry(),
-        secondaryLabel: 'ยกเลิก',
+        secondaryLabel: l10n.cancel,
         onSecondary: () => context.pop(),
       );
     }
@@ -165,12 +172,12 @@ class _CardCheckoutScreenState extends ConsumerState<CardCheckoutScreen> {
       return _StatusMessage(
         icon: Icons.cancel_outlined,
         color: AppColors.error,
-        title: 'ชำระเงินไม่สำเร็จ',
-        subtitle: 'กรุณาลองสร้างรายการใหม่อีกครั้ง',
-        primaryLabel: 'ลองอีกครั้ง',
+        title: l10n.payFailedTitle,
+        subtitle: l10n.payFailedSubtitle,
+        primaryLabel: l10n.payTryAgain,
         onPrimary: () =>
             ref.read(promptPayControllerProvider.notifier).retry(),
-        secondaryLabel: 'ยกเลิก',
+        secondaryLabel: l10n.cancel,
         onSecondary: () => context.pop(),
       );
     }
@@ -180,12 +187,12 @@ class _CardCheckoutScreenState extends ConsumerState<CardCheckoutScreen> {
       return _StatusMessage(
         icon: Icons.credit_card_off_rounded,
         color: AppColors.textSecondary,
-        title: 'ยังเปิดการชำระด้วยบัตรไม่ได้',
-        subtitle: 'ขณะนี้ยังไม่รองรับการชำระด้วยบัตร กรุณาเลือกวิธีอื่น',
-        primaryLabel: 'ลองอีกครั้ง',
+        title: l10n.payCardUnavailableTitle,
+        subtitle: l10n.payCardUnavailableSubtitle,
+        primaryLabel: l10n.payTryAgain,
         onPrimary: () =>
             ref.read(promptPayControllerProvider.notifier).retry(),
-        secondaryLabel: 'เลือกวิธีอื่น',
+        secondaryLabel: l10n.payChooseAnotherMethod,
         onSecondary: () => context.pop(),
       );
     }
@@ -211,6 +218,7 @@ class _AwaitingCardPayment extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -222,14 +230,13 @@ class _AwaitingCardPayment extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'ชำระเงินในหน้าเว็บที่เปิดขึ้น',
+            l10n.payCardPayInBrowser,
             style: AppTypography.heading4,
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
           Text(
-            'กรอกข้อมูลบัตรในหน้าชำระเงินที่ปลอดภัย '
-            'เมื่อชำระเสร็จแล้วให้กลับมาที่แอป ระบบจะยืนยันให้อัตโนมัติ',
+            l10n.payCardPayInBrowserHint,
             style: AppTypography.body2.copyWith(color: AppColors.textSecondary),
             textAlign: TextAlign.center,
           ),
@@ -241,16 +248,16 @@ class _AwaitingCardPayment extends StatelessWidget {
             ),
           ],
           const SizedBox(height: 24),
-          const Row(
+          Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              SizedBox(
+              const SizedBox(
                 width: 16,
                 height: 16,
                 child: CircularProgressIndicator(strokeWidth: 2),
               ),
-              SizedBox(width: 10),
-              Text('กำลังรอการชำระเงิน...'),
+              const SizedBox(width: 10),
+              Text(l10n.payAwaitingPayment),
             ],
           ),
           const SizedBox(height: 28),
@@ -262,8 +269,7 @@ class _AwaitingCardPayment extends StatelessWidget {
                 backgroundColor: AppColors.primary,
                 padding: const EdgeInsets.symmetric(vertical: 14),
               ),
-              child: Text('เปิดหน้าชำระเงินอีกครั้ง',
-                  style: AppTypography.label2),
+              child: Text(l10n.payCardReopen, style: AppTypography.label2),
             ),
           ),
           const SizedBox(height: 12),
@@ -271,8 +277,7 @@ class _AwaitingCardPayment extends StatelessWidget {
             width: double.infinity,
             child: TextButton(
               onPressed: () => onCheck(),
-              child: Text('ฉันชำระเงินแล้ว · ตรวจสอบสถานะ',
-                  style: AppTypography.label2),
+              child: Text(l10n.payCardIPaid, style: AppTypography.label2),
             ),
           ),
         ],

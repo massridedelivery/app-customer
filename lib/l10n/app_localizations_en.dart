@@ -831,4 +831,561 @@ class AppLocalizationsEn extends AppLocalizations {
   String etaExpectedAround(String time) {
     return 'Expected around $time';
   }
+
+  @override
+  String get authTabPhone => 'Phone';
+
+  @override
+  String get authEmail => 'Email';
+
+  @override
+  String get authRequestOtp => 'Request OTP';
+
+  @override
+  String get authShowPassword => 'Show password';
+
+  @override
+  String get authHidePassword => 'Hide password';
+
+  @override
+  String get authWelcome => 'Welcome';
+
+  @override
+  String get authLoginSubtitle =>
+      'Sign in to book rides, send parcels and order food';
+
+  @override
+  String get authNoAccount => 'Don\'t have an account?';
+
+  @override
+  String get authAccountDeletedTitle => 'Account deleted';
+
+  @override
+  String get authAccountSuspendedTitle => 'Account suspended';
+
+  @override
+  String get authAccountDeletedBody =>
+      'Contact us if you have any questions, or sign up again with the same phone number to start a new account.';
+
+  @override
+  String get authAccountSuspendedBody =>
+      'This account can\'t be used right now. Please contact us.';
+
+  @override
+  String authContactSupportPhone(String phone) {
+    return 'Contact support $phone';
+  }
+
+  @override
+  String get authCallSupport => 'Call support';
+
+  @override
+  String get authOk => 'OK';
+
+  @override
+  String get authInvalidOtp => 'Incorrect OTP. Please try again.';
+
+  @override
+  String get authChangePasswordFailed =>
+      'Couldn\'t change your password. Please try again.';
+
+  @override
+  String get authGenericError => 'Something went wrong. Please try again.';
+
+  @override
+  String get authInvalidServerResponse => 'Invalid response from the server';
+
+  @override
+  String get authInvalidCredentials => 'Incorrect email or password';
+
+  @override
+  String get authEmailAlreadyRegistered =>
+      'This email already has an account. Please sign in.';
+
+  @override
+  String get authRegisterFailed => 'Sign-up failed. Please try again.';
+
+  @override
+  String get onboardSplashTagline => 'Elevating city services';
+
+  @override
+  String get onboardRideTitle => 'Book a ride';
+
+  @override
+  String get onboardRideDesc =>
+      'Book a ride and get service from\ndrivers in your neighbourhood';
+
+  @override
+  String get onboardDriverTitle => 'Confirm your driver';
+
+  @override
+  String get onboardDriverDesc =>
+      'Our wide driver network gets you\nwhere you need to go — easy, safe and affordable';
+
+  @override
+  String get onboardTrackTitle => 'Track your trip';
+
+  @override
+  String get onboardTrackDesc =>
+      'See your driver\'s details in advance and\nfollow their live location on the map';
+
+  @override
+  String get onboardGetStarted => 'Get started!';
+
+  @override
+  String get onboardNext => 'Next';
+
+  @override
+  String get onboardSkip => 'Skip';
+
+  @override
+  String get profilePrivacyPolicy => 'Privacy policy';
+
+  @override
+  String get profileContactSupport => 'Contact support';
+
+  @override
+  String get profileManageAccount => 'Manage account';
+
+  @override
+  String get profileDeleteAccount => 'Delete account';
+
+  @override
+  String profileVersion(String version) {
+    return 'Version $version';
+  }
+
+  @override
+  String get profileDeleteAccountConfirm =>
+      'Deleting your account permanently removes all your data and can\'t be undone. Delete your account?';
+
+  @override
+  String get profileAccountDeleted => 'Your account has been deleted';
+
+  @override
+  String get profileDeleteAccountFailed =>
+      'Couldn\'t delete your account. Please try again.';
+
+  @override
+  String get profileLoadFailed => 'Couldn\'t load data';
+
+  @override
+  String get profileClose => 'Close';
+
+  @override
+  String get profilePdpaTitle => 'Privacy (PDPA)';
+
+  @override
+  String get profilePdpaRightsTitle => 'Your PDPA rights';
+
+  @override
+  String get profilePdpaRightsBody =>
+      'You have the right to manage your personal data under the PDPA (Personal Data Protection Act).';
+
+  @override
+  String get profilePdpaDataManagement => 'Data management';
+
+  @override
+  String get profilePdpaExportTitle => 'Export my data';
+
+  @override
+  String get profilePdpaExportSubtitle =>
+      'Download all your personal data as JSON';
+
+  @override
+  String get profilePdpaConsentHistoryTitle => 'Consent history';
+
+  @override
+  String get profilePdpaConsentHistorySubtitle => 'View your consent status';
+
+  @override
+  String get profilePdpaDangerZone => 'Danger zone';
+
+  @override
+  String get profilePdpaDeletionTitle => 'Request account deletion';
+
+  @override
+  String get profilePdpaDeletionSubtitle =>
+      'Request deletion of your account and all data (can\'t be undone)';
+
+  @override
+  String get profilePdpaExporting => 'Exporting data...';
+
+  @override
+  String get profilePdpaExportSuccess => 'Data exported. Check your email.';
+
+  @override
+  String get profilePdpaExportFailed => 'Can\'t export your data right now';
+
+  @override
+  String get profilePdpaConsentTitle => 'Consent';
+
+  @override
+  String get profilePdpaConsentPolicyVersion => 'Privacy policy v2.1';
+
+  @override
+  String get profilePdpaConsentStatus => 'Status: Consented ✓';
+
+  @override
+  String get profilePdpaDeletionReasonPrompt =>
+      'Please tell us why you want to delete your account';
+
+  @override
+  String get profilePdpaDeletionReasonHint => 'Reason...';
+
+  @override
+  String get profilePdpaSubmitRequest => 'Submit request';
+
+  @override
+  String get profilePdpaDeletionReceived =>
+      'Request received. Our team will process it within 30 days.';
+
+  @override
+  String get profilePdpaDeletionFailed =>
+      'Can\'t submit your request right now';
+
+  @override
+  String get profileReferralTitle => 'Invite friends';
+
+  @override
+  String get profileReferralHeadline => 'Invite friends to MASS';
+
+  @override
+  String get profileReferralSubtitle =>
+      'Get 100 points every time a friend signs up and rides';
+
+  @override
+  String get profileReferralFriendsInvited => 'Friends invited';
+
+  @override
+  String get profileReferralPointsEarned => 'Points earned';
+
+  @override
+  String get profileReferralYourCode => 'Your referral code';
+
+  @override
+  String get profileReferralCodeCopied => 'Code copied!';
+
+  @override
+  String get profileReferralCopy => 'Copy';
+
+  @override
+  String profileReferralShareMessage(String code) {
+    return 'Try Mass Move! Use code $code to get a discount 🚀';
+  }
+
+  @override
+  String get profileReferralInviteCopied => 'Invite message copied';
+
+  @override
+  String get profileReferralShare => 'Share';
+
+  @override
+  String get profileReferralHaveCode => 'Have a referral code?';
+
+  @override
+  String get profileReferralHaveCodeSubtitle =>
+      'Enter the code a friend sent you to get bonus points';
+
+  @override
+  String get profileReferralCodeHint => 'e.g. MASS-XXXX';
+
+  @override
+  String get profileReferralApply => 'Apply';
+
+  @override
+  String get profileReferralApplySuccess => 'Code applied! Bonus points added.';
+
+  @override
+  String get profileReferralApplyInvalid => 'Invalid or already-used code';
+
+  @override
+  String get profileSosTitle => 'SOS safety';
+
+  @override
+  String get profileSosHoldHint => 'Press and hold to send an emergency alert';
+
+  @override
+  String profileSosCallCenter(String phone) {
+    return 'Call support center $phone';
+  }
+
+  @override
+  String get profileSosInfoTitle => 'Emergency info';
+
+  @override
+  String get profileSosInfoBody =>
+      'When you press SOS, we alert our admins and the driver on your trip, and the details are recorded for your safety.';
+
+  @override
+  String get profileSosHistory => 'SOS history';
+
+  @override
+  String get profileSosNoHistory => 'No SOS history';
+
+  @override
+  String get profileSosEvent => 'SOS event';
+
+  @override
+  String get profileSosResolved => 'Resolved';
+
+  @override
+  String get profileSosOpen => 'Open';
+
+  @override
+  String get profileSosConfirmTitle => 'Send SOS alert';
+
+  @override
+  String get profileSosConfirmBody =>
+      'Send an emergency alert? Our team will be notified right away.';
+
+  @override
+  String get profileSosSend => 'Send SOS';
+
+  @override
+  String get profileSosSent => 'SOS sent. Our team has been notified.';
+
+  @override
+  String get profileSosSendFailed => 'Can\'t send SOS right now';
+
+  @override
+  String get profileLoyaltyLoadFailed => 'Unable to load data';
+
+  @override
+  String get profileLoyaltyPointsBalance => 'Points';
+
+  @override
+  String get profileLoyaltyCashbackBalance => 'Cashback (฿)';
+
+  @override
+  String get profileLoyaltyRedeemPoints => 'Redeem points';
+
+  @override
+  String get profileLoyaltyPointsHistory => 'Points history';
+
+  @override
+  String get profileLoyaltyCashbackHistory => 'Cashback history';
+
+  @override
+  String profileLoyaltyYouHavePoints(String points) {
+    return 'You have $points points';
+  }
+
+  @override
+  String get profileLoyaltyRedeemAmountLabel => 'Points to redeem';
+
+  @override
+  String get profileLoyaltyRedeemSuccess => 'Points redeemed!';
+
+  @override
+  String get profileLoyaltyRedeem => 'Redeem';
+
+  @override
+  String profileLoyaltyCashbackRate(String percent) {
+    return '$percent% back';
+  }
+
+  @override
+  String profileLoyaltyPoints(String points) {
+    return '$points points';
+  }
+
+  @override
+  String profileLoyaltyNextTier(String tier) {
+    return 'Next tier: $tier';
+  }
+
+  @override
+  String profileLoyaltyPointsToGo(String points) {
+    return '$points points to go';
+  }
+
+  @override
+  String get profileSavedPlacesTitle => 'Delivery addresses';
+
+  @override
+  String get profileDeleteAddressTitle => 'Delete address';
+
+  @override
+  String get profileDeleteAddressConfirm => 'Delete this address?';
+
+  @override
+  String get profileDelete => 'Delete';
+
+  @override
+  String get profileDeleteAddressFailed => 'Can\'t delete right now';
+
+  @override
+  String get profileNoAddressInfo => 'No address details';
+
+  @override
+  String get profileNoSavedAddresses => 'No saved addresses yet';
+
+  @override
+  String get profileNoSavedAddressesHint =>
+      'Add an address for faster delivery';
+
+  @override
+  String get profileEditTitle => 'Edit profile';
+
+  @override
+  String get profileFullNameHint => 'Enter your full name';
+
+  @override
+  String get profileFillAllFields => 'Please fill in all required fields';
+
+  @override
+  String get profileAvatarUploadFailed =>
+      'Couldn\'t upload photo. Please try again.';
+
+  @override
+  String get payTryAgain => 'Try again';
+
+  @override
+  String get payBack => 'Back';
+
+  @override
+  String get payVoidedSubtitle =>
+      'This payment was cancelled — for example, you switched to cash or the trip was cancelled.';
+
+  @override
+  String get payFailedTitle => 'Payment failed';
+
+  @override
+  String get payFailedSubtitle => 'Please try creating a new payment.';
+
+  @override
+  String get payAwaitingPayment => 'Waiting for payment...';
+
+  @override
+  String get payCardOpenFailed => 'Couldn\'t open the payment page';
+
+  @override
+  String get payCardTitle => 'Pay by card';
+
+  @override
+  String get payCardStartFailed => 'Couldn\'t start the payment';
+
+  @override
+  String get payCardVoidedTitle => 'No card payment needed';
+
+  @override
+  String get payCardExpiredTitle => 'Payment expired';
+
+  @override
+  String get payCardExpiredSubtitle => 'Please start the payment again.';
+
+  @override
+  String get payStartOver => 'Start over';
+
+  @override
+  String get payCardUnavailableTitle => 'Card payment unavailable';
+
+  @override
+  String get payCardUnavailableSubtitle =>
+      'Card payments aren\'t supported right now. Please choose another method.';
+
+  @override
+  String get payChooseAnotherMethod => 'Choose another method';
+
+  @override
+  String get payCardPayInBrowser => 'Complete payment on the page that opened';
+
+  @override
+  String get payCardPayInBrowserHint =>
+      'Enter your card details on the secure payment page. When you\'re done, come back to the app and we\'ll confirm automatically.';
+
+  @override
+  String get payCardReopen => 'Reopen payment page';
+
+  @override
+  String get payCardIPaid => 'I\'ve paid · Check status';
+
+  @override
+  String get payPromptPayTitle => 'Pay with PromptPay';
+
+  @override
+  String get payQrVoidedTitle => 'This QR no longer needs to be paid';
+
+  @override
+  String get payQrCreateFailed => 'Couldn\'t create QR';
+
+  @override
+  String get payPayCashInstead => 'Pay cash instead';
+
+  @override
+  String get payQrExpiredTitle => 'QR expired';
+
+  @override
+  String get payQrExpiredSubtitle => 'Create a new QR or switch to cash.';
+
+  @override
+  String get payQrCreateNew => 'Create new QR';
+
+  @override
+  String get payQrNotFoundTitle => 'Payment QR not found';
+
+  @override
+  String get payQrNotFoundSubtitle => 'Please try again.';
+
+  @override
+  String get payAmountChangedNotice =>
+      'The amount has changed. Please scan this new QR instead of the old one.';
+
+  @override
+  String get payQrScanHint => 'Scan this QR with your banking app to pay';
+
+  @override
+  String payQrExpiresIn(String time) {
+    return 'QR expires in $time';
+  }
+
+  @override
+  String get payQrLoadFailed => 'Couldn\'t load QR';
+
+  @override
+  String get payAddCreditCard => 'Add credit card';
+
+  @override
+  String get payNoCreditCards => 'No credit cards yet';
+
+  @override
+  String get payNoCreditCardsHint => 'Add a card for easier payments';
+
+  @override
+  String get payCardHolder => 'Card holder';
+
+  @override
+  String get payCardExpires => 'Expires';
+
+  @override
+  String get payCardAdded => 'Card added';
+
+  @override
+  String get payCardDevNotice =>
+      'In development — can\'t be used for real payments yet, and card details aren\'t stored permanently.';
+
+  @override
+  String get payCardNumber => 'Card number';
+
+  @override
+  String get payCardNameOnCard => 'Name on card';
+
+  @override
+  String get payCardNameHint => 'Full name';
+
+  @override
+  String get payCardExpiryDate => 'Expiry date';
+
+  @override
+  String get payCardSave => 'Save card';
+
+  @override
+  String get payCreateIntentFailed => 'Couldn\'t create the payment';
+
+  @override
+  String get payCheckStatusFailed => 'Couldn\'t check the payment status';
+
+  @override
+  String get payCheckIntentFailed => 'Couldn\'t check the payment';
 }

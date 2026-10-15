@@ -19,6 +19,9 @@ sealed class VehicleEstimation with _$VehicleEstimation {
     @JsonKey(name: 'base_fare') required double baseFare,
     required double discount,
     @JsonKey(name: 'total_fare') required double totalFare,
+    // Price before the coupon (total_fare = gross_fare - discount). Optional so
+    // older estimate payloads without it still parse.
+    @JsonKey(name: 'gross_fare') double? grossFare,
     @JsonKey(name: 'available', readValue: _readAvailable)
     @Default(true)
     bool available,

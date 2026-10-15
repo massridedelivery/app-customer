@@ -67,4 +67,39 @@ void main() {
       );
     });
   });
+
+  group('BE dev95 rejection reasons', () {
+    test('fully redeemed / not available / minimum spend with amount (th)', () {
+      expect(
+        promoReasonToThai('promotion fully redeemed', languageCode: 'th'),
+        'สิทธิ์ของโค้ดนี้เต็มแล้ว',
+      );
+      expect(
+        promoReasonToThai(
+          'promotion not available at this time',
+          languageCode: 'th',
+        ),
+        'โค้ดนี้ใช้ไม่ได้ในขณะนี้',
+      );
+      expect(
+        promoReasonToThai('minimum spend 150 required', languageCode: 'th'),
+        'ยอดขั้นต่ำ ฿150 จึงจะใช้โค้ดนี้ได้',
+      );
+      expect(
+        promoReasonToThai('usage limit reached per user', languageCode: 'th'),
+        'คุณใช้สิทธิ์คูปองนี้ครบแล้ว',
+      );
+    });
+
+    test('same reasons in English', () {
+      expect(
+        promoReasonToThai('promotion fully redeemed', languageCode: 'en'),
+        'This code has been fully redeemed',
+      );
+      expect(
+        promoReasonToThai('minimum spend 1,000.00 required', languageCode: 'en'),
+        'Spend at least ฿1000 to use this code',
+      );
+    });
+  });
 }

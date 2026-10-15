@@ -5064,6 +5064,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tap to use your current location'**
   String get homeAllowLocation;
+
+  /// No description provided for @promoRejectFullyRedeemed.
+  ///
+  /// In en, this message translates to:
+  /// **'This code has been fully redeemed'**
+  String get promoRejectFullyRedeemed;
+
+  /// No description provided for @promoRejectNotAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'This code isn\'t available right now'**
+  String get promoRejectNotAvailable;
+
+  /// No description provided for @promoRejectMinSpendAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Spend at least ฿{amount} to use this code'**
+  String promoRejectMinSpendAmount(String amount);
+
+  /// No description provided for @couponNotAppliedReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Code {code} can\'t be used: {reason}'**
+  String couponNotAppliedReason(String code, String reason);
+
+  /// No description provided for @promoEnded.
+  ///
+  /// In en, this message translates to:
+  /// **'This promotion has ended'**
+  String get promoEnded;
 }
 
 class _AppLocalizationsDelegate

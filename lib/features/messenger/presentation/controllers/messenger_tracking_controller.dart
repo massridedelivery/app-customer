@@ -1,3 +1,4 @@
+import 'package:customer_app/features/profile/presentation/screens/promo_list_screen.dart';
 import 'dart:async';
 
 import 'package:customer_app/core/localization/locale_controller.dart';
@@ -147,6 +148,8 @@ class MessengerTrackingController extends _$MessengerTrackingController {
     state = state.copyWith(isCancelling: true);
     try {
       await ref.read(messengerRepositoryProvider).cancelOrder(id, reason: reason);
+      // BE returns the promo code on cancel — reload the coupon list.
+      ref.invalidate(promoListProvider);
       await _loadOrder(id);
       state = state.copyWith(isCancelling: false);
       return true;

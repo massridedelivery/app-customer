@@ -26,6 +26,16 @@ class _PromoListScreenState extends ConsumerState<PromoListScreen> {
   PromoScope? _scope;
 
   @override
+  void initState() {
+    super.initState();
+    // Fresh list on every visit (deleted / full promos drop out, refunded
+    // codes come back) — home keeps the provider alive otherwise.
+    Future.microtask(() {
+      if (mounted) ref.invalidate(promoListProvider);
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final promosAsync = ref.watch(promoListProvider);
     final l10n = AppLocalizations.of(context)!;

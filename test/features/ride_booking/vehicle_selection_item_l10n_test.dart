@@ -15,7 +15,11 @@ const _est = VehicleEstimation(
   driversNearby: 3,
 );
 
-Future<void> _pump(WidgetTester tester, String languageCode) async {
+Future<void> _pump(
+  WidgetTester tester,
+  String languageCode, {
+  VehicleEstimation estimation = _est,
+}) async {
   await tester.pumpWidget(
     MaterialApp(
       localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -23,7 +27,7 @@ Future<void> _pump(WidgetTester tester, String languageCode) async {
       locale: Locale(languageCode),
       home: Scaffold(
         body: VehicleSelectionItem(
-          estimation: _est,
+          estimation: estimation,
           isSelected: false,
           onTap: () {},
           iconPath: 'assets/images/icons/3d/ic3d_ride.png',
@@ -53,4 +57,30 @@ void main() {
     expect(find.text('มีคนขับใกล้ฉัน 3 คน'), findsOneWidget);
     expect(find.text('ลด ฿20'), findsOneWidget);
   });
+
+  testWidgets('a coupon shows total_fare with gross_fare struck through', (
+    tester,
+  ) async {
+    // DIS50 on a ฿118 motorcycle: total ฿68, before ฿118 (not the base fare).
+    await _pump(
+      tester,
+      'th',
+      estimation: const VehicleEstimation(
+        vehicleTypeId: 'moto',
+        vehicleTypeName: 'motorcycle',
+        displayName: 'Motorcycle',
+        baseFare: 100,
+        discount: 50,
+        totalFare: 68,
+        grossFare: 118,
+        surgedFare: 100,
+      ),
+    );
+
+    expect(find.text('฿68'), findsOneWidget);
+    expect(find.text('฿118'), findsOneWidget);
+    expect(find.text('฿100'), findsNothing);
+    expect(find.text('ลด ฿50'), findsOneWidget);
+  });
 }
+

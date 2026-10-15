@@ -26,6 +26,15 @@ class _MessengerCouponScreenState extends ConsumerState<MessengerCouponScreen> {
   );
 
   @override
+  void initState() {
+    super.initState();
+    // Fresh list every time the checkout coupon picker opens.
+    Future.microtask(() {
+      if (mounted) ref.invalidate(promoListProvider);
+    });
+  }
+
+  @override
   void dispose() {
     _manual.dispose();
     super.dispose();

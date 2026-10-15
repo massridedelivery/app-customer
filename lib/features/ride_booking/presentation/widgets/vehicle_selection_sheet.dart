@@ -315,6 +315,7 @@ class VehicleSelectionSheet extends ConsumerWidget {
             _CouponSummary(
               code: bookingState.appliedPromoCode!,
               discount: (selectedEstimation ?? estimations.first).discount,
+              reason: bookingState.promoRejectReason,
               onRemove: onPromoRemove,
             ),
 
@@ -462,11 +463,13 @@ class _EmptyEstimate extends StatelessWidget {
 class _CouponSummary extends StatelessWidget {
   final String code;
   final double discount;
+  final String? reason;
   final VoidCallback? onRemove;
 
   const _CouponSummary({
     required this.code,
     required this.discount,
+    this.reason,
     this.onRemove,
   });
 
@@ -498,6 +501,8 @@ class _CouponSummary extends StatelessWidget {
             child: Text(
               applied
                   ? '${l10n.couponDiscount} $code'
+                  : reason != null
+                  ? l10n.couponNotAppliedReason(code, reason!)
                   : l10n.couponNotAppliedToFare(code),
               style: style,
             ),

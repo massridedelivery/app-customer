@@ -859,5 +859,10 @@
   "errSetDefaultPlace": "ตั้งค่าสถานที่เริ่มต้นไม่สำเร็จ",
   "errGetDefaultPlace": "ดึงสถานที่เริ่มต้นไม่สำเร็จ",
   "couponRemove": "เอาโค้ดออก",
-  "homeAllowLocation": "แตะเพื่อใช้ตำแหน่งปัจจุบัน"
+  "homeAllowLocation": "แตะเพื่อใช้ตำแหน่งปัจจุบัน",
+  "promoRejectFullyRedeemed": "สิทธิ์ของโค้ดนี้เต็มแล้ว",
+  "promoRejectNotAvailable": "โค้ดนี้ใช้ไม่ได้ในขณะนี้",
+  "promoRejectMinSpendAmount": "ยอดขั้นต่ำ ฿{amount} จึงจะใช้โค้ดนี้ได้",
+  "couponNotAppliedReason": "โค้ด {code} ใช้ไม่ได้: {reason}",
+  "promoEnded": "โปรนี้สิ้นสุดแล้ว"
 }

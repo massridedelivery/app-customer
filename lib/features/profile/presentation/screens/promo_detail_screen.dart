@@ -11,7 +11,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final promoDetailProvider = FutureProvider.family<Map<String, dynamic>, String>((
+final promoDetailProvider =
+    FutureProvider.autoDispose.family<Map<String, dynamic>, String>((
   ref,
   id,
 ) async {
@@ -109,8 +110,52 @@ class PromoDetailScreen extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Opened by id after the promo was deleted / switched off
+                    // (deep link, cached card): say it's over and make the
+                    // code unusable.
+                    if (promo['is_active'] == false) ...[
+                      Container(
+                        key: const Key('promoEndedBanner'),
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 12,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.semanticGrayNeutralBgMidgray,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.event_busy_rounded,
+                              size: 18,
+                              color: AppColors.textSecondary,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                AppLocalizations.of(context)!.promoEnded,
+                                style: AppTypography.label2.copyWith(
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                    ],
                     _buildDescription(promo),
-                    _buildCodeSection(context, promo),
+                    if (promo['is_active'] == false)
+                      Opacity(
+                        opacity: 0.45,
+                        child: IgnorePointer(
+                          child: _buildCodeSection(context, promo),
+                        ),
+                      )
+                    else
+                      _buildCodeSection(context, promo),
                     _buildExpiry(context, promo),
                     const SizedBox(height: 32),
                     _buildTermsSection(context, promo),

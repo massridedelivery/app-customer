@@ -17,6 +17,8 @@ abstract class BookingState with _$BookingState {
     String? vehicleTypeId,
     String? appliedPromoCode,
     @Default(0.0) double promoDiscount,
+    // Why the applied code took ฿0 off (localized, from /promos/validate).
+    String? promoRejectReason,
     String? encodedPolyline,
     String? activeJobId,
     double? surgeMultiplier,

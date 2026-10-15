@@ -1,6 +1,7 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/features/messenger/presentation/controllers/messenger_review_controller.dart';
+import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -48,6 +49,7 @@ class _MessengerReviewScreenState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     ref.listen<AsyncValue<void>>(messengerReviewControllerProvider, (
       previous,
       next,
@@ -58,14 +60,18 @@ class _MessengerReviewScreenState
           // Already reviewed → not an error the user can act on; acknowledge
           // and leave rather than inviting a retry.
           if (raw == 'ALREADY_REVIEWED') {
-            _snack('คุณได้ให้คะแนนออเดอร์นี้ไปแล้ว');
+            _snack(l10n.msgrAlreadyReviewed);
             context.go('/main');
             return;
           }
-          _snack(raw, isError: true);
+          // The controller reports a missing rating as a code; localize it.
+          _snack(
+            raw == kMessengerRatingRequired ? l10n.msgrRatingRequired : raw,
+            isError: true,
+          );
         },
         data: (_) {
-          _snack('ส่งรีวิวสำเร็จ ขอบคุณสำหรับความคิดเห็นครับ');
+          _snack(l10n.msgrReviewThanks);
           context.go('/main');
         },
       );
@@ -84,12 +90,12 @@ class _MessengerReviewScreenState
           onPressed: () =>
               context.canPop() ? context.pop() : context.go('/main'),
         ),
-        title: Text('ให้คะแนนการจัดส่ง', style: AppTypography.heading4),
+        title: Text(l10n.msgrRateDeliveryTitle, style: AppTypography.heading4),
         actions: [
           TextButton(
             onPressed: () => context.go('/main'),
             child: Text(
-              'ข้าม',
+              l10n.msgrSkip,
               style: AppTypography.label2.copyWith(
                 color: AppColors.semanticGrayNeutralFgLowOnWhite,
               ),
@@ -122,14 +128,14 @@ class _MessengerReviewScreenState
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          'คนขับของคุณเป็นอย่างไรบ้าง?',
+                          l10n.msgrHowWasDriver,
                           style: AppTypography.label2.copyWith(
                             color: AppColors.semanticGrayNeutralFgHigh,
                           ),
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'ให้คะแนนการจัดส่งพัสดุครั้งนี้',
+                          l10n.msgrRateThisDelivery,
                           style: AppTypography.caption5.copyWith(
                             color: AppColors.semanticGrayNeutralFgLowOnWhite,
                           ),
@@ -144,7 +150,7 @@ class _MessengerReviewScreenState
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('ความคิดเห็นเพิ่มเติม (ไม่บังคับ)',
+                        Text(l10n.msgrCommentOptional,
                             style: AppTypography.label2),
                         const SizedBox(height: 12),
                         Container(
@@ -157,7 +163,7 @@ class _MessengerReviewScreenState
                             maxLines: 4,
                             maxLength: 1000,
                             decoration: InputDecoration(
-                              hintText: 'เล่าประสบการณ์การจัดส่งให้เราฟัง...',
+                              hintText: l10n.msgrCommentHint,
                               hintStyle: AppTypography.caption4.copyWith(
                                 color: AppColors.semanticGrayNeutralFgLowOnWhite,
                               ),
@@ -204,7 +210,7 @@ class _MessengerReviewScreenState
                               ),
                             )
                           : Text(
-                              'ส่งรีวิว',
+                              l10n.msgrSubmitReview,
                               style: AppTypography.label1.copyWith(
                                 color: AppColors.white,
                               ),
@@ -217,7 +223,7 @@ class _MessengerReviewScreenState
                     child: TextButton(
                       onPressed: () => context.go('/main'),
                       child: Text(
-                        'ข้ามไปก่อน',
+                        l10n.msgrSkipForNow,
                         style: AppTypography.label2.copyWith(
                           color: AppColors.semanticGrayNeutralFgLowOnWhite,
                         ),

@@ -92,11 +92,11 @@ class _MessengerBookingScreenState
   void _submit() {
     final homeState = ref.read(homeControllerProvider);
     if (homeState.pickupLocation == null) {
-      _showSnack('กรุณาเลือกจุดรับพัสดุ', isError: true);
+      _showSnack(_l10n.msgrSelectPickupError, isError: true);
       return;
     }
     if (homeState.dropoffLocation == null) {
-      _showSnack('กรุณาเลือกจุดส่งพัสดุ', isError: true);
+      _showSnack(_l10n.msgrSelectDropoffError, isError: true);
       return;
     }
 
@@ -110,15 +110,15 @@ class _MessengerBookingScreenState
     final recipientName = _recipientNameController.text.trim();
     final recipientPhone = _recipientPhoneController.text.trim();
     if (recipientName.isEmpty) {
-      _showSnack('กรุณาระบุชื่อผู้รับ', isError: true);
+      _showSnack(_l10n.msgrRecipientNameRequired, isError: true);
       return;
     }
     if (recipientPhone.isEmpty) {
-      _showSnack('กรุณาระบุเบอร์โทรผู้รับ', isError: true);
+      _showSnack(_l10n.msgrRecipientPhoneRequired, isError: true);
       return;
     }
     if (!_thaiPhoneRegex.hasMatch(recipientPhone)) {
-      _showSnack('รูปแบบเบอร์โทรผู้รับไม่ถูกต้อง', isError: true);
+      _showSnack(_l10n.msgrRecipientPhoneInvalid, isError: true);
       return;
     }
 
@@ -126,7 +126,7 @@ class _MessengerBookingScreenState
 
     final bookingState = ref.read(messengerBookingControllerProvider);
     if (bookingState.estimate == null || bookingState.isEstimating) {
-      _showSnack('กำลังคำนวณราคา กรุณารอสักครู่', isError: true);
+      _showSnack(_l10n.msgrCalculatingPleaseWait, isError: true);
       return;
     }
 
@@ -139,6 +139,8 @@ class _MessengerBookingScreenState
           notes: _notesController.text.trim(),
         );
   }
+
+  AppLocalizations get _l10n => AppLocalizations.of(context)!;
 
   void _showSnack(String message, {bool isError = false}) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -273,12 +275,12 @@ class _MessengerBookingScreenState
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'เมสเซนเจอร์ส่งพัสดุ',
+                  _l10n.msgrTitle,
                   style: AppTypography.heading2.copyWith(color: Colors.white),
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'บริการรับ-ส่งพัสดุเพื่อคุณ ไม่ว่าจะที่ไหน เมื่อไหร่',
+                  _l10n.msgrHeroSubtitle,
                   style: AppTypography.caption3.copyWith(
                     color: Colors.white.withValues(alpha: 0.9),
                   ),
@@ -303,7 +305,7 @@ class _MessengerBookingScreenState
     final String pickupLabel = homeState.pickupAddress ??
         (hasPickup
             ? AppLocalizations.of(context)!.currentLocation
-            : 'เลือกจุดรับพัสดุ');
+            : _l10n.msgrSelectPickup);
     final bool hasDropoff = homeState.dropoffAddress != null &&
         homeState.dropoffAddress!.isNotEmpty;
     return _card(
@@ -357,7 +359,7 @@ class _MessengerBookingScreenState
                 ),
                 const SizedBox(height: 12),
                 _addressPill(
-                  address: homeState.dropoffAddress ?? 'เลือกจุดส่งพัสดุ',
+                  address: homeState.dropoffAddress ?? _l10n.msgrSelectDropoff,
                   isPlaceholder: !hasDropoff,
                   onTap: () {
                     ref
@@ -428,13 +430,13 @@ class _MessengerBookingScreenState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'ต้องการจัดส่งแบบไหน?',
+            _l10n.msgrDeliveryTypeTitle,
             style: AppTypography.heading6.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
           if (levels.isEmpty)
             Text(
-              'เลือกจุดส่งและระบุน้ำหนักพัสดุเพื่อดูตัวเลือกจัดส่ง',
+              _l10n.msgrDeliveryOptionsHint,
               style: AppTypography.caption4.copyWith(
                 color: AppColors.textSecondary,
               ),
@@ -498,7 +500,7 @@ class _MessengerBookingScreenState
         child: Column(
           children: [
             Text(
-              'ไม่พบบริการเมสเซนเจอร์ในขณะนี้',
+              _l10n.msgrNoService,
               style: AppTypography.body2.copyWith(
                 color: AppColors.textSecondary,
               ),
@@ -507,9 +509,9 @@ class _MessengerBookingScreenState
               onPressed: () => ref
                   .read(messengerBookingControllerProvider.notifier)
                   .loadVehicleTypes(),
-              child: const Text(
-                'ลองใหม่',
-                style: TextStyle(color: AppColors.primary),
+              child: Text(
+                _l10n.retry,
+                style: const TextStyle(color: AppColors.primary),
               ),
             ),
           ],
@@ -524,7 +526,7 @@ class _MessengerBookingScreenState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'ประเภทรถ',
+            _l10n.msgrVehicleType,
             style: AppTypography.heading6.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
@@ -559,7 +561,7 @@ class _MessengerBookingScreenState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'ขนาดพัสดุ',
+            _l10n.msgrPackageSize,
             style: AppTypography.heading6.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
@@ -574,10 +576,16 @@ class _MessengerBookingScreenState
                         .selectSizeTier(tier.tier),
                     badgeText: tier.tier.toUpperCase(),
                     title: _msgSizeLabel(tier.tier),
-                    subtitle:
-                        '≤ ${tier.maxWeightKg} กก.\n${tier.maxLengthCm}×${tier.maxWidthCm}×${tier.maxHeightCm} ซม.',
+                    subtitle: _l10n.msgrSizeTierLimits(
+                      '${tier.maxWeightKg}',
+                      '${tier.maxLengthCm}',
+                      '${tier.maxWidthCm}',
+                      '${tier.maxHeightCm}',
+                    ),
                     trailing: Text(
-                      tier.surchargeThb > 0 ? '+฿${tier.surchargeThb}' : 'ฟรี',
+                      tier.surchargeThb > 0
+                          ? '+฿${tier.surchargeThb}'
+                          : _l10n.msgrFree,
                       style: AppTypography.caption4.copyWith(
                         fontWeight: FontWeight.bold,
                         color: AppColors.foundationGreen500,
@@ -633,7 +641,7 @@ class _MessengerBookingScreenState
       case 'L':
         return l10n.msgSizeLarge;
       default:
-        return 'ขนาด ${tier.toUpperCase()}';
+        return l10n.msgrSizeTier(tier.toUpperCase());
     }
   }
 
@@ -820,7 +828,7 @@ class _MessengerBookingScreenState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'ข้อมูลพัสดุ',
+            _l10n.msgrPackageInfo,
             style: AppTypography.heading6.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
@@ -831,16 +839,18 @@ class _MessengerBookingScreenState
             // on submit.
             autovalidateMode: AutovalidateMode.onUserInteraction,
             decoration: _inputDecoration(
-              label: 'น้ำหนัก (กก.) *',
-              hint: tier != null ? 'ไม่เกิน ${tier.maxWeightKg} กก.' : null,
+              label: _l10n.msgrWeightLabel,
+              hint: tier != null
+                  ? _l10n.msgrWeightHint('${tier.maxWeightKg}')
+                  : null,
             ),
             validator: (value) {
               final weight = double.tryParse(value ?? '');
               if (weight == null || weight <= 0) {
-                return 'กรุณาระบุน้ำหนักพัสดุ';
+                return _l10n.msgrWeightRequired;
               }
               if (tier != null && weight > tier.maxWeightKg) {
-                return 'น้ำหนักเกินขนาด ${tier.tier} (สูงสุด ${tier.maxWeightKg} กก.)';
+                return _l10n.msgrWeightOverTier(tier.tier, '${tier.maxWeightKg}');
               }
               return null;
             },
@@ -856,7 +866,7 @@ class _MessengerBookingScreenState
             shape: const Border(),
             maintainState: true,
             title: Text(
-              'ขนาดพัสดุ (ไม่บังคับ)',
+              _l10n.msgrDimensionsOptional,
               style: AppTypography.caption3.copyWith(
                 color: AppColors.textSecondary,
               ),
@@ -867,7 +877,7 @@ class _MessengerBookingScreenState
                   Expanded(
                     child: _dimensionField(
                       _lengthController,
-                      'ยาว (ซม.)',
+                      _l10n.msgrLengthCm,
                       tier?.maxLengthCm,
                     ),
                   ),
@@ -875,7 +885,7 @@ class _MessengerBookingScreenState
                   Expanded(
                     child: _dimensionField(
                       _widthController,
-                      'กว้าง (ซม.)',
+                      _l10n.msgrWidthCm,
                       tier?.maxWidthCm,
                     ),
                   ),
@@ -883,7 +893,7 @@ class _MessengerBookingScreenState
                   Expanded(
                     child: _dimensionField(
                       _heightController,
-                      'สูง (ซม.)',
+                      _l10n.msgrHeightCm,
                       tier?.maxHeightCm,
                     ),
                   ),
@@ -909,8 +919,8 @@ class _MessengerBookingScreenState
       validator: (value) {
         if (value == null || value.isEmpty) return null;
         final size = double.tryParse(value);
-        if (size == null || size < 0) return 'ไม่ถูกต้อง';
-        if (max != null && max > 0 && size > max) return 'เกิน $max ซม.';
+        if (size == null || size < 0) return _l10n.msgrInvalid;
+        if (max != null && max > 0 && size > max) return _l10n.msgrOverMaxCm('$max');
         return null;
       },
       onChanged: (_) => _onDimensionsChanged(),
@@ -925,7 +935,7 @@ class _MessengerBookingScreenState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'ข้อมูลผู้รับ',
+            _l10n.msgrRecipientInfo,
             style: AppTypography.heading6.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
@@ -933,10 +943,13 @@ class _MessengerBookingScreenState
             controller: _recipientNameController,
             maxLength: 200,
             autovalidateMode: AutovalidateMode.onUserInteraction,
-            decoration: _inputDecoration(label: 'ชื่อผู้รับ *', counter: false),
+            decoration: _inputDecoration(
+              label: _l10n.msgrRecipientNameLabel,
+              counter: false,
+            ),
             validator: (value) =>
                 (value == null || value.trim().isEmpty)
-                ? 'กรุณาระบุชื่อผู้รับ'
+                ? _l10n.msgrRecipientNameRequired
                 : null,
           ),
           const SizedBox(height: 8),
@@ -945,15 +958,15 @@ class _MessengerBookingScreenState
             keyboardType: TextInputType.phone,
             autovalidateMode: AutovalidateMode.onUserInteraction,
             decoration: _inputDecoration(
-              label: 'เบอร์โทรผู้รับ *',
-              hint: 'เช่น 0812345678',
+              label: _l10n.msgrRecipientPhoneLabel,
+              hint: _l10n.msgrRecipientPhoneHint,
             ),
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
-                return 'กรุณาระบุเบอร์โทรผู้รับ';
+                return _l10n.msgrRecipientPhoneRequired;
               }
               if (!_thaiPhoneRegex.hasMatch(value.trim())) {
-                return 'รูปแบบเบอร์โทรไม่ถูกต้อง';
+                return _l10n.msgrPhoneInvalid;
               }
               return null;
             },
@@ -964,8 +977,8 @@ class _MessengerBookingScreenState
             maxLength: 1000,
             maxLines: 2,
             decoration: _inputDecoration(
-              label: 'โน้ตถึงคนขับ (ไม่บังคับ)',
-              hint: 'เช่น ของแตกง่าย',
+              label: _l10n.msgrNotesLabel,
+              hint: _l10n.msgrNotesHint,
               counter: false,
             ),
           ),
@@ -983,7 +996,7 @@ class _MessengerBookingScreenState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'ใครชำระค่าส่ง?',
+            _l10n.msgrPayerTitle,
             style: AppTypography.heading6.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
@@ -994,8 +1007,8 @@ class _MessengerBookingScreenState
                   .read(messengerBookingControllerProvider.notifier)
                   .setPayer('SENDER'),
               icon: Icons.person_outline,
-              title: 'ผู้ส่ง (คุณ)',
-              subtitle: 'จ่ายค่าส่งตอนนี้',
+              title: _l10n.msgrPayerSender,
+              subtitle: _l10n.msgrPayerSenderSub,
             ),
             _selectableCard(
               selected: payer == 'RECIPIENT',
@@ -1003,8 +1016,8 @@ class _MessengerBookingScreenState
                   .read(messengerBookingControllerProvider.notifier)
                   .setPayer('RECIPIENT'),
               icon: Icons.pin_drop_outlined,
-              title: 'ผู้รับปลายทาง',
-              subtitle: 'เก็บเงินตอนส่งของ',
+              title: _l10n.msgrPayerRecipient,
+              subtitle: _l10n.msgrPayerRecipientSub,
             ),
           ]),
           if (bookingState.isRecipientPays) ...[
@@ -1020,7 +1033,7 @@ class _MessengerBookingScreenState
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
-                    'คนขับจะไปเก็บค่าส่งจากผู้รับที่ปลายทาง — คุณไม่ต้องจ่ายตอนนี้',
+                    _l10n.msgrRecipientPaysNote,
                     style: AppTypography.caption4.copyWith(
                       color: AppColors.textSecondary,
                     ),
@@ -1044,7 +1057,7 @@ class _MessengerBookingScreenState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'วิธีชำระเงิน',
+            _l10n.msgrPaymentMethod,
             style: AppTypography.heading6.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
@@ -1055,7 +1068,7 @@ class _MessengerBookingScreenState
                   .read(messengerBookingControllerProvider.notifier)
                   .setPaymentMethod('CASH'),
               icon: Icons.payments_outlined,
-              title: 'เงินสด',
+              title: _l10n.cashLabel,
             ),
             // PromptPay is gated off until the messenger backend accepts
             // digital payment (SCRUM-41 phase 1 = CASH|COD; PROMPTPAY 400s).
@@ -1066,7 +1079,7 @@ class _MessengerBookingScreenState
                     .read(messengerBookingControllerProvider.notifier)
                     .setPaymentMethod('PROMPTPAY'),
                 icon: Icons.qr_code_2_rounded,
-                title: 'พร้อมเพย์',
+                title: _l10n.promptPay,
               ),
             // COD hidden behind a flag until its collection/settlement flow
             // is finalised (FeatureFlags.messengerCodEnabled).
@@ -1077,7 +1090,7 @@ class _MessengerBookingScreenState
                     .read(messengerBookingControllerProvider.notifier)
                     .setPaymentMethod('COD'),
                 icon: Icons.local_atm,
-                title: 'เก็บเงินปลายทาง',
+                title: _l10n.msgrCod,
               ),
           ]),
           if (FeatureFlags.messengerCodEnabled && isCod) ...[
@@ -1087,8 +1100,8 @@ class _MessengerBookingScreenState
               keyboardType:
                   const TextInputType.numberWithOptions(decimal: true),
               decoration: _inputDecoration(
-                label: 'ยอดเก็บเงินปลายทาง (บาท) *',
-                hint: 'ไม่เกิน 100,000 บาท',
+                label: _l10n.msgrCodAmountLabel,
+                hint: _l10n.msgrCodAmountHint,
               ),
               validator: (value) {
                 if (!ref.read(messengerBookingControllerProvider).isCod) {
@@ -1096,9 +1109,9 @@ class _MessengerBookingScreenState
                 }
                 final amount = double.tryParse(value ?? '');
                 if (amount == null || amount <= 0) {
-                  return 'กรุณาระบุยอดเก็บเงินปลายทาง';
+                  return _l10n.msgrCodAmountRequired;
                 }
-                if (amount > 100000) return 'ยอดสูงสุด 100,000 บาท';
+                if (amount > 100000) return _l10n.msgrCodAmountMax;
                 return null;
               },
               onChanged: (value) {
@@ -1148,7 +1161,7 @@ class _MessengerBookingScreenState
                     child: Text(
                       _promoController.text.isNotEmpty
                           ? _promoController.text
-                          : 'เลือกโค้ดส่วนลด (ไม่บังคับ)',
+                          : _l10n.msgrSelectPromoOptional,
                       style: AppTypography.body2.copyWith(
                         color: _promoController.text.isNotEmpty
                             ? AppColors.textPrimary
@@ -1186,7 +1199,7 @@ class _MessengerBookingScreenState
             ),
             const SizedBox(width: 12),
             Text(
-              'กำลังคำนวณราคา...',
+              _l10n.msgrCalculating,
               style: AppTypography.body2.copyWith(
                 color: AppColors.textSecondary,
               ),
@@ -1200,7 +1213,7 @@ class _MessengerBookingScreenState
     if (estimate == null) {
       return _card(
         child: Text(
-          'เลือกจุดส่งและระบุน้ำหนักพัสดุเพื่อดูราคา',
+          _l10n.msgrPriceHint,
           style: AppTypography.body2.copyWith(color: AppColors.textSecondary),
         ),
       );
@@ -1211,13 +1224,16 @@ class _MessengerBookingScreenState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'สรุปราคา',
+            _l10n.msgrPriceSummary,
             style: AppTypography.heading6.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           _priceRow(
-            'ระยะทาง',
-            '${estimate.distanceKm.toStringAsFixed(1)} กม. (~${estimate.durationMin.round()} นาที)',
+            _l10n.distance,
+            _l10n.msgrDistanceDuration(
+              estimate.distanceKm.toStringAsFixed(1),
+              '${estimate.durationMin.round()}',
+            ),
           ),
           ..._fareLines(bookingState, estimate),
           const Divider(height: 16, color: AppColors.foundationGrayscale200),
@@ -1225,7 +1241,7 @@ class _MessengerBookingScreenState
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'ยอดชำระ',
+                _l10n.msgrTotal,
                 style: AppTypography.heading5.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -1255,20 +1271,23 @@ class _MessengerBookingScreenState
     final level = bookingState.selectedServiceLevel;
     if (level != null) {
       return [
-        _priceRow('ค่าส่ง', '฿${level.baseFare.toStringAsFixed(0)}'),
+        _priceRow(
+          _l10n.msgrDeliveryFee,
+          '฿${level.baseFare.toStringAsFixed(0)}',
+        ),
         if (level.sizeSurcharge > 0)
           _priceRow(
-            'ค่าธรรมเนียมขนาด',
+            _l10n.msgrSizeFee,
             '฿${level.sizeSurcharge.toStringAsFixed(0)}',
           ),
         if (level.expressSurcharge > 0)
           _priceRow(
-            'ค่าส่งด่วน',
+            _l10n.msgrExpressFee,
             '฿${level.expressSurcharge.toStringAsFixed(0)}',
           ),
         if (level.discount > 0)
           _priceRow(
-            'ส่วนลด',
+            _l10n.msgrDiscount,
             '-฿${level.discount.toStringAsFixed(0)}',
             valueColor: AppColors.foundationGreen500,
           ),
@@ -1276,15 +1295,18 @@ class _MessengerBookingScreenState
     }
     // No per-mode pricing from BE: show the top-level lines as they are.
     return [
-      _priceRow('ค่าส่ง', '฿${estimate.baseFare.toStringAsFixed(0)}'),
+      _priceRow(
+        _l10n.msgrDeliveryFee,
+        '฿${estimate.baseFare.toStringAsFixed(0)}',
+      ),
       if (estimate.surcharge > 0)
         _priceRow(
-          'ค่าธรรมเนียมเพิ่มเติม',
+          _l10n.msgrExtraFee,
           '฿${estimate.surcharge.toStringAsFixed(0)}',
         ),
       if (estimate.discount > 0)
         _priceRow(
-          'ส่วนลด',
+          _l10n.msgrDiscount,
           '-฿${estimate.discount.toStringAsFixed(0)}',
           valueColor: AppColors.foundationGreen500,
         ),
@@ -1355,8 +1377,10 @@ class _MessengerBookingScreenState
                 )
               : Text(
                   estimate != null
-                      ? 'เรียกเมสเซนเจอร์ • ฿${bookingState.displayTotalFare.toStringAsFixed(0)}'
-                      : 'เรียกเมสเซนเจอร์',
+                      ? _l10n.msgrCallMessengerPrice(
+                          bookingState.displayTotalFare.toStringAsFixed(0),
+                        )
+                      : _l10n.msgrCallMessenger,
                   style: AppTypography.heading5.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,

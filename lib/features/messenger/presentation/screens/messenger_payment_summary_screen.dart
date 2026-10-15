@@ -4,6 +4,7 @@ import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/core/widgets/route_stops.dart';
 import 'package:customer_app/features/messenger/data/repositories/messenger_repository_impl.dart';
 import 'package:customer_app/features/messenger/domain/models/messenger_order.dart';
+import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -20,22 +21,23 @@ class MessengerPaymentSummaryScreen extends ConsumerWidget {
 
   const MessengerPaymentSummaryScreen({super.key, required this.orderId});
 
-  String _paymentLabel(String method) {
+  String _paymentLabel(AppLocalizations l10n, String method) {
     switch (method.toUpperCase()) {
       case 'CASH':
-        return 'เงินสด';
+        return l10n.cashLabel;
       case 'PROMPTPAY':
-        return 'พร้อมเพย์';
+        return l10n.promptPay;
       case 'COD':
-        return 'เก็บเงินปลายทาง';
+        return l10n.msgrCod;
       default:
-        return method.isEmpty ? 'ไม่ระบุ' : method;
+        return method.isEmpty ? l10n.msgrNotSpecified : method;
     }
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final orderAsync = ref.watch(_summaryOrderProvider(orderId));
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: AppColors.semanticGrayNeutralBgWhite,
@@ -49,7 +51,7 @@ class MessengerPaymentSummaryScreen extends ConsumerWidget {
               context.canPop() ? context.pop() : context.go('/main'),
         ),
         title: Text(
-          'สรุปการชำระเงิน',
+          l10n.msgrPaymentSummaryTitle,
           style: AppTypography.heading4.copyWith(color: AppColors.black),
         ),
       ),
@@ -59,7 +61,7 @@ class MessengerPaymentSummaryScreen extends ConsumerWidget {
           child: Padding(
             padding: const EdgeInsets.all(24),
             child: Text(
-              'โหลดข้อมูลไม่สำเร็จ',
+              l10n.msgrLoadDataFailed,
               style: AppTypography.body2,
               textAlign: TextAlign.center,
             ),
@@ -71,6 +73,7 @@ class MessengerPaymentSummaryScreen extends ConsumerWidget {
   }
 
   Widget _content(BuildContext context, MessengerOrder order) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       children: [
         Expanded(
@@ -83,12 +86,12 @@ class MessengerPaymentSummaryScreen extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('เส้นทางจัดส่ง', style: AppTypography.label2),
+                      Text(l10n.msgrDeliveryRoute, style: AppTypography.label2),
                       const SizedBox(height: 14),
                       RouteStops(
                         showLabels: false,
-                        pickupLabel: 'จุดรับพัสดุ',
-                        dropoffLabel: 'จุดส่งพัสดุ',
+                        pickupLabel: l10n.msgrPickupPoint,
+                        dropoffLabel: l10n.msgrDropoffPoint,
                         pickupAddress: order.pickupAddress,
                         dropoffAddress: order.dropoffAddress,
                         addressStyle: AppTypography.body2,
@@ -101,12 +104,16 @@ class MessengerPaymentSummaryScreen extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('ข้อมูลพัสดุ', style: AppTypography.label2),
+                      Text(l10n.msgrPackageInfo, style: AppTypography.label2),
                       const SizedBox(height: 12),
                       _infoRow(
                         Icons.inventory_2_outlined,
-                        'ขนาด ${order.packageSizeTier.isNotEmpty ? order.packageSizeTier : '-'} '
-                            '• ${order.packageWeightKg.toStringAsFixed(1)} กก.',
+                        l10n.msgrSizeWeight(
+                          order.packageSizeTier.isNotEmpty
+                              ? order.packageSizeTier
+                              : '-',
+                          order.packageWeightKg.toStringAsFixed(1),
+                        ),
                       ),
                       if (order.recipientName.isNotEmpty ||
                           order.recipientPhone.isNotEmpty) ...[
@@ -127,16 +134,16 @@ class MessengerPaymentSummaryScreen extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('สรุปค่าจัดส่ง', style: AppTypography.label2),
+                      Text(l10n.msgrFeeSummary, style: AppTypography.label2),
                       const SizedBox(height: 16),
                       _amountRow(
-                        'ค่าส่ง (${order.distanceKm.toStringAsFixed(1)} กม.)',
+                        l10n.msgrDeliveryFeeDistance(order.distanceKm.toStringAsFixed(1)),
                         '฿${order.fare.toStringAsFixed(0)}',
                       ),
                       if (order.discount > 0) ...[
                         const SizedBox(height: 12),
                         _amountRow(
-                          'ส่วนลด',
+                          l10n.msgrDiscount,
                           '-฿${order.discount.toStringAsFixed(0)}',
                           valueColor: AppColors.primary,
                         ),
@@ -144,7 +151,7 @@ class MessengerPaymentSummaryScreen extends ConsumerWidget {
                       if (order.isCod && order.codAmount > 0) ...[
                         const SizedBox(height: 12),
                         _amountRow(
-                          'เก็บเงินปลายทาง (COD)',
+                          l10n.msgrCodWithTag,
                           '฿${order.codAmount.toStringAsFixed(0)}',
                         ),
                       ],
@@ -160,8 +167,12 @@ class MessengerPaymentSummaryScreen extends ConsumerWidget {
                             // so the sender's amount_due is 0 — label it as
                             // "ชำระปลายทาง" and still show the ฿ amount, not ฿0.
                             order.isRecipientPays
-                                ? 'ชำระปลายทาง (${_paymentLabel(order.paymentMethod)})'
-                                : 'ยอดชำระ (${_paymentLabel(order.paymentMethod)})',
+                                ? l10n.msgrPayOnDeliveryWith(
+                                    _paymentLabel(l10n, order.paymentMethod),
+                                  )
+                                : l10n.msgrTotalWith(
+                                    _paymentLabel(l10n, order.paymentMethod),
+                                  ),
                             style: AppTypography.label1.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
@@ -202,7 +213,7 @@ class MessengerPaymentSummaryScreen extends ConsumerWidget {
                   ),
                 ),
                 child: Text(
-                  'ยืนยันและให้คะแนน',
+                  l10n.msgrConfirmAndRate,
                   style: AppTypography.label1.copyWith(color: AppColors.white),
                 ),
               ),

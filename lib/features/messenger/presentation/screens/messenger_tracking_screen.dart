@@ -30,6 +30,8 @@ class _MessengerTrackingScreenState
   GoogleMapController? _mapController;
   bool _cameraFitted = false;
 
+  AppLocalizations get _l10n => AppLocalizations.of(context)!;
+
   @override
   void initState() {
     super.initState();
@@ -67,17 +69,17 @@ class _MessengerTrackingScreenState
       final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('ยกเลิกการส่งพัสดุ', style: AppTypography.heading4),
+        title: Text(_l10n.msgrCancelTitle, style: AppTypography.heading4),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('คุณแน่ใจหรือไม่ว่าต้องการยกเลิก?'),
+            Text(_l10n.msgrCancelConfirm),
             const SizedBox(height: 12),
             TextField(
               controller: reasonController,
-              decoration: const InputDecoration(
-                hintText: 'เหตุผล (ไม่บังคับ)',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                hintText: _l10n.msgrCancelReasonHint,
+                border: const OutlineInputBorder(),
               ),
             ),
           ],
@@ -85,13 +87,16 @@ class _MessengerTrackingScreenState
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('ไม่ใช่', style: TextStyle(color: Colors.grey)),
+            child: Text(
+              _l10n.msgrNo,
+              style: const TextStyle(color: Colors.grey),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text(
-              'ใช่, ยกเลิกเลย',
-              style: TextStyle(color: Colors.red),
+            child: Text(
+              _l10n.msgrYesCancel,
+              style: const TextStyle(color: Colors.red),
             ),
           ),
         ],
@@ -106,8 +111,8 @@ class _MessengerTrackingScreenState
     if (!mounted) return;
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('ยกเลิกการส่งพัสดุแล้ว'),
+        SnackBar(
+          content: Text(_l10n.msgrCancelledSnack),
           backgroundColor: AppColors.success,
         ),
       );
@@ -125,18 +130,19 @@ class _MessengerTrackingScreenState
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('จ่ายเงินสดแทน', style: AppTypography.heading4),
-        content: const Text(
-          'เปลี่ยนเป็นจ่ายเงินสดกับคนขับที่ปลายทาง/จุดรับแทนการสแกน QR ใช่หรือไม่?',
-        ),
+        title: Text(_l10n.msgrPayCashInstead, style: AppTypography.heading4),
+        content: Text(_l10n.msgrPayCashConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('ยกเลิก', style: TextStyle(color: Colors.grey)),
+            child: Text(
+              _l10n.cancel,
+              style: const TextStyle(color: Colors.grey),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('ใช่, จ่ายเงินสด'),
+            child: Text(_l10n.msgrYesPayCash),
           ),
         ],
       ),
@@ -148,8 +154,8 @@ class _MessengerTrackingScreenState
         .switchToCash();
     if (!mounted || !ok) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('เปลี่ยนเป็นจ่ายเงินสดแล้ว — จ่ายกับคนขับได้เลย'),
+      SnackBar(
+        content: Text(_l10n.msgrSwitchedToCash),
         backgroundColor: AppColors.success,
       ),
     );
@@ -319,7 +325,7 @@ class _MessengerTrackingScreenState
           children: [
             const Icon(Icons.error_outline, size: 64, color: AppColors.error),
             const SizedBox(height: 16),
-            Text('ไม่สามารถโหลดข้อมูลได้', style: AppTypography.heading5),
+            Text(_l10n.msgrCannotLoad, style: AppTypography.heading5),
             const SizedBox(height: 8),
             Text(
               error,
@@ -332,7 +338,10 @@ class _MessengerTrackingScreenState
                   .read(messengerTrackingControllerProvider.notifier)
                   .startTracking(widget.orderId),
               style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
-              child: const Text('ลองใหม่', style: TextStyle(color: Colors.white)),
+              child: Text(
+                _l10n.retry,
+                style: const TextStyle(color: Colors.white),
+              ),
             ),
           ],
         ),
@@ -384,7 +393,7 @@ class _MessengerTrackingScreenState
           icon:
               pickupIcon ??
               BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
-          infoWindow: const InfoWindow(title: 'จุดรับพัสดุ'),
+          infoWindow: InfoWindow(title: _l10n.msgrPickupPoint),
         ),
         Marker(
           markerId: const MarkerId('dropoff'),
@@ -392,7 +401,7 @@ class _MessengerTrackingScreenState
           icon:
               dropoffIcon ??
               BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
-          infoWindow: const InfoWindow(title: 'จุดส่งพัสดุ'),
+          infoWindow: InfoWindow(title: _l10n.msgrDropoffPoint),
         ),
       },
       myLocationEnabled: false,
@@ -433,8 +442,9 @@ class _MessengerTrackingScreenState
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      'สแกน QR ที่คนขับเพื่อชำระค่าส่ง '
-                      '฿${order.amountDue.toStringAsFixed(0)}',
+                      _l10n.msgrScanDriverQr(
+                        order.amountDue.toStringAsFixed(0),
+                      ),
                       style: AppTypography.heading6.copyWith(
                         color: AppColors.foundationGreen700,
                       ),
@@ -455,7 +465,7 @@ class _MessengerTrackingScreenState
                   color: AppColors.textSecondary,
                 ),
                 label: Text(
-                  'จ่ายเงินสดแทน',
+                  _l10n.msgrPayCashInstead,
                   style: AppTypography.caption4.copyWith(
                     color: AppColors.textSecondary,
                     decoration: TextDecoration.underline,
@@ -480,7 +490,7 @@ class _MessengerTrackingScreenState
                 color: Colors.white,
               ),
               label: Text(
-                'แชทกับคนขับ',
+                _l10n.msgrChatWithDriver,
                 style: AppTypography.heading6.copyWith(color: Colors.white),
               ),
               style: ElevatedButton.styleFrom(
@@ -509,7 +519,7 @@ class _MessengerTrackingScreenState
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
-                  'ให้คะแนนแล้ว  ⭐ ${order.customerRating}',
+                  _l10n.msgrRated('${order.customerRating}'),
                   style: AppTypography.heading6.copyWith(
                     color: AppColors.semanticGrayNeutralFgMidOnWhite,
                   ),
@@ -525,7 +535,7 @@ class _MessengerTrackingScreenState
                   color: Colors.white,
                 ),
                 label: Text(
-                  'สรุปและให้คะแนน',
+                  _l10n.msgrSummaryAndRate,
                   style: AppTypography.heading6.copyWith(color: Colors.white),
                 ),
                 style: ElevatedButton.styleFrom(
@@ -550,7 +560,7 @@ class _MessengerTrackingScreenState
                 ),
               ),
               child: Text(
-                'ยกเลิกการส่งพัสดุ',
+                _l10n.msgrCancelTitle,
                 style: AppTypography.heading6.copyWith(color: AppColors.error),
               ),
             ),
@@ -572,7 +582,7 @@ class _MessengerTrackingScreenState
                 const Icon(Icons.cancel, color: AppColors.error, size: 28),
                 const SizedBox(width: 8),
                 Text(
-                  'ยกเลิกแล้ว',
+                  _l10n.msgrStatusCancelled,
                   style: AppTypography.heading5.copyWith(
                     fontWeight: FontWeight.bold,
                     color: AppColors.error,
@@ -583,7 +593,7 @@ class _MessengerTrackingScreenState
             if (order.cancelReason.isNotEmpty) ...[
               const SizedBox(height: 8),
               Text(
-                'เหตุผล: ${order.cancelReason}',
+                _l10n.msgrCancelReason(order.cancelReason),
                 style: AppTypography.body2.copyWith(
                   color: AppColors.textSecondary,
                 ),
@@ -618,7 +628,9 @@ class _MessengerTrackingScreenState
           if (order.hasDriver) ...[
             const SizedBox(height: 4),
             Text(
-              'คนขับ #${order.driverId.substring(0, order.driverId.length.clamp(0, 6))}',
+              _l10n.msgrDriverId(
+                order.driverId.substring(0, order.driverId.length.clamp(0, 6)),
+              ),
               style: AppTypography.caption4.copyWith(
                 color: AppColors.textSecondary,
               ),
@@ -673,17 +685,17 @@ class _MessengerTrackingScreenState
   String _statusSubtitle(String status) {
     switch (status.toUpperCase()) {
       case 'PENDING':
-        return 'กำลังหาคนขับที่อยู่ใกล้คุณ...';
+        return _l10n.msgrStatusSubPending;
       case 'ACCEPTED':
-        return 'คนขับกำลังเดินทางไปรับพัสดุ';
+        return _l10n.msgrStatusSubAccepted;
       case 'ARRIVED_AT_PICKUP':
-        return 'คนขับถึงจุดรับพัสดุแล้ว';
+        return _l10n.msgrStatusArrivedAtPickup;
       case 'PICKED_UP':
-        return 'กำลังนำส่งพัสดุถึงปลายทาง';
+        return _l10n.msgrStatusSubPickedUp;
       case 'DELIVERED':
-        return 'ส่งพัสดุถึงปลายทางเรียบร้อย';
+        return _l10n.msgrStatusSubDelivered;
       default:
-        return 'กำลังดำเนินการ...';
+        return _l10n.msgrStatusInProgress;
     }
   }
 
@@ -753,14 +765,14 @@ class _MessengerTrackingScreenState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'ข้อมูลพัสดุ',
+            _l10n.msgrPackageInfo,
             style: AppTypography.heading6.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 10),
           RouteStops(
             showLabels: false,
-            pickupLabel: 'จุดรับพัสดุ',
-            dropoffLabel: 'จุดส่งพัสดุ',
+            pickupLabel: _l10n.msgrPickupPoint,
+            dropoffLabel: _l10n.msgrDropoffPoint,
             pickupAddress: order.pickupAddress,
             dropoffAddress: order.dropoffAddress,
             addressStyle: AppTypography.body2,
@@ -771,11 +783,14 @@ class _MessengerTrackingScreenState
             runSpacing: 8,
             children: [
               _chip(
-                'ขนาด ${order.packageSizeTier.toUpperCase()} • ${order.packageWeightKg.toStringAsFixed(1)} กก.',
+                _l10n.msgrSizeWeight(
+                  order.packageSizeTier.toUpperCase(),
+                  order.packageWeightKg.toStringAsFixed(1),
+                ),
               ),
               if (order.isCod)
                 _chip(
-                  'เก็บเงินปลายทาง ฿${order.codAmount.toStringAsFixed(0)}',
+                  _l10n.msgrCodAmountChip(order.codAmount.toStringAsFixed(0)),
                   color: AppColors.foundationOrange800,
                   background: AppColors.foundationOrange100,
                 ),
@@ -810,13 +825,13 @@ class _MessengerTrackingScreenState
       child: Column(
         children: [
           _fareRow(
-            'ค่าส่ง (${order.distanceKm.toStringAsFixed(1)} กม.)',
+            _l10n.msgrDeliveryFeeDistance(order.distanceKm.toStringAsFixed(1)),
             '฿${order.fare.toStringAsFixed(0)}',
           ),
           if (order.discount > 0) ...[
             const SizedBox(height: 4),
             _fareRow(
-              'ส่วนลด',
+              _l10n.msgrDiscount,
               '-฿${order.discount.toStringAsFixed(0)}',
               valueColor: AppColors.foundationGreen500,
             ),
@@ -826,7 +841,7 @@ class _MessengerTrackingScreenState
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'ค่าส่ง (${_paymentLabel(order)})',
+                _l10n.msgrDeliveryFeeWithMethod(_paymentLabel(order)),
                 style: AppTypography.body2.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -847,7 +862,7 @@ class _MessengerTrackingScreenState
           if (order.isCod && order.codAmount > 0) ...[
             const SizedBox(height: 4),
             _fareRow(
-              'เก็บเงินค่าสินค้าปลายทาง',
+              _l10n.msgrGoodsCod,
               '฿${order.codAmount.toStringAsFixed(0)}',
             ),
           ],
@@ -863,14 +878,16 @@ class _MessengerTrackingScreenState
   /// the delivery fee and where it gets collected.
   Widget _buildPayerInfo(MessengerOrder order) {
     final bool paid = order.isPaid;
-    final String who = order.isRecipientPays ? 'ผู้รับปลายทาง' : 'ผู้ส่ง (คุณ)';
+    final String who = order.isRecipientPays
+        ? _l10n.msgrPayerRecipient
+        : _l10n.msgrPayerSender;
     String? where;
     switch ((order.collectAt ?? '').toUpperCase()) {
       case 'PICKUP':
-        where = 'เก็บตอนรับพัสดุ';
+        where = _l10n.msgrCollectAtPickup;
         break;
       case 'DELIVERY':
-        where = 'เก็บตอนส่งถึงปลายทาง';
+        where = _l10n.msgrCollectAtDelivery;
         break;
     }
     return Container(
@@ -890,8 +907,10 @@ class _MessengerTrackingScreenState
           Expanded(
             child: Text(
               paid
-                  ? 'ชำระค่าส่งแล้ว'
-                  : 'ผู้จ่ายค่าส่ง: $who${where != null ? ' · $where' : ''}',
+                  ? _l10n.msgrFeePaid
+                  : _l10n.msgrFeePayer(
+                      '$who${where != null ? ' · $where' : ''}',
+                    ),
               style: AppTypography.caption4.copyWith(
                 color: paid
                     ? AppColors.foundationGreen700
@@ -980,11 +999,11 @@ class _MessengerTrackingScreenState
   String _paymentLabel(MessengerOrder order) {
     switch (order.paymentMethod.toUpperCase()) {
       case 'COD':
-        return 'เก็บเงินปลายทาง';
+        return _l10n.msgrCod;
       case 'PROMPTPAY':
-        return 'พร้อมเพย์';
+        return _l10n.promptPay;
       default:
-        return 'เงินสด';
+        return _l10n.cashLabel;
     }
   }
 
@@ -1008,17 +1027,17 @@ class _MessengerTrackingScreenState
   String _statusText(String status) {
     switch (status.toUpperCase()) {
       case 'PENDING':
-        return 'กำลังค้นหาคนขับ...';
+        return _l10n.msgrStatusPending;
       case 'ACCEPTED':
-        return 'คนขับรับงานแล้ว กำลังไปจุดรับ';
+        return _l10n.msgrStatusAccepted;
       case 'ARRIVED_AT_PICKUP':
-        return 'คนขับถึงจุดรับพัสดุแล้ว';
+        return _l10n.msgrStatusArrivedAtPickup;
       case 'PICKED_UP':
-        return 'รับพัสดุแล้ว กำลังนำส่ง';
+        return _l10n.msgrStatusPickedUp;
       case 'DELIVERED':
-        return 'ส่งพัสดุสำเร็จ';
+        return _l10n.msgrStatusDelivered;
       default:
-        return 'กำลังดำเนินการ...';
+        return _l10n.msgrStatusInProgress;
     }
   }
 }

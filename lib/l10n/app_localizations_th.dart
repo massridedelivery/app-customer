@@ -829,4 +829,464 @@ class AppLocalizationsTh extends AppLocalizations {
   String etaExpectedAround(String time) {
     return 'คาดว่าถึงประมาณ $time';
   }
+
+  @override
+  String get msgrSelectPickupError => 'กรุณาเลือกจุดรับพัสดุ';
+
+  @override
+  String get msgrSelectDropoffError => 'กรุณาเลือกจุดส่งพัสดุ';
+
+  @override
+  String get msgrRecipientNameRequired => 'กรุณาระบุชื่อผู้รับ';
+
+  @override
+  String get msgrRecipientPhoneRequired => 'กรุณาระบุเบอร์โทรผู้รับ';
+
+  @override
+  String get msgrRecipientPhoneInvalid => 'รูปแบบเบอร์โทรผู้รับไม่ถูกต้อง';
+
+  @override
+  String get msgrPhoneInvalid => 'รูปแบบเบอร์โทรไม่ถูกต้อง';
+
+  @override
+  String get msgrCalculatingPleaseWait => 'กำลังคำนวณราคา กรุณารอสักครู่';
+
+  @override
+  String get msgrTitle => 'เมสเซนเจอร์ส่งพัสดุ';
+
+  @override
+  String get msgrHeroSubtitle =>
+      'บริการรับ-ส่งพัสดุเพื่อคุณ ไม่ว่าจะที่ไหน เมื่อไหร่';
+
+  @override
+  String get msgrSelectPickup => 'เลือกจุดรับพัสดุ';
+
+  @override
+  String get msgrSelectDropoff => 'เลือกจุดส่งพัสดุ';
+
+  @override
+  String get msgrDeliveryTypeTitle => 'ต้องการจัดส่งแบบไหน?';
+
+  @override
+  String get msgrDeliveryOptionsHint =>
+      'เลือกจุดส่งและระบุน้ำหนักพัสดุเพื่อดูตัวเลือกจัดส่ง';
+
+  @override
+  String get msgrNoService => 'ไม่พบบริการเมสเซนเจอร์ในขณะนี้';
+
+  @override
+  String get msgrVehicleType => 'ประเภทรถ';
+
+  @override
+  String get msgrPackageSize => 'ขนาดพัสดุ';
+
+  @override
+  String msgrSizeTierLimits(
+    String weight,
+    String length,
+    String width,
+    String height,
+  ) {
+    return '≤ $weight กก.\n$length×$width×$height ซม.';
+  }
+
+  @override
+  String get msgrFree => 'ฟรี';
+
+  @override
+  String msgrSizeTier(String tier) {
+    return 'ขนาด $tier';
+  }
+
+  @override
+  String get msgrPackageInfo => 'ข้อมูลพัสดุ';
+
+  @override
+  String get msgrWeightLabel => 'น้ำหนัก (กก.) *';
+
+  @override
+  String msgrWeightHint(String max) {
+    return 'ไม่เกิน $max กก.';
+  }
+
+  @override
+  String get msgrWeightRequired => 'กรุณาระบุน้ำหนักพัสดุ';
+
+  @override
+  String msgrWeightOverTier(String tier, String max) {
+    return 'น้ำหนักเกินขนาด $tier (สูงสุด $max กก.)';
+  }
+
+  @override
+  String get msgrDimensionsOptional => 'ขนาดพัสดุ (ไม่บังคับ)';
+
+  @override
+  String get msgrLengthCm => 'ยาว (ซม.)';
+
+  @override
+  String get msgrWidthCm => 'กว้าง (ซม.)';
+
+  @override
+  String get msgrHeightCm => 'สูง (ซม.)';
+
+  @override
+  String get msgrInvalid => 'ไม่ถูกต้อง';
+
+  @override
+  String msgrOverMaxCm(String max) {
+    return 'เกิน $max ซม.';
+  }
+
+  @override
+  String get msgrRecipientInfo => 'ข้อมูลผู้รับ';
+
+  @override
+  String get msgrRecipientNameLabel => 'ชื่อผู้รับ *';
+
+  @override
+  String get msgrRecipientPhoneLabel => 'เบอร์โทรผู้รับ *';
+
+  @override
+  String get msgrRecipientPhoneHint => 'เช่น 0812345678';
+
+  @override
+  String get msgrNotesLabel => 'โน้ตถึงคนขับ (ไม่บังคับ)';
+
+  @override
+  String get msgrNotesHint => 'เช่น ของแตกง่าย';
+
+  @override
+  String get msgrPayerTitle => 'ใครชำระค่าส่ง?';
+
+  @override
+  String get msgrPayerSender => 'ผู้ส่ง (คุณ)';
+
+  @override
+  String get msgrPayerSenderSub => 'จ่ายค่าส่งตอนนี้';
+
+  @override
+  String get msgrPayerRecipient => 'ผู้รับปลายทาง';
+
+  @override
+  String get msgrPayerRecipientSub => 'เก็บเงินตอนส่งของ';
+
+  @override
+  String get msgrRecipientPaysNote =>
+      'คนขับจะไปเก็บค่าส่งจากผู้รับที่ปลายทาง — คุณไม่ต้องจ่ายตอนนี้';
+
+  @override
+  String get msgrPaymentMethod => 'วิธีชำระเงิน';
+
+  @override
+  String get msgrCod => 'เก็บเงินปลายทาง';
+
+  @override
+  String get msgrCodAmountLabel => 'ยอดเก็บเงินปลายทาง (บาท) *';
+
+  @override
+  String get msgrCodAmountHint => 'ไม่เกิน 100,000 บาท';
+
+  @override
+  String get msgrCodAmountRequired => 'กรุณาระบุยอดเก็บเงินปลายทาง';
+
+  @override
+  String get msgrCodAmountMax => 'ยอดสูงสุด 100,000 บาท';
+
+  @override
+  String get msgrSelectPromoOptional => 'เลือกโค้ดส่วนลด (ไม่บังคับ)';
+
+  @override
+  String get msgrCalculating => 'กำลังคำนวณราคา...';
+
+  @override
+  String get msgrPriceHint => 'เลือกจุดส่งและระบุน้ำหนักพัสดุเพื่อดูราคา';
+
+  @override
+  String get msgrPriceSummary => 'สรุปราคา';
+
+  @override
+  String msgrDistanceDuration(String km, String minutes) {
+    return '$km กม. (~$minutes นาที)';
+  }
+
+  @override
+  String get msgrTotal => 'ยอดชำระ';
+
+  @override
+  String get msgrDeliveryFee => 'ค่าส่ง';
+
+  @override
+  String get msgrSizeFee => 'ค่าธรรมเนียมขนาด';
+
+  @override
+  String get msgrExpressFee => 'ค่าส่งด่วน';
+
+  @override
+  String get msgrDiscount => 'ส่วนลด';
+
+  @override
+  String get msgrExtraFee => 'ค่าธรรมเนียมเพิ่มเติม';
+
+  @override
+  String msgrCallMessengerPrice(String amount) {
+    return 'เรียกเมสเซนเจอร์ • ฿$amount';
+  }
+
+  @override
+  String get msgrCallMessenger => 'เรียกเมสเซนเจอร์';
+
+  @override
+  String get msgrLoadVehiclesFailed => 'โหลดประเภทรถไม่สำเร็จ กรุณาลองใหม่';
+
+  @override
+  String get msgrNoDeliveryModes =>
+      'ขณะนี้ยังไม่เปิดให้บริการจัดส่ง กรุณาลองใหม่ภายหลัง';
+
+  @override
+  String get msgrEstimateFailed => 'ประเมินราคาไม่สำเร็จ กรุณาลองใหม่';
+
+  @override
+  String get msgrDeliveryModeUnavailable =>
+      'โหมดจัดส่งที่เลือกถูกปิด กรุณาเลือกใหม่แล้วลองอีกครั้ง';
+
+  @override
+  String get msgrCreateOrderFailed => 'สร้างออเดอร์ไม่สำเร็จ กรุณาลองใหม่';
+
+  @override
+  String get msgrPaidCannotCancel =>
+      'ออเดอร์นี้ชำระเงินแล้ว ยกเลิกในแอปไม่ได้ กรุณาติดต่อฝ่ายบริการลูกค้าเพื่อขอคืนเงิน';
+
+  @override
+  String get msgrOrderAlreadyPaid => 'ออเดอร์นี้ชำระเงินแล้ว';
+
+  @override
+  String get msgrRatingRequired => 'กรุณาให้คะแนนคนขับก่อนนะครับ';
+
+  @override
+  String get msgrCancelTitle => 'ยกเลิกการส่งพัสดุ';
+
+  @override
+  String get msgrCancelConfirm => 'คุณแน่ใจหรือไม่ว่าต้องการยกเลิก?';
+
+  @override
+  String get msgrCancelReasonHint => 'เหตุผล (ไม่บังคับ)';
+
+  @override
+  String get msgrNo => 'ไม่ใช่';
+
+  @override
+  String get msgrYesCancel => 'ใช่, ยกเลิกเลย';
+
+  @override
+  String get msgrCancelledSnack => 'ยกเลิกการส่งพัสดุแล้ว';
+
+  @override
+  String get msgrPayCashInstead => 'จ่ายเงินสดแทน';
+
+  @override
+  String get msgrPayCashConfirm =>
+      'เปลี่ยนเป็นจ่ายเงินสดกับคนขับที่ปลายทาง/จุดรับแทนการสแกน QR ใช่หรือไม่?';
+
+  @override
+  String get msgrYesPayCash => 'ใช่, จ่ายเงินสด';
+
+  @override
+  String get msgrSwitchedToCash =>
+      'เปลี่ยนเป็นจ่ายเงินสดแล้ว — จ่ายกับคนขับได้เลย';
+
+  @override
+  String get msgrCannotLoad => 'ไม่สามารถโหลดข้อมูลได้';
+
+  @override
+  String get msgrPickupPoint => 'จุดรับพัสดุ';
+
+  @override
+  String get msgrDropoffPoint => 'จุดส่งพัสดุ';
+
+  @override
+  String msgrScanDriverQr(String amount) {
+    return 'สแกน QR ที่คนขับเพื่อชำระค่าส่ง ฿$amount';
+  }
+
+  @override
+  String get msgrChatWithDriver => 'แชทกับคนขับ';
+
+  @override
+  String msgrRated(String rating) {
+    return 'ให้คะแนนแล้ว  ⭐ $rating';
+  }
+
+  @override
+  String get msgrSummaryAndRate => 'สรุปและให้คะแนน';
+
+  @override
+  String get msgrStatusCancelled => 'ยกเลิกแล้ว';
+
+  @override
+  String msgrCancelReason(String reason) {
+    return 'เหตุผล: $reason';
+  }
+
+  @override
+  String msgrDriverId(String id) {
+    return 'คนขับ #$id';
+  }
+
+  @override
+  String get msgrStatusPending => 'กำลังค้นหาคนขับ...';
+
+  @override
+  String get msgrStatusAccepted => 'คนขับรับงานแล้ว กำลังไปจุดรับ';
+
+  @override
+  String get msgrStatusArrivedAtPickup => 'คนขับถึงจุดรับพัสดุแล้ว';
+
+  @override
+  String get msgrStatusPickedUp => 'รับพัสดุแล้ว กำลังนำส่ง';
+
+  @override
+  String get msgrStatusDelivered => 'ส่งพัสดุสำเร็จ';
+
+  @override
+  String get msgrStatusInProgress => 'กำลังดำเนินการ...';
+
+  @override
+  String get msgrStatusSubPending => 'กำลังหาคนขับที่อยู่ใกล้คุณ...';
+
+  @override
+  String get msgrStatusSubAccepted => 'คนขับกำลังเดินทางไปรับพัสดุ';
+
+  @override
+  String get msgrStatusSubPickedUp => 'กำลังนำส่งพัสดุถึงปลายทาง';
+
+  @override
+  String get msgrStatusSubDelivered => 'ส่งพัสดุถึงปลายทางเรียบร้อย';
+
+  @override
+  String msgrSizeWeight(String size, String weight) {
+    return 'ขนาด $size • $weight กก.';
+  }
+
+  @override
+  String msgrCodAmountChip(String amount) {
+    return 'เก็บเงินปลายทาง ฿$amount';
+  }
+
+  @override
+  String msgrDeliveryFeeDistance(String km) {
+    return 'ค่าส่ง ($km กม.)';
+  }
+
+  @override
+  String msgrDeliveryFeeWithMethod(String method) {
+    return 'ค่าส่ง ($method)';
+  }
+
+  @override
+  String get msgrGoodsCod => 'เก็บเงินค่าสินค้าปลายทาง';
+
+  @override
+  String get msgrCollectAtPickup => 'เก็บตอนรับพัสดุ';
+
+  @override
+  String get msgrCollectAtDelivery => 'เก็บตอนส่งถึงปลายทาง';
+
+  @override
+  String get msgrFeePaid => 'ชำระค่าส่งแล้ว';
+
+  @override
+  String msgrFeePayer(String who) {
+    return 'ผู้จ่ายค่าส่ง: $who';
+  }
+
+  @override
+  String get msgrPaymentSummaryTitle => 'สรุปการชำระเงิน';
+
+  @override
+  String get msgrNotSpecified => 'ไม่ระบุ';
+
+  @override
+  String get msgrLoadDataFailed => 'โหลดข้อมูลไม่สำเร็จ';
+
+  @override
+  String get msgrDeliveryRoute => 'เส้นทางจัดส่ง';
+
+  @override
+  String get msgrFeeSummary => 'สรุปค่าจัดส่ง';
+
+  @override
+  String get msgrCodWithTag => 'เก็บเงินปลายทาง (COD)';
+
+  @override
+  String msgrPayOnDeliveryWith(String method) {
+    return 'ชำระปลายทาง ($method)';
+  }
+
+  @override
+  String msgrTotalWith(String method) {
+    return 'ยอดชำระ ($method)';
+  }
+
+  @override
+  String get msgrConfirmAndRate => 'ยืนยันและให้คะแนน';
+
+  @override
+  String get msgrAlreadyReviewed => 'คุณได้ให้คะแนนออเดอร์นี้ไปแล้ว';
+
+  @override
+  String get msgrReviewThanks => 'ส่งรีวิวสำเร็จ ขอบคุณสำหรับความคิดเห็นครับ';
+
+  @override
+  String get msgrRateDeliveryTitle => 'ให้คะแนนการจัดส่ง';
+
+  @override
+  String get msgrSkip => 'ข้าม';
+
+  @override
+  String get msgrHowWasDriver => 'คนขับของคุณเป็นอย่างไรบ้าง?';
+
+  @override
+  String get msgrRateThisDelivery => 'ให้คะแนนการจัดส่งพัสดุครั้งนี้';
+
+  @override
+  String get msgrCommentOptional => 'ความคิดเห็นเพิ่มเติม (ไม่บังคับ)';
+
+  @override
+  String get msgrCommentHint => 'เล่าประสบการณ์การจัดส่งให้เราฟัง...';
+
+  @override
+  String get msgrSubmitReview => 'ส่งรีวิว';
+
+  @override
+  String get msgrSkipForNow => 'ข้ามไปก่อน';
+
+  @override
+  String get msgrSelectPromo => 'เลือกโค้ดส่วนลด';
+
+  @override
+  String get msgrApplyCode => 'ใช้โค้ด';
+
+  @override
+  String get msgrEnterPromo => 'กรอกโค้ดส่วนลด';
+
+  @override
+  String get msgrLoadPromosFailed => 'โหลดโค้ดส่วนลดไม่สำเร็จ';
+
+  @override
+  String get msgrNoPromos => 'ยังไม่มีโค้ดส่วนลด';
+
+  @override
+  String get msgrAvailableCoupons => 'คูปองส่วนลดที่มี';
+
+  @override
+  String get msgrSendFailed => 'ส่งข้อความไม่สำเร็จ กรุณาลองใหม่';
+
+  @override
+  String get msgrYourDriver => 'คนขับของคุณ';
+
+  @override
+  String get msgrLoadMessagesFailed => 'โหลดข้อความไม่สำเร็จ';
+
+  @override
+  String get msgrTypeMessage => 'พิมพ์ข้อความ...';
 }

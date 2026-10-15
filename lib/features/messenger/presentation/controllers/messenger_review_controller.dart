@@ -3,6 +3,10 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'messenger_review_controller.g.dart';
 
+/// Error code raised when submitting without a star rating. The review screen
+/// maps it to a localized message.
+const String kMessengerRatingRequired = 'RATING_REQUIRED';
+
 /// Submits a post-delivery review for a messenger order (SCRUM-41).
 /// Fire-and-forget: idle → loading → data (success) / error, mirroring the
 /// ride RatingController.
@@ -20,7 +24,7 @@ class MessengerReviewController extends _$MessengerReviewController {
   }) async {
     if (rating == 0) {
       state = AsyncValue.error(
-        Exception('กรุณาให้คะแนนคนขับก่อนนะครับ'),
+        Exception(kMessengerRatingRequired),
         StackTrace.current,
       );
       return;

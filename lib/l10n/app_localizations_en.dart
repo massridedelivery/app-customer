@@ -831,4 +831,469 @@ class AppLocalizationsEn extends AppLocalizations {
   String etaExpectedAround(String time) {
     return 'Expected around $time';
   }
+
+  @override
+  String get msgrSelectPickupError => 'Please choose a pickup point';
+
+  @override
+  String get msgrSelectDropoffError => 'Please choose a drop-off point';
+
+  @override
+  String get msgrRecipientNameRequired => 'Please enter the recipient\'s name';
+
+  @override
+  String get msgrRecipientPhoneRequired =>
+      'Please enter the recipient\'s phone number';
+
+  @override
+  String get msgrRecipientPhoneInvalid => 'Invalid recipient phone number';
+
+  @override
+  String get msgrPhoneInvalid => 'Invalid phone number';
+
+  @override
+  String get msgrCalculatingPleaseWait => 'Calculating the price, please wait';
+
+  @override
+  String get msgrTitle => 'Messenger';
+
+  @override
+  String get msgrHeroSubtitle =>
+      'Parcel pickup and delivery — anywhere, anytime';
+
+  @override
+  String get msgrSelectPickup => 'Choose pickup point';
+
+  @override
+  String get msgrSelectDropoff => 'Choose drop-off point';
+
+  @override
+  String get msgrDeliveryTypeTitle => 'How should we deliver?';
+
+  @override
+  String get msgrDeliveryOptionsHint =>
+      'Choose a drop-off and enter the weight to see delivery options';
+
+  @override
+  String get msgrNoService => 'No messenger service available right now';
+
+  @override
+  String get msgrVehicleType => 'Vehicle type';
+
+  @override
+  String get msgrPackageSize => 'Parcel size';
+
+  @override
+  String msgrSizeTierLimits(
+    String weight,
+    String length,
+    String width,
+    String height,
+  ) {
+    return '≤ $weight kg\n$length×$width×$height cm';
+  }
+
+  @override
+  String get msgrFree => 'Free';
+
+  @override
+  String msgrSizeTier(String tier) {
+    return 'Size $tier';
+  }
+
+  @override
+  String get msgrPackageInfo => 'Parcel details';
+
+  @override
+  String get msgrWeightLabel => 'Weight (kg) *';
+
+  @override
+  String msgrWeightHint(String max) {
+    return 'Up to $max kg';
+  }
+
+  @override
+  String get msgrWeightRequired => 'Please enter the parcel weight';
+
+  @override
+  String msgrWeightOverTier(String tier, String max) {
+    return 'Too heavy for size $tier (max $max kg)';
+  }
+
+  @override
+  String get msgrDimensionsOptional => 'Parcel dimensions (optional)';
+
+  @override
+  String get msgrLengthCm => 'Length (cm)';
+
+  @override
+  String get msgrWidthCm => 'Width (cm)';
+
+  @override
+  String get msgrHeightCm => 'Height (cm)';
+
+  @override
+  String get msgrInvalid => 'Invalid';
+
+  @override
+  String msgrOverMaxCm(String max) {
+    return 'Over $max cm';
+  }
+
+  @override
+  String get msgrRecipientInfo => 'Recipient details';
+
+  @override
+  String get msgrRecipientNameLabel => 'Recipient name *';
+
+  @override
+  String get msgrRecipientPhoneLabel => 'Recipient phone *';
+
+  @override
+  String get msgrRecipientPhoneHint => 'e.g. 0812345678';
+
+  @override
+  String get msgrNotesLabel => 'Note to driver (optional)';
+
+  @override
+  String get msgrNotesHint => 'e.g. Fragile';
+
+  @override
+  String get msgrPayerTitle => 'Who pays the delivery fee?';
+
+  @override
+  String get msgrPayerSender => 'Sender (you)';
+
+  @override
+  String get msgrPayerSenderSub => 'Sender pays now';
+
+  @override
+  String get msgrPayerRecipient => 'Recipient';
+
+  @override
+  String get msgrPayerRecipientSub => 'Recipient pays on delivery';
+
+  @override
+  String get msgrRecipientPaysNote =>
+      'The driver collects the fee from the recipient on delivery — you don\'t pay now';
+
+  @override
+  String get msgrPaymentMethod => 'Payment method';
+
+  @override
+  String get msgrCod => 'Cash on delivery';
+
+  @override
+  String get msgrCodAmountLabel => 'COD amount (THB) *';
+
+  @override
+  String get msgrCodAmountHint => 'Up to 100,000 THB';
+
+  @override
+  String get msgrCodAmountRequired => 'Please enter the COD amount';
+
+  @override
+  String get msgrCodAmountMax => 'Maximum 100,000 THB';
+
+  @override
+  String get msgrSelectPromoOptional => 'Choose a promo code (optional)';
+
+  @override
+  String get msgrCalculating => 'Calculating price...';
+
+  @override
+  String get msgrPriceHint =>
+      'Choose a drop-off and enter the weight to see the price';
+
+  @override
+  String get msgrPriceSummary => 'Price summary';
+
+  @override
+  String msgrDistanceDuration(String km, String minutes) {
+    return '$km km (~$minutes min)';
+  }
+
+  @override
+  String get msgrTotal => 'Total';
+
+  @override
+  String get msgrDeliveryFee => 'Delivery fee';
+
+  @override
+  String get msgrSizeFee => 'Size fee';
+
+  @override
+  String get msgrExpressFee => 'Express fee';
+
+  @override
+  String get msgrDiscount => 'Discount';
+
+  @override
+  String get msgrExtraFee => 'Additional fee';
+
+  @override
+  String msgrCallMessengerPrice(String amount) {
+    return 'Book messenger • ฿$amount';
+  }
+
+  @override
+  String get msgrCallMessenger => 'Book messenger';
+
+  @override
+  String get msgrLoadVehiclesFailed =>
+      'Couldn\'t load vehicle types. Please try again.';
+
+  @override
+  String get msgrNoDeliveryModes =>
+      'Delivery isn\'t available right now. Please try again later.';
+
+  @override
+  String get msgrEstimateFailed =>
+      'Couldn\'t estimate the price. Please try again.';
+
+  @override
+  String get msgrDeliveryModeUnavailable =>
+      'The selected delivery option is no longer available. Please choose again and retry.';
+
+  @override
+  String get msgrCreateOrderFailed =>
+      'Couldn\'t create the order. Please try again.';
+
+  @override
+  String get msgrPaidCannotCancel =>
+      'This order is already paid and can\'t be cancelled in the app. Please contact customer support for a refund.';
+
+  @override
+  String get msgrOrderAlreadyPaid => 'This order is already paid';
+
+  @override
+  String get msgrRatingRequired => 'Please rate your driver first';
+
+  @override
+  String get msgrCancelTitle => 'Cancel delivery';
+
+  @override
+  String get msgrCancelConfirm => 'Are you sure you want to cancel?';
+
+  @override
+  String get msgrCancelReasonHint => 'Reason (optional)';
+
+  @override
+  String get msgrNo => 'No';
+
+  @override
+  String get msgrYesCancel => 'Yes, cancel';
+
+  @override
+  String get msgrCancelledSnack => 'Delivery cancelled';
+
+  @override
+  String get msgrPayCashInstead => 'Pay cash instead';
+
+  @override
+  String get msgrPayCashConfirm =>
+      'Pay the driver in cash at pickup/drop-off instead of scanning the QR?';
+
+  @override
+  String get msgrYesPayCash => 'Yes, pay cash';
+
+  @override
+  String get msgrSwitchedToCash => 'Switched to cash — pay the driver directly';
+
+  @override
+  String get msgrCannotLoad => 'Couldn\'t load data';
+
+  @override
+  String get msgrPickupPoint => 'Pickup point';
+
+  @override
+  String get msgrDropoffPoint => 'Drop-off point';
+
+  @override
+  String msgrScanDriverQr(String amount) {
+    return 'Scan the driver\'s QR to pay the ฿$amount delivery fee';
+  }
+
+  @override
+  String get msgrChatWithDriver => 'Chat with driver';
+
+  @override
+  String msgrRated(String rating) {
+    return 'Rated  ⭐ $rating';
+  }
+
+  @override
+  String get msgrSummaryAndRate => 'Summary & rating';
+
+  @override
+  String get msgrStatusCancelled => 'Cancelled';
+
+  @override
+  String msgrCancelReason(String reason) {
+    return 'Reason: $reason';
+  }
+
+  @override
+  String msgrDriverId(String id) {
+    return 'Driver #$id';
+  }
+
+  @override
+  String get msgrStatusPending => 'Finding a driver...';
+
+  @override
+  String get msgrStatusAccepted => 'Driver accepted, heading to pickup';
+
+  @override
+  String get msgrStatusArrivedAtPickup => 'Driver has arrived at pickup';
+
+  @override
+  String get msgrStatusPickedUp => 'Parcel picked up, on the way';
+
+  @override
+  String get msgrStatusDelivered => 'Parcel delivered';
+
+  @override
+  String get msgrStatusInProgress => 'In progress...';
+
+  @override
+  String get msgrStatusSubPending => 'Looking for a driver near you...';
+
+  @override
+  String get msgrStatusSubAccepted =>
+      'Your driver is on the way to pick up the parcel';
+
+  @override
+  String get msgrStatusSubPickedUp => 'Delivering your parcel to the drop-off';
+
+  @override
+  String get msgrStatusSubDelivered => 'Your parcel has been delivered';
+
+  @override
+  String msgrSizeWeight(String size, String weight) {
+    return 'Size $size • $weight kg';
+  }
+
+  @override
+  String msgrCodAmountChip(String amount) {
+    return 'Cash on delivery ฿$amount';
+  }
+
+  @override
+  String msgrDeliveryFeeDistance(String km) {
+    return 'Delivery fee ($km km)';
+  }
+
+  @override
+  String msgrDeliveryFeeWithMethod(String method) {
+    return 'Delivery fee ($method)';
+  }
+
+  @override
+  String get msgrGoodsCod => 'Goods payment on delivery';
+
+  @override
+  String get msgrCollectAtPickup => 'Collected at pickup';
+
+  @override
+  String get msgrCollectAtDelivery => 'Collected on delivery';
+
+  @override
+  String get msgrFeePaid => 'Delivery fee paid';
+
+  @override
+  String msgrFeePayer(String who) {
+    return 'Fee paid by: $who';
+  }
+
+  @override
+  String get msgrPaymentSummaryTitle => 'Payment summary';
+
+  @override
+  String get msgrNotSpecified => 'Not specified';
+
+  @override
+  String get msgrLoadDataFailed => 'Couldn\'t load data';
+
+  @override
+  String get msgrDeliveryRoute => 'Delivery route';
+
+  @override
+  String get msgrFeeSummary => 'Delivery fee summary';
+
+  @override
+  String get msgrCodWithTag => 'Cash on delivery (COD)';
+
+  @override
+  String msgrPayOnDeliveryWith(String method) {
+    return 'Pay on delivery ($method)';
+  }
+
+  @override
+  String msgrTotalWith(String method) {
+    return 'Total ($method)';
+  }
+
+  @override
+  String get msgrConfirmAndRate => 'Confirm & rate';
+
+  @override
+  String get msgrAlreadyReviewed => 'You\'ve already rated this order';
+
+  @override
+  String get msgrReviewThanks => 'Review sent. Thanks for your feedback!';
+
+  @override
+  String get msgrRateDeliveryTitle => 'Rate delivery';
+
+  @override
+  String get msgrSkip => 'Skip';
+
+  @override
+  String get msgrHowWasDriver => 'How was your driver?';
+
+  @override
+  String get msgrRateThisDelivery => 'Rate this parcel delivery';
+
+  @override
+  String get msgrCommentOptional => 'Additional comments (optional)';
+
+  @override
+  String get msgrCommentHint => 'Tell us about your delivery...';
+
+  @override
+  String get msgrSubmitReview => 'Submit review';
+
+  @override
+  String get msgrSkipForNow => 'Skip for now';
+
+  @override
+  String get msgrSelectPromo => 'Choose a promo code';
+
+  @override
+  String get msgrApplyCode => 'Apply';
+
+  @override
+  String get msgrEnterPromo => 'Enter promo code';
+
+  @override
+  String get msgrLoadPromosFailed => 'Couldn\'t load promo codes';
+
+  @override
+  String get msgrNoPromos => 'No promo codes yet';
+
+  @override
+  String get msgrAvailableCoupons => 'Available coupons';
+
+  @override
+  String get msgrSendFailed => 'Couldn\'t send the message. Please try again.';
+
+  @override
+  String get msgrYourDriver => 'Your driver';
+
+  @override
+  String get msgrLoadMessagesFailed => 'Couldn\'t load messages';
+
+  @override
+  String get msgrTypeMessage => 'Type a message...';
 }

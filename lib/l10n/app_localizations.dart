@@ -1651,6 +1651,833 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Expected around {time}'**
   String etaExpectedAround(String time);
+
+  /// No description provided for @msgrSelectPickupError.
+  ///
+  /// In en, this message translates to:
+  /// **'Please choose a pickup point'**
+  String get msgrSelectPickupError;
+
+  /// No description provided for @msgrSelectDropoffError.
+  ///
+  /// In en, this message translates to:
+  /// **'Please choose a drop-off point'**
+  String get msgrSelectDropoffError;
+
+  /// No description provided for @msgrRecipientNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter the recipient\'s name'**
+  String get msgrRecipientNameRequired;
+
+  /// No description provided for @msgrRecipientPhoneRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter the recipient\'s phone number'**
+  String get msgrRecipientPhoneRequired;
+
+  /// No description provided for @msgrRecipientPhoneInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid recipient phone number'**
+  String get msgrRecipientPhoneInvalid;
+
+  /// No description provided for @msgrPhoneInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid phone number'**
+  String get msgrPhoneInvalid;
+
+  /// No description provided for @msgrCalculatingPleaseWait.
+  ///
+  /// In en, this message translates to:
+  /// **'Calculating the price, please wait'**
+  String get msgrCalculatingPleaseWait;
+
+  /// No description provided for @msgrTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Messenger'**
+  String get msgrTitle;
+
+  /// No description provided for @msgrHeroSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Parcel pickup and delivery — anywhere, anytime'**
+  String get msgrHeroSubtitle;
+
+  /// No description provided for @msgrSelectPickup.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose pickup point'**
+  String get msgrSelectPickup;
+
+  /// No description provided for @msgrSelectDropoff.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose drop-off point'**
+  String get msgrSelectDropoff;
+
+  /// No description provided for @msgrDeliveryTypeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How should we deliver?'**
+  String get msgrDeliveryTypeTitle;
+
+  /// No description provided for @msgrDeliveryOptionsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a drop-off and enter the weight to see delivery options'**
+  String get msgrDeliveryOptionsHint;
+
+  /// No description provided for @msgrNoService.
+  ///
+  /// In en, this message translates to:
+  /// **'No messenger service available right now'**
+  String get msgrNoService;
+
+  /// No description provided for @msgrVehicleType.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle type'**
+  String get msgrVehicleType;
+
+  /// No description provided for @msgrPackageSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Parcel size'**
+  String get msgrPackageSize;
+
+  /// No description provided for @msgrSizeTierLimits.
+  ///
+  /// In en, this message translates to:
+  /// **'≤ {weight} kg\n{length}×{width}×{height} cm'**
+  String msgrSizeTierLimits(
+    String weight,
+    String length,
+    String width,
+    String height,
+  );
+
+  /// No description provided for @msgrFree.
+  ///
+  /// In en, this message translates to:
+  /// **'Free'**
+  String get msgrFree;
+
+  /// No description provided for @msgrSizeTier.
+  ///
+  /// In en, this message translates to:
+  /// **'Size {tier}'**
+  String msgrSizeTier(String tier);
+
+  /// No description provided for @msgrPackageInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Parcel details'**
+  String get msgrPackageInfo;
+
+  /// No description provided for @msgrWeightLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight (kg) *'**
+  String get msgrWeightLabel;
+
+  /// No description provided for @msgrWeightHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Up to {max} kg'**
+  String msgrWeightHint(String max);
+
+  /// No description provided for @msgrWeightRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter the parcel weight'**
+  String get msgrWeightRequired;
+
+  /// No description provided for @msgrWeightOverTier.
+  ///
+  /// In en, this message translates to:
+  /// **'Too heavy for size {tier} (max {max} kg)'**
+  String msgrWeightOverTier(String tier, String max);
+
+  /// No description provided for @msgrDimensionsOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Parcel dimensions (optional)'**
+  String get msgrDimensionsOptional;
+
+  /// No description provided for @msgrLengthCm.
+  ///
+  /// In en, this message translates to:
+  /// **'Length (cm)'**
+  String get msgrLengthCm;
+
+  /// No description provided for @msgrWidthCm.
+  ///
+  /// In en, this message translates to:
+  /// **'Width (cm)'**
+  String get msgrWidthCm;
+
+  /// No description provided for @msgrHeightCm.
+  ///
+  /// In en, this message translates to:
+  /// **'Height (cm)'**
+  String get msgrHeightCm;
+
+  /// No description provided for @msgrInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid'**
+  String get msgrInvalid;
+
+  /// No description provided for @msgrOverMaxCm.
+  ///
+  /// In en, this message translates to:
+  /// **'Over {max} cm'**
+  String msgrOverMaxCm(String max);
+
+  /// No description provided for @msgrRecipientInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipient details'**
+  String get msgrRecipientInfo;
+
+  /// No description provided for @msgrRecipientNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipient name *'**
+  String get msgrRecipientNameLabel;
+
+  /// No description provided for @msgrRecipientPhoneLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipient phone *'**
+  String get msgrRecipientPhoneLabel;
+
+  /// No description provided for @msgrRecipientPhoneHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. 0812345678'**
+  String get msgrRecipientPhoneHint;
+
+  /// No description provided for @msgrNotesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Note to driver (optional)'**
+  String get msgrNotesLabel;
+
+  /// No description provided for @msgrNotesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Fragile'**
+  String get msgrNotesHint;
+
+  /// No description provided for @msgrPayerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Who pays the delivery fee?'**
+  String get msgrPayerTitle;
+
+  /// No description provided for @msgrPayerSender.
+  ///
+  /// In en, this message translates to:
+  /// **'Sender (you)'**
+  String get msgrPayerSender;
+
+  /// No description provided for @msgrPayerSenderSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Sender pays now'**
+  String get msgrPayerSenderSub;
+
+  /// No description provided for @msgrPayerRecipient.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipient'**
+  String get msgrPayerRecipient;
+
+  /// No description provided for @msgrPayerRecipientSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipient pays on delivery'**
+  String get msgrPayerRecipientSub;
+
+  /// No description provided for @msgrRecipientPaysNote.
+  ///
+  /// In en, this message translates to:
+  /// **'The driver collects the fee from the recipient on delivery — you don\'t pay now'**
+  String get msgrRecipientPaysNote;
+
+  /// No description provided for @msgrPaymentMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment method'**
+  String get msgrPaymentMethod;
+
+  /// No description provided for @msgrCod.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash on delivery'**
+  String get msgrCod;
+
+  /// No description provided for @msgrCodAmountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'COD amount (THB) *'**
+  String get msgrCodAmountLabel;
+
+  /// No description provided for @msgrCodAmountHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Up to 100,000 THB'**
+  String get msgrCodAmountHint;
+
+  /// No description provided for @msgrCodAmountRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter the COD amount'**
+  String get msgrCodAmountRequired;
+
+  /// No description provided for @msgrCodAmountMax.
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum 100,000 THB'**
+  String get msgrCodAmountMax;
+
+  /// No description provided for @msgrSelectPromoOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a promo code (optional)'**
+  String get msgrSelectPromoOptional;
+
+  /// No description provided for @msgrCalculating.
+  ///
+  /// In en, this message translates to:
+  /// **'Calculating price...'**
+  String get msgrCalculating;
+
+  /// No description provided for @msgrPriceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a drop-off and enter the weight to see the price'**
+  String get msgrPriceHint;
+
+  /// No description provided for @msgrPriceSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Price summary'**
+  String get msgrPriceSummary;
+
+  /// No description provided for @msgrDistanceDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'{km} km (~{minutes} min)'**
+  String msgrDistanceDuration(String km, String minutes);
+
+  /// No description provided for @msgrTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get msgrTotal;
+
+  /// No description provided for @msgrDeliveryFee.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery fee'**
+  String get msgrDeliveryFee;
+
+  /// No description provided for @msgrSizeFee.
+  ///
+  /// In en, this message translates to:
+  /// **'Size fee'**
+  String get msgrSizeFee;
+
+  /// No description provided for @msgrExpressFee.
+  ///
+  /// In en, this message translates to:
+  /// **'Express fee'**
+  String get msgrExpressFee;
+
+  /// No description provided for @msgrDiscount.
+  ///
+  /// In en, this message translates to:
+  /// **'Discount'**
+  String get msgrDiscount;
+
+  /// No description provided for @msgrExtraFee.
+  ///
+  /// In en, this message translates to:
+  /// **'Additional fee'**
+  String get msgrExtraFee;
+
+  /// No description provided for @msgrCallMessengerPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Book messenger • ฿{amount}'**
+  String msgrCallMessengerPrice(String amount);
+
+  /// No description provided for @msgrCallMessenger.
+  ///
+  /// In en, this message translates to:
+  /// **'Book messenger'**
+  String get msgrCallMessenger;
+
+  /// No description provided for @msgrLoadVehiclesFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load vehicle types. Please try again.'**
+  String get msgrLoadVehiclesFailed;
+
+  /// No description provided for @msgrNoDeliveryModes.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery isn\'t available right now. Please try again later.'**
+  String get msgrNoDeliveryModes;
+
+  /// No description provided for @msgrEstimateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t estimate the price. Please try again.'**
+  String get msgrEstimateFailed;
+
+  /// No description provided for @msgrDeliveryModeUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'The selected delivery option is no longer available. Please choose again and retry.'**
+  String get msgrDeliveryModeUnavailable;
+
+  /// No description provided for @msgrCreateOrderFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t create the order. Please try again.'**
+  String get msgrCreateOrderFailed;
+
+  /// No description provided for @msgrPaidCannotCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'This order is already paid and can\'t be cancelled in the app. Please contact customer support for a refund.'**
+  String get msgrPaidCannotCancel;
+
+  /// No description provided for @msgrOrderAlreadyPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'This order is already paid'**
+  String get msgrOrderAlreadyPaid;
+
+  /// No description provided for @msgrRatingRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please rate your driver first'**
+  String get msgrRatingRequired;
+
+  /// No description provided for @msgrCancelTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel delivery'**
+  String get msgrCancelTitle;
+
+  /// No description provided for @msgrCancelConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to cancel?'**
+  String get msgrCancelConfirm;
+
+  /// No description provided for @msgrCancelReasonHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason (optional)'**
+  String get msgrCancelReasonHint;
+
+  /// No description provided for @msgrNo.
+  ///
+  /// In en, this message translates to:
+  /// **'No'**
+  String get msgrNo;
+
+  /// No description provided for @msgrYesCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, cancel'**
+  String get msgrYesCancel;
+
+  /// No description provided for @msgrCancelledSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery cancelled'**
+  String get msgrCancelledSnack;
+
+  /// No description provided for @msgrPayCashInstead.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay cash instead'**
+  String get msgrPayCashInstead;
+
+  /// No description provided for @msgrPayCashConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay the driver in cash at pickup/drop-off instead of scanning the QR?'**
+  String get msgrPayCashConfirm;
+
+  /// No description provided for @msgrYesPayCash.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, pay cash'**
+  String get msgrYesPayCash;
+
+  /// No description provided for @msgrSwitchedToCash.
+  ///
+  /// In en, this message translates to:
+  /// **'Switched to cash — pay the driver directly'**
+  String get msgrSwitchedToCash;
+
+  /// No description provided for @msgrCannotLoad.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load data'**
+  String get msgrCannotLoad;
+
+  /// No description provided for @msgrPickupPoint.
+  ///
+  /// In en, this message translates to:
+  /// **'Pickup point'**
+  String get msgrPickupPoint;
+
+  /// No description provided for @msgrDropoffPoint.
+  ///
+  /// In en, this message translates to:
+  /// **'Drop-off point'**
+  String get msgrDropoffPoint;
+
+  /// No description provided for @msgrScanDriverQr.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan the driver\'s QR to pay the ฿{amount} delivery fee'**
+  String msgrScanDriverQr(String amount);
+
+  /// No description provided for @msgrChatWithDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat with driver'**
+  String get msgrChatWithDriver;
+
+  /// No description provided for @msgrRated.
+  ///
+  /// In en, this message translates to:
+  /// **'Rated  ⭐ {rating}'**
+  String msgrRated(String rating);
+
+  /// No description provided for @msgrSummaryAndRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Summary & rating'**
+  String get msgrSummaryAndRate;
+
+  /// No description provided for @msgrStatusCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get msgrStatusCancelled;
+
+  /// No description provided for @msgrCancelReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason: {reason}'**
+  String msgrCancelReason(String reason);
+
+  /// No description provided for @msgrDriverId.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver #{id}'**
+  String msgrDriverId(String id);
+
+  /// No description provided for @msgrStatusPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Finding a driver...'**
+  String get msgrStatusPending;
+
+  /// No description provided for @msgrStatusAccepted.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver accepted, heading to pickup'**
+  String get msgrStatusAccepted;
+
+  /// No description provided for @msgrStatusArrivedAtPickup.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver has arrived at pickup'**
+  String get msgrStatusArrivedAtPickup;
+
+  /// No description provided for @msgrStatusPickedUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Parcel picked up, on the way'**
+  String get msgrStatusPickedUp;
+
+  /// No description provided for @msgrStatusDelivered.
+  ///
+  /// In en, this message translates to:
+  /// **'Parcel delivered'**
+  String get msgrStatusDelivered;
+
+  /// No description provided for @msgrStatusInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'In progress...'**
+  String get msgrStatusInProgress;
+
+  /// No description provided for @msgrStatusSubPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Looking for a driver near you...'**
+  String get msgrStatusSubPending;
+
+  /// No description provided for @msgrStatusSubAccepted.
+  ///
+  /// In en, this message translates to:
+  /// **'Your driver is on the way to pick up the parcel'**
+  String get msgrStatusSubAccepted;
+
+  /// No description provided for @msgrStatusSubPickedUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivering your parcel to the drop-off'**
+  String get msgrStatusSubPickedUp;
+
+  /// No description provided for @msgrStatusSubDelivered.
+  ///
+  /// In en, this message translates to:
+  /// **'Your parcel has been delivered'**
+  String get msgrStatusSubDelivered;
+
+  /// No description provided for @msgrSizeWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Size {size} • {weight} kg'**
+  String msgrSizeWeight(String size, String weight);
+
+  /// No description provided for @msgrCodAmountChip.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash on delivery ฿{amount}'**
+  String msgrCodAmountChip(String amount);
+
+  /// No description provided for @msgrDeliveryFeeDistance.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery fee ({km} km)'**
+  String msgrDeliveryFeeDistance(String km);
+
+  /// No description provided for @msgrDeliveryFeeWithMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery fee ({method})'**
+  String msgrDeliveryFeeWithMethod(String method);
+
+  /// No description provided for @msgrGoodsCod.
+  ///
+  /// In en, this message translates to:
+  /// **'Goods payment on delivery'**
+  String get msgrGoodsCod;
+
+  /// No description provided for @msgrCollectAtPickup.
+  ///
+  /// In en, this message translates to:
+  /// **'Collected at pickup'**
+  String get msgrCollectAtPickup;
+
+  /// No description provided for @msgrCollectAtDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Collected on delivery'**
+  String get msgrCollectAtDelivery;
+
+  /// No description provided for @msgrFeePaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery fee paid'**
+  String get msgrFeePaid;
+
+  /// No description provided for @msgrFeePayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Fee paid by: {who}'**
+  String msgrFeePayer(String who);
+
+  /// No description provided for @msgrPaymentSummaryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment summary'**
+  String get msgrPaymentSummaryTitle;
+
+  /// No description provided for @msgrNotSpecified.
+  ///
+  /// In en, this message translates to:
+  /// **'Not specified'**
+  String get msgrNotSpecified;
+
+  /// No description provided for @msgrLoadDataFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load data'**
+  String get msgrLoadDataFailed;
+
+  /// No description provided for @msgrDeliveryRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery route'**
+  String get msgrDeliveryRoute;
+
+  /// No description provided for @msgrFeeSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery fee summary'**
+  String get msgrFeeSummary;
+
+  /// No description provided for @msgrCodWithTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash on delivery (COD)'**
+  String get msgrCodWithTag;
+
+  /// No description provided for @msgrPayOnDeliveryWith.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay on delivery ({method})'**
+  String msgrPayOnDeliveryWith(String method);
+
+  /// No description provided for @msgrTotalWith.
+  ///
+  /// In en, this message translates to:
+  /// **'Total ({method})'**
+  String msgrTotalWith(String method);
+
+  /// No description provided for @msgrConfirmAndRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm & rate'**
+  String get msgrConfirmAndRate;
+
+  /// No description provided for @msgrAlreadyReviewed.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve already rated this order'**
+  String get msgrAlreadyReviewed;
+
+  /// No description provided for @msgrReviewThanks.
+  ///
+  /// In en, this message translates to:
+  /// **'Review sent. Thanks for your feedback!'**
+  String get msgrReviewThanks;
+
+  /// No description provided for @msgrRateDeliveryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate delivery'**
+  String get msgrRateDeliveryTitle;
+
+  /// No description provided for @msgrSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get msgrSkip;
+
+  /// No description provided for @msgrHowWasDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'How was your driver?'**
+  String get msgrHowWasDriver;
+
+  /// No description provided for @msgrRateThisDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate this parcel delivery'**
+  String get msgrRateThisDelivery;
+
+  /// No description provided for @msgrCommentOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Additional comments (optional)'**
+  String get msgrCommentOptional;
+
+  /// No description provided for @msgrCommentHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell us about your delivery...'**
+  String get msgrCommentHint;
+
+  /// No description provided for @msgrSubmitReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit review'**
+  String get msgrSubmitReview;
+
+  /// No description provided for @msgrSkipForNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip for now'**
+  String get msgrSkipForNow;
+
+  /// No description provided for @msgrSelectPromo.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a promo code'**
+  String get msgrSelectPromo;
+
+  /// No description provided for @msgrApplyCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get msgrApplyCode;
+
+  /// No description provided for @msgrEnterPromo.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter promo code'**
+  String get msgrEnterPromo;
+
+  /// No description provided for @msgrLoadPromosFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load promo codes'**
+  String get msgrLoadPromosFailed;
+
+  /// No description provided for @msgrNoPromos.
+  ///
+  /// In en, this message translates to:
+  /// **'No promo codes yet'**
+  String get msgrNoPromos;
+
+  /// No description provided for @msgrAvailableCoupons.
+  ///
+  /// In en, this message translates to:
+  /// **'Available coupons'**
+  String get msgrAvailableCoupons;
+
+  /// No description provided for @msgrSendFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t send the message. Please try again.'**
+  String get msgrSendFailed;
+
+  /// No description provided for @msgrYourDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Your driver'**
+  String get msgrYourDriver;
+
+  /// No description provided for @msgrLoadMessagesFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load messages'**
+  String get msgrLoadMessagesFailed;
+
+  /// No description provided for @msgrTypeMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Type a message...'**
+  String get msgrTypeMessage;
 }
 
 class _AppLocalizationsDelegate

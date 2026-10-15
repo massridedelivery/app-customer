@@ -4,6 +4,7 @@ import 'package:customer_app/core/utils/promo_style.dart';
 import 'package:customer_app/core/widgets/coupon_card.dart';
 import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/features/profile/presentation/screens/promo_list_screen.dart';
+import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -39,6 +40,7 @@ class _MessengerCouponScreenState extends ConsumerState<MessengerCouponScreen> {
   @override
   Widget build(BuildContext context) {
     final promosAsync = ref.watch(promoListProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: AppColors.semanticGrayNeutralBgWhite,
@@ -46,7 +48,7 @@ class _MessengerCouponScreenState extends ConsumerState<MessengerCouponScreen> {
         backgroundColor: AppColors.white,
         elevation: 0,
         title: Text(
-          'เลือกโค้ดส่วนลด',
+          l10n.msgrSelectPromo,
           style: AppTypography.heading4.copyWith(color: AppColors.black),
         ),
         centerTitle: true,
@@ -57,15 +59,15 @@ class _MessengerCouponScreenState extends ConsumerState<MessengerCouponScreen> {
           CouponManualEntry(
             controller: _manual,
             onApply: _apply,
-            applyLabel: 'ใช้โค้ด',
-            hint: 'กรอกโค้ดส่วนลด',
+            applyLabel: l10n.msgrApplyCode,
+            hint: l10n.msgrEnterPromo,
           ),
           Expanded(
             child: promosAsync.when(
               loading: () => const Center(child: MassLoadingM(size: 72)),
               error: (error, stack) => Center(
                 child: Text(
-                  'โหลดโค้ดส่วนลดไม่สำเร็จ',
+                  l10n.msgrLoadPromosFailed,
                   style: AppTypography.label2.copyWith(
                     color: AppColors.semanticGrayNeutralFgLowOnWhite,
                   ),
@@ -85,7 +87,7 @@ class _MessengerCouponScreenState extends ConsumerState<MessengerCouponScreen> {
                 if (promos.isEmpty) {
                   return Center(
                     child: Text(
-                      'ยังไม่มีโค้ดส่วนลด',
+                      l10n.msgrNoPromos,
                       style: AppTypography.label2.copyWith(
                         color: AppColors.semanticGrayNeutralFgLowOnWhite,
                       ),
@@ -103,7 +105,7 @@ class _MessengerCouponScreenState extends ConsumerState<MessengerCouponScreen> {
                       return Padding(
                         padding: const EdgeInsets.only(top: 16, bottom: 12),
                         child: Text(
-                          'คูปองส่วนลดที่มี',
+                          l10n.msgrAvailableCoupons,
                           style: AppTypography.label1.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -121,7 +123,7 @@ class _MessengerCouponScreenState extends ConsumerState<MessengerCouponScreen> {
                       isSelected: selected,
                       onApply: () => _apply(data.code),
                       onCancel: () => Navigator.of(context).pop(''),
-                      applyLabel: 'ใช้โค้ด',
+                      applyLabel: l10n.msgrApplyCode,
                     );
                   },
                 );

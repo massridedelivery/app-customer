@@ -5400,6 +5400,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This code wasn\'t issued for this email. Please send a new code'**
   String get authOtpMismatch;
+
+  /// No description provided for @profilePhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get profilePhone;
+
+  /// No description provided for @profilePhoneAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add phone number'**
+  String get profilePhoneAdd;
+
+  /// No description provided for @profilePhoneChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Change number'**
+  String get profilePhoneChange;
+
+  /// No description provided for @profilePhoneHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify the number with a 6-digit SMS code (valid 5 minutes) to sign in to this account with it.'**
+  String get profilePhoneHint;
+
+  /// No description provided for @profilePhoneReplaceNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Your current number will be replaced.'**
+  String get profilePhoneReplaceNote;
+
+  /// No description provided for @profilePhoneInUse.
+  ///
+  /// In en, this message translates to:
+  /// **'This number is already used by another account'**
+  String get profilePhoneInUse;
+
+  /// No description provided for @profilePhoneInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid phone number'**
+  String get profilePhoneInvalid;
+
+  /// No description provided for @profilePhoneSendFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t send the SMS. Please try again'**
+  String get profilePhoneSendFailed;
+
+  /// No description provided for @profilePhoneVerifiedDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Number saved — you can sign in with it'**
+  String get profilePhoneVerifiedDone;
+
+  /// No description provided for @authOtpMismatchPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'This code wasn\'t issued for this number. Please request a new code'**
+  String get authOtpMismatchPhone;
 }
 
 class _AppLocalizationsDelegate

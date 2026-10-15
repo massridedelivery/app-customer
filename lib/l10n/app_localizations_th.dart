@@ -2883,4 +2883,36 @@ class AppLocalizationsTh extends AppLocalizations {
   @override
   String get authOtpMismatch =>
       'รหัสนี้ไม่ได้ออกให้อีเมลนี้ กรุณากดส่งรหัสใหม่';
+
+  @override
+  String get profilePhone => 'เบอร์โทร';
+
+  @override
+  String get profilePhoneAdd => 'เพิ่มเบอร์โทร';
+
+  @override
+  String get profilePhoneChange => 'เปลี่ยนเบอร์';
+
+  @override
+  String get profilePhoneHint =>
+      'ยืนยันเบอร์ด้วยรหัส SMS 6 หลัก (หมดอายุใน 5 นาที) แล้วใช้เบอร์นี้เข้าสู่ระบบบัญชีนี้ได้';
+
+  @override
+  String get profilePhoneReplaceNote => 'เบอร์เดิมจะถูกแทนที่ด้วยเบอร์ใหม่';
+
+  @override
+  String get profilePhoneInUse => 'เบอร์นี้ถูกใช้กับบัญชีอื่นแล้ว';
+
+  @override
+  String get profilePhoneInvalid => 'รูปแบบเบอร์ไม่ถูกต้อง';
+
+  @override
+  String get profilePhoneSendFailed => 'ส่ง SMS ไม่สำเร็จ กรุณาลองใหม่';
+
+  @override
+  String get profilePhoneVerifiedDone => 'บันทึกเบอร์แล้ว ใช้เข้าสู่ระบบได้';
+
+  @override
+  String get authOtpMismatchPhone =>
+      'รหัสนี้ไม่ได้ออกให้เบอร์นี้ กรุณากดส่งรหัสใหม่';
 }

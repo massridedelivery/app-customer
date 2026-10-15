@@ -210,7 +210,7 @@ class _CurrentEmailCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              EmailStatusBadge(verified: email.verified),
+              VerifiedBadge(verified: email.verified),
             ],
           ),
           const SizedBox(height: 6),
@@ -229,8 +229,8 @@ class _CurrentEmailCard extends StatelessWidget {
 }
 
 /// "ยืนยันแล้ว" (green) / "ยังไม่ยืนยัน" (amber) pill.
-class EmailStatusBadge extends StatelessWidget {
-  const EmailStatusBadge({super.key, required this.verified});
+class VerifiedBadge extends StatelessWidget {
+  const VerifiedBadge({super.key, required this.verified});
 
   final bool verified;
 

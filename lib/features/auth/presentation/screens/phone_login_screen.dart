@@ -1,5 +1,6 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
+import 'package:customer_app/core/utils/phone_format.dart';
 import 'package:customer_app/core/widgets/hero_header.dart';
 import 'package:customer_app/core/widgets/pill_tabs.dart';
 import 'package:customer_app/features/auth/data/models/send_otp_response.dart';
@@ -66,13 +67,7 @@ class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
   Future<void> _requestOtp() async {
     if (!_isValidPhone) return;
 
-    String phone = _phoneController.text.trim();
-    // Ensure format +66
-    if (phone.startsWith('0')) {
-      phone = '+66${phone.substring(1)}';
-    } else if (!phone.startsWith('+')) {
-      phone = '+66$phone';
-    }
+    final phone = toE164Thai(_phoneController.text.trim());
 
     final SendOtpResponse? response = await ref
         .read(authControllerProvider.notifier)

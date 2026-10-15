@@ -394,12 +394,48 @@ class AuthController extends _$AuthController {
   }
 
   /// Sends a code to add / verify [email] on the signed-in account.
-  Future<EmailOtpSendResult> sendAccountEmail(String email) async {
+  Future<EmailOtpSendResult> sendAccountEmail(String email) => _sendAccountCode(
+    () => ref.read(emailOtpDataSourceProvider).sendAccountEmail(email),
+    invalid: EmailOtpError.invalidEmail,
+  );
+
+  /// Verifies the add-email code; on success email login opens this same
+  /// account. Null = success.
+  Future<EmailOtpError?> verifyAccountEmail({
+    required String email,
+    required String otp,
+    required String refId,
+  }) => _verifyAccountCode(
+    () => ref
+        .read(emailOtpDataSourceProvider)
+        .verifyAccountEmail(email: email, otp: otp, refId: refId),
+  );
+
+  /// SMS code to add / change the account's [phone] (E.164).
+  Future<EmailOtpSendResult> sendAccountPhone(String phone) => _sendAccountCode(
+    () => ref.read(emailOtpDataSourceProvider).sendAccountPhone(phone),
+    invalid: EmailOtpError.invalidPhone,
+  );
+
+  /// Verifies the add/change-phone code; the number replaces the old one and
+  /// SMS login with it opens this account. Null = success.
+  Future<EmailOtpError?> verifyAccountPhone({
+    required String phone,
+    required String otp,
+    required String refId,
+  }) => _verifyAccountCode(
+    () => ref
+        .read(emailOtpDataSourceProvider)
+        .verifyAccountPhone(phone: phone, otp: otp, refId: refId),
+  );
+
+  Future<EmailOtpSendResult> _sendAccountCode(
+    Future<Map<String, dynamic>> Function() send, {
+    required EmailOtpError invalid,
+  }) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      final res = await ref
-          .read(emailOtpDataSourceProvider)
-          .sendAccountEmail(email);
+      final res = await send();
       state = state.copyWith(isLoading: false);
       return EmailOtpSendResult.sent(
         refId: (res['ref_id'] ?? '').toString(),
@@ -409,18 +445,15 @@ class AuthController extends _$AuthController {
       state = state.copyWith(isLoading: false);
       final status = e.response?.statusCode;
       final code = _errorCode(e);
-      if (code == 'EMAIL_IN_USE' || status == 409) {
-        return const EmailOtpSendResult.failed(EmailOtpError.emailInUse);
-      }
+      final inUse = _inUse(code, status);
+      if (inUse != null) return EmailOtpSendResult.failed(inUse);
       if (status == 503 || code == 'EMAIL_LOGIN_UNAVAILABLE') {
         return const EmailOtpSendResult.failed(EmailOtpError.unavailable);
       }
       if (status == 429) {
         return const EmailOtpSendResult.failed(EmailOtpError.rateLimited);
       }
-      if (status == 400) {
-        return const EmailOtpSendResult.failed(EmailOtpError.invalidEmail);
-      }
+      if (status == 400) return EmailOtpSendResult.failed(invalid);
       return const EmailOtpSendResult.failed(EmailOtpError.failed);
     } catch (_) {
       state = state.copyWith(isLoading: false);
@@ -428,27 +461,20 @@ class AuthController extends _$AuthController {
     }
   }
 
-  /// Verifies the add-email code; on success email login opens this same
-  /// account. Null = success.
-  Future<EmailOtpError?> verifyAccountEmail({
-    required String email,
-    required String otp,
-    required String refId,
-  }) async {
+  Future<EmailOtpError?> _verifyAccountCode(
+    Future<Map<String, dynamic>> Function() verify,
+  ) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      await ref
-          .read(emailOtpDataSourceProvider)
-          .verifyAccountEmail(email: email, otp: otp, refId: refId);
+      await verify();
       state = state.copyWith(isLoading: false);
       return null;
     } on DioException catch (e) {
       state = state.copyWith(isLoading: false);
       final status = e.response?.statusCode;
       final code = _errorCode(e);
-      if (code == 'EMAIL_IN_USE' || status == 409) {
-        return EmailOtpError.emailInUse;
-      }
+      final inUse = _inUse(code, status);
+      if (inUse != null) return inUse;
       if (code == 'OTP_MISMATCH') return EmailOtpError.mismatch;
       if (code == 'INVALID_OTP' || status == 401) return EmailOtpError.invalidOtp;
       if (code == 'OTP_RATE_LIMITED') return EmailOtpError.rateLimited;
@@ -462,6 +488,13 @@ class AuthController extends _$AuthController {
       state = state.copyWith(isLoading: false);
       return EmailOtpError.failed;
     }
+  }
+
+  /// 409: the email / phone already belongs to another account.
+  EmailOtpError? _inUse(String? code, int? status) {
+    if (code == 'PHONE_IN_USE') return EmailOtpError.phoneInUse;
+    if (code == 'EMAIL_IN_USE' || status == 409) return EmailOtpError.emailInUse;
+    return null;
   }
 
   String? _errorCode(DioException e) {
@@ -500,6 +533,12 @@ enum EmailOtpError {
 
   /// Add-email: the address belongs to another account (409 EMAIL_IN_USE).
   emailInUse,
+
+  /// Add-phone: the number belongs to another account (409 PHONE_IN_USE).
+  phoneInUse,
+
+  /// Add-phone: not a valid number (400 without a code).
+  invalidPhone,
 
   /// Add-email: the code wasn't issued for this account/email (OTP_MISMATCH).
   mismatch,

@@ -1,14 +1,19 @@
-/// A short, user-facing (Thai) message for an error shown in the UI.
+import 'package:customer_app/core/localization/app_language.dart';
+
+/// A short, user-facing message for an error shown in the UI, in the app's
+/// current language ([languageCode] overrides it).
 ///
 /// Strips the `Exception: ` prefix, translates known backend/validator errors
-/// to Thai, and hides raw technical/Dart dumps (DioException, SocketException,
-/// Go-validator strings, …) behind a clean Thai fallback — so users never see
-/// `Exception: …`, a stack trace, or a raw English backend error. A clean,
-/// already-Thai backend message is passed through as-is.
+/// to Thai (in Thai mode), and hides raw technical/Dart dumps (DioException,
+/// SocketException, Go-validator strings, …) behind a clean fallback — so users
+/// never see `Exception: …`, a stack trace, or a raw backend dump. A clean
+/// backend message is passed through as-is.
 String friendlyError(
   Object? e, {
-  String fallback = 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง',
+  String? fallback,
+  String? languageCode,
 }) {
+  fallback ??= AppLanguage.l10n(languageCode).errGeneric;
   if (e == null) return fallback;
   var s = e.toString().trim();
   const prefix = 'Exception: ';
@@ -16,8 +21,8 @@ String friendlyError(
   if (s.isEmpty) return fallback;
 
   // Translate a recognised backend error (Go validator, common English
-  // phrases) to Thai before anything else.
-  final mapped = backendErrorToThai(s);
+  // phrases) to Thai before anything else — Thai mode only.
+  final mapped = backendErrorToThai(s, languageCode: languageCode);
   if (mapped != null) return mapped;
 
   const technical = [
@@ -42,7 +47,7 @@ String friendlyError(
   ];
   if (technical.any(s.contains)) return fallback;
 
-  // Anything left is a clean message (often already Thai) — show it.
+  // Anything left is a clean message (from the backend) — show it.
   return s;
 }
 
@@ -52,7 +57,11 @@ String friendlyError(
 ///   "...Key: 'CreateOrderRequest.RecipientPhone' Error:Field validation for
 ///    'RecipientPhone' failed on the 'phone_th' tag"
 /// plus a few common English phrases.
-String? backendErrorToThai(String? raw) {
+///
+/// Only translates when the UI is Thai ([languageCode] overrides the current
+/// language); in English it returns null so the caller falls back.
+String? backendErrorToThai(String? raw, {String? languageCode}) {
+  if (!AppLanguage.isThai(languageCode)) return null;
   final s = (raw ?? '').trim();
   if (s.isEmpty) return null;
 

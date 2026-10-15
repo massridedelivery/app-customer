@@ -5,6 +5,7 @@ import 'package:customer_app/core/utils/promo_style.dart';
 import 'package:customer_app/core/widgets/coupon_card.dart';
 import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/features/profile/data/datasources/promo_remote_data_source.dart';
+import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -27,11 +28,12 @@ class _PromoListScreenState extends ConsumerState<PromoListScreen> {
   @override
   Widget build(BuildContext context) {
     final promosAsync = ref.watch(promoListProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text('โปรโมชั่นของฉัน', style: AppTypography.heading4),
+        title: Text(l10n.promoMyPromos, style: AppTypography.heading4),
         backgroundColor: AppColors.background,
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
@@ -42,13 +44,13 @@ class _PromoListScreenState extends ConsumerState<PromoListScreen> {
         ),
       ),
       body: promosAsync.when(
-        loading: () => const Center(
+        loading: () => Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              MassLoadingM(size: 72),
-              SizedBox(height: 16),
-              Text('กำลังโหลดโปรโมชัน...'),
+              const MassLoadingM(size: 72),
+              const SizedBox(height: 16),
+              Text(l10n.promoLoading),
             ],
           ),
         ),
@@ -65,12 +67,12 @@ class _PromoListScreenState extends ConsumerState<PromoListScreen> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  friendlyError(e, fallback: 'โหลดข้อมูลไม่สำเร็จ'),
+                  friendlyError(e, fallback: l10n.errLoadFailed),
                   style: AppTypography.body2,
                 ),
                 TextButton(
                   onPressed: () => ref.invalidate(promoListProvider),
-                  child: const Text('ลองใหม่'),
+                  child: Text(l10n.tryAgain),
                 ),
               ],
             ),
@@ -82,7 +84,7 @@ class _PromoListScreenState extends ConsumerState<PromoListScreen> {
               .map((e) => Map<String, dynamic>.from(e))
               .toList();
           if (promos.isEmpty) {
-            return _empty('ไม่พบโปรโมชันในขณะนี้');
+            return _empty(l10n.promoNoneNow);
           }
 
           // Only offer the scopes that actually have promos, and only when
@@ -106,9 +108,13 @@ class _PromoListScreenState extends ConsumerState<PromoListScreen> {
                     scrollDirection: Axis.horizontal,
                     padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
                     children: [
-                      _tab('ทั้งหมด', scope == null, () => _select(null)),
+                      _tab(
+                        l10n.promoTabEverything,
+                        scope == null,
+                        () => _select(null),
+                      ),
                       for (final s in scopes)
-                        _tab(s.tabLabel, scope == s, () => _select(s)),
+                        _tab(s.tabLabel(l10n), scope == s, () => _select(s)),
                     ],
                   ),
                 ),

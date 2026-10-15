@@ -56,4 +56,31 @@ void main() {
       expect(backendErrorToThai('just some text'), isNull);
     });
   });
+
+  group('friendlyError · English mode', () {
+    test('generic fallback is English', () {
+      expect(
+        friendlyError(
+          Exception('DioException [bad response]: 500'),
+          languageCode: 'en',
+        ),
+        'Something went wrong. Please try again.',
+      );
+      expect(
+        friendlyError(null, languageCode: 'en'),
+        'Something went wrong. Please try again.',
+      );
+    });
+
+    test('Go validator errors are not translated to Thai', () {
+      const raw =
+          "Key: 'X.RecipientName' Error:Field validation for 'RecipientName' "
+          "failed on the 'required' tag";
+      expect(backendErrorToThai(raw, languageCode: 'en'), isNull);
+      expect(
+        friendlyError(Exception(raw), languageCode: 'en'),
+        'Something went wrong. Please try again.',
+      );
+    });
+  });
 }

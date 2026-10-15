@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:customer_app/core/localization/app_language.dart';
 import 'package:customer_app/core/managers/providers.dart';
 
 final localeControllerProvider = NotifierProvider<LocaleController, Locale>(
@@ -14,6 +15,8 @@ class LocaleController extends Notifier<Locale> {
   @override
   Locale build() {
     // Standard build method for Notifier
+    // Mirror every change for context-free code (error text, fallbacks).
+    listenSelf((_, next) => AppLanguage.code = next.languageCode);
     _initLocale();
     return const Locale('th');
   }

@@ -103,7 +103,7 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
                   // order history), falling back to frequent places. Hidden when
                   // both are empty so there's no dangling header.
                   if (recentPlaces.isNotEmpty) ...[
-                    _buildRecentTrips('การเดินทางล่าสุด', recentPlaces),
+                    _buildRecentTrips(l10n.homeRecentTrips, recentPlaces),
                     const SizedBox(height: 28),
                   ],
                   _buildExperienceSection(l10n),

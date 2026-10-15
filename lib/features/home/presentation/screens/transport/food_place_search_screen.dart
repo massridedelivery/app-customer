@@ -68,7 +68,10 @@ class _FoodPlaceSearchScreenState extends ConsumerState<FoodPlaceSearchScreen>
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('ระบุสถานที่ส่งอาหาร', style: AppTypography.heading4),
+        title: Text(
+          AppLocalizations.of(context)!.homeFoodLocationTitle,
+          style: AppTypography.heading4,
+        ),
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
@@ -117,8 +120,8 @@ class _FoodPlaceSearchScreenState extends ConsumerState<FoodPlaceSearchScreen>
                 onChanged: (val) => ref
                     .read(placeSearchControllerProvider.notifier)
                     .search(val),
-                decoration: const InputDecoration(
-                  hintText: 'ให้เราไปส่งอาหารที่ไหนดี?',
+                decoration: InputDecoration(
+                  hintText: AppLocalizations.of(context)!.homeFoodWhereHint,
                   border: InputBorder.none,
                 ),
                 style: AppTypography.body1,
@@ -244,9 +247,9 @@ class _FoodPlaceSearchScreenState extends ConsumerState<FoodPlaceSearchScreen>
           children: [
             const Icon(Icons.map_outlined, color: Colors.black),
             const SizedBox(width: 8),
-            const Text(
-              'เลือกบนแผนที่',
-              style: TextStyle(fontWeight: FontWeight.bold),
+            Text(
+              AppLocalizations.of(context)!.homeChooseOnMap,
+              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ],
         ),
@@ -258,7 +261,7 @@ class _FoodPlaceSearchScreenState extends ConsumerState<FoodPlaceSearchScreen>
     if (recentPlaces.isEmpty) {
       return Center(
         child: Text(
-          'ยังไม่มีสถานที่ล่าสุด',
+          AppLocalizations.of(context)!.homeNoRecentPlaces,
           style: AppTypography.body2.copyWith(color: Colors.grey),
         ),
       );
@@ -351,7 +354,7 @@ class _FoodPlaceSearchScreenState extends ConsumerState<FoodPlaceSearchScreen>
     if (savedPlaces.isEmpty) {
       return Center(
         child: Text(
-          'ยังไม่มีสถานที่ที่บันทึกไว้',
+          AppLocalizations.of(context)!.homeNoSavedPlaces,
           style: AppTypography.body2.copyWith(color: Colors.grey),
         ),
       );

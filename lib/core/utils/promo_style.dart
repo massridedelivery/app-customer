@@ -1,3 +1,4 @@
+import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 /// Shared styling for promotion cards/banners (home Style-B card + detail),
@@ -40,14 +41,21 @@ Color promoColorOf(Map<String, dynamic> promo) {
   }
 }
 
-/// Headline shown large on the card: "ลด ฿100" / "ลด 20%" / "ส่งฟรี".
-String promoHeadlineOf(Map<String, dynamic> promo, {String? fallback}) {
-  if (_type(promo) == 'free_shipping') return 'ส่งฟรี';
+/// Headline shown large on the card, in the UI language: "ลด ฿100" /
+/// "ลด 20%" / "ส่งฟรี" (English: "฿100 off" / "20% off" / "Free Delivery").
+String promoHeadlineOf(
+  Map<String, dynamic> promo,
+  AppLocalizations l10n, {
+  String? fallback,
+}) {
+  if (_type(promo) == 'free_shipping') return l10n.freeDelivery;
   final raw = promo['discount_value'] ?? promo['discount'] ?? 0;
   final num value = raw is num ? raw : num.tryParse(raw.toString()) ?? 0;
-  if (value <= 0) return fallback ?? 'โปรโมชัน';
-  if (_type(promo) == 'percentage') return 'ลด ${value.toStringAsFixed(0)}%';
-  return 'ลด ฿${value.toStringAsFixed(0)}';
+  if (value <= 0) return fallback ?? l10n.promoHeadlineFallback;
+  if (_type(promo) == 'percentage') {
+    return l10n.promoHeadlinePercent(value.toStringAsFixed(0));
+  }
+  return l10n.promoHeadlineBaht(value.toStringAsFixed(0));
 }
 
 num _discountValueOf(Map<String, dynamic> promo) {
@@ -116,6 +124,7 @@ bool promoAppliesToService(Map<String, dynamic> promo, String serviceKey) {
 ({String text, Color color})? serviceBadgeOf(
   List<Map<String, dynamic>> promos,
   String serviceKey,
+  AppLocalizations l10n,
 ) {
   final matched =
       promos.where((p) => promoAppliesToService(p, serviceKey)).toList();
@@ -123,31 +132,37 @@ bool promoAppliesToService(Map<String, dynamic> promo, String serviceKey) {
   // Show the best offer: free shipping first, then the largest discount.
   matched.sort((a, b) => _discountValueOf(b).compareTo(_discountValueOf(a)));
   final best = matched.first;
-  return (text: '${promoHeadlineOf(best)}*', color: promoColorOf(best));
+  return (text: '${promoHeadlineOf(best, l10n)}*', color: promoColorOf(best));
 }
 
 /// Which service a promo can be used on, from the backend's `applies_to`
 /// ("ALL" | "RIDE" | "FOOD" | "MESSENGER"). Shown as a text-only label on the
 /// promo cards and used to filter the "โปรโมชั่นของฉัน" list.
 enum PromoScope {
-  all('ลดทั่วไป', Color(0xFF9A2832), Color(0xFFFBE9EA)),
-  ride('เฉพาะเรียกรถ', Color(0xFF1D4ED8), Color(0xFFE6EFFF)),
-  food('เฉพาะอาหาร', Color(0xFFB45309), Color(0xFFFFF1DF)),
-  messenger('เฉพาะส่งของ', Color(0xFF047857), Color(0xFFE3F6EE));
+  all(Color(0xFF9A2832), Color(0xFFFBE9EA)),
+  ride(Color(0xFF1D4ED8), Color(0xFFE6EFFF)),
+  food(Color(0xFFB45309), Color(0xFFFFF1DF)),
+  messenger(Color(0xFF047857), Color(0xFFE3F6EE));
 
-  const PromoScope(this.label, this.foreground, this.background);
+  const PromoScope(this.foreground, this.background);
 
-  /// Card label, e.g. "เฉพาะเรียกรถ".
-  final String label;
   final Color foreground;
   final Color background;
 
-  /// Short name for a filter tab, e.g. "เรียกรถ".
-  String get tabLabel => switch (this) {
-        PromoScope.all => 'ทั่วไป',
-        PromoScope.ride => 'เรียกรถ',
-        PromoScope.food => 'อาหาร',
-        PromoScope.messenger => 'ส่งของ',
+  /// Card label in the UI language, e.g. "เฉพาะเรียกรถ" / "Rides only".
+  String label(AppLocalizations l10n) => switch (this) {
+        PromoScope.all => l10n.promoScopeAll,
+        PromoScope.ride => l10n.promoScopeRide,
+        PromoScope.food => l10n.promoScopeFood,
+        PromoScope.messenger => l10n.promoScopeMessenger,
+      };
+
+  /// Short name for a filter tab, e.g. "เรียกรถ" / "Ride".
+  String tabLabel(AppLocalizations l10n) => switch (this) {
+        PromoScope.all => l10n.promoTabGeneral,
+        PromoScope.ride => l10n.promoTabRide,
+        PromoScope.food => l10n.food,
+        PromoScope.messenger => l10n.promoTabMessenger,
       };
 
   /// Parses an `applies_to` value. Missing or unknown values count as

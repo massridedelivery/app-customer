@@ -1,4 +1,5 @@
 import 'package:customer_app/core/error/server_exception.dart';
+import 'package:customer_app/core/localization/app_language.dart';
 import 'package:customer_app/features/home/domain/models/place.dart';
 import 'package:customer_app/features/home/domain/models/place_prediction.dart';
 import 'package:customer_app/features/home/domain/repositories/place_repository.dart';
@@ -34,7 +35,7 @@ class PlaceRepositoryImpl implements PlaceRepository {
         sessionToken: sessionToken,
       );
     } on DioException catch (e) {
-      throw ServerException(_message(e, 'ค้นหาสถานที่ไม่สำเร็จ'));
+      throw ServerException(_message(e, AppLanguage.l10n().errPlaceSearch));
     }
   }
 
@@ -46,7 +47,7 @@ class PlaceRepositoryImpl implements PlaceRepository {
         sessionToken: sessionToken,
       );
     } on DioException catch (e) {
-      throw ServerException(_message(e, 'ดึงข้อมูลสถานที่ไม่สำเร็จ'));
+      throw ServerException(_message(e, AppLanguage.l10n().errPlaceDetails));
     }
   }
 
@@ -58,7 +59,7 @@ class PlaceRepositoryImpl implements PlaceRepository {
           .map((e) => Place.fromJson(e as Map<String, dynamic>))
           .toList();
     } on DioException catch (e) {
-      throw ServerException(_message(e, 'โหลดสถานที่ล่าสุดไม่สำเร็จ'));
+      throw ServerException(_message(e, AppLanguage.l10n().errRecentPlaces));
     }
   }
 
@@ -70,7 +71,7 @@ class PlaceRepositoryImpl implements PlaceRepository {
           .map((e) => Place.fromJson(e as Map<String, dynamic>))
           .toList();
     } on DioException catch (e) {
-      throw ServerException(_message(e, 'โหลดสถานที่ที่บันทึกไม่สำเร็จ'));
+      throw ServerException(_message(e, AppLanguage.l10n().errSavedPlaces));
     }
   }
 
@@ -97,7 +98,7 @@ class PlaceRepositoryImpl implements PlaceRepository {
         phoneNumber: phoneNumber,
       );
     } on DioException catch (e) {
-      throw ServerException(_message(e, 'บันทึกสถานที่ไม่สำเร็จ'));
+      throw ServerException(_message(e, AppLanguage.l10n().errSavePlace));
     }
   }
 
@@ -107,7 +108,7 @@ class PlaceRepositoryImpl implements PlaceRepository {
       final response = await _dataSource.setDefaultPlace(id);
       return Place.fromJson(response);
     } on DioException catch (e) {
-      throw ServerException(_message(e, 'ตั้งค่าสถานที่เริ่มต้นไม่สำเร็จ'));
+      throw ServerException(_message(e, AppLanguage.l10n().errSetDefaultPlace));
     }
   }
 
@@ -120,7 +121,7 @@ class PlaceRepositoryImpl implements PlaceRepository {
       if (e.response?.statusCode == 404 || e.response?.statusCode == 400) {
         return null;
       }
-      throw ServerException(_message(e, 'ดึงสถานที่เริ่มต้นไม่สำเร็จ'));
+      throw ServerException(_message(e, AppLanguage.l10n().errGetDefaultPlace));
     }
   }
 

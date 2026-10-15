@@ -2,6 +2,7 @@ import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/features/food_order/domain/models/food_models.dart';
 import 'package:customer_app/features/home/presentation/controllers/category_restaurants_controller.dart';
+import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:customer_app/core/widgets/app_network_image.dart';
 import 'package:customer_app/core/widgets/mass_loading_m.dart';
@@ -26,6 +27,7 @@ class CategoryListScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     if (!_useSection && categoryId == null) {
       return Scaffold(
         backgroundColor: AppColors.semanticGrayNeutralBgWhite,
@@ -43,7 +45,7 @@ class CategoryListScreen extends ConsumerWidget {
         ),
         body: Center(
           child: Text(
-            'ไม่พบข้อมูลหมวดหมู่',
+            l10n.homeCategoryNotFound,
             style: AppTypography.label1.copyWith(color: Colors.grey),
           ),
         ),
@@ -80,7 +82,7 @@ class CategoryListScreen extends ConsumerWidget {
           if (items.isEmpty) {
             return Center(
               child: Text(
-                'ไม่พบร้านอาหารในหมวดหมู่นี้',
+                l10n.homeNoRestaurantsInCategory,
                 style: AppTypography.label1.copyWith(color: Colors.grey),
               ),
             );
@@ -149,7 +151,7 @@ class CategoryListScreen extends ConsumerWidget {
                 const Icon(Icons.error_outline, color: Colors.red, size: 48),
                 const SizedBox(height: 16),
                 Text(
-                  'เกิดข้อผิดพลาดในการโหลดข้อมูล',
+                  l10n.commonLoadError,
                   style: AppTypography.heading4,
                 ),
                 const SizedBox(height: 8),
@@ -170,6 +172,7 @@ class CategoryListScreen extends ConsumerWidget {
     BuildContext context,
     RestaurantProfileModel restaurant,
   ) {
+    final l10n = AppLocalizations.of(context)!;
     return InkWell(
       onTap: () {
         context.push('/restaurant/${restaurant.id}');
@@ -223,7 +226,7 @@ class CategoryListScreen extends ConsumerWidget {
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
-                            'ปิดทำการ',
+                            l10n.homeClosed,
                             style: AppTypography.caption5.copyWith(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
@@ -251,7 +254,7 @@ class CategoryListScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      restaurant.cuisineType ?? 'ร้านอาหาร',
+                      restaurant.cuisineType ?? l10n.homeRestaurant,
                       style: AppTypography.caption5.copyWith(
                         color: Colors.grey.shade600,
                       ),
@@ -273,7 +276,7 @@ class CategoryListScreen extends ConsumerWidget {
                         Text(
                           restaurant.deliveryFee == null ||
                                   restaurant.deliveryFee == 0
-                              ? 'ส่งฟรี'
+                              ? l10n.freeDelivery
                               : '฿${restaurant.deliveryFee!.toStringAsFixed(0)}',
                           style: AppTypography.caption5.copyWith(
                             color: AppColors.foundationGreen600,

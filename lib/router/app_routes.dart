@@ -43,6 +43,7 @@ import 'package:customer_app/features/payment/presentation/screens/card_checkout
 import 'package:customer_app/features/profile/presentation/screens/profile_screen.dart';
 import 'package:customer_app/features/profile/presentation/screens/edit_profile_screen.dart';
 import 'package:customer_app/features/profile/presentation/screens/account_email_screen.dart';
+import 'package:customer_app/features/profile/presentation/screens/account_phone_screen.dart';
 import 'package:customer_app/features/profile/presentation/screens/loyalty_screen.dart';
 import 'package:customer_app/features/food_delivery/presentation/screens/saved_restaurants_screen.dart';
 import 'package:customer_app/features/payment/presentation/screens/credit_card_list_screen.dart';
@@ -117,7 +118,8 @@ bool _requiresAuth(String path) {
   const protectedPrefixes = <String>[
     '/live', '/rating', '/payment', '/payment-summary',
     '/chat', '/trips', '/trip',
-    '/profile', '/edit-profile', '/account-email', '/loyalty',
+    '/profile', '/edit-profile', '/account-email', '/account-phone',
+    '/loyalty',
     '/saved-places', '/saved-restaurants', '/add-address',
     // '/promos' is public (guest can browse promos + detail via the public
     // endpoint); applying a code still happens at checkout, which needs auth.
@@ -501,6 +503,22 @@ final routerProvider = Provider<GoRouter>((ref) {
               final extra = state.extra as Map<String, dynamic>? ?? {};
               return OtpScreen.linkEmail(
                 email: extra['email'] as String? ?? '',
+                refId: extra['refId'] as String? ?? '',
+              );
+            },
+          ),
+        ],
+      ),
+      GoRoute(
+        path: '/account-phone',
+        builder: (context, state) => const AccountPhoneScreen(),
+        routes: [
+          GoRoute(
+            path: 'otp',
+            builder: (context, state) {
+              final extra = state.extra as Map<String, dynamic>? ?? {};
+              return OtpScreen.linkPhone(
+                phone: extra['phone'] as String? ?? '',
                 refId: extra['refId'] as String? ?? '',
               );
             },

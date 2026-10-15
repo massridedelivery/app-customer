@@ -28,7 +28,7 @@ class OtpScreen extends ConsumerStatefulWidget {
   final String refId;
   final bool isRegistered;
 
-  /// Email mode only: verify adds [email] to the signed-in account instead of
+  /// Verify adds [email] / [phone] to the signed-in account instead of
   /// signing in. Pops `true` on success.
   final bool linkToAccount;
 
@@ -56,6 +56,14 @@ class OtpScreen extends ConsumerStatefulWidget {
        isRegistered = true,
        linkToAccount = true;
 
+  const OtpScreen.linkPhone({
+    super.key,
+    required this.phone,
+    required this.refId,
+  }) : email = null,
+       isRegistered = true,
+       linkToAccount = true;
+
   @override
   ConsumerState<OtpScreen> createState() => _OtpScreenState();
 }
@@ -77,8 +85,10 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
 
   bool get _isEmail => widget.email != null;
 
-  /// Email-mode verify error (phone mode uses the controller's error).
-  String? _emailError;
+  /// Email login and add-email/phone use the coded errors below; phone login
+  /// keeps the controller's error message.
+  bool get _codedErrors => _isEmail || widget.linkToAccount;
+  String? _codeError;
 
   /// SMS mode: the backend says the code may not have arrived and offers email.
   bool _offerEmail = false;
@@ -95,7 +105,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
     _startResendTimer();
     // SMS may never arrive: poll its delivery and offer email when the
     // backend says so (email_fallback).
-    if (!_isEmail) {
+    if (!_isEmail && !widget.linkToAccount) {
       _smsStatusTimer = Timer.periodic(
         const Duration(seconds: 10),
         (_) => _checkSmsDelivery(),
@@ -182,23 +192,29 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
     return '$head${'•' * (p.length - 6)}$tail';
   }
 
-  Future<void> _verifyEmailOtp() async {
+  Future<void> _verifyCodedOtp() async {
     final l10n = AppLocalizations.of(context)!;
     final auth = ref.read(authControllerProvider.notifier);
-    final error = widget.linkToAccount
+    final error = !widget.linkToAccount
+        ? await auth.verifyEmailOtp(
+            email: widget.email!,
+            otp: _otp,
+            refId: _refId,
+          )
+        : _isEmail
         ? await auth.verifyAccountEmail(
             email: widget.email!,
             otp: _otp,
             refId: _refId,
           )
-        : await auth.verifyEmailOtp(
-            email: widget.email!,
+        : await auth.verifyAccountPhone(
+            phone: widget.phone,
             otp: _otp,
             refId: _refId,
           );
     if (!mounted) return;
     if (error == null) {
-      // Login: the router leaves /auth by itself. Add-email: back to profile.
+      // Login: the router leaves /auth by itself. Add-email/phone: back.
       if (widget.linkToAccount) context.pop(true);
       return;
     }
@@ -210,21 +226,26 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
           // This code is dead: let them request a new one right away.
           _timer?.cancel();
           _secondsRemaining = 0;
-          _emailError = switch (error) {
+          _codeError = switch (error) {
             EmailOtpError.expired => l10n.authOtpExpired,
-            EmailOtpError.mismatch => l10n.authOtpMismatch,
+            EmailOtpError.mismatch =>
+              _isEmail ? l10n.authOtpMismatch : l10n.authOtpMismatchPhone,
             _ => l10n.authOtpTooManyAttempts,
           };
         case EmailOtpError.invalidOtp:
-          _emailError = l10n.authOtpInvalid;
+          _codeError = l10n.authOtpInvalid;
         case EmailOtpError.emailInUse:
-          _emailError = l10n.profileEmailInUse;
+          _codeError = l10n.profileEmailInUse;
+        case EmailOtpError.phoneInUse:
+          _codeError = l10n.profilePhoneInUse;
         case EmailOtpError.rateLimited:
-          _emailError = l10n.authOtpRateLimited;
+          _codeError = l10n.authOtpRateLimited;
         case EmailOtpError.accountBlocked:
-          _emailError = null; // the account-blocked screen takes over
+          _codeError = null; // the account-blocked screen takes over
         default:
-          _emailError = l10n.authEmailSendFailed;
+          _codeError = _isEmail
+              ? l10n.authEmailSendFailed
+              : l10n.profilePhoneSendFailed;
       }
     });
     _otpController.clear();
@@ -234,7 +255,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
 
   Future<void> _verifyOtp() async {
     if (!_isComplete) return;
-    if (_isEmail) return _verifyEmailOtp();
+    if (_codedErrors) return _verifyCodedOtp();
     final success = await ref
         .read(authControllerProvider.notifier)
         .sendVerifyOtp(
@@ -260,12 +281,14 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
     }
   }
 
-  Future<void> _resendEmailOtp() async {
+  Future<void> _resendCodedOtp() async {
     final l10n = AppLocalizations.of(context)!;
     final auth = ref.read(authControllerProvider.notifier);
-    final result = widget.linkToAccount
+    final result = !widget.linkToAccount
+        ? await auth.sendEmailOtp(widget.email!)
+        : _isEmail
         ? await auth.sendAccountEmail(widget.email!)
-        : await auth.sendEmailOtp(widget.email!);
+        : await auth.sendAccountPhone(widget.phone);
     if (!mounted) return;
     if (!result.ok) {
       if (result.error == EmailOtpError.accountBlocked) return;
@@ -274,6 +297,8 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
           content: Text(switch (result.error) {
             EmailOtpError.rateLimited => l10n.authOtpRateLimited,
             EmailOtpError.emailInUse => l10n.profileEmailInUse,
+            EmailOtpError.phoneInUse => l10n.profilePhoneInUse,
+            _ when !_isEmail => l10n.profilePhoneSendFailed,
             _ => l10n.authEmailSendFailed,
           }),
         ),
@@ -282,7 +307,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
     }
     setState(() {
       _refId = result.refId;
-      _emailError = null;
+      _codeError = null;
       _autoSubmitted = false;
       _otpController.clear();
     });
@@ -295,7 +320,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
 
   Future<void> _resendOtp() async {
     if (_secondsRemaining > 0) return;
-    if (_isEmail) return _resendEmailOtp();
+    if (_codedErrors) return _resendCodedOtp();
     final response = await ref
         .read(authControllerProvider.notifier)
         .sendOtp(widget.phone);
@@ -400,11 +425,11 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
 
               _buildVerifyButton(l10n, isLoading),
 
-              if ((_isEmail ? _emailError : authState.error) != null)
+              if ((_codedErrors ? _codeError : authState.error) != null)
                 Padding(
                   padding: const EdgeInsets.only(top: 16),
                   child: Text(
-                    (_isEmail ? _emailError : authState.error)!,
+                    (_codedErrors ? _codeError : authState.error)!,
                     style: TextStyle(color: AppColors.error),
                     textAlign: TextAlign.center,
                   ),

@@ -31,3 +31,31 @@ final accountEmailProvider = FutureProvider.autoDispose<AccountEmail?>((
     return null;
   }
 });
+
+/// The signed-in account's phone (`GET /auth/phone`), E.164.
+class AccountPhone {
+  const AccountPhone({required this.phone, required this.verified});
+
+  /// Empty when the account has none yet.
+  final String phone;
+  final bool verified;
+
+  bool get isEmpty => phone.isEmpty;
+
+  factory AccountPhone.fromJson(Map<String, dynamic> json) => AccountPhone(
+    phone: (json['phone'] ?? '').toString().trim(),
+    verified: json['verified'] == true,
+  );
+}
+
+/// Null hides the profile's phone row (the backend can't say).
+final accountPhoneProvider = FutureProvider.autoDispose<AccountPhone?>((
+  ref,
+) async {
+  try {
+    final json = await ref.read(emailOtpDataSourceProvider).accountPhone();
+    return AccountPhone.fromJson(json);
+  } catch (_) {
+    return null;
+  }
+});

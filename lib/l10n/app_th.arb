@@ -916,5 +916,15 @@
   "profileEmailNotLoginReady": "ยังใช้เข้าสู่ระบบไม่ได้ จนกว่าจะยืนยัน",
   "profileEmailInUse": "อีเมลนี้ถูกใช้กับบัญชีอื่นแล้ว",
   "profileEmailVerifiedDone": "ยืนยันอีเมลแล้ว ใช้เข้าสู่ระบบได้",
-  "authOtpMismatch": "รหัสนี้ไม่ได้ออกให้อีเมลนี้ กรุณากดส่งรหัสใหม่"
+  "authOtpMismatch": "รหัสนี้ไม่ได้ออกให้อีเมลนี้ กรุณากดส่งรหัสใหม่",
+  "profilePhone": "เบอร์โทร",
+  "profilePhoneAdd": "เพิ่มเบอร์โทร",
+  "profilePhoneChange": "เปลี่ยนเบอร์",
+  "profilePhoneHint": "ยืนยันเบอร์ด้วยรหัส SMS 6 หลัก (หมดอายุใน 5 นาที) แล้วใช้เบอร์นี้เข้าสู่ระบบบัญชีนี้ได้",
+  "profilePhoneReplaceNote": "เบอร์เดิมจะถูกแทนที่ด้วยเบอร์ใหม่",
+  "profilePhoneInUse": "เบอร์นี้ถูกใช้กับบัญชีอื่นแล้ว",
+  "profilePhoneInvalid": "รูปแบบเบอร์ไม่ถูกต้อง",
+  "profilePhoneSendFailed": "ส่ง SMS ไม่สำเร็จ กรุณาลองใหม่",
+  "profilePhoneVerifiedDone": "บันทึกเบอร์แล้ว ใช้เข้าสู่ระบบได้",
+  "authOtpMismatchPhone": "รหัสนี้ไม่ได้ออกให้เบอร์นี้ กรุณากดส่งรหัสใหม่"
 }

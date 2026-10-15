@@ -2917,4 +2917,39 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get authOtpMismatch =>
       'This code wasn\'t issued for this email. Please send a new code';
+
+  @override
+  String get profilePhone => 'Phone';
+
+  @override
+  String get profilePhoneAdd => 'Add phone number';
+
+  @override
+  String get profilePhoneChange => 'Change number';
+
+  @override
+  String get profilePhoneHint =>
+      'Verify the number with a 6-digit SMS code (valid 5 minutes) to sign in to this account with it.';
+
+  @override
+  String get profilePhoneReplaceNote => 'Your current number will be replaced.';
+
+  @override
+  String get profilePhoneInUse =>
+      'This number is already used by another account';
+
+  @override
+  String get profilePhoneInvalid => 'Invalid phone number';
+
+  @override
+  String get profilePhoneSendFailed =>
+      'Couldn\'t send the SMS. Please try again';
+
+  @override
+  String get profilePhoneVerifiedDone =>
+      'Number saved — you can sign in with it';
+
+  @override
+  String get authOtpMismatchPhone =>
+      'This code wasn\'t issued for this number. Please request a new code';
 }

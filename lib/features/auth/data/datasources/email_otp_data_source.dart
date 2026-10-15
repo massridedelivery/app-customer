@@ -76,6 +76,35 @@ class EmailOtpDataSource {
     return Map<String, dynamic>.from(res.data as Map);
   }
 
+  /// The signed-in account's phone: `{phone, verified}` (phone may be "").
+  Future<Map<String, dynamic>> accountPhone() async {
+    final res = await _api.dio.get('/auth/phone');
+    return Map<String, dynamic>.from(res.data as Map);
+  }
+
+  /// SMS code to add / change the account's [phone] (E.164): `{ref_id}`.
+  Future<Map<String, dynamic>> sendAccountPhone(String phone) async {
+    final res = await _api.dio.post(
+      '/auth/phone/send',
+      data: {'phone': phone, 'device_id': _deviceId},
+    );
+    return Map<String, dynamic>.from(res.data as Map);
+  }
+
+  /// `{phone, verified: true}` — the new number replaces the old one, and SMS
+  /// login with it opens this account.
+  Future<Map<String, dynamic>> verifyAccountPhone({
+    required String phone,
+    required String otp,
+    required String refId,
+  }) async {
+    final res = await _api.dio.post(
+      '/auth/phone/verify',
+      data: {'phone': phone, 'otp': otp, 'ref_id': refId},
+    );
+    return Map<String, dynamic>.from(res.data as Map);
+  }
+
   /// `{channel, outcome, delivery, email_fallback}` for an SMS OTP [refId].
   Future<Map<String, dynamic>> smsStatus(String refId) async {
     final res = await _api.dio.get(

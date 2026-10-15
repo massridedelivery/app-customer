@@ -6,6 +6,7 @@ import 'package:customer_app/core/providers/app_version_provider.dart';
 import 'package:customer_app/core/widgets/coming_soon_dialog.dart';
 import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/core/localization/locale_controller.dart';
+import 'package:customer_app/core/utils/phone_format.dart';
 import 'package:customer_app/core/widgets/login_required_view.dart';
 import 'package:customer_app/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:customer_app/features/profile/data/account_email.dart';
@@ -85,6 +86,18 @@ class ProfileScreen extends ConsumerWidget {
                         title: l10n.personalInfo,
                         onTap: () => context.push('/edit-profile'),
                       ),
+                      if (ref.watch(accountPhoneProvider).asData?.value
+                          case final phone?)
+                        _MenuTile(
+                          key: const Key('profilePhoneRow'),
+                          icon: Icons.phone_iphone_rounded,
+                          title: l10n.profilePhone,
+                          trailing: _PhoneRowTrailing(phone: phone),
+                          onTap: () async {
+                            await context.push('/account-phone');
+                            ref.invalidate(accountPhoneProvider);
+                          },
+                        ),
                       // Hidden while email login is off (503) or unknown.
                       if (ref.watch(accountEmailProvider).asData?.value
                           case final email?)
@@ -801,9 +814,36 @@ class _EmailRowTrailing extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 6),
-          const EmailStatusBadge(verified: true),
+          const VerifiedBadge(verified: true),
         ],
       ),
+    );
+  }
+}
+
+/// Profile phone row: the number, or "เพิ่มเบอร์โทร" when there's none.
+class _PhoneRowTrailing extends StatelessWidget {
+  const _PhoneRowTrailing({required this.phone});
+
+  final AccountPhone phone;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          phone.isEmpty ? l10n.profilePhoneAdd : displayThaiPhone(phone.phone),
+          style: AppTypography.body3.copyWith(
+            color: phone.isEmpty ? AppColors.primary : AppColors.textSecondary,
+          ),
+        ),
+        const Icon(
+          Icons.chevron_right_rounded,
+          color: AppColors.foundationGrayscale300,
+        ),
+      ],
     );
   }
 }

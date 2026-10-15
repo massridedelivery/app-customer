@@ -8,7 +8,9 @@ import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/core/localization/locale_controller.dart';
 import 'package:customer_app/core/widgets/login_required_view.dart';
 import 'package:customer_app/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:customer_app/features/profile/data/account_email.dart';
 import 'package:customer_app/features/profile/data/datasources/account_remote_data_source.dart';
+import 'package:customer_app/features/profile/presentation/screens/account_email_screen.dart';
 import 'package:customer_app/features/profile/presentation/controllers/profile_controller.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -83,6 +85,19 @@ class ProfileScreen extends ConsumerWidget {
                         title: l10n.personalInfo,
                         onTap: () => context.push('/edit-profile'),
                       ),
+                      // Hidden while email login is off (503) or unknown.
+                      if (ref.watch(accountEmailProvider).asData?.value
+                          case final email?)
+                        _MenuTile(
+                          key: const Key('profileEmailRow'),
+                          icon: Icons.mail_outline_rounded,
+                          title: l10n.profileEmail,
+                          trailing: _EmailRowTrailing(email: email),
+                          onTap: () async {
+                            await context.push('/account-email');
+                            ref.invalidate(accountEmailProvider);
+                          },
+                        ),
                       _MenuTile(
                         icon: Icons.language_rounded,
                         title: l10n.changeLanguage,
@@ -716,6 +731,7 @@ class _MenuTile extends StatelessWidget {
   final Color? iconColor;
 
   const _MenuTile({
+    super.key,
     required this.icon,
     required this.title,
     this.trailing,
@@ -742,6 +758,52 @@ class _MenuTile extends StatelessWidget {
           ),
       onTap: onTap,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+    );
+  }
+}
+
+/// Profile email row: the verified address + badge, or a call to add/verify.
+class _EmailRowTrailing extends StatelessWidget {
+  const _EmailRowTrailing({required this.email});
+
+  final AccountEmail email;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    if (email.isEmpty || !email.verified) {
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            email.isEmpty ? l10n.profileEmailAdd : l10n.profileEmailVerify,
+            style: AppTypography.body3.copyWith(color: AppColors.primary),
+          ),
+          const Icon(
+            Icons.chevron_right_rounded,
+            color: AppColors.foundationGrayscale300,
+          ),
+        ],
+      );
+    }
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 200),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Flexible(
+            child: Text(
+              email.email,
+              overflow: TextOverflow.ellipsis,
+              style: AppTypography.body3.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ),
+          const SizedBox(width: 6),
+          const EmailStatusBadge(verified: true),
+        ],
+      ),
     );
   }
 }

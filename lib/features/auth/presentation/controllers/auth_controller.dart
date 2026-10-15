@@ -393,6 +393,82 @@ class AuthController extends _$AuthController {
     }
   }
 
+  /// Sends a code to add / verify [email] on the signed-in account.
+  Future<EmailOtpSendResult> sendAccountEmail(String email) async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final res = await ref
+          .read(emailOtpDataSourceProvider)
+          .sendAccountEmail(email);
+      state = state.copyWith(isLoading: false);
+      return EmailOtpSendResult.sent(
+        refId: (res['ref_id'] ?? '').toString(),
+        isRegistered: true,
+      );
+    } on DioException catch (e) {
+      state = state.copyWith(isLoading: false);
+      final status = e.response?.statusCode;
+      final code = _errorCode(e);
+      if (code == 'EMAIL_IN_USE' || status == 409) {
+        return const EmailOtpSendResult.failed(EmailOtpError.emailInUse);
+      }
+      if (status == 503 || code == 'EMAIL_LOGIN_UNAVAILABLE') {
+        return const EmailOtpSendResult.failed(EmailOtpError.unavailable);
+      }
+      if (status == 429) {
+        return const EmailOtpSendResult.failed(EmailOtpError.rateLimited);
+      }
+      if (status == 400) {
+        return const EmailOtpSendResult.failed(EmailOtpError.invalidEmail);
+      }
+      return const EmailOtpSendResult.failed(EmailOtpError.failed);
+    } catch (_) {
+      state = state.copyWith(isLoading: false);
+      return const EmailOtpSendResult.failed(EmailOtpError.failed);
+    }
+  }
+
+  /// Verifies the add-email code; on success email login opens this same
+  /// account. Null = success.
+  Future<EmailOtpError?> verifyAccountEmail({
+    required String email,
+    required String otp,
+    required String refId,
+  }) async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      await ref
+          .read(emailOtpDataSourceProvider)
+          .verifyAccountEmail(email: email, otp: otp, refId: refId);
+      state = state.copyWith(isLoading: false);
+      return null;
+    } on DioException catch (e) {
+      state = state.copyWith(isLoading: false);
+      final status = e.response?.statusCode;
+      final code = _errorCode(e);
+      if (code == 'EMAIL_IN_USE' || status == 409) {
+        return EmailOtpError.emailInUse;
+      }
+      if (code == 'OTP_MISMATCH') return EmailOtpError.mismatch;
+      if (code == 'INVALID_OTP' || status == 401) return EmailOtpError.invalidOtp;
+      if (code == 'OTP_RATE_LIMITED') return EmailOtpError.rateLimited;
+      if (code == 'TOO_MANY_ATTEMPTS' || status == 429) {
+        return EmailOtpError.tooManyAttempts;
+      }
+      if (code == 'OTP_EXPIRED' || status == 410) return EmailOtpError.expired;
+      if (status == 400) return EmailOtpError.mismatch;
+      return EmailOtpError.failed;
+    } catch (_) {
+      state = state.copyWith(isLoading: false);
+      return EmailOtpError.failed;
+    }
+  }
+
+  String? _errorCode(DioException e) {
+    final data = e.response?.data;
+    return data is Map ? data['code']?.toString() : null;
+  }
+
   /// Whether the backend offers email instead for an SMS code that may not
   /// have arrived (`email_fallback`). False on any error.
   Future<bool> smsEmailFallbackOffered(String refId) async {
@@ -421,6 +497,12 @@ enum EmailOtpError {
   invalidOtp,
   tooManyAttempts,
   expired,
+
+  /// Add-email: the address belongs to another account (409 EMAIL_IN_USE).
+  emailInUse,
+
+  /// Add-email: the code wasn't issued for this account/email (OTP_MISMATCH).
+  mismatch,
   failed,
 }
 

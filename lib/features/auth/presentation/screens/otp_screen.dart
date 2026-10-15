@@ -28,19 +28,33 @@ class OtpScreen extends ConsumerStatefulWidget {
   final String refId;
   final bool isRegistered;
 
+  /// Email mode only: verify adds [email] to the signed-in account instead of
+  /// signing in. Pops `true` on success.
+  final bool linkToAccount;
+
   const OtpScreen({
     super.key,
     required this.phone,
     required this.refId,
     required this.isRegistered,
-  }) : email = null;
+  }) : email = null,
+       linkToAccount = false;
 
   const OtpScreen.email({
     super.key,
     required String this.email,
     required this.refId,
     required this.isRegistered,
-  }) : phone = '';
+  }) : phone = '',
+       linkToAccount = false;
+
+  const OtpScreen.linkEmail({
+    super.key,
+    required String this.email,
+    required this.refId,
+  }) : phone = '',
+       isRegistered = true,
+       linkToAccount = true;
 
   @override
   ConsumerState<OtpScreen> createState() => _OtpScreenState();
@@ -170,22 +184,43 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
 
   Future<void> _verifyEmailOtp() async {
     final l10n = AppLocalizations.of(context)!;
-    final error = await ref
-        .read(authControllerProvider.notifier)
-        .verifyEmailOtp(email: widget.email!, otp: _otp, refId: _refId);
-    if (!mounted || error == null) return; // success → router leaves /auth
+    final auth = ref.read(authControllerProvider.notifier);
+    final error = widget.linkToAccount
+        ? await auth.verifyAccountEmail(
+            email: widget.email!,
+            otp: _otp,
+            refId: _refId,
+          )
+        : await auth.verifyEmailOtp(
+            email: widget.email!,
+            otp: _otp,
+            refId: _refId,
+          );
+    if (!mounted) return;
+    if (error == null) {
+      // Login: the router leaves /auth by itself. Add-email: back to profile.
+      if (widget.linkToAccount) context.pop(true);
+      return;
+    }
     setState(() {
       switch (error) {
         case EmailOtpError.tooManyAttempts:
         case EmailOtpError.expired:
+        case EmailOtpError.mismatch:
           // This code is dead: let them request a new one right away.
           _timer?.cancel();
           _secondsRemaining = 0;
-          _emailError = error == EmailOtpError.expired
-              ? l10n.authOtpExpired
-              : l10n.authOtpTooManyAttempts;
+          _emailError = switch (error) {
+            EmailOtpError.expired => l10n.authOtpExpired,
+            EmailOtpError.mismatch => l10n.authOtpMismatch,
+            _ => l10n.authOtpTooManyAttempts,
+          };
         case EmailOtpError.invalidOtp:
           _emailError = l10n.authOtpInvalid;
+        case EmailOtpError.emailInUse:
+          _emailError = l10n.profileEmailInUse;
+        case EmailOtpError.rateLimited:
+          _emailError = l10n.authOtpRateLimited;
         case EmailOtpError.accountBlocked:
           _emailError = null; // the account-blocked screen takes over
         default:
@@ -227,19 +262,20 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
 
   Future<void> _resendEmailOtp() async {
     final l10n = AppLocalizations.of(context)!;
-    final result = await ref
-        .read(authControllerProvider.notifier)
-        .sendEmailOtp(widget.email!);
+    final auth = ref.read(authControllerProvider.notifier);
+    final result = widget.linkToAccount
+        ? await auth.sendAccountEmail(widget.email!)
+        : await auth.sendEmailOtp(widget.email!);
     if (!mounted) return;
     if (!result.ok) {
       if (result.error == EmailOtpError.accountBlocked) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            result.error == EmailOtpError.rateLimited
-                ? l10n.authOtpRateLimited
-                : l10n.authEmailSendFailed,
-          ),
+          content: Text(switch (result.error) {
+            EmailOtpError.rateLimited => l10n.authOtpRateLimited,
+            EmailOtpError.emailInUse => l10n.profileEmailInUse,
+            _ => l10n.authEmailSendFailed,
+          }),
         ),
       );
       return;

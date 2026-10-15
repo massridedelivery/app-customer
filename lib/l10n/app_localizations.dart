@@ -5284,7 +5284,7 @@ abstract class AppLocalizations {
   /// No description provided for @authEmailNewAccountWarning.
   ///
   /// In en, this message translates to:
-  /// **'This email has no account yet — a new one will be created. If you signed up with a phone number, sign in with that number instead'**
+  /// **'This email isn\'t linked to any account — a new one will be created. If you already have an account with a phone number, sign in with it and add this email on your profile'**
   String get authEmailNewAccountWarning;
 
   /// No description provided for @authOtpInvalid.
@@ -5322,6 +5322,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You signed up with code {code}'**
   String referralReferredBy(String code);
+
+  /// No description provided for @profileEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get profileEmail;
+
+  /// No description provided for @profileEmailAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add email'**
+  String get profileEmailAdd;
+
+  /// No description provided for @profileEmailVerify.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify email'**
+  String get profileEmailVerify;
+
+  /// No description provided for @profileEmailAddTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add / verify email'**
+  String get profileEmailAddTitle;
+
+  /// No description provided for @profileEmailChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Change email'**
+  String get profileEmailChange;
+
+  /// No description provided for @profileEmailHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify your email with a 6-digit code (valid 10 minutes) to sign in to this account with it'**
+  String get profileEmailHint;
+
+  /// No description provided for @profileEmailVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified'**
+  String get profileEmailVerified;
+
+  /// No description provided for @profileEmailUnverified.
+  ///
+  /// In en, this message translates to:
+  /// **'Not verified'**
+  String get profileEmailUnverified;
+
+  /// No description provided for @profileEmailLoginReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Can be used to sign in'**
+  String get profileEmailLoginReady;
+
+  /// No description provided for @profileEmailNotLoginReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t be used to sign in until verified'**
+  String get profileEmailNotLoginReady;
+
+  /// No description provided for @profileEmailInUse.
+  ///
+  /// In en, this message translates to:
+  /// **'This email is already used by another account'**
+  String get profileEmailInUse;
+
+  /// No description provided for @profileEmailVerifiedDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Email verified — you can sign in with it'**
+  String get profileEmailVerifiedDone;
+
+  /// No description provided for @authOtpMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'This code wasn\'t issued for this email. Please send a new code'**
+  String get authOtpMismatch;
 }
 
 class _AppLocalizationsDelegate

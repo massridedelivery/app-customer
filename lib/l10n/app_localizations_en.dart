@@ -2850,7 +2850,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get authEmailNewAccountWarning =>
-      'This email has no account yet — a new one will be created. If you signed up with a phone number, sign in with that number instead';
+      'This email isn\'t linked to any account — a new one will be created. If you already have an account with a phone number, sign in with it and add this email on your profile';
 
   @override
   String get authOtpInvalid => 'Incorrect code';
@@ -2873,4 +2873,48 @@ class AppLocalizationsEn extends AppLocalizations {
   String referralReferredBy(String code) {
     return 'You signed up with code $code';
   }
+
+  @override
+  String get profileEmail => 'Email';
+
+  @override
+  String get profileEmailAdd => 'Add email';
+
+  @override
+  String get profileEmailVerify => 'Verify email';
+
+  @override
+  String get profileEmailAddTitle => 'Add / verify email';
+
+  @override
+  String get profileEmailChange => 'Change email';
+
+  @override
+  String get profileEmailHint =>
+      'Verify your email with a 6-digit code (valid 10 minutes) to sign in to this account with it';
+
+  @override
+  String get profileEmailVerified => 'Verified';
+
+  @override
+  String get profileEmailUnverified => 'Not verified';
+
+  @override
+  String get profileEmailLoginReady => 'Can be used to sign in';
+
+  @override
+  String get profileEmailNotLoginReady =>
+      'Can\'t be used to sign in until verified';
+
+  @override
+  String get profileEmailInUse =>
+      'This email is already used by another account';
+
+  @override
+  String get profileEmailVerifiedDone =>
+      'Email verified — you can sign in with it';
+
+  @override
+  String get authOtpMismatch =>
+      'This code wasn\'t issued for this email. Please send a new code';
 }

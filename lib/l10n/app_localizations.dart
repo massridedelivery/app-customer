@@ -5094,6 +5094,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This promotion has ended'**
   String get promoEnded;
+
+  /// No description provided for @homeLocationPromptTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on location'**
+  String get homeLocationPromptTitle;
+
+  /// No description provided for @homeLocationPromptBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow location so Mass Move can use where you are as your pickup and delivery address automatically.'**
+  String get homeLocationPromptBody;
+
+  /// No description provided for @homeLocationPromptAllow.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on'**
+  String get homeLocationPromptAllow;
+
+  /// No description provided for @homeLocationPromptLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get homeLocationPromptLater;
 }
 
 class _AppLocalizationsDelegate

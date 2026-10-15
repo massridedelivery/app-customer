@@ -2703,4 +2703,17 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get promoEnded => 'โปรนี้สิ้นสุดแล้ว';
+
+  @override
+  String get homeLocationPromptTitle => 'เปิดการเข้าถึงตำแหน่ง';
+
+  @override
+  String get homeLocationPromptBody =>
+      'เปิดตำแหน่งเพื่อให้ Mass Move ใช้ตำแหน่งปัจจุบันของคุณเป็นจุดรับและที่อยู่จัดส่งให้อัตโนมัติ';
+
+  @override
+  String get homeLocationPromptAllow => 'เปิดตำแหน่ง';
+
+  @override
+  String get homeLocationPromptLater => 'ไว้ทีหลัง';
 }

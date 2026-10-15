@@ -864,5 +864,9 @@
   "promoRejectNotAvailable": "โค้ดนี้ใช้ไม่ได้ในขณะนี้",
   "promoRejectMinSpendAmount": "ยอดขั้นต่ำ ฿{amount} จึงจะใช้โค้ดนี้ได้",
   "couponNotAppliedReason": "โค้ด {code} ใช้ไม่ได้: {reason}",
-  "promoEnded": "โปรนี้สิ้นสุดแล้ว"
+  "promoEnded": "โปรนี้สิ้นสุดแล้ว",
+  "homeLocationPromptTitle": "เปิดการเข้าถึงตำแหน่ง",
+  "homeLocationPromptBody": "เปิดตำแหน่งเพื่อให้ Mass Move ใช้ตำแหน่งปัจจุบันของคุณเป็นจุดรับและที่อยู่จัดส่งให้อัตโนมัติ",
+  "homeLocationPromptAllow": "เปิดตำแหน่ง",
+  "homeLocationPromptLater": "ไว้ทีหลัง"
 }

@@ -933,5 +933,9 @@
   "@promoRejectMinSpendAmount": {"placeholders": {"amount": {"type": "String"}}},
   "couponNotAppliedReason": "Code {code} can't be used: {reason}",
   "@couponNotAppliedReason": {"placeholders": {"code": {"type": "String"}, "reason": {"type": "String"}}},
-  "promoEnded": "This promotion has ended"
+  "promoEnded": "This promotion has ended",
+  "homeLocationPromptTitle": "Turn on location",
+  "homeLocationPromptBody": "Allow location so Mass Move can use where you are as your pickup and delivery address automatically.",
+  "homeLocationPromptAllow": "Turn on",
+  "homeLocationPromptLater": "Not now"
 }

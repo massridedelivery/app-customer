@@ -2728,4 +2728,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get promoEnded => 'This promotion has ended';
+
+  @override
+  String get homeLocationPromptTitle => 'Turn on location';
+
+  @override
+  String get homeLocationPromptBody =>
+      'Allow location so Mass Move can use where you are as your pickup and delivery address automatically.';
+
+  @override
+  String get homeLocationPromptAllow => 'Turn on';
+
+  @override
+  String get homeLocationPromptLater => 'Not now';
 }

@@ -49,6 +49,9 @@ abstract class HomeState with _$HomeState {
     @Default([]) List<Place> savedPlaces,
     @Default([]) List<Place> recentPlaces,
     @Default(LocationAccess.unknown) LocationAccess locationAccess,
+    // The OS permission / location-services dialog was shown in this run, so
+    // the app's own "turn on location" popup shouldn't follow right after it.
+    @Default(false) bool systemLocationPromptShown,
     String? error,
   }) = _HomeState;
 }

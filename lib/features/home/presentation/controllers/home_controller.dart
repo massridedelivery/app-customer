@@ -127,11 +127,25 @@ class HomeController extends _$HomeController {
   // written into `pickupAddress`: that string is shown as the pickup and sent to
   // the backend as `pickup_address`, and a non-empty value made screens treat
   // the pickup as set. Leaving it alone also keeps a saved default place.
+  /// Records that the OS really showed its permission / location-services
+  /// dialog. A request the OS refuses on the spot (Android "don't ask again")
+  /// returns almost instantly, so it doesn't count — the app's own popup
+  /// should still guide the user to Settings then.
+  void _noteSystemPrompt(DateTime askedAt) {
+    if (DateTime.now().difference(askedAt) >= _kSystemDialogMinDuration) {
+      state = state.copyWith(systemLocationPromptShown: true);
+    }
+  }
+
+  static const _kSystemDialogMinDuration = Duration(milliseconds: 700);
+
   Future<void> _initLocation() async {
     try {
       var serviceEnabled = await _location.serviceEnabled();
       if (!serviceEnabled) {
+        final asked = DateTime.now();
         serviceEnabled = await _location.requestService();
+        _noteSystemPrompt(asked);
         if (!serviceEnabled) {
           state = state.copyWith(locationAccess: LocationAccess.serviceDisabled);
           return;
@@ -140,7 +154,9 @@ class HomeController extends _$HomeController {
 
       var permission = await _location.hasPermission();
       if (permission == PermissionStatus.denied) {
+        final asked = DateTime.now();
         permission = await _location.requestPermission();
+        _noteSystemPrompt(asked);
       }
       if (permission == PermissionStatus.deniedForever) {
         state = state.copyWith(locationAccess: LocationAccess.deniedForever);

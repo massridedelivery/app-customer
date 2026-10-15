@@ -58,9 +58,82 @@ class ServiceSelectionScreen extends ConsumerStatefulWidget {
 
 class _ServiceSelectionScreenState
     extends ConsumerState<ServiceSelectionScreen> {
+  /// The automatic "turn on location" popup shows at most once per app run.
+  static bool _locationPromptShown = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _maybePromptLocation(ref.read(homeControllerProvider)),
+    );
+  }
+
+  /// Without location the home can't default to where the user is. When the
+  /// OS won't ask any more (denied forever) or location services are off, and
+  /// the OS dialog wasn't just shown this run, pop our own explainer that
+  /// leads to the fix — so the user doesn't have to find the header hint.
+  Future<void> _maybePromptLocation(HomeState homeState) async {
+    if (_locationPromptShown || !mounted) return;
+    if (homeState.systemLocationPromptShown) return;
+    if (!_needsLocationAccess(homeState)) return;
+    if (ModalRoute.of(context)?.isCurrent == false) return;
+    _locationPromptShown = true;
+    final l10n = AppLocalizations.of(context)!;
+    final turnOn = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        key: const Key('homeLocationPrompt'),
+        icon: const Icon(
+          Icons.location_on_rounded,
+          color: AppColors.primary,
+          size: 36,
+        ),
+        title: Text(
+          l10n.homeLocationPromptTitle,
+          textAlign: TextAlign.center,
+          style: AppTypography.heading4,
+        ),
+        content: Text(
+          l10n.homeLocationPromptBody,
+          textAlign: TextAlign.center,
+          style: AppTypography.body2.copyWith(color: AppColors.textSecondary),
+        ),
+        actionsAlignment: MainAxisAlignment.center,
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.textSecondary,
+              textStyle: AppTypography.label2,
+            ),
+            child: Text(l10n.homeLocationPromptLater),
+          ),
+          FilledButton(
+            key: const Key('homeLocationPromptAllow'),
+            onPressed: () => Navigator.of(ctx).pop(true),
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              textStyle: AppTypography.label2,
+            ),
+            child: Text(l10n.homeLocationPromptAllow),
+          ),
+        ],
+      ),
+    );
+    if (turnOn == true && mounted) {
+      await _fixLocationAccess(ref.read(homeControllerProvider).locationAccess);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final homeState = ref.watch(homeControllerProvider);
+    // The bootstrap resolves after the first frame — prompt when it lands.
+    ref.listen(
+      homeControllerProvider.select((s) => s.locationAccess),
+      (prev, next) => _maybePromptLocation(ref.read(homeControllerProvider)),
+    );
     // Service-card promo badges come from the customer's real active promos
     // (GET /api/customer/promo/list). While loading, on error, or when empty,
     // this stays an empty list so the cards simply show no badge.

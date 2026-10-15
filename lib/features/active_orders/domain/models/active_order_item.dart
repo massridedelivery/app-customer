@@ -1,4 +1,3 @@
-import 'package:customer_app/core/utils/thai_date_formatter.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'active_order_item.freezed.dart';
@@ -27,5 +26,4 @@ abstract class ActiveOrderItem with _$ActiveOrderItem {
   bool get isMessenger => type.toUpperCase() == 'MESSENGER';
   bool get hasDriver => driverId.isNotEmpty;
 
-  String get formattedCreatedAt => ThaiDateFormatter.dateTime(createdAt);
 }

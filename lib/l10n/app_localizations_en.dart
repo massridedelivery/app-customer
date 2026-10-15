@@ -772,4 +772,63 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get allowLocation => 'Allow';
+
+  @override
+  String couponValidUntil(String date) {
+    return 'Valid until $date';
+  }
+
+  @override
+  String promoValidUntilShort(String date) {
+    return 'Until $date';
+  }
+
+  @override
+  String promoValidUntilFull(String date, String time) {
+    return 'Valid until $date, $time';
+  }
+
+  @override
+  String orderedAt(String date) {
+    return 'Ordered: $date';
+  }
+
+  @override
+  String etaArrivingSoonAround(String time) {
+    return 'Arriving soon · around $time';
+  }
+
+  @override
+  String etaMinutesArriveAround(int minutes, String time) {
+    return 'About $minutes min · arrives around $time';
+  }
+
+  @override
+  String deliverByAround(String time) {
+    return 'Delivered by about $time';
+  }
+
+  @override
+  String pickupInMinutes(int minutes) {
+    return 'Pickup in $minutes min';
+  }
+
+  @override
+  String get etaIn => 'In';
+
+  @override
+  String get etaAbout => 'About';
+
+  @override
+  String etaArriveApprox(String time) {
+    return 'arrives ~$time';
+  }
+
+  @override
+  String get etaExpectedArrival => 'Expected arrival';
+
+  @override
+  String etaExpectedAround(String time) {
+    return 'Expected around $time';
+  }
 }

@@ -1,4 +1,3 @@
-import 'package:customer_app/core/utils/thai_date_formatter.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'history_order.freezed.dart';
@@ -33,8 +32,6 @@ abstract class HistoryOrder with _$HistoryOrder {
 
   factory HistoryOrder.fromJson(Map<String, dynamic> json) =>
       _$HistoryOrderFromJson(json);
-
-  String get formattedCreatedAt => ThaiDateFormatter.dateTime(createdAt);
 }
 
 @freezed

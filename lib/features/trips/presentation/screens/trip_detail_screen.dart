@@ -1,3 +1,4 @@
+import 'package:customer_app/core/utils/app_dates.dart';
 import 'package:customer_app/core/constants/map_defaults.dart';
 import 'package:customer_app/core/utils/error_text.dart';
 import 'package:customer_app/core/constants/app_assets.dart';
@@ -6,7 +7,6 @@ import 'package:customer_app/core/constants/app_icons.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/utils/map_marker_providers.dart';
 import 'package:customer_app/core/widgets/mass_loading_m.dart';
-import 'package:customer_app/core/utils/thai_date_formatter.dart';
 import 'package:customer_app/features/live_ride/presentation/controllers/rating_controller.dart';
 import 'package:customer_app/features/trips/domain/models/history_order.dart';
 import 'package:customer_app/features/trips/presentation/controllers/trip_detail_controller.dart';
@@ -295,10 +295,10 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
     String bookingId = '';
 
     if (state.rideDetails != null) {
-      bookingDate = ThaiDateFormatter.dateTime(state.rideDetails!.createdAt);
+      bookingDate = AppDates.of(context).isoDateTime(state.rideDetails!.createdAt);
       bookingId = state.rideDetails!.id;
     } else if (state.foodDetails != null) {
-      bookingDate = ThaiDateFormatter.dateTime(state.foodDetails!.placedAt);
+      bookingDate = AppDates.of(context).isoDateTime(state.foodDetails!.placedAt);
       bookingId = state.foodDetails!.id;
     }
 
@@ -480,19 +480,19 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
       distanceStr = '${ride.distanceKm?.toStringAsFixed(1) ?? '0'} กม.';
       durationStr = '${ride.totalDurationMin ?? '0'} นาที';
       pickupLocation = ride.pickupAddress ?? '';
-      pickupTime = ThaiDateFormatter.time(ride.pickedUpAt ?? ride.createdAt);
+      pickupTime = AppDates.of(context).isoTime(ride.pickedUpAt ?? ride.createdAt);
       dropoffLocation = ride.dropoffAddress ?? '';
-      dropoffTime = ThaiDateFormatter.time(ride.completedAt ?? ride.updatedAt);
+      dropoffTime = AppDates.of(context).isoTime(ride.completedAt ?? ride.updatedAt);
     } else if (state.foodDetails != null) {
       final food = state.foodDetails!;
       distanceStr = '${food.customerDistanceKm?.toStringAsFixed(1) ?? '0'} กม.';
       durationStr = '${food.originalEtaMin ?? '0'} นาที';
       pickupLocation = 'ร้านอาหาร';
-      pickupTime = ThaiDateFormatter.time(food.placedAt);
+      pickupTime = AppDates.of(context).isoTime(food.placedAt);
       dropoffLocation = food.deliveryAddress ?? '';
       // Only the real delivered time — never fall back to delayQueueUntil, an
       // internal batching timestamp that isn't the customer's dropoff time.
-      dropoffTime = ThaiDateFormatter.time(food.deliveredAt);
+      dropoffTime = AppDates.of(context).isoTime(food.deliveredAt);
     }
 
     return _buildThemeCard(

@@ -1,3 +1,4 @@
+import 'package:customer_app/core/utils/app_dates.dart';
 import 'package:customer_app/core/constants/app_assets.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/utils/auth_gate.dart';
@@ -447,12 +448,13 @@ class _MessengerBookingScreenState
                 final String title = level.label.isNotEmpty
                     ? level.label
                     : level.deliveryType;
-                final String? clock = formatDeliverBy(level.deliverBy);
+                final l10n = AppLocalizations.of(context)!;
+                final DateTime? deliverBy = parseDeliverBy(level.deliverBy);
                 final String pickup = level.pickupEtaMin != null
-                    ? 'ไปรับใน ${level.pickupEtaMin} นาที'
+                    ? l10n.pickupInMinutes(level.pickupEtaMin!)
                     : '';
-                final String subtitle = clock != null
-                    ? 'ส่งถึงประมาณ $clock น.${pickup.isNotEmpty ? '\n$pickup' : ''}'
+                final String subtitle = deliverBy != null
+                    ? '${l10n.deliverByAround(AppDates.of(context).time(deliverBy))}${pickup.isNotEmpty ? '\n$pickup' : ''}'
                     : pickup;
                 return _selectableCard(
                   selected:

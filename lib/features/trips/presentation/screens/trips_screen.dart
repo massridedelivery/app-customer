@@ -1,3 +1,4 @@
+import 'package:customer_app/core/utils/app_dates.dart';
 import 'package:customer_app/core/constants/app_assets.dart';
 import 'package:customer_app/core/utils/error_text.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
@@ -404,7 +405,7 @@ class _OrderListItem extends ConsumerWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      order.formattedCreatedAt,
+                      AppDates.of(context).isoDateTime(order.createdAt),
                       style: AppTypography.caption5.copyWith(
                         color: AppColors.semanticGrayNeutralFgHigh,
                       ),
@@ -646,7 +647,7 @@ class _MessengerOrderListItem extends ConsumerWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      order.formattedCreatedAt,
+                      AppDates.of(context).isoDateTime(order.createdAt),
                       style: AppTypography.caption5.copyWith(
                         color: AppColors.semanticGrayNeutralFgHigh,
                       ),

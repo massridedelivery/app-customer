@@ -1,3 +1,4 @@
+import 'package:customer_app/core/utils/app_dates.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/widgets/mass_loading_m.dart';
@@ -5,12 +6,10 @@ import 'package:customer_app/features/profile/data/datasources/loyalty_remote_da
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Safely take the YYYY-MM-DD prefix of an API date without assuming it is a
-/// non-null string of at least 10 chars (guards against crashing the list).
-String _safeDate(dynamic v) {
-  final s = v?.toString() ?? '';
-  return s.length >= 10 ? s.substring(0, 10) : s;
-}
+/// An API timestamp as a localized date; tolerates null / non-string values
+/// (guards against crashing the list).
+String _safeDate(BuildContext context, dynamic v) =>
+    AppDates.of(context).isoDate(v?.toString(), fallback: '');
 
 /// Format a possibly-null / non-num amount without throwing.
 String _safeAmount(dynamic v) {
@@ -108,7 +107,7 @@ class LoyaltyScreen extends ConsumerWidget {
                             type: (t['type'] ?? '').toString(),
                             desc: (t['description'] ?? '').toString(),
                             points: (t['points'] as num?)?.toInt() ?? 0,
-                            date: _safeDate(t['created_at']),
+                            date: _safeDate(context, t['created_at']),
                           ),
                         )
                         .toList(),
@@ -466,7 +465,7 @@ class _CashbackTile extends StatelessWidget {
                   style: AppTypography.caption3,
                 ),
                 Text(
-                  _safeDate(item['created_at']),
+                  _safeDate(context, item['created_at']),
                   style: AppTypography.caption5.copyWith(
                     color: AppColors.textSecondary,
                   ),

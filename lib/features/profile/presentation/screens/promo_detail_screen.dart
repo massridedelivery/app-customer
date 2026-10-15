@@ -1,3 +1,5 @@
+import 'package:customer_app/l10n/app_localizations.dart';
+import 'package:customer_app/core/utils/app_dates.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/utils/error_text.dart';
 import 'package:customer_app/core/utils/promo_style.dart';
@@ -99,7 +101,7 @@ class PromoDetailScreen extends ConsumerWidget {
         body: CustomScrollView(
           slivers: [
             _buildAppBar(context, promo),
-            SliverToBoxAdapter(child: _buildFloatingHeader(promo)),
+            SliverToBoxAdapter(child: _buildFloatingHeader(context, promo)),
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
@@ -108,7 +110,7 @@ class PromoDetailScreen extends ConsumerWidget {
                   children: [
                     _buildDescription(promo),
                     _buildCodeSection(context, promo),
-                    _buildExpiry(promo),
+                    _buildExpiry(context, promo),
                     const SizedBox(height: 32),
                     _buildTermsSection(promo),
                     const SizedBox(height: 100),
@@ -140,7 +142,7 @@ class PromoDetailScreen extends ConsumerWidget {
   /// "Floating card" header: a short color band continuing the app bar, with a
   /// white card overlapping it that sums up the promo — service scope, tag,
   /// expiry date, the discount headline and the title.
-  Widget _buildFloatingHeader(Map<String, dynamic> promo) {
+  Widget _buildFloatingHeader(BuildContext context, Map<String, dynamic> promo) {
     final barColor = promoColorOf(promo);
     final bannerUrl = (promo['banner_url'] ?? '').toString();
     final scope = promoScopeOf(promo);
@@ -191,7 +193,7 @@ class PromoDetailScreen extends ConsumerWidget {
                     const Spacer(),
                     if (expiry != null)
                       Text(
-                        'ถึง $expiry',
+                        AppLocalizations.of(context)!.promoValidUntilShort(AppDates.of(context).date(expiry)),
                         style: AppTypography.caption5.copyWith(
                           color: AppColors.textSecondary,
                         ),
@@ -258,13 +260,10 @@ class PromoDetailScreen extends ConsumerWidget {
     );
   }
 
-  /// `expires_at` as a Bangkok-time date (dd/MM/yyyy), or null.
-  String? _expiryDate(Map<String, dynamic> promo) {
+  /// `expires_at` in Bangkok time, or null.
+  DateTime? _expiryDate(Map<String, dynamic> promo) {
     final parsed = DateTime.tryParse((promo['expires_at'] ?? '').toString());
-    if (parsed == null) return null;
-    final bkk = parsed.toUtc().add(const Duration(hours: 7));
-    String two(int n) => n.toString().padLeft(2, '0');
-    return '${two(bkk.day)}/${two(bkk.month)}/${bkk.year}';
+    return parsed == null ? null : AppDates.bangkok(parsed);
   }
 
   Widget _buildCodeSection(BuildContext context, Map<String, dynamic> promo) {
@@ -385,15 +384,12 @@ class PromoDetailScreen extends ConsumerWidget {
 
   /// Expiry, converted from the ISO-8601 UTC `expires_at` to Thai time
   /// (Asia/Bangkok, UTC+7) regardless of the device timezone.
-  Widget _buildExpiry(Map<String, dynamic> promo) {
-    final raw = (promo['expires_at'] ?? '').toString();
-    if (raw.isEmpty) return const SizedBox.shrink();
-    final DateTime? parsed = DateTime.tryParse(raw);
-    if (parsed == null) return const SizedBox.shrink();
-    final bkk = parsed.toUtc().add(const Duration(hours: 7));
-    String two(int n) => n.toString().padLeft(2, '0');
-    final text =
-        'ใช้ได้ถึง ${two(bkk.day)}/${two(bkk.month)}/${bkk.year} ${two(bkk.hour)}:${two(bkk.minute)} น.';
+  Widget _buildExpiry(BuildContext context, Map<String, dynamic> promo) {
+    final bkk = _expiryDate(promo);
+    if (bkk == null) return const SizedBox.shrink();
+    final dates = AppDates.of(context);
+    final text = AppLocalizations.of(context)!
+        .promoValidUntilFull(dates.date(bkk), dates.time(bkk));
     return Padding(
       padding: const EdgeInsets.only(top: 16),
       child: Row(

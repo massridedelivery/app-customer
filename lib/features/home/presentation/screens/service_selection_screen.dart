@@ -1,3 +1,4 @@
+import 'package:customer_app/core/utils/app_dates.dart';
 import 'package:customer_app/core/constants/app_assets.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_icons.dart';
@@ -562,26 +563,26 @@ class _ServiceSelectionScreenState
   // ─── Latest articles (massridedelivery.com/blog) ──────────────────────────
   Widget _buildArticlesSection(BuildContext context) {
     final articles =
-        <({String image, String category, String title, String date, String url})>[
+        <({String image, String category, String title, DateTime date, String url})>[
       (
         image: 'assets/images/article_mass.webp',
         category: 'แนะนำบริการ',
         title: 'MASS คืออะไร? รู้จักซูเปอร์แอปสัญชาติไทยที่ครบจบในแอปเดียว',
-        date: '15 มิถุนายน 2026',
+        date: DateTime(2026, 6, 15),
         url: 'https://massridedelivery.com/blog/what-is-mass-super-app',
       ),
       (
         image: 'assets/images/article_food.webp',
         category: 'เคล็ดลับ',
         title: '5 เคล็ดลับสั่งอาหารเดลิเวอรีให้คุ้มค่าและอร่อยเหมือนทานที่ร้าน',
-        date: '22 มิถุนายน 2026',
+        date: DateTime(2026, 6, 22),
         url: 'https://massridedelivery.com/blog/food-delivery-tips',
       ),
       (
         image: 'assets/images/article_ride.webp',
         category: 'ความปลอดภัย',
         title: 'เดินทางปลอดภัยกับ MASS Ride: ฟีเจอร์ความปลอดภัยที่คุณควรรู้',
-        date: '28 มิถุนายน 2026',
+        date: DateTime(2026, 6, 28),
         url: 'https://massridedelivery.com/blog/ride-safety-features',
       ),
     ];
@@ -616,7 +617,7 @@ class _ServiceSelectionScreenState
   }
 
   Widget _articleCard(
-    ({String image, String category, String title, String date, String url})
+    ({String image, String category, String title, DateTime date, String url})
     a,
   ) {
     return GestureDetector(
@@ -689,7 +690,7 @@ class _ServiceSelectionScreenState
                       ),
                       const SizedBox(width: 5),
                       Text(
-                        a.date,
+                        AppDates.of(context).dateLong(a.date),
                         style: AppTypography.caption5.copyWith(
                           color: AppColors.textSecondary,
                         ),

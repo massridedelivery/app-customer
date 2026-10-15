@@ -4,6 +4,7 @@ import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/features/chat/domain/models/chat_message.dart';
 import 'package:customer_app/features/chat/presentation/controllers/chat_controller.dart';
 import 'package:customer_app/features/live_ride/presentation/controllers/live_ride_controller.dart';
+import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -69,6 +70,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final chatState = ref.watch(chatControllerProvider((id: widget.jobId, kind: ChatKind.ride)));
     // Only the two fields the header needs — a whole-state watch rebuilt the
     // entire chat on every ~2s driver-location socket tick.
@@ -80,7 +82,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         );
 
     final isActiveJob = rideJobId == widget.jobId;
-    final driverName = isActiveJob ? (rideDriverName ?? 'คนขับ') : 'คนขับ';
+    final driverName = isActiveJob
+        ? (rideDriverName ?? l10n.liveChatDriver)
+        : l10n.liveChatDriver;
     // Header subtitle: car model + plate (e.g. "Honda City • กภ1234"), falling
     // back to a generic label until the driver details arrive.
     final vehicleInfo = isActiveJob
@@ -91,7 +95,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         : '';
     final headerSubtitle = vehicleInfo.isNotEmpty
         ? vehicleInfo
-        : 'แชทระหว่างเดินทาง';
+        : l10n.liveChatSubtitle;
 
     // Automatically scroll to bottom when new messages arrive
     ref.listen(chatControllerProvider((id: widget.jobId, kind: ChatKind.ride)), (previous, next) {
@@ -106,7 +110,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         ScaffoldMessenger.of(context)
           ..hideCurrentSnackBar()
           ..showSnackBar(
-            const SnackBar(content: Text('ส่งข้อความไม่สำเร็จ กรุณาลองใหม่')),
+            SnackBar(content: Text(l10n.liveChatSendFailed)),
           );
       }
     });
@@ -166,7 +170,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'โหลดข้อความไม่สำเร็จ',
+                      l10n.liveChatLoadFailed,
                       style: AppTypography.label2.copyWith(
                         color: AppColors.error,
                       ),
@@ -178,7 +182,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                             .read(chatControllerProvider((id: widget.jobId, kind: ChatKind.ride)).notifier)
                             .fetchChatHistory();
                       },
-                      child: const Text('ลองใหม่'),
+                      child: Text(l10n.retry),
                     ),
                   ],
                 ),
@@ -250,7 +254,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     child: TextField(
                       controller: _controller,
                       decoration: InputDecoration(
-                        hintText: 'พิมพ์ข้อความ...',
+                        hintText: l10n.liveChatHint,
                         hintStyle: AppTypography.caption4.copyWith(
                           color: AppColors.semanticGrayNeutralFgLowOnWhite,
                         ),

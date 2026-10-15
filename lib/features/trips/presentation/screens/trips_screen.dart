@@ -155,6 +155,7 @@ class _TripsFilterBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       color: AppColors.semanticGrayNeutralBgWhite,
       child: Column(
@@ -171,17 +172,17 @@ class _TripsFilterBar extends StatelessWidget implements PreferredSizeWidget {
               children: [
                 // "ทั้งหมด" = no type filter (null) → ride+food+messenger merged.
                 AppFilterChip(
-                  label: 'ทั้งหมด',
+                  label: l10n.tripFilterAll,
                   selected: selectedType == null,
                   filled: true,
                   onTap: () => onTypeChanged(null),
                 ),
                 const SizedBox(width: 8),
-                _buildTypeChip(HistoryType.food, 'ส่งอาหาร'),
+                _buildTypeChip(HistoryType.food, l10n.tripFilterFood),
                 const SizedBox(width: 8),
-                _buildTypeChip(HistoryType.ride, 'เรียกรถ'),
+                _buildTypeChip(HistoryType.ride, l10n.tripFilterRide),
                 const SizedBox(width: 8),
-                _buildTypeChip(HistoryType.messenger, 'ส่งของ'),
+                _buildTypeChip(HistoryType.messenger, l10n.tripFilterMessenger),
               ],
             ),
           ),
@@ -341,6 +342,7 @@ class _OrderListItem extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final isCancelled =
         order.status.toUpperCase() == 'CANCELLED' ||
         order.status.toUpperCase() == 'FAILED';
@@ -360,21 +362,24 @@ class _OrderListItem extends ConsumerWidget {
       final food = order.foodDetails!;
       final itemsSummary = food.items.map((i) => i.name).join(', ');
       title = itemsSummary.isNotEmpty
-          ? '$itemsSummary ไป ${food.deliveryAddress ?? ''}'
-          : 'คำสั่งซื้ออาหาร ไป ${food.deliveryAddress ?? ''}';
+          ? l10n.tripTitleTo(itemsSummary, food.deliveryAddress ?? '')
+          : l10n.tripFoodOrderTo(food.deliveryAddress ?? '');
     } else if (order.type.toUpperCase() == 'RIDE' &&
         order.rideDetails != null) {
       final ride = order.rideDetails!;
-      title = '${ride.pickupAddress ?? ''} ไป ${ride.dropoffAddress ?? ''}';
+      title = l10n.tripTitleTo(
+        ride.pickupAddress ?? '',
+        ride.dropoffAddress ?? '',
+      );
     } else if (order.type.toUpperCase() == 'MART' &&
         order.foodDetails != null) {
       final food = order.foodDetails!;
       final itemsSummary = food.items.map((i) => i.name).join(', ');
       title = itemsSummary.isNotEmpty
-          ? 'ซื้อของ: $itemsSummary ไป ${food.deliveryAddress ?? ''}'
-          : 'คำสั่งซื้อของใช้ ไป ${food.deliveryAddress ?? ''}';
+          ? l10n.tripMartItemsTo(itemsSummary, food.deliveryAddress ?? '')
+          : l10n.tripMartOrderTo(food.deliveryAddress ?? '');
     } else {
-      title = 'คำสั่งซื้อ #${order.id}';
+      title = l10n.tripOrderNumber(order.id);
     }
 
     return RepaintBoundary(
@@ -424,7 +429,7 @@ class _OrderListItem extends ConsumerWidget {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
-                                'จองอีกครั้ง',
+                                AppLocalizations.of(context)!.bookAgain,
                                 style: AppTypography.label2.copyWith(
                                   color: AppColors.primary,
                                   fontWeight: FontWeight.bold,
@@ -471,10 +476,11 @@ class _StatusText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final s = status.toUpperCase();
     if (s == 'COMPLETED' || s == 'SUCCESS') {
       return Text(
-        'สำเร็จ',
+        l10n.completed,
         style: AppTypography.caption4.copyWith(
           color: AppColors.foundationGreen500,
           fontWeight: FontWeight.bold,
@@ -482,7 +488,7 @@ class _StatusText extends StatelessWidget {
       );
     } else if (s == 'CANCELLED' || s == 'FAILED') {
       return Text(
-        'ถูกยกเลิก',
+        l10n.cancelledLabel,
         style: AppTypography.caption4.copyWith(
           color: AppColors.foundationRed700,
           fontWeight: FontWeight.bold,
@@ -490,7 +496,7 @@ class _StatusText extends StatelessWidget {
       );
     } else {
       return Text(
-        _ongoingLabel(s),
+        _ongoingLabel(l10n, s),
         style: AppTypography.caption4.copyWith(
           color: Colors.orange,
           fontWeight: FontWeight.bold,
@@ -499,31 +505,31 @@ class _StatusText extends StatelessWidget {
     }
   }
 
-  // Thai labels for in-progress ride/food statuses (terminal ones handled
-  // above) so the list never shows a raw English enum.
-  String _ongoingLabel(String s) {
+  // Localized labels for in-progress ride/food statuses (terminal ones
+  // handled above) so the list never shows a raw English enum.
+  String _ongoingLabel(AppLocalizations l10n, String s) {
     switch (s) {
       case 'PENDING':
-        return 'กำลังหาคนขับ';
+        return l10n.tripStatusFindingDriver;
       case 'ACCEPTED':
       case 'CONFIRMING':
-        return 'คนขับรับงานแล้ว';
+        return l10n.tripStatusDriverAccepted;
       case 'ARRIVED_AT_PICK_UP':
       case 'ARRIVED_AT_PICKUP':
-        return 'คนขับถึงจุดรับ';
+        return l10n.tripStatusDriverAtPickup;
       case 'PICKED_UP':
-        return 'กำลังเดินทาง';
+        return l10n.tripStatusOnTrip;
       case 'PREPARING':
-        return 'กำลังเตรียมอาหาร';
+        return l10n.tripStatusPreparing;
       case 'READY_FOR_PICKUP':
-        return 'รอรับอาหาร';
+        return l10n.tripStatusReadyForPickup;
       case 'DRIVER_ASSIGNED':
-        return 'จับคู่คนขับแล้ว';
+        return l10n.tripStatusDriverAssigned;
       case 'DELIVERING':
       case 'ON_THE_WAY':
-        return 'กำลังจัดส่ง';
+        return l10n.tripStatusDelivering;
       default:
-        return 'กำลังดำเนินการ';
+        return l10n.tripStatusInProgress;
     }
   }
 }
@@ -616,10 +622,11 @@ class _MessengerOrderListItem extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final dropoff = order.dropoffAddress.isNotEmpty
         ? order.dropoffAddress
-        : 'จุดส่งพัสดุ';
-    final title = 'ส่งพัสดุ ไป $dropoff';
+        : l10n.tripParcelDropoffFallback;
+    final title = l10n.tripParcelTo(dropoff);
 
     return RepaintBoundary(
       child: InkWell(
@@ -664,7 +671,7 @@ class _MessengerOrderListItem extends ConsumerWidget {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
-                                'จองอีกครั้ง',
+                                AppLocalizations.of(context)!.bookAgain,
                                 style: AppTypography.label2.copyWith(
                                   color: AppColors.primary,
                                   fontWeight: FontWeight.bold,
@@ -714,9 +721,10 @@ class _MessengerStatusText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     if (order.isDelivered) {
       return Text(
-        'สำเร็จ',
+        l10n.completed,
         style: AppTypography.caption4.copyWith(
           color: AppColors.foundationGreen500,
           fontWeight: FontWeight.bold,
@@ -725,7 +733,7 @@ class _MessengerStatusText extends StatelessWidget {
     }
     if (order.isCancelled) {
       return Text(
-        'ถูกยกเลิก',
+        l10n.cancelledLabel,
         style: AppTypography.caption4.copyWith(
           color: AppColors.foundationRed700,
           fontWeight: FontWeight.bold,
@@ -733,7 +741,7 @@ class _MessengerStatusText extends StatelessWidget {
       );
     }
     return Text(
-      _ongoingLabel(order.status),
+      _ongoingLabel(l10n, order.status),
       style: AppTypography.caption4.copyWith(
         color: Colors.orange,
         fontWeight: FontWeight.bold,
@@ -741,18 +749,18 @@ class _MessengerStatusText extends StatelessWidget {
     );
   }
 
-  String _ongoingLabel(String status) {
+  String _ongoingLabel(AppLocalizations l10n, String status) {
     switch (status.toUpperCase()) {
       case 'PENDING':
-        return 'กำลังหาคนขับ';
+        return l10n.tripStatusFindingDriver;
       case 'ACCEPTED':
-        return 'คนขับรับงานแล้ว';
+        return l10n.tripStatusDriverAccepted;
       case 'ARRIVED_AT_PICKUP':
-        return 'ถึงจุดรับพัสดุ';
+        return l10n.tripStatusAtParcelPickup;
       case 'PICKED_UP':
-        return 'กำลังนำส่ง';
+        return l10n.tripStatusParcelEnRoute;
       default:
-        return 'กำลังดำเนินการ';
+        return l10n.tripStatusInProgress;
     }
   }
 }

@@ -3,6 +3,7 @@ import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/widgets/app_filter_chip.dart';
 import 'package:customer_app/features/live_ride/domain/models/driver_profile_model.dart';
 import 'package:customer_app/features/live_ride/presentation/controllers/rating_controller.dart';
+import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -31,6 +32,8 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
   final Set<String> _selectedTags = {};
   final _commentController = TextEditingController();
 
+  // Tag values are submitted to the backend as-is, so they stay the Thai
+  // strings it has always received; only the chip label is localized.
   static const _feedbackTags = [
     'ขับรถดี',
     'สุภาพ',
@@ -38,6 +41,23 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
     'ตรงเวลา',
     'ขับขี่ปลอดภัย',
   ];
+
+  String _tagLabel(AppLocalizations l10n, String tag) {
+    switch (tag) {
+      case 'ขับรถดี':
+        return l10n.ratingTagGoodDriving;
+      case 'สุภาพ':
+        return l10n.ratingTagPolite;
+      case 'รถสะอาด':
+        return l10n.ratingTagCleanCar;
+      case 'ตรงเวลา':
+        return l10n.ratingTagOnTime;
+      case 'ขับขี่ปลอดภัย':
+        return l10n.ratingTagSafeDriving;
+      default:
+        return tag;
+    }
+  }
 
   @override
   void dispose() {
@@ -59,10 +79,14 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     ref.listen<AsyncValue<void>>(ratingControllerProvider, (previous, next) {
       next.whenOrNull(
         error: (error, stackTrace) {
-          final message = error is Exception
+          final isHint = error is RatingRequiredException;
+          final message = isHint
+              ? l10n.ratingRequired
+              : error is Exception
               ? error.toString().replaceFirst('Exception: ', '')
               : error.toString();
           ScaffoldMessenger.of(context).showSnackBar(
@@ -71,7 +95,7 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
                 message,
                 style: AppTypography.caption4.copyWith(color: AppColors.white),
               ),
-              backgroundColor: message.contains('กรุณา')
+              backgroundColor: isHint || message.contains('กรุณา')
                   ? AppColors.grey800
                   : AppColors.error,
             ),
@@ -101,7 +125,7 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
           },
         ),
         title: Text(
-          'รีวิวการเดินทางของคุณ',
+          l10n.ratingTitle,
           style: AppTypography.heading4.copyWith(color: AppColors.black),
         ),
         centerTitle: true,
@@ -109,7 +133,7 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
           TextButton(
             onPressed: () => context.go('/main'),
             child: Text(
-              'ข้าม',
+              l10n.ratingSkip,
               style: AppTypography.label2.copyWith(
                 color: AppColors.semanticGrayNeutralFgLowOnWhite,
               ),
@@ -160,13 +184,13 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
                         children: [
                           Text(
                             widget.driverProfile?.driverInfo.fullName ??
-                                'ไม่ระบุชื่อคนขับ',
+                                l10n.ratingDriverNameUnknown,
                             style: AppTypography.label2,
                           ),
                           Text(
                             () {
                               final info = widget.driverProfile?.driverInfo;
-                              if (info == null) return 'คนขับของคุณ';
+                              if (info == null) return l10n.ratingYourDriver;
                               final parts = <String>[];
                               if (info.vehiclePlate.isNotEmpty) {
                                 parts.add(info.vehiclePlate);
@@ -180,7 +204,7 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
                               if (vehicleDesc.isNotEmpty) {
                                 parts.add(vehicleDesc);
                               }
-                              parts.add('คนขับของคุณ');
+                              parts.add(l10n.ratingYourDriver);
                               return parts.join('  •  ');
                             }(),
                             style: AppTypography.caption5.copyWith(
@@ -193,7 +217,7 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'ให้คะแนนคนขับ',
+                    l10n.ratingRateDriver,
                     style: AppTypography.label2.copyWith(
                       color: AppColors.semanticGrayNeutralFgHigh,
                     ),
@@ -207,7 +231,7 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
                     children: _feedbackTags.map((tag) {
                       final selected = _selectedTags.contains(tag);
                       return AppFilterChip(
-                        label: tag,
+                        label: _tagLabel(l10n, tag),
                         selected: selected,
                         onTap: () {
                           setState(() {
@@ -230,7 +254,7 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('ความคิดเห็นเพิ่มเติม', style: AppTypography.label2),
+                  Text(l10n.ratingCommentTitle, style: AppTypography.label2),
                   const SizedBox(height: 12),
                   Container(
                     decoration: BoxDecoration(
@@ -241,7 +265,7 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
                       controller: _commentController,
                       maxLines: 4,
                       decoration: InputDecoration(
-                        hintText: 'บอกเราว่าคุณชอบหรือไม่ชอบอะไร...',
+                        hintText: l10n.ratingCommentHint,
                         hintStyle: AppTypography.caption4.copyWith(
                           color: AppColors.semanticGrayNeutralFgLowOnWhite,
                         ),
@@ -291,7 +315,7 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
                               ),
                             )
                           : Text(
-                              'ส่งรีวิว',
+                              l10n.ratingSubmit,
                               style: AppTypography.label1.copyWith(
                                 color: AppColors.white,
                               ),
@@ -304,7 +328,7 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
                     child: TextButton(
                       onPressed: () => context.go('/main'),
                       child: Text(
-                        'ข้ามไปก่อน',
+                        l10n.ratingSkipForNow,
                         style: AppTypography.label2.copyWith(
                           color: AppColors.semanticGrayNeutralFgLowOnWhite,
                         ),

@@ -9,6 +9,7 @@ import 'package:customer_app/features/auth/presentation/controllers/auth_control
 import 'package:customer_app/features/profile/presentation/screens/promo_list_screen.dart';
 import 'package:customer_app/features/ride_booking/presentation/controllers/booking_controller.dart';
 import 'package:customer_app/features/ride_booking/presentation/providers/discover_promos_provider.dart';
+import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -23,6 +24,8 @@ class _RideCouponScreenState extends ConsumerState<RideCouponScreen> {
   final _manualController = TextEditingController();
   bool _isLoading = false;
   String? _errorMessage;
+
+  AppLocalizations get _l10n => AppLocalizations.of(context)!;
 
   @override
   void dispose() {
@@ -39,7 +42,7 @@ class _RideCouponScreenState extends ConsumerState<RideCouponScreen> {
     // would be 0 and the backend answers a bare "invalid request".
     final booking = ref.read(bookingControllerProvider).value;
     if (booking == null || booking.estimations.isEmpty) {
-      setState(() => _errorMessage = 'กรุณาเลือกจุดรับ-ส่งก่อนใช้คูปอง');
+      setState(() => _errorMessage = _l10n.rideCouponNeedRoute);
       return;
     }
 
@@ -64,14 +67,14 @@ class _RideCouponScreenState extends ConsumerState<RideCouponScreen> {
         }
       } else {
         setState(() {
-          _errorMessage = 'รหัสส่วนลดไม่ถูกต้อง';
+          _errorMessage = _l10n.rideCouponInvalid;
         });
       }
     } catch (e) {
       setState(() {
         _errorMessage = friendlyError(
           e,
-          fallback: 'ใช้คูปองนี้ไม่ได้ กรุณาลองใหม่',
+          fallback: _l10n.rideCouponApplyFailed,
         );
       });
     } finally {
@@ -103,9 +106,9 @@ class _RideCouponScreenState extends ConsumerState<RideCouponScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        title: const Text(
-          'เลือกคูปองส่วนลด',
-          style: TextStyle(
+        title: Text(
+          _l10n.rideCouponSelectTitle,
+          style: const TextStyle(
             color: Colors.black87,
             fontWeight: FontWeight.bold,
             fontSize: 16,
@@ -130,7 +133,7 @@ class _RideCouponScreenState extends ConsumerState<RideCouponScreen> {
                 CouponManualEntry(
                   controller: _manualController,
                   onApply: _applyPromo,
-                  applyLabel: 'ใช้งาน',
+                  applyLabel: _l10n.rideCouponUse,
                   errorText: _errorMessage,
                   isLoading: _isLoading,
                   onChanged: () {
@@ -157,7 +160,7 @@ class _RideCouponScreenState extends ConsumerState<RideCouponScreen> {
     return promosAsync.when(
       loading: () => const Center(child: MassLoadingM(size: 72)),
       error: (err, stack) => _ErrorView(
-        message: friendlyError(err, fallback: 'โหลดคูปองไม่สำเร็จ'),
+        message: friendlyError(err, fallback: _l10n.rideCouponLoadFailed),
         onRetry: () => ref.invalidate(discoverPromosProvider),
       ),
       data: (promos) => _CouponList(
@@ -182,7 +185,7 @@ class _RideCouponScreenState extends ConsumerState<RideCouponScreen> {
     return promosAsync.when(
       loading: () => const Center(child: MassLoadingM(size: 72)),
       error: (err, stack) => _ErrorView(
-        message: friendlyError(err, fallback: 'โหลดคูปองไม่สำเร็จ'),
+        message: friendlyError(err, fallback: _l10n.rideCouponLoadFailed),
         onRetry: () => ref.invalidate(promoListProvider),
       ),
       data: (raw) {
@@ -225,7 +228,7 @@ class _CouponList extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(top: 16, bottom: 12),
             child: Text(
-              'คูปองส่วนลดที่มี',
+              AppLocalizations.of(context)!.rideCouponAvailable,
               style: AppTypography.label1.copyWith(fontWeight: FontWeight.bold),
             ),
           ),
@@ -234,7 +237,7 @@ class _CouponList extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 64),
               child: Center(
                 child: Text(
-                  'ไม่มีคูปองที่สามารถใช้งานได้ในขณะนี้',
+                  AppLocalizations.of(context)!.rideCouponNoneAvailable,
                   style: AppTypography.label2.copyWith(color: Colors.grey),
                 ),
               ),
@@ -265,7 +268,7 @@ class _ErrorView extends StatelessWidget {
               textAlign: TextAlign.center,
               style: AppTypography.caption4.copyWith(color: AppColors.error),
             ),
-            TextButton(onPressed: onRetry, child: const Text('ลองใหม่')),
+            TextButton(onPressed: onRetry, child: Text(AppLocalizations.of(context)!.retry)),
           ],
         ),
       ),

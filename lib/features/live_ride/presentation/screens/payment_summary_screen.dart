@@ -1,6 +1,7 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/features/live_ride/domain/models/driver_profile_model.dart';
+import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -47,16 +48,16 @@ class _PaymentSummaryScreenState extends ConsumerState<PaymentSummaryScreen> {
     return '$sign฿$buffer$satang';
   }
 
-  String _paymentMethodLabel(String method) {
+  String _paymentMethodLabel(AppLocalizations l10n, String method) {
     switch (method.toUpperCase()) {
       case 'CASH':
-        return 'เงินสด';
+        return l10n.cashLabel;
       case 'PROMPTPAY':
-        return 'พร้อมเพย์';
+        return l10n.promptPay;
       case 'COD':
-        return 'เก็บเงินปลายทาง';
+        return l10n.livePayCod;
       default:
-        return method.isEmpty ? 'ไม่ระบุ' : method;
+        return method.isEmpty ? l10n.livePayUnspecified : method;
     }
   }
 
@@ -79,6 +80,7 @@ class _PaymentSummaryScreenState extends ConsumerState<PaymentSummaryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final profile = widget.driverProfile;
     final method = (profile?.paymentMethod ?? '').toUpperCase();
     // Cash / cash-on-delivery has no channel to deduct a tip from, so the tip
@@ -98,7 +100,7 @@ class _PaymentSummaryScreenState extends ConsumerState<PaymentSummaryScreen> {
         elevation: 0,
         automaticallyImplyLeading: false,
         title: Text(
-          'สรุปการชำระเงิน',
+          l10n.livePaymentSummaryTitle,
           style: AppTypography.heading4.copyWith(color: AppColors.black),
         ),
         centerTitle: true,
@@ -116,28 +118,28 @@ class _PaymentSummaryScreenState extends ConsumerState<PaymentSummaryScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('สรุปค่าโดยสาร', style: AppTypography.label2),
+                  Text(l10n.liveFareSummary, style: AppTypography.label2),
                   const SizedBox(height: 16),
-                  _amountRow('ค่าโดยสาร', _formatBaht(fare)),
+                  _amountRow(l10n.liveFare, _formatBaht(fare)),
                   if (tollFee > 0) ...[
                     const SizedBox(height: 12),
-                    _amountRow('ค่าทางด่วน', _formatBaht(tollFee)),
+                    _amountRow(l10n.liveTollFee, _formatBaht(tollFee)),
                   ],
                   if (waitingFee > 0) ...[
                     const SizedBox(height: 12),
-                    _amountRow('ค่ารอคอย', _formatBaht(waitingFee)),
+                    _amountRow(l10n.liveWaitingFee, _formatBaht(waitingFee)),
                   ],
                   if (discount > 0) ...[
                     const SizedBox(height: 12),
                     _amountRow(
-                      'ส่วนลด',
+                      l10n.liveDiscount,
                       '-${_formatBaht(discount)}',
                       valueColor: AppColors.primary,
                     ),
                   ],
                   if (tip > 0) ...[
                     const SizedBox(height: 12),
-                    _amountRow('ทิปให้คนขับ', _formatBaht(tip)),
+                    _amountRow(l10n.liveDriverTip, _formatBaht(tip)),
                   ],
                   const Padding(
                     padding: EdgeInsets.symmetric(vertical: 14),
@@ -147,7 +149,7 @@ class _PaymentSummaryScreenState extends ConsumerState<PaymentSummaryScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'ยอดชำระทั้งหมด',
+                        l10n.liveTotalToPay,
                         style: AppTypography.label1.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -177,10 +179,10 @@ class _PaymentSummaryScreenState extends ConsumerState<PaymentSummaryScreen> {
                     size: 22,
                   ),
                   const SizedBox(width: 12),
-                  Text('วิธีชำระเงิน', style: AppTypography.label2),
+                  Text(l10n.livePaymentMethod, style: AppTypography.label2),
                   const Spacer(),
                   Text(
-                    _paymentMethodLabel(profile?.paymentMethod ?? ''),
+                    _paymentMethodLabel(l10n, profile?.paymentMethod ?? ''),
                     style: AppTypography.label2.copyWith(
                       color: AppColors.semanticGrayNeutralFgHigh,
                     ),
@@ -205,12 +207,12 @@ class _PaymentSummaryScreenState extends ConsumerState<PaymentSummaryScreen> {
                         size: 20,
                       ),
                       const SizedBox(width: 8),
-                      Text('ให้ทิปคนขับ (ไม่บังคับ)', style: AppTypography.label2),
+                      Text(l10n.liveTipTitle, style: AppTypography.label2),
                     ],
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'ทิปจะถูกหักจากช่องทางชำระเงินที่คุณเลือก',
+                    l10n.liveTipNote,
                     style: AppTypography.caption5.copyWith(
                       color: AppColors.semanticGrayNeutralFgLowOnWhite,
                     ),
@@ -284,7 +286,7 @@ class _PaymentSummaryScreenState extends ConsumerState<PaymentSummaryScreen> {
                     ),
                   ),
                   child: Text(
-                    'ยืนยันและให้คะแนน',
+                    l10n.liveConfirmAndRate,
                     style: AppTypography.label1.copyWith(color: AppColors.white),
                   ),
                 ),

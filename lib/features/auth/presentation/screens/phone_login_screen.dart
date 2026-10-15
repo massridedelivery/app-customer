@@ -143,6 +143,9 @@ class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
                     padding: const EdgeInsets.fromLTRB(20, 6, 20, 0),
                     child: _form(l10n, isLoading),
                   ),
+                  // Phone sign-up happens inside the OTP flow (a new number goes
+                  // to the profile form), so the sign-up row is email-only.
+                  if (_method == LoginMethod.email) ...[
                   const SizedBox(height: 24),
                   Wrap(
                     alignment: WrapAlignment.center,
@@ -160,6 +163,7 @@ class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
                       ),
                     ],
                   ),
+                  ],
                   const SizedBox(height: 8),
                 ],
               ),

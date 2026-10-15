@@ -119,6 +119,13 @@ void main() {
     expect(find.text('อีเมล'), findsOneWidget);
     expect(find.text('ขอรหัส OTP'), findsOneWidget);
     expect(find.text('ยินดีต้อนรับ'), findsOneWidget);
+    // Phone tab: no sign-up row (a new number signs up via OTP).
+    expect(find.text('ยังไม่มีบัญชี?'), findsNothing);
+    expect(find.text('สมัครสมาชิก'), findsNothing);
+
+    // Email tab keeps it.
+    await tester.tap(find.text('อีเมล').first);
+    await tester.pump();
     expect(find.text('ยังไม่มีบัญชี?'), findsOneWidget);
     expect(find.text('สมัครสมาชิก'), findsOneWidget);
   });
@@ -132,8 +139,7 @@ void main() {
     expect(find.text('Email'), findsOneWidget);
     expect(find.text('Request OTP'), findsOneWidget);
     expect(find.text('Welcome'), findsOneWidget);
-    expect(find.text("Don't have an account?"), findsOneWidget);
-    expect(find.text('Sign up'), findsOneWidget);
+    expect(find.text("Don't have an account?"), findsNothing);
     expect(find.textContaining(RegExp('[\u0E00-\u0E7F]')), findsNothing);
 
     // The email tab's field label and password toggle are English too.
@@ -141,5 +147,7 @@ void main() {
     await tester.pump();
     expect(find.text('Email'), findsNWidgets(2)); // tab + field label
     expect(find.byTooltip('Show password'), findsOneWidget);
+    expect(find.text("Don't have an account?"), findsOneWidget);
+    expect(find.text('Sign up'), findsOneWidget);
   });
 }

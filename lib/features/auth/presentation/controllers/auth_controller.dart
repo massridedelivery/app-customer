@@ -1,3 +1,4 @@
+import 'package:customer_app/features/auth/data/datasources/email_otp_data_source.dart';
 import 'package:customer_app/core/managers/providers.dart';
 import 'package:customer_app/core/services/push_notification_service.dart';
 import 'package:customer_app/core/services/socket_service.dart';
@@ -316,10 +317,122 @@ class AuthController extends _$AuthController {
     }
   }
 
+  /// Sends a login code to [email]. Returns the ref/registration info, or the
+  /// reason it failed (branching on the backend `code`, never its message).
+  Future<EmailOtpSendResult> sendEmailOtp(String email) async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final res = await ref.read(emailOtpDataSourceProvider).send(email);
+      state = state.copyWith(isLoading: false);
+      return EmailOtpSendResult.sent(
+        refId: (res['ref_id'] ?? '').toString(),
+        isRegistered: res['is_registered'] == true,
+      );
+    } on DioException catch (e) {
+      state = state.copyWith(isLoading: false);
+      final status = e.response?.statusCode;
+      final data = e.response?.data;
+      final code = data is Map ? data['code']?.toString() : null;
+      if (status == 503 || code == 'EMAIL_LOGIN_UNAVAILABLE') {
+        return const EmailOtpSendResult.failed(EmailOtpError.unavailable);
+      }
+      if (status == 429) {
+        return const EmailOtpSendResult.failed(EmailOtpError.rateLimited);
+      }
+      if (status == 403) {
+        // account_suspended / account_deleted: ApiService already routes to
+        // the account-blocked screen.
+        return const EmailOtpSendResult.failed(EmailOtpError.accountBlocked);
+      }
+      if (status == 400) {
+        return const EmailOtpSendResult.failed(EmailOtpError.invalidEmail);
+      }
+      return const EmailOtpSendResult.failed(EmailOtpError.failed);
+    } catch (_) {
+      state = state.copyWith(isLoading: false);
+      return const EmailOtpSendResult.failed(EmailOtpError.failed);
+    }
+  }
+
+  /// Verifies an email code; on success saves the tokens and signs in (the
+  /// backend creates the account if the email had none). Null = success.
+  Future<EmailOtpError?> verifyEmailOtp({
+    required String email,
+    required String otp,
+    required String refId,
+  }) async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final res = await ref
+          .read(emailOtpDataSourceProvider)
+          .verify(email: email, otp: otp, refId: refId);
+      await ref.read(tokenStorageProvider).saveTokens(
+        accessToken: (res['access_token'] ?? '').toString(),
+        refreshToken: (res['refresh_token'] ?? '').toString(),
+      );
+      state = state.copyWith(isLoading: false, isAuthenticated: true);
+      _openSocket();
+      _syncLanguage();
+      await checkActiveJob();
+      return null;
+    } on DioException catch (e) {
+      state = state.copyWith(isLoading: false);
+      final status = e.response?.statusCode;
+      final data = e.response?.data;
+      final code = data is Map ? data['code']?.toString() : null;
+      if (code == 'INVALID_OTP' || status == 401) return EmailOtpError.invalidOtp;
+      if (code == 'TOO_MANY_ATTEMPTS' || status == 429) {
+        return EmailOtpError.tooManyAttempts;
+      }
+      if (code == 'OTP_EXPIRED' || status == 410) return EmailOtpError.expired;
+      if (status == 403) return EmailOtpError.accountBlocked;
+      return EmailOtpError.failed;
+    } catch (_) {
+      state = state.copyWith(isLoading: false);
+      return EmailOtpError.failed;
+    }
+  }
+
+  /// Whether the backend offers email instead for an SMS code that may not
+  /// have arrived (`email_fallback`). False on any error.
+  Future<bool> smsEmailFallbackOffered(String refId) async {
+    try {
+      final res = await ref.read(emailOtpDataSourceProvider).smsStatus(refId);
+      return res['email_fallback'] == true;
+    } catch (_) {
+      return false;
+    }
+  }
+
   /// Entry point for flows that save their own tokens (e.g. registration).
   void setAuthenticated() {
     state = state.copyWith(isAuthenticated: true);
     _openSocket();
     _syncLanguage();
   }
+}
+
+/// Why an email-OTP step failed.
+enum EmailOtpError {
+  invalidEmail,
+  rateLimited,
+  unavailable,
+  accountBlocked,
+  invalidOtp,
+  tooManyAttempts,
+  expired,
+  failed,
+}
+
+/// Outcome of [AuthController.sendEmailOtp].
+class EmailOtpSendResult {
+  const EmailOtpSendResult.sent({required this.refId, required this.isRegistered})
+    : error = null;
+  const EmailOtpSendResult.failed(this.error) : refId = '', isRegistered = false;
+
+  final String refId;
+  final bool isRegistered;
+  final EmailOtpError? error;
+
+  bool get ok => error == null;
 }

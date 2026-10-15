@@ -9,14 +9,18 @@ import 'package:go_router/go_router.dart';
 
 /// Records the calls instead of hitting the network.
 class _SpyAuthController extends AuthController {
-  final logins = <(String, String)>[];
+  _SpyAuthController(this.sendResult);
+
+  final EmailOtpSendResult sendResult;
+  final emailCodes = <String>[];
 
   @override
   AuthState build() => const AuthState(isAuthenticated: false);
 
   @override
-  Future<void> login(String email, String password) async {
-    logins.add((email, password));
+  Future<EmailOtpSendResult> sendEmailOtp(String email) async {
+    emailCodes.add(email);
+    return sendResult;
   }
 }
 
@@ -24,8 +28,12 @@ Future<_SpyAuthController> _pump(
   WidgetTester tester, {
   LoginMethod method = LoginMethod.phone,
   Locale locale = const Locale('th'),
+  EmailOtpSendResult sendResult = const EmailOtpSendResult.sent(
+    refId: 'abcd1234',
+    isRegistered: true,
+  ),
 }) async {
-  final spy = _SpyAuthController();
+  final spy = _SpyAuthController(sendResult);
   await tester.pumpWidget(
     ProviderScope(
       overrides: [authControllerProvider.overrideWith(() => spy)],
@@ -38,6 +46,11 @@ Future<_SpyAuthController> _pump(
             GoRoute(
               path: '/',
               builder: (_, _) => PhoneLoginScreen(initialMethod: method),
+            ),
+            GoRoute(
+              path: '/auth/email-otp',
+              builder: (_, state) =>
+                  Text('otp:${(state.extra as Map)['email']}'),
             ),
           ],
         ),
@@ -70,7 +83,7 @@ void main() {
     expect(_button(tester, 'loginRequestOtp').onPressed, isNotNull);
   });
 
-  testWidgets('switching to the email tab shows email + password', (
+  testWidgets('email tab sends a code (no password) and opens the OTP page', (
     tester,
   ) async {
     final spy = await _pump(tester);
@@ -80,34 +93,51 @@ void main() {
 
     expect(find.byKey(const Key('loginPhone')), findsNothing);
     expect(find.byKey(const Key('loginIdentifier')), findsOneWidget);
-    expect(find.byKey(const Key('loginPassword')), findsOneWidget);
-    expect(_button(tester, 'loginSubmit').onPressed, isNull);
+    expect(find.byKey(const Key('loginPassword')), findsNothing);
+    expect(_button(tester, 'loginEmailSend').onPressed, isNull);
+
+    await tester.enterText(find.byKey(const Key('loginIdentifier')), 'me@');
+    await tester.pump();
+    expect(_button(tester, 'loginEmailSend').onPressed, isNull);
 
     await tester.enterText(
       find.byKey(const Key('loginIdentifier')),
       'me@mass.co',
     );
-    await tester.enterText(find.byKey(const Key('loginPassword')), 'secret');
     await tester.pump();
-    await tester.tap(find.byKey(const Key('loginSubmit')));
+    await tester.tap(find.byKey(const Key('loginEmailSend')));
+    await tester.pumpAndSettle();
+
+    expect(spy.emailCodes, ['me@mass.co']);
+    expect(find.text('otp:me@mass.co'), findsOneWidget);
+  });
+
+  testWidgets('email login switched off (503) hides the tabs', (tester) async {
+    await _pump(
+      tester,
+      method: LoginMethod.email,
+      sendResult: const EmailOtpSendResult.failed(EmailOtpError.unavailable),
+    );
+
+    await tester.enterText(
+      find.byKey(const Key('loginIdentifier')),
+      'me@mass.co',
+    );
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('loginEmailSend')));
     await tester.pump();
 
-    expect(spy.logins, [('me@mass.co', 'secret')]);
+    expect(find.byKey(const Key('loginMethodTabs')), findsNothing);
+    expect(find.byKey(const Key('loginPhone')), findsOneWidget);
+    expect(
+      find.text('ยังไม่เปิดให้เข้าสู่ระบบด้วยอีเมล กรุณาใช้เบอร์โทรแทน'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('email_login route opens on the email tab', (tester) async {
     await _pump(tester, method: LoginMethod.email);
     expect(find.byKey(const Key('loginIdentifier')), findsOneWidget);
-  });
-
-  testWidgets('sign-up link returns to the phone tab', (tester) async {
-    await _pump(tester, method: LoginMethod.email);
-
-    await tester.ensureVisible(find.byKey(const Key('loginGoRegister')));
-    await tester.tap(find.byKey(const Key('loginGoRegister')));
-    await tester.pump();
-
-    expect(find.byKey(const Key('loginPhone')), findsOneWidget);
   });
 
   testWidgets('Thai locale shows the Thai tabs, button and heading', (
@@ -123,11 +153,11 @@ void main() {
     expect(find.text('ยังไม่มีบัญชี?'), findsNothing);
     expect(find.text('สมัครสมาชิก'), findsNothing);
 
-    // Email tab keeps it.
+    // Email tab neither: a new email signs up on verify.
     await tester.tap(find.text('อีเมล').first);
     await tester.pump();
-    expect(find.text('ยังไม่มีบัญชี?'), findsOneWidget);
-    expect(find.text('สมัครสมาชิก'), findsOneWidget);
+    expect(find.text('ยังไม่มีบัญชี?'), findsNothing);
+    expect(find.text('ส่งรหัส'), findsOneWidget);
   });
 
   testWidgets('English locale shows English tabs, button and heading', (
@@ -142,12 +172,12 @@ void main() {
     expect(find.text("Don't have an account?"), findsNothing);
     expect(find.textContaining(RegExp('[\u0E00-\u0E7F]')), findsNothing);
 
-    // The email tab's field label and password toggle are English too.
+    // The email tab's field label and button are English too.
     await tester.tap(find.text('Email'));
     await tester.pump();
     expect(find.text('Email'), findsNWidgets(2)); // tab + field label
-    expect(find.byTooltip('Show password'), findsOneWidget);
-    expect(find.text("Don't have an account?"), findsOneWidget);
-    expect(find.text('Sign up'), findsOneWidget);
+    expect(find.text('Send code'), findsOneWidget);
+    expect(find.text("Don't have an account?"), findsNothing);
+    expect(find.textContaining(RegExp('[\u0E00-\u0E7F]')), findsNothing);
   });
 }

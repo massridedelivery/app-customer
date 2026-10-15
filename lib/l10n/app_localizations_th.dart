@@ -2789,4 +2789,49 @@ class AppLocalizationsTh extends AppLocalizations {
   @override
   String get promoRejectReferredOnly =>
       'โค้ดนี้สำหรับเพื่อนที่กรอกรหัสแนะนำเท่านั้น';
+
+  @override
+  String get authSendCode => 'ส่งรหัส';
+
+  @override
+  String get authEmailCodeHint =>
+      'เราจะส่งรหัส 6 หลักไปที่อีเมลนี้ ใช้ได้ทั้งเข้าสู่ระบบและสมัครใหม่';
+
+  @override
+  String get authEmailInvalid => 'รูปแบบอีเมลไม่ถูกต้อง';
+
+  @override
+  String get authOtpRateLimited => 'ขอรหัสบ่อยเกินไป กรุณาลองใหม่ภายหลัง';
+
+  @override
+  String get authEmailUnavailable =>
+      'ยังไม่เปิดให้เข้าสู่ระบบด้วยอีเมล กรุณาใช้เบอร์โทรแทน';
+
+  @override
+  String get authEmailSendFailed => 'ส่งอีเมลไม่สำเร็จ กรุณาลองใหม่';
+
+  @override
+  String authEmailOtpSentTo(String email, String ref) {
+    return 'ส่งรหัสไปที่ $email แล้ว · รหัสอ้างอิง $ref';
+  }
+
+  @override
+  String get authEmailOtpSpamHint =>
+      'ไม่เห็นอีเมล? ลองดูในโฟลเดอร์ Spam · รหัสมีอายุ 10 นาที';
+
+  @override
+  String get authEmailNewAccountWarning =>
+      'อีเมลนี้ยังไม่มีบัญชี จะสร้างบัญชีใหม่ — ถ้าเคยสมัครด้วยเบอร์โทร กรุณาเข้าด้วยเบอร์เดิม';
+
+  @override
+  String get authOtpInvalid => 'รหัสไม่ถูกต้อง';
+
+  @override
+  String get authOtpTooManyAttempts => 'ใส่รหัสผิดเกินกำหนด กรุณากดส่งรหัสใหม่';
+
+  @override
+  String get authOtpExpired => 'รหัสหมดอายุ กรุณากดส่งรหัสใหม่';
+
+  @override
+  String get authSmsEmailFallback => 'ไม่ได้รับ SMS? รับรหัสทางอีเมลแทน';
 }

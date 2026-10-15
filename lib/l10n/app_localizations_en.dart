@@ -2816,4 +2816,53 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get promoRejectReferredOnly =>
       'This code is for referred friends only';
+
+  @override
+  String get authSendCode => 'Send code';
+
+  @override
+  String get authEmailCodeHint =>
+      'We\'ll email you a 6-digit code — it works for signing in and signing up';
+
+  @override
+  String get authEmailInvalid => 'Invalid email address';
+
+  @override
+  String get authOtpRateLimited =>
+      'Too many code requests. Please try again later';
+
+  @override
+  String get authEmailUnavailable =>
+      'Email sign-in isn\'t available yet. Please use your phone number';
+
+  @override
+  String get authEmailSendFailed =>
+      'Couldn\'t send the email. Please try again';
+
+  @override
+  String authEmailOtpSentTo(String email, String ref) {
+    return 'Code sent to $email · Ref $ref';
+  }
+
+  @override
+  String get authEmailOtpSpamHint =>
+      'Can\'t find it? Check your Spam folder · The code is valid for 10 minutes';
+
+  @override
+  String get authEmailNewAccountWarning =>
+      'This email has no account yet — a new one will be created. If you signed up with a phone number, sign in with that number instead';
+
+  @override
+  String get authOtpInvalid => 'Incorrect code';
+
+  @override
+  String get authOtpTooManyAttempts =>
+      'Too many wrong attempts. Please request a new code';
+
+  @override
+  String get authOtpExpired => 'The code has expired. Please request a new one';
+
+  @override
+  String get authSmsEmailFallback =>
+      'Didn\'t get the SMS? Get the code by email';
 }

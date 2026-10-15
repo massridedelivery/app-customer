@@ -5232,6 +5232,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This code is for referred friends only'**
   String get promoRejectReferredOnly;
+
+  /// No description provided for @authSendCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Send code'**
+  String get authSendCode;
+
+  /// No description provided for @authEmailCodeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ll email you a 6-digit code — it works for signing in and signing up'**
+  String get authEmailCodeHint;
+
+  /// No description provided for @authEmailInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid email address'**
+  String get authEmailInvalid;
+
+  /// No description provided for @authOtpRateLimited.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many code requests. Please try again later'**
+  String get authOtpRateLimited;
+
+  /// No description provided for @authEmailUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Email sign-in isn\'t available yet. Please use your phone number'**
+  String get authEmailUnavailable;
+
+  /// No description provided for @authEmailSendFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t send the email. Please try again'**
+  String get authEmailSendFailed;
+
+  /// No description provided for @authEmailOtpSentTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Code sent to {email} · Ref {ref}'**
+  String authEmailOtpSentTo(String email, String ref);
+
+  /// No description provided for @authEmailOtpSpamHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t find it? Check your Spam folder · The code is valid for 10 minutes'**
+  String get authEmailOtpSpamHint;
+
+  /// No description provided for @authEmailNewAccountWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'This email has no account yet — a new one will be created. If you signed up with a phone number, sign in with that number instead'**
+  String get authEmailNewAccountWarning;
+
+  /// No description provided for @authOtpInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect code'**
+  String get authOtpInvalid;
+
+  /// No description provided for @authOtpTooManyAttempts.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many wrong attempts. Please request a new code'**
+  String get authOtpTooManyAttempts;
+
+  /// No description provided for @authOtpExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'The code has expired. Please request a new one'**
+  String get authOtpExpired;
+
+  /// No description provided for @authSmsEmailFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Didn\'t get the SMS? Get the code by email'**
+  String get authSmsEmailFallback;
 }
 
 class _AppLocalizationsDelegate

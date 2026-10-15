@@ -88,13 +88,8 @@ void _sendToBackgroundAndBack(WidgetTester tester) {
 /// The splash now creates HomeController at launch (to ask for location
 /// early); keep its GPS / network bootstrap out of these tests.
 class _FakeHomeController extends HomeController {
-  static int builds = 0;
-
   @override
-  HomeState build() {
-    builds++;
-    return const HomeState();
-  }
+  HomeState build() => const HomeState();
 }
 
 void main() {

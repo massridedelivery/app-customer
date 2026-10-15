@@ -2820,7 +2820,7 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get authEmailNewAccountWarning =>
-      'อีเมลนี้ยังไม่มีบัญชี จะสร้างบัญชีใหม่ — ถ้าเคยสมัครด้วยเบอร์โทร กรุณาเข้าด้วยเบอร์เดิม';
+      'อีเมลนี้ยังไม่ผูกกับบัญชีใด จะสร้างบัญชีใหม่ — ถ้ามีบัญชีด้วยเบอร์โทรอยู่แล้ว ให้เข้าด้วยเบอร์ แล้วไปเพิ่มอีเมลที่หน้าโปรไฟล์';
 
   @override
   String get authOtpInvalid => 'รหัสไม่ถูกต้อง';
@@ -2841,4 +2841,46 @@ class AppLocalizationsTh extends AppLocalizations {
   String referralReferredBy(String code) {
     return 'คุณสมัครด้วยรหัส $code';
   }
+
+  @override
+  String get profileEmail => 'อีเมล';
+
+  @override
+  String get profileEmailAdd => 'เพิ่มอีเมล';
+
+  @override
+  String get profileEmailVerify => 'ยืนยันอีเมล';
+
+  @override
+  String get profileEmailAddTitle => 'เพิ่ม/ยืนยันอีเมล';
+
+  @override
+  String get profileEmailChange => 'เปลี่ยนอีเมล';
+
+  @override
+  String get profileEmailHint =>
+      'ยืนยันอีเมลด้วยรหัส 6 หลัก (หมดอายุใน 10 นาที) แล้วใช้อีเมลนี้เข้าสู่ระบบบัญชีนี้ได้';
+
+  @override
+  String get profileEmailVerified => 'ยืนยันแล้ว';
+
+  @override
+  String get profileEmailUnverified => 'ยังไม่ยืนยัน';
+
+  @override
+  String get profileEmailLoginReady => 'ใช้เข้าสู่ระบบได้';
+
+  @override
+  String get profileEmailNotLoginReady =>
+      'ยังใช้เข้าสู่ระบบไม่ได้ จนกว่าจะยืนยัน';
+
+  @override
+  String get profileEmailInUse => 'อีเมลนี้ถูกใช้กับบัญชีอื่นแล้ว';
+
+  @override
+  String get profileEmailVerifiedDone => 'ยืนยันอีเมลแล้ว ใช้เข้าสู่ระบบได้';
+
+  @override
+  String get authOtpMismatch =>
+      'รหัสนี้ไม่ได้ออกให้อีเมลนี้ กรุณากดส่งรหัสใหม่';
 }

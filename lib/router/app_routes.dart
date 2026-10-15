@@ -42,6 +42,7 @@ import 'package:customer_app/features/payment/presentation/screens/promptpay_qr_
 import 'package:customer_app/features/payment/presentation/screens/card_checkout_screen.dart';
 import 'package:customer_app/features/profile/presentation/screens/profile_screen.dart';
 import 'package:customer_app/features/profile/presentation/screens/edit_profile_screen.dart';
+import 'package:customer_app/features/profile/presentation/screens/account_email_screen.dart';
 import 'package:customer_app/features/profile/presentation/screens/loyalty_screen.dart';
 import 'package:customer_app/features/food_delivery/presentation/screens/saved_restaurants_screen.dart';
 import 'package:customer_app/features/payment/presentation/screens/credit_card_list_screen.dart';
@@ -116,7 +117,7 @@ bool _requiresAuth(String path) {
   const protectedPrefixes = <String>[
     '/live', '/rating', '/payment', '/payment-summary',
     '/chat', '/trips', '/trip',
-    '/profile', '/edit-profile', '/loyalty',
+    '/profile', '/edit-profile', '/account-email', '/loyalty',
     '/saved-places', '/saved-restaurants', '/add-address',
     // '/promos' is public (guest can browse promos + detail via the public
     // endpoint); applying a code still happens at checkout, which needs auth.
@@ -489,6 +490,22 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/edit-profile',
         builder: (context, state) => const EditProfileScreen(),
+      ),
+      GoRoute(
+        path: '/account-email',
+        builder: (context, state) => const AccountEmailScreen(),
+        routes: [
+          GoRoute(
+            path: 'otp',
+            builder: (context, state) {
+              final extra = state.extra as Map<String, dynamic>? ?? {};
+              return OtpScreen.linkEmail(
+                email: extra['email'] as String? ?? '',
+                refId: extra['refId'] as String? ?? '',
+              );
+            },
+          ),
+        ],
       ),
       GoRoute(
         path: '/loyalty',

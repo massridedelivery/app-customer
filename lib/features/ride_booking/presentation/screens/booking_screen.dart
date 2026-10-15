@@ -14,6 +14,7 @@ import 'package:customer_app/features/ride_booking/presentation/widgets/vehicle_
 import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, TargetPlatform;
+import 'package:customer_app/features/ride_booking/domain/models/vehicle_estimation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -443,21 +444,6 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                   final previousVehicleId =
                       ref.read(bookingControllerProvider).value?.vehicleTypeId;
 
-                  // Show snackbar feedback
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          promoCode != null
-                              ? l10n.couponApplied(promoCode)
-                              : l10n.couponRemoved,
-                        ),
-                        backgroundColor: AppColors.primary,
-                        duration: const Duration(seconds: 2),
-                      ),
-                    );
-                  }
-
                   await ref.read(bookingControllerProvider.notifier).estimateFare(
                     pickup,
                     dropoff,
@@ -470,6 +456,37 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                     ref
                         .read(bookingControllerProvider.notifier)
                         .setVehicleType(previousVehicleId);
+                  }
+
+                  // Tell the rider what the fare estimate actually did with the
+                  // code: discount 0 means it doesn't apply to this trip (min
+                  // spend, used up, wrong service…), so don't say "applied".
+                  if (context.mounted) {
+                    final st = ref.read(bookingControllerProvider).value;
+                    VehicleEstimation? est;
+                    for (final e in st?.estimations ?? const <VehicleEstimation>[]) {
+                      if (e.vehicleTypeId == st?.vehicleTypeId) est = e;
+                    }
+                    est ??= (st?.estimations.isNotEmpty ?? false)
+                        ? st!.estimations.first
+                        : null;
+                    final notApplied =
+                        promoCode != null && est != null && est.discount <= 0;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          promoCode == null
+                              ? l10n.couponRemoved
+                              : notApplied
+                              ? l10n.couponNotAppliedToFare(promoCode)
+                              : l10n.couponApplied(promoCode),
+                        ),
+                        backgroundColor: notApplied
+                            ? AppColors.textSecondary
+                            : AppColors.primary,
+                        duration: const Duration(seconds: 3),
+                      ),
+                    );
                   }
                 }
               },

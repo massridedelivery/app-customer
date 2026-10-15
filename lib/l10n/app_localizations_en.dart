@@ -688,7 +688,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String couponNotAppliedToFare(String code) {
-    return 'Code $code hasn\'t been taken off the fare';
+    return 'Code $code can\'t be used on this trip';
   }
 
   @override

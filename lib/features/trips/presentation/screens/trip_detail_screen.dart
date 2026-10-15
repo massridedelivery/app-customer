@@ -1,4 +1,5 @@
 import 'package:customer_app/core/utils/app_dates.dart';
+import 'package:customer_app/core/utils/ride_payable.dart';
 import 'package:customer_app/core/constants/map_defaults.dart';
 import 'package:customer_app/core/utils/error_text.dart';
 import 'package:customer_app/core/constants/app_assets.dart';
@@ -618,7 +619,13 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
       final ride = state.rideDetails!;
       paymentMethod = ride.paymentMethod;
       serviceName = ride.bookingType ?? _l10n.tripServiceRide;
-      total = ride.fare;
+      // `fare` is before the coupon — show what the rider actually paid.
+      total = ridePayable(
+        fare: ride.fare,
+        discount: ride.discount,
+        tollFee: ride.tollFee ?? 0,
+        waitingFee: ride.waitingFee ?? 0,
+      );
 
       breakdownRows = [
         _buildPaymentBreakdownRow(_l10n.baseFareLabel, ride.fare),

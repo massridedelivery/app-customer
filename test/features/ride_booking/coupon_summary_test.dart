@@ -88,7 +88,7 @@ void main() {
       ),
     );
 
-    expect(find.text('โค้ด RIDE50 ยังไม่ถูกหักจากค่าโดยสาร'), findsOneWidget);
+    expect(find.text('โค้ด RIDE50 ใช้กับการเดินทางนี้ไม่ได้'), findsOneWidget);
     expect(find.text('-฿50'), findsNothing);
   });
 

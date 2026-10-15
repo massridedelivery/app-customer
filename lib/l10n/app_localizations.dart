@@ -5128,7 +5128,7 @@ abstract class AppLocalizations {
   /// No description provided for @referralShareText.
   ///
   /// In en, this message translates to:
-  /// **'Use code {code} on Mass Move and get ฿{value} off'**
+  /// **'Use code {code} on Mass Move and get ฿{value} off 🎉'**
   String referralShareText(String code, String value);
 
   /// No description provided for @referralStatInvited.
@@ -5170,13 +5170,13 @@ abstract class AppLocalizations {
   /// No description provided for @referralUseWelcomeCode.
   ///
   /// In en, this message translates to:
-  /// **'Don\'t forget to use {code} on your first order'**
-  String referralUseWelcomeCode(String code);
+  /// **'Don\'t forget to use {code} on your first order for ฿{value} off'**
+  String referralUseWelcomeCode(String code, String value);
 
   /// No description provided for @referralApplySuccessPromo.
   ///
   /// In en, this message translates to:
-  /// **'You got code {code}: ฿{value} off'**
+  /// **'You got code {code}: ฿{value} off 🎁'**
   String referralApplySuccessPromo(String code, String value);
 
   /// No description provided for @referralErrInvalidCode.
@@ -5310,6 +5310,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Didn\'t get the SMS? Get the code by email'**
   String get authSmsEmailFallback;
+
+  /// No description provided for @referralCodeFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Your code has reached its friend limit'**
+  String get referralCodeFull;
+
+  /// No description provided for @referralReferredBy.
+  ///
+  /// In en, this message translates to:
+  /// **'You signed up with code {code}'**
+  String referralReferredBy(String code);
 }
 
 class _AppLocalizationsDelegate

@@ -14,6 +14,8 @@ class ReferralInfo {
     this.applyBefore,
     this.referredByStatus,
     this.referredByWelcomeCode,
+    this.referredByCode,
+    this.referredByWelcomeValue = 0,
   });
 
   /// False hides the referral menu and page.
@@ -41,6 +43,13 @@ class ReferralInfo {
   final String? referredByStatus;
   final String? referredByWelcomeCode;
 
+  /// The friend's code this user signed up with ("คุณสมัครด้วยรหัส …").
+  final String? referredByCode;
+  final double referredByWelcomeValue;
+
+  /// Every friend slot on the user's own code is taken.
+  bool get codeFull => maxUses != null && maxUses! > 0 && currentUses >= maxUses!;
+
   bool get wasReferred => referredByStatus != null;
   bool get welcomePromoPending =>
       referredByStatus?.toUpperCase() == 'PENDING' &&
@@ -62,6 +71,7 @@ class ReferralInfo {
     final referredBy = json['referred_by'] is Map
         ? map(json['referred_by'])
         : null;
+    final welcome = map(referredBy?['welcome_promo']);
     return ReferralInfo(
       enabled: json['enabled'] != false,
       code: asString(codeJson['code']),
@@ -76,9 +86,9 @@ class ReferralInfo {
       referredByStatus: referredBy == null
           ? null
           : (asString(referredBy['status']) ?? 'APPLIED'),
-      referredByWelcomeCode: referredBy == null
-          ? null
-          : asString(map(referredBy['welcome_promo'])['code']),
+      referredByWelcomeCode: asString(welcome['code']),
+      referredByCode: asString(referredBy?['code']),
+      referredByWelcomeValue: asDouble(welcome['discount_value']),
     );
   }
 }

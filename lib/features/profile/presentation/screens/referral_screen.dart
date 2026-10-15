@@ -29,11 +29,34 @@ final referralInfoProvider = FutureProvider.autoDispose<ReferralInfo>((
 
 /// "แนะนำเพื่อน": share your code, see how many friends signed up / ordered,
 /// and (as a new customer) enter a friend's code for a welcome discount.
-class ReferralScreen extends ConsumerWidget {
+class ReferralScreen extends ConsumerStatefulWidget {
   const ReferralScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ReferralScreen> createState() => _ReferralScreenState();
+}
+
+class _ReferralScreenState extends ConsumerState<ReferralScreen> {
+  // Referrer points land a few seconds after a friend's first job ends: if the
+  // page was left open in the background, read fresh stats on return.
+  late final AppLifecycleListener _lifecycle = AppLifecycleListener(
+    onResume: () => ref.invalidate(referralInfoProvider),
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    _lifecycle; // start listening
+  }
+
+  @override
+  void dispose() {
+    _lifecycle.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final referralAsync = ref.watch(referralInfoProvider);
     final l10n = AppLocalizations.of(context)!;
 
@@ -90,11 +113,25 @@ class _ReferralBody extends StatelessWidget {
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.all(20),
       children: [
+        if (info.referredByCode != null) ...[
+          Text(
+            l10n.referralReferredBy(info.referredByCode!),
+            key: const Key('referralReferredBy'),
+            textAlign: TextAlign.center,
+            style: AppTypography.caption4.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
+          const SizedBox(height: 10),
+        ],
         if (info.welcomePromoPending) ...[
           _Notice(
             key: const Key('referralWelcomeReminder'),
             icon: Icons.card_giftcard_rounded,
-            text: l10n.referralUseWelcomeCode(info.referredByWelcomeCode!),
+            text: l10n.referralUseWelcomeCode(
+              info.referredByWelcomeCode!,
+              _baht(info.referredByWelcomeValue),
+            ),
           ),
           const SizedBox(height: 16),
         ],
@@ -155,6 +192,17 @@ class _ReferralBody extends StatelessWidget {
                   letterSpacing: 3,
                 ),
               ),
+              if (info.codeFull) ...[
+                const SizedBox(height: 6),
+                Text(
+                  l10n.referralCodeFull,
+                  key: const Key('referralCodeFull'),
+                  textAlign: TextAlign.center,
+                  style: AppTypography.caption4.copyWith(
+                    color: AppColors.semanticErrorFgHigh,
+                  ),
+                ),
+              ],
               const SizedBox(height: 16),
               Row(
                 children: [

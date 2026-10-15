@@ -1,4 +1,5 @@
 import 'package:customer_app/core/constants/app_colors.dart';
+import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:flutter/material.dart';
 
 /// One segment of a [PillTabs].
@@ -90,10 +91,8 @@ class _PillTab extends StatelessWidget {
                 child: Text(
                   label,
                   maxLines: 1,
-                  style: TextStyle(
+                  style: AppTypography.label2.copyWith(
                     color: active ? Colors.white : const Color(0xFF6A6E83),
-                    fontWeight: FontWeight.w700,
-                    fontSize: 14,
                   ),
                 ),
               ),

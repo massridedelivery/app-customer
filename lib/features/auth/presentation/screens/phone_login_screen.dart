@@ -1,4 +1,5 @@
 import 'package:customer_app/core/constants/app_colors.dart';
+import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/widgets/hero_header.dart';
 import 'package:customer_app/core/widgets/pill_tabs.dart';
 import 'package:customer_app/features/auth/data/models/send_otp_response.dart';
@@ -149,7 +150,7 @@ class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
                     children: [
                       Text(
                         l10n.authNoAccount,
-                        style: const TextStyle(color: _kInkSoft),
+                        style: AppTypography.body2.copyWith(color: _kInkSoft),
                       ),
                       TextButton(
                         key: const Key('loginGoRegister'),
@@ -203,7 +204,7 @@ class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
           FilteringTextInputFormatter.allow(RegExp(r'[0-9+]')),
           LengthLimitingTextInputFormatter(15),
         ],
-        style: const TextStyle(fontSize: 16, color: _kInk),
+        style: AppTypography.body1.copyWith(color: _kInk),
         decoration: _decoration(
           label: l10n.phoneNumber,
           hint: '812345678',
@@ -228,7 +229,7 @@ class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
         keyboardType: TextInputType.emailAddress,
         autofillHints: const [AutofillHints.username, AutofillHints.email],
         textInputAction: TextInputAction.next,
-        style: const TextStyle(fontSize: 16, color: _kInk),
+        style: AppTypography.body1.copyWith(color: _kInk),
         decoration: _decoration(label: l10n.authEmail, hint: 'you@email.com'),
       ),
       const SizedBox(height: 14),
@@ -239,7 +240,7 @@ class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
         autofillHints: const [AutofillHints.password],
         textInputAction: TextInputAction.done,
         onSubmitted: (_) => _loginEmail(),
-        style: const TextStyle(fontSize: 16, color: _kInk),
+        style: AppTypography.body1.copyWith(color: _kInk),
         decoration: _decoration(label: l10n.password).copyWith(
           suffixIcon: IconButton(
             tooltip: _obscurePassword
@@ -290,10 +291,12 @@ class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
       // Keep the label up so the "+66" prefix and the hint show before focus.
       floatingLabelBehavior: FloatingLabelBehavior.always,
       prefixText: prefix,
-      prefixStyle: const TextStyle(fontSize: 16, color: _kInkSoft),
-      labelStyle: const TextStyle(color: _kMuted),
-      floatingLabelStyle: const TextStyle(color: AppColors.primary),
-      hintStyle: const TextStyle(color: _kMuted),
+      prefixStyle: AppTypography.body1.copyWith(color: _kInkSoft),
+      labelStyle: AppTypography.body1.copyWith(color: _kMuted),
+      floatingLabelStyle: AppTypography.body1.copyWith(
+        color: AppColors.primary,
+      ),
+      hintStyle: AppTypography.body1.copyWith(color: _kMuted),
       filled: true,
       fillColor: _kFieldFill,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
@@ -307,7 +310,7 @@ class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
 final ButtonStyle _textButtonStyle = TextButton.styleFrom(
   foregroundColor: AppColors.primary,
   minimumSize: const Size(48, 48),
-  textStyle: const TextStyle(fontWeight: FontWeight.w600),
+  textStyle: AppTypography.label2,
 );
 
 /// Brand-red gradient hero with the S-curve wave bottom shared by the home,
@@ -384,19 +387,17 @@ class _Hero extends StatelessWidget {
                           children: [
                             Text(
                               l10n.authWelcome,
-                              style: const TextStyle(
+                              // Same title style as the ride / messenger heroes.
+                              style: AppTypography.heading2.copyWith(
                                 color: Colors.white,
-                                fontSize: 24,
-                                fontWeight: FontWeight.w800,
                                 height: 1.2,
                               ),
                             ),
                             const SizedBox(height: 2),
                             Text(
                               l10n.authLoginSubtitle,
-                              style: TextStyle(
+                              style: AppTypography.body2.copyWith(
                                 color: Colors.white.withValues(alpha: 0.9),
-                                fontSize: 14,
                               ),
                             ),
                           ],
@@ -442,7 +443,7 @@ class _PrimaryButton extends StatelessWidget {
             : AppColors.semanticDisabledFgOnGray,
         minimumSize: const Size.fromHeight(52),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-        textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+        textStyle: AppTypography.label1,
       ),
       child: loading
           ? const SizedBox(

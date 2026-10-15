@@ -5058,6 +5058,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Remove code'**
   String get couponRemove;
+
+  /// No description provided for @homeAllowLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to use your current location'**
+  String get homeAllowLocation;
 }
 
 class _AppLocalizationsDelegate

@@ -858,5 +858,6 @@
   "errSavePlace": "บันทึกสถานที่ไม่สำเร็จ",
   "errSetDefaultPlace": "ตั้งค่าสถานที่เริ่มต้นไม่สำเร็จ",
   "errGetDefaultPlace": "ดึงสถานที่เริ่มต้นไม่สำเร็จ",
-  "couponRemove": "เอาโค้ดออก"
+  "couponRemove": "เอาโค้ดออก",
+  "homeAllowLocation": "แตะเพื่อใช้ตำแหน่งปัจจุบัน"
 }

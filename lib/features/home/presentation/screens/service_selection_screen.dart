@@ -15,6 +15,7 @@ import 'package:customer_app/features/home/presentation/states/home_state.dart';
 import 'package:customer_app/features/active_orders/presentation/controllers/active_orders_controller.dart';
 import 'package:customer_app/features/home/presentation/widgets/home_promo_banner.dart';
 import 'package:customer_app/features/active_orders/presentation/widgets/active_orders_banner.dart';
+import 'package:app_settings/app_settings.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:customer_app/core/widgets/app_network_image.dart';
@@ -252,7 +253,9 @@ class _ServiceSelectionScreenState
       children: [
         Expanded(
           child: GestureDetector(
-            onTap: () => context.push('/food-place-search'),
+            onTap: () => _needsLocationAccess(homeState)
+                ? _fixLocationAccess(homeState.locationAccess)
+                : context.push('/food-place-search'),
             behavior: HitTestBehavior.opaque,
             child: Row(
               children: [
@@ -277,8 +280,7 @@ class _ServiceSelectionScreenState
                         children: [
                           Flexible(
                             child: Text(
-                              homeState.foodAddress ??
-                                  l10n.homePleaseChooseLocation,
+                              _homeLocationLabel(homeState, l10n),
                               style: AppTypography.label2.copyWith(
                                 color: Colors.white,
                               ),
@@ -308,6 +310,50 @@ class _ServiceSelectionScreenState
         ),
       ],
     );
+  }
+
+  /// The home header's place: the chosen/geocoded address; "ตำแหน่งปัจจุบัน"
+  /// when we're on the current location but its address hasn't resolved; the
+  /// "please choose" prompt only when there is no location at all.
+  String _homeLocationLabel(HomeState homeState, AppLocalizations l10n) {
+    final address = homeState.foodAddress;
+    if (address != null && address.isNotEmpty) return address;
+    if (homeState.foodLocation != null &&
+        homeState.foodLocation == homeState.currentLocation) {
+      return l10n.currentLocation;
+    }
+    if (_needsLocationAccess(homeState)) return l10n.homeAllowLocation;
+    return l10n.homePleaseChooseLocation;
+  }
+
+  /// No place yet because location is off / not allowed — the header then
+  /// invites the user to turn it on instead of opening the place picker.
+  bool _needsLocationAccess(HomeState homeState) {
+    final address = homeState.foodAddress;
+    if (address != null && address.isNotEmpty) return false;
+    if (homeState.foodLocation != null) return false;
+    return const {
+      LocationAccess.denied,
+      LocationAccess.deniedForever,
+      LocationAccess.serviceDisabled,
+    }.contains(homeState.locationAccess);
+  }
+
+  /// Ask again (system dialog) or, when Android/iOS won't ask any more, open
+  /// Settings. Coming back to the app re-checks (HomeController resume).
+  Future<void> _fixLocationAccess(LocationAccess access) async {
+    final home = ref.read(homeControllerProvider.notifier);
+    if (access == LocationAccess.deniedForever) {
+      await AppSettings.openAppSettings();
+      return;
+    }
+    await home.retryLocation();
+    final after = ref.read(homeControllerProvider).locationAccess;
+    if (after == LocationAccess.deniedForever) {
+      await AppSettings.openAppSettings();
+    } else if (after == LocationAccess.serviceDisabled) {
+      await AppSettings.openAppSettings(type: AppSettingsType.location);
+    }
   }
 
   Widget _buildSearchBar(double t) {

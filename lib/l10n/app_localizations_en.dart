@@ -2706,4 +2706,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get couponRemove => 'Remove code';
+
+  @override
+  String get homeAllowLocation => 'Tap to use your current location';
 }

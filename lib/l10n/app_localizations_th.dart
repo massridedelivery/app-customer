@@ -2681,4 +2681,7 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get couponRemove => 'เอาโค้ดออก';
+
+  @override
+  String get homeAllowLocation => 'แตะเพื่อใช้ตำแหน่งปัจจุบัน';
 }

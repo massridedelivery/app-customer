@@ -61,6 +61,11 @@ class HomeController extends _$HomeController {
   /// refresh must never replace a pickup the user chose.
   bool _pickupIsManual = false;
 
+  /// True once the user picks the home delivery location themselves. Until
+  /// then it follows the current location — a saved place only fills in when
+  /// GPS isn't available.
+  bool _foodIsManual = false;
+
   /// When the app went to the background, for the resume refresh below.
   DateTime? _backgroundedAt;
 
@@ -103,6 +108,12 @@ class HomeController extends _$HomeController {
   void _onAppResumed() {
     final since = _backgroundedAt;
     _backgroundedAt = null;
+    // Back from Settings after "never ask again": re-check at once. This
+    // doesn't prompt (the OS won't ask again), it just picks up a grant.
+    if (state.locationAccess == LocationAccess.deniedForever) {
+      _initLocation();
+      return;
+    }
     if (since == null ||
         DateTime.now().difference(since) < _kResumeRefreshAfter) {
       return;
@@ -151,11 +162,12 @@ class HomeController extends _$HomeController {
         currentLocation: latLng,
         mapCenter: latLng,
         pickupLocation: latLng,
-        // No recent/default food location yet → default the food delivery point
-        // to the current location so the home shows a real place instead of the
-        // "โปรดเลือกสถานที่" prompt. A saved default place still wins if it
-        // resolves first (the guard below only fills a still-empty value).
-        foodLocation: state.foodLocation ?? latLng,
+        // The home location defaults to where the user is now (even over a
+        // saved default place) unless they picked one themselves. Clear the
+        // old address so a saved place's name never sits on these coordinates;
+        // the header reads "ตำแหน่งปัจจุบัน" until the geocode below lands.
+        foodLocation: _foodIsManual ? state.foodLocation : latLng,
+        foodAddress: _foodIsManual ? state.foodAddress : null,
       );
 
       // 2. Get Address (Network call, can be slow)
@@ -167,9 +179,7 @@ class HomeController extends _$HomeController {
           final address = '${p.name}, ${p.locality}';
           state = state.copyWith(
             pickupAddress: address,
-            // Fill the food address from current location only if nothing (a
-            // recent/default place) has claimed it yet.
-            foodAddress: state.foodAddress ?? address,
+            foodAddress: _foodIsManual ? state.foodAddress : address,
           );
         }
       } catch (e) {
@@ -335,6 +345,7 @@ class HomeController extends _$HomeController {
         tempLocation: null,
       );
     } else if (state.selectionMode == RideSelectionMode.food) {
+      _foodIsManual = true;
       state = state.copyWith(
         foodAddress: state.tempAddress,
         foodLocation: state.tempLocation,
@@ -381,6 +392,9 @@ class HomeController extends _$HomeController {
   }
 
   void setFoodLocation(LatLng location, String address) {
+    // An empty address is the add-address form resetting its scratch picker,
+    // not a choice of the home location.
+    if (address.isNotEmpty) _foodIsManual = true;
     state = state.copyWith(foodLocation: location, foodAddress: address);
   }
 
@@ -390,7 +404,8 @@ class HomeController extends _$HomeController {
       state = state.copyWith(savedPlaces: places);
       try {
         final defaultPlace = places.firstWhere((p) => p.isDefault == true);
-        if (state.foodAddress == null) {
+        // Fallback only: GPS (or a manual pick) owns the home location.
+        if (state.foodLocation == null) {
           state = state.copyWith(
             foodAddress: defaultPlace.address ?? defaultPlace.name,
             foodLocation: LatLng(defaultPlace.lat, defaultPlace.lng),
@@ -416,7 +431,8 @@ class HomeController extends _$HomeController {
     try {
       final place = await ref.read(getDefaultPlaceUseCaseProvider).call();
       if (place != null) {
-        if (state.foodAddress == null) {
+        // Fallback only: GPS (or a manual pick) owns the home location.
+        if (state.foodLocation == null) {
           state = state.copyWith(
             foodAddress: place.address ?? place.name,
             foodLocation: LatLng(place.lat, place.lng),

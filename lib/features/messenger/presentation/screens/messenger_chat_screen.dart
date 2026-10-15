@@ -2,6 +2,7 @@ import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/features/chat/presentation/controllers/chat_controller.dart';
+import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -71,6 +72,7 @@ class _MessengerChatScreenState extends ConsumerState<MessengerChatScreen> {
   @override
   Widget build(BuildContext context) {
     final chatState = ref.watch(chatControllerProvider(_room));
+    final l10n = AppLocalizations.of(context)!;
 
     // Automatically scroll to bottom when new messages arrive
     ref.listen(chatControllerProvider(_room), (previous, next) {
@@ -83,7 +85,7 @@ class _MessengerChatScreenState extends ConsumerState<MessengerChatScreen> {
         ScaffoldMessenger.of(context)
           ..hideCurrentSnackBar()
           ..showSnackBar(
-            const SnackBar(content: Text('ส่งข้อความไม่สำเร็จ กรุณาลองใหม่')),
+            SnackBar(content: Text(l10n.msgrSendFailed)),
           );
       }
     });
@@ -119,13 +121,13 @@ class _MessengerChatScreenState extends ConsumerState<MessengerChatScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    'คนขับของคุณ',
+                    l10n.msgrYourDriver,
                     style: AppTypography.label2.copyWith(
                       color: AppColors.white,
                     ),
                   ),
                   Text(
-                    'เมสเซนเจอร์ส่งพัสดุ',
+                    l10n.msgrTitle,
                     style: AppTypography.caption5.copyWith(
                       color: AppColors.white.withValues(alpha: 0.75),
                     ),
@@ -152,7 +154,7 @@ class _MessengerChatScreenState extends ConsumerState<MessengerChatScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'โหลดข้อความไม่สำเร็จ',
+                      l10n.msgrLoadMessagesFailed,
                       style: AppTypography.label2.copyWith(
                         color: AppColors.error,
                       ),
@@ -168,7 +170,7 @@ class _MessengerChatScreenState extends ConsumerState<MessengerChatScreen> {
                             .read(chatControllerProvider(_room).notifier)
                             .fetchChatHistory();
                       },
-                      child: const Text('ลองใหม่'),
+                      child: Text(l10n.retry),
                     ),
                   ],
                 ),
@@ -237,7 +239,7 @@ class _MessengerChatScreenState extends ConsumerState<MessengerChatScreen> {
                     child: TextField(
                       controller: _controller,
                       decoration: InputDecoration(
-                        hintText: 'พิมพ์ข้อความ...',
+                        hintText: l10n.msgrTypeMessage,
                         hintStyle: AppTypography.caption4.copyWith(
                           color: AppColors.semanticGrayNeutralFgLowOnWhite,
                         ),

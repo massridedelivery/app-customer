@@ -1,9 +1,11 @@
 import 'dart:async';
 
+import 'package:customer_app/core/localization/locale_controller.dart';
 import 'package:customer_app/core/services/socket_service.dart';
 import 'package:customer_app/features/messenger/data/repositories/messenger_repository_impl.dart';
 import 'package:customer_app/features/messenger/domain/models/messenger_order.dart';
 import 'package:customer_app/features/messenger/presentation/states/messenger_tracking_state.dart';
+import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/widgets.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -18,6 +20,12 @@ class MessengerTrackingController extends _$MessengerTrackingController {
   StreamSubscription<void>? _reconnectSubscription;
   Timer? _pollingTimer;
   AppLifecycleListener? _lifecycleListener;
+
+  /// Strings in the user's chosen app language — controllers have no
+  /// BuildContext, so look them up from the locale provider.
+  AppLocalizations get _l10n => lookupAppLocalizations(
+        Locale(ref.read(localeControllerProvider).languageCode),
+      );
 
   @override
   MessengerTrackingState build() {
@@ -149,7 +157,7 @@ class MessengerTrackingController extends _$MessengerTrackingController {
         // A paid order can't be cancelled in-app (PromptPay refunds are manual
         // via admin) — point the user at support instead of a raw 409 (dev14).
         error: msg == 'ORDER_ALREADY_PAID'
-            ? 'ออเดอร์นี้ชำระเงินแล้ว ยกเลิกในแอปไม่ได้ กรุณาติดต่อฝ่ายบริการลูกค้าเพื่อขอคืนเงิน'
+            ? _l10n.msgrPaidCannotCancel
             : msg,
       );
       return false;
@@ -170,7 +178,7 @@ class MessengerTrackingController extends _$MessengerTrackingController {
     } catch (e) {
       final msg = e.toString().replaceFirst('Exception: ', '');
       state = state.copyWith(
-        error: msg == 'ORDER_ALREADY_PAID' ? 'ออเดอร์นี้ชำระเงินแล้ว' : msg,
+        error: msg == 'ORDER_ALREADY_PAID' ? _l10n.msgrOrderAlreadyPaid : msg,
       );
       return false;
     }

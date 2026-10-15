@@ -1,11 +1,14 @@
 import 'dart:async';
 
+import 'package:customer_app/core/localization/locale_controller.dart';
 import 'package:customer_app/core/utils/error_text.dart';
 import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
 import 'package:customer_app/features/messenger/data/repositories/messenger_repository_impl.dart';
 import 'package:customer_app/features/messenger/domain/models/messenger_vehicle_type.dart';
 import 'package:customer_app/features/messenger/presentation/states/messenger_booking_state.dart';
+import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart' show Locale;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'messenger_booking_controller.g.dart';
@@ -13,6 +16,12 @@ part 'messenger_booking_controller.g.dart';
 @riverpod
 class MessengerBookingController extends _$MessengerBookingController {
   Timer? _estimateDebounce;
+
+  /// Strings in the user's chosen app language — controllers have no
+  /// BuildContext, so look them up from the locale provider.
+  AppLocalizations get _l10n => lookupAppLocalizations(
+        Locale(ref.read(localeControllerProvider).languageCode),
+      );
 
   @override
   MessengerBookingState build() {
@@ -47,7 +56,7 @@ class MessengerBookingController extends _$MessengerBookingController {
     } catch (e) {
       state = state.copyWith(
         isLoadingVehicles: false,
-        error: 'โหลดประเภทรถไม่สำเร็จ กรุณาลองใหม่',
+        error: _l10n.msgrLoadVehiclesFailed,
       );
       debugPrint('MessengerBookingController.loadVehicleTypes: $e');
     }
@@ -195,8 +204,8 @@ class MessengerBookingController extends _$MessengerBookingController {
         isEstimating: false,
         estimate: null,
         error: msg == 'NO_DELIVERY_MODES'
-            ? 'ขณะนี้ยังไม่เปิดให้บริการจัดส่ง กรุณาลองใหม่ภายหลัง'
-            : friendlyError(e, fallback: 'ประเมินราคาไม่สำเร็จ กรุณาลองใหม่'),
+            ? _l10n.msgrNoDeliveryModes
+            : friendlyError(e, fallback: _l10n.msgrEstimateFailed),
       );
     }
   }
@@ -240,13 +249,13 @@ class MessengerBookingController extends _$MessengerBookingController {
         // the picker reflects the currently-offered modes, and prompt a retry.
         state = state.copyWith(
           isCreating: false,
-          error: 'โหมดจัดส่งที่เลือกถูกปิด กรุณาเลือกใหม่แล้วลองอีกครั้ง',
+          error: _l10n.msgrDeliveryModeUnavailable,
         );
         unawaited(estimate());
       } else {
         state = state.copyWith(
           isCreating: false,
-          error: friendlyError(e, fallback: 'สร้างออเดอร์ไม่สำเร็จ กรุณาลองใหม่'),
+          error: friendlyError(e, fallback: _l10n.msgrCreateOrderFailed),
         );
       }
     }

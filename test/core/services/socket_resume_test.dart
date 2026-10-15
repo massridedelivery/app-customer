@@ -1,3 +1,5 @@
+import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
+import 'package:customer_app/features/home/presentation/states/home_state.dart';
 import 'package:customer_app/app.dart';
 import 'package:customer_app/core/data/token_storage.dart';
 import 'package:customer_app/core/managers/providers.dart';
@@ -60,6 +62,7 @@ Future<_SpySocket> _pumpApp(WidgetTester tester, {required bool loggedIn}) async
         sharedPreferencesProvider.overrideWithValue(prefs),
         pushNotificationServiceProvider.overrideWithValue(_NoopPush()),
         authControllerProvider.overrideWith(_FakeAuthController.new),
+        homeControllerProvider.overrideWith(_FakeHomeController.new),
         socketServiceProvider.overrideWithValue(socket),
       ],
       child: const App(),
@@ -80,6 +83,18 @@ void _sendToBackgroundAndBack(WidgetTester tester) {
   tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
   tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
   tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+}
+
+/// The splash now creates HomeController at launch (to ask for location
+/// early); keep its GPS / network bootstrap out of these tests.
+class _FakeHomeController extends HomeController {
+  static int builds = 0;
+
+  @override
+  HomeState build() {
+    builds++;
+    return const HomeState();
+  }
 }
 
 void main() {

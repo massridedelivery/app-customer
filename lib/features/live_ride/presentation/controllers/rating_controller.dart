@@ -3,6 +3,15 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'rating_controller.g.dart';
 
+/// Raised when the rider submits without picking a star rating. The screen
+/// shows the localized hint for it.
+class RatingRequiredException implements Exception {
+  const RatingRequiredException();
+
+  @override
+  String toString() => 'RatingRequiredException';
+}
+
 @riverpod
 class RatingController extends _$RatingController {
   @override
@@ -19,7 +28,7 @@ class RatingController extends _$RatingController {
   }) async {
     if (rating == 0) {
       state = AsyncValue.error(
-        Exception('กรุณาให้คะแนนคนขับก่อนนะครับ'),
+        const RatingRequiredException(),
         StackTrace.current,
       );
       return;

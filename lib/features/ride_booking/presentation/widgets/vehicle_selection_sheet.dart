@@ -318,9 +318,11 @@ class VehicleSelectionSheet extends ConsumerWidget {
                 child: Text(
                   hasVehicleSelected && selectedEstimation != null
                       ? l10n.requestRideWith(
-                          vehicleNameTh(
+                          vehicleName(
                             selectedEstimation.displayName,
                             vehicleTypeName: selectedEstimation.vehicleTypeName,
+                            languageCode:
+                                Localizations.localeOf(context).languageCode,
                           ),
                           selectedEstimation.totalFare.toStringAsFixed(0),
                         )

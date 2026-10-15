@@ -11,6 +11,7 @@ import 'package:customer_app/features/live_ride/presentation/controllers/rating_
 import 'package:customer_app/features/trips/domain/models/history_order.dart';
 import 'package:customer_app/features/trips/presentation/controllers/trip_detail_controller.dart';
 import 'package:customer_app/features/trips/presentation/states/trip_detail_state.dart';
+import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -29,6 +30,8 @@ class TripDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
+  AppLocalizations get _l10n => AppLocalizations.of(context)!;
+
   @override
   void initState() {
     super.initState();
@@ -88,7 +91,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
 
     if (state.error != null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('รายละเอียดการเดินทาง')),
+        appBar: AppBar(title: Text(_l10n.tripDetailTitle)),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -104,7 +107,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: _loadDetails,
-                child: const Text('ลองใหม่'),
+                child: Text(_l10n.retry),
               ),
             ],
           ),
@@ -114,8 +117,8 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
 
     if (state.foodDetails == null && state.rideDetails == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('รายละเอียดการเดินทาง')),
-        body: const Center(child: Text('ไม่พบข้อมูลการจอง')),
+        appBar: AppBar(title: Text(_l10n.tripDetailTitle)),
+        body: Center(child: Text(_l10n.tripNotFound)),
       );
     }
 
@@ -267,7 +270,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'ไม่มีข้อมูลแผนที่',
+                      _l10n.tripNoMapData,
                       style: AppTypography.caption4.copyWith(
                         color: AppColors.semanticGrayNeutralFgMidOnWhite,
                       ),
@@ -310,7 +313,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'วันที่การจอง',
+                _l10n.tripBookingDate,
                 style: AppTypography.caption4.copyWith(
                   color: AppColors.semanticGrayNeutralFgMidOnWhite,
                   fontWeight: FontWeight.w500,
@@ -330,7 +333,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'รหัสการจอง',
+                _l10n.tripBookingCode,
                 style: AppTypography.caption4.copyWith(
                   color: AppColors.semanticGrayNeutralFgMidOnWhite,
                   fontWeight: FontWeight.w500,
@@ -346,8 +349,8 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
                       ScaffoldMessenger.of(context)
                         ..hideCurrentSnackBar()
                         ..showSnackBar(
-                          const SnackBar(
-                            content: Text('คัดลอกรหัสการจองแล้ว'),
+                          SnackBar(
+                            content: Text(_l10n.tripBookingCodeCopied),
                           ),
                         );
                     },
@@ -433,7 +436,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  driver.fullName ?? 'ไม่ระบุคนขับ',
+                  driver.fullName ?? _l10n.tripDriverUnknown,
                   style: AppTypography.body2.copyWith(
                     color: AppColors.semanticGrayNeutralFgHigh,
                     fontWeight: FontWeight.bold,
@@ -477,17 +480,19 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
 
     if (state.rideDetails != null) {
       final ride = state.rideDetails!;
-      distanceStr = '${ride.distanceKm?.toStringAsFixed(1) ?? '0'} กม.';
-      durationStr = '${ride.totalDurationMin ?? '0'} นาที';
+      distanceStr =
+          '${ride.distanceKm?.toStringAsFixed(1) ?? '0'} ${_l10n.kmUnit}';
+      durationStr = '${ride.totalDurationMin ?? '0'} ${_l10n.minUnit}';
       pickupLocation = ride.pickupAddress ?? '';
       pickupTime = AppDates.of(context).isoTime(ride.pickedUpAt ?? ride.createdAt);
       dropoffLocation = ride.dropoffAddress ?? '';
       dropoffTime = AppDates.of(context).isoTime(ride.completedAt ?? ride.updatedAt);
     } else if (state.foodDetails != null) {
       final food = state.foodDetails!;
-      distanceStr = '${food.customerDistanceKm?.toStringAsFixed(1) ?? '0'} กม.';
-      durationStr = '${food.originalEtaMin ?? '0'} นาที';
-      pickupLocation = 'ร้านอาหาร';
+      distanceStr =
+          '${food.customerDistanceKm?.toStringAsFixed(1) ?? '0'} ${_l10n.kmUnit}';
+      durationStr = '${food.originalEtaMin ?? '0'} ${_l10n.minUnit}';
+      pickupLocation = _l10n.tripRestaurant;
       pickupTime = AppDates.of(context).isoTime(food.placedAt);
       dropoffLocation = food.deliveryAddress ?? '';
       // Only the real delivered time — never fall back to delayQueueUntil, an
@@ -502,7 +507,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'รายละเอียดเส้นทาง',
+                _l10n.tripRouteDetails,
                 style: AppTypography.body2.copyWith(
                   color: AppColors.semanticGrayNeutralFgHigh,
                   fontWeight: FontWeight.bold,
@@ -540,7 +545,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'รายการอาหาร',
+            _l10n.tripFoodItems,
             style: AppTypography.body2.copyWith(
               color: AppColors.semanticGrayNeutralFgHigh,
               fontWeight: FontWeight.bold,
@@ -612,31 +617,31 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
     if (state.rideDetails != null) {
       final ride = state.rideDetails!;
       paymentMethod = ride.paymentMethod;
-      serviceName = ride.bookingType ?? 'การเดินทาง';
+      serviceName = ride.bookingType ?? _l10n.tripServiceRide;
       total = ride.fare;
 
       breakdownRows = [
-        _buildPaymentBreakdownRow('ค่าโดยสารเริ่มต้น', ride.fare),
+        _buildPaymentBreakdownRow(_l10n.baseFareLabel, ride.fare),
         if (ride.tollFee != null && ride.tollFee! > 0)
-          _buildPaymentBreakdownRow('ค่าผ่านทาง', ride.tollFee!),
+          _buildPaymentBreakdownRow(_l10n.tripTollFee, ride.tollFee!),
         if (ride.waitingFee != null && ride.waitingFee! > 0)
-          _buildPaymentBreakdownRow('ค่าบริการรอ', ride.waitingFee!),
+          _buildPaymentBreakdownRow(_l10n.tripWaitingFee, ride.waitingFee!),
         if (ride.discount > 0)
-          _buildPaymentBreakdownRow('ส่วนลด', -ride.discount),
+          _buildPaymentBreakdownRow(_l10n.liveDiscount, -ride.discount),
       ];
     } else if (state.foodDetails != null) {
       final food = state.foodDetails!;
-      paymentMethod = food.paymentMethod ?? 'เงินสด';
+      paymentMethod = food.paymentMethod ?? _l10n.cashLabel;
       serviceName = widget.orderType?.toUpperCase() == 'MART'
           ? 'MassMart'
           : 'MassFood';
       total = food.totalAmount ?? 0;
 
       breakdownRows = [
-        _buildPaymentBreakdownRow('ค่าอาหาร/สินค้า', food.foodTotal ?? 0),
-        _buildPaymentBreakdownRow('ค่าบริการจัดส่ง', food.deliveryFee ?? 0),
+        _buildPaymentBreakdownRow(_l10n.tripFoodTotal, food.foodTotal ?? 0),
+        _buildPaymentBreakdownRow(_l10n.tripDeliveryFee, food.deliveryFee ?? 0),
         if (food.promoDiscount != null && food.promoDiscount! > 0)
-          _buildPaymentBreakdownRow('ส่วนลดคูปอง', -food.promoDiscount!),
+          _buildPaymentBreakdownRow(_l10n.couponDiscount, -food.promoDiscount!),
       ];
     }
 
@@ -663,7 +668,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'ยอดรวมสุทธิ',
+                _l10n.tripNetTotal,
                 style: AppTypography.body2.copyWith(
                   color: AppColors.semanticGrayNeutralFgHigh,
                   fontWeight: FontWeight.bold,
@@ -862,7 +867,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
                 elevation: 0,
               ),
               child: Text(
-                'ทำรายการอีกครั้ง',
+                _l10n.tripRebook,
                 style: AppTypography.body2.copyWith(
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
@@ -877,7 +882,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
               padding: const EdgeInsets.symmetric(vertical: 12),
             ),
             child: Text(
-              'ต้องการความช่วยเหลือ / แจ้งปัญหา',
+              _l10n.tripHelpReport,
               style: AppTypography.body3.copyWith(
                 color: AppColors.primary.withValues(alpha: 0.7),
                 fontWeight: FontWeight.w500,
@@ -922,6 +927,7 @@ class _TripRatingCardState extends ConsumerState<_TripRatingCard> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final alreadyRated = (widget.existingRating ?? 0) > 0 || _submitted;
     final submitState = ref.watch(ratingControllerProvider);
     final isSubmitting = submitState.isLoading;
@@ -931,7 +937,11 @@ class _TripRatingCardState extends ConsumerState<_TripRatingCard> {
         error: (e, _) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(e.toString().replaceFirst('Exception: ', '')),
+              content: Text(
+                e is RatingRequiredException
+                    ? l10n.ratingRequired
+                    : e.toString().replaceFirst('Exception: ', ''),
+              ),
             ),
           );
         },
@@ -941,15 +951,15 @@ class _TripRatingCardState extends ConsumerState<_TripRatingCard> {
     if (alreadyRated) {
       final value = _submitted ? _selected : widget.existingRating!.round();
       return _card(
-        title: 'ขอบคุณสำหรับรีวิว',
-        subtitle: 'คุณให้คะแนนการเดินทางนี้แล้ว',
+        title: l10n.tripRatingThanks,
+        subtitle: l10n.tripRatingAlreadyRated,
         child: _StarRow(value: value, size: 40),
       );
     }
 
     return _card(
-      title: 'ช่วยเราปรับปรุงประสบการณ์ให้ดียิ่งขึ้น',
-      subtitle: 'โดยการให้คะแนนการเดินทางครั้งนี้',
+      title: l10n.tripRatingPromptTitle,
+      subtitle: l10n.tripRatingPromptSub,
       child: Column(
         children: [
           _StarRow(
@@ -985,7 +995,7 @@ class _TripRatingCardState extends ConsumerState<_TripRatingCard> {
                         ),
                       )
                     : Text(
-                        'ส่งรีวิว',
+                        l10n.ratingSubmit,
                         style: AppTypography.label1.copyWith(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,

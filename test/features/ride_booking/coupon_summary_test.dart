@@ -26,7 +26,11 @@ VehicleEstimation _est({required double discount}) => VehicleEstimation(
   surgedFare: 100,
 );
 
-Future<void> _pump(WidgetTester tester, BookingState state) async {
+Future<void> _pump(
+  WidgetTester tester,
+  BookingState state, {
+  VoidCallback? onPromoRemove,
+}) async {
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
@@ -45,6 +49,7 @@ Future<void> _pump(WidgetTester tester, BookingState state) async {
             onRequest: () {},
             onPromoTap: () {},
             onVehicleSelected: (_) {},
+            onPromoRemove: onPromoRemove,
           ),
         ),
       ),
@@ -97,5 +102,50 @@ void main() {
 
     expect(find.textContaining('RIDE50'), findsNothing);
     expect(find.textContaining('ส่วนลดคูปอง'), findsNothing);
+  });
+
+  testWidgets('the ✕ on an applied code removes it', (tester) async {
+    var removed = 0;
+    final est = _est(discount: 50);
+    await _pump(
+      tester,
+      BookingState(
+        estimations: [est],
+        vehicleTypeId: est.vehicleTypeId,
+        appliedPromoCode: 'RIDE50',
+      ),
+      onPromoRemove: () => removed++,
+    );
+
+    await tester.tap(find.byKey(const Key('ridePromoRemove')));
+    expect(removed, 1);
+  });
+
+  testWidgets('a code that does not apply offers "เอาโค้ดออก"', (tester) async {
+    var removed = 0;
+    final est = _est(discount: 0);
+    await _pump(
+      tester,
+      BookingState(
+        estimations: [est],
+        vehicleTypeId: est.vehicleTypeId,
+        appliedPromoCode: 'DIS50',
+      ),
+      onPromoRemove: () => removed++,
+    );
+
+    expect(find.text('เอาโค้ดออก'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('ridePromoRemoveLink')));
+    expect(removed, 1);
+  });
+
+  testWidgets('no remove control without a code', (tester) async {
+    await _pump(
+      tester,
+      BookingState(estimations: [_est(discount: 0)]),
+      onPromoRemove: () {},
+    );
+    expect(find.byKey(const Key('ridePromoRemove')), findsNothing);
+    expect(find.byKey(const Key('ridePromoRemoveLink')), findsNothing);
   });
 }

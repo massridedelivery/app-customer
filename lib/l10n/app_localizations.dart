@@ -5052,6 +5052,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Couldn\'t get the default place'**
   String get errGetDefaultPlace;
+
+  /// No description provided for @couponRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove code'**
+  String get couponRemove;
 }
 
 class _AppLocalizationsDelegate

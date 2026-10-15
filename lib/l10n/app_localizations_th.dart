@@ -2678,4 +2678,7 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get errGetDefaultPlace => 'ดึงสถานที่เริ่มต้นไม่สำเร็จ';
+
+  @override
+  String get couponRemove => 'เอาโค้ดออก';
 }

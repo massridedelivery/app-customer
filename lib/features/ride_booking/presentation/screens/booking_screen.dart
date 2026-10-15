@@ -232,6 +232,60 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
     );
   }
 
+  /// Re-estimates with [promoCode] (null = remove the code), keeps the
+  /// selected vehicle, and tells the rider what the estimate did with it.
+  Future<void> _repriceWithPromo(
+    String? promoCode,
+    LatLng pickup,
+    LatLng dropoff,
+    AppLocalizations l10n,
+  ) async {
+    // Keep track of selected vehicle to restore after re-estimate.
+    // Do NOT pass vehicleTypeId to estimateFare — the API should
+    // always return all vehicle types so the list stays complete.
+    final previousVehicleId =
+        ref.read(bookingControllerProvider).value?.vehicleTypeId;
+
+    await ref.read(bookingControllerProvider.notifier).estimateFare(
+      pickup,
+      dropoff,
+      promoCode: promoCode,
+    );
+
+    // Restore the vehicle selection the user had before re-estimate.
+    if (previousVehicleId != null) {
+      ref.read(bookingControllerProvider.notifier).setVehicleType(previousVehicleId);
+    }
+
+    // Tell the rider what the fare estimate actually did with the code:
+    // discount 0 means it doesn't apply to this trip (min spend, used up,
+    // wrong service…), so don't say "applied".
+    if (!mounted) return;
+    final st = ref.read(bookingControllerProvider).value;
+    VehicleEstimation? est;
+    for (final e in st?.estimations ?? const <VehicleEstimation>[]) {
+      if (e.vehicleTypeId == st?.vehicleTypeId) est = e;
+    }
+    est ??= (st?.estimations.isNotEmpty ?? false) ? st!.estimations.first : null;
+    final notApplied = promoCode != null && est != null && est.discount <= 0;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(
+            promoCode == null
+                ? l10n.couponRemoved
+                : notApplied
+                ? l10n.couponNotAppliedToFare(promoCode)
+                : l10n.couponApplied(promoCode),
+          ),
+          backgroundColor:
+              notApplied ? AppColors.textSecondary : AppColors.primary,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+  }
+
   @override
   Widget build(BuildContext context) {
     final bookingAsync = ref.watch(bookingControllerProvider);
@@ -437,59 +491,19 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                 // Only re-estimate if the user explicitly applied or cancelled a promo.
                 // result == null means they just pressed back without action.
                 if (result != null && pickup != null && dropoff != null) {
-                  final promoCode = result.isEmpty ? null : result;
-                  // Keep track of selected vehicle to restore after re-estimate.
-                  // Do NOT pass vehicleTypeId to estimateFare — the API should
-                  // always return all vehicle types so the list stays complete.
-                  final previousVehicleId =
-                      ref.read(bookingControllerProvider).value?.vehicleTypeId;
-
-                  await ref.read(bookingControllerProvider.notifier).estimateFare(
+                  await _repriceWithPromo(
+                    result.isEmpty ? null : result,
                     pickup,
                     dropoff,
-                    promoCode: promoCode,
-                    // vehicleTypeId intentionally omitted — let API return all types.
+                    l10n,
                   );
-
-                  // Restore the vehicle selection the user had before re-estimate.
-                  if (previousVehicleId != null) {
-                    ref
-                        .read(bookingControllerProvider.notifier)
-                        .setVehicleType(previousVehicleId);
-                  }
-
-                  // Tell the rider what the fare estimate actually did with the
-                  // code: discount 0 means it doesn't apply to this trip (min
-                  // spend, used up, wrong service…), so don't say "applied".
-                  if (context.mounted) {
-                    final st = ref.read(bookingControllerProvider).value;
-                    VehicleEstimation? est;
-                    for (final e in st?.estimations ?? const <VehicleEstimation>[]) {
-                      if (e.vehicleTypeId == st?.vehicleTypeId) est = e;
-                    }
-                    est ??= (st?.estimations.isNotEmpty ?? false)
-                        ? st!.estimations.first
-                        : null;
-                    final notApplied =
-                        promoCode != null && est != null && est.discount <= 0;
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          promoCode == null
-                              ? l10n.couponRemoved
-                              : notApplied
-                              ? l10n.couponNotAppliedToFare(promoCode)
-                              : l10n.couponApplied(promoCode),
-                        ),
-                        backgroundColor: notApplied
-                            ? AppColors.textSecondary
-                            : AppColors.primary,
-                        duration: const Duration(seconds: 3),
-                      ),
-                    );
-                  }
                 }
               },
+              // Drop the code straight from the sheet (✕ on the coupon button /
+              // "เอาโค้ดออก" on a code that doesn't apply) — no coupon screen.
+              onPromoRemove: pickup == null || dropoff == null
+                  ? null
+                  : () => _repriceWithPromo(null, pickup, dropoff, l10n),
               onRequest: () async {
                 // Tell the user instead of silently ignoring the tap — e.g.
                 // location is off and no pickup was chosen manually.

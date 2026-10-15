@@ -924,5 +924,6 @@
   "errSavedPlaces": "Couldn't load saved places",
   "errSavePlace": "Couldn't save the place",
   "errSetDefaultPlace": "Couldn't set the default place",
-  "errGetDefaultPlace": "Couldn't get the default place"
+  "errGetDefaultPlace": "Couldn't get the default place",
+  "couponRemove": "Remove code"
 }

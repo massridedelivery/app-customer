@@ -4218,6 +4218,840 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Couldn\'t check the payment'**
   String get payCheckIntentFailed;
+
+  /// No description provided for @homeChooseDeliveryLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Deliver to'**
+  String get homeChooseDeliveryLocation;
+
+  /// No description provided for @homePleaseChooseLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a location'**
+  String get homePleaseChooseLocation;
+
+  /// No description provided for @homeWhatToOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'What are you craving?'**
+  String get homeWhatToOrder;
+
+  /// No description provided for @homeServiceRide.
+  ///
+  /// In en, this message translates to:
+  /// **'Ride'**
+  String get homeServiceRide;
+
+  /// No description provided for @homeServiceRideSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Your first ride'**
+  String get homeServiceRideSub;
+
+  /// No description provided for @homeServiceFood.
+  ///
+  /// In en, this message translates to:
+  /// **'Food'**
+  String get homeServiceFood;
+
+  /// No description provided for @homeServiceFoodSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Best prices daily'**
+  String get homeServiceFoodSub;
+
+  /// No description provided for @homeServiceMessenger.
+  ///
+  /// In en, this message translates to:
+  /// **'Messenger'**
+  String get homeServiceMessenger;
+
+  /// No description provided for @homeServiceMessengerSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Parcels & packages'**
+  String get homeServiceMessengerSub;
+
+  /// No description provided for @homeServiceParcel.
+  ///
+  /// In en, this message translates to:
+  /// **'Parcel delivery'**
+  String get homeServiceParcel;
+
+  /// No description provided for @homeYourArea.
+  ///
+  /// In en, this message translates to:
+  /// **'your area'**
+  String get homeYourArea;
+
+  /// No description provided for @homeComingSoonInYourArea.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming soon to your area'**
+  String get homeComingSoonInYourArea;
+
+  /// No description provided for @homeZoneComingSoonMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'{service} is coming soon to {area}. Drivers may not be available yet.'**
+  String homeZoneComingSoonMessage(String service, String area);
+
+  /// No description provided for @homeYourLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Your location: {area}'**
+  String homeYourLocation(String area);
+
+  /// No description provided for @homeArticlesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tips & insights from MASS'**
+  String get homeArticlesTitle;
+
+  /// No description provided for @homeArticleCatServices.
+  ///
+  /// In en, this message translates to:
+  /// **'Our services'**
+  String get homeArticleCatServices;
+
+  /// No description provided for @homeArticleCatTips.
+  ///
+  /// In en, this message translates to:
+  /// **'Tips'**
+  String get homeArticleCatTips;
+
+  /// No description provided for @homeArticleCatSafety.
+  ///
+  /// In en, this message translates to:
+  /// **'Safety'**
+  String get homeArticleCatSafety;
+
+  /// No description provided for @homeArticleMassTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What is MASS? Meet the Thai super app that does it all'**
+  String get homeArticleMassTitle;
+
+  /// No description provided for @homeArticleFoodTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'5 tips for food delivery that\'s great value and as tasty as dining in'**
+  String get homeArticleFoodTitle;
+
+  /// No description provided for @homeArticleRideTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ride safe with MASS Ride: safety features you should know'**
+  String get homeArticleRideTitle;
+
+  /// No description provided for @homePromosForYou.
+  ///
+  /// In en, this message translates to:
+  /// **'Promotions for you'**
+  String get homePromosForYou;
+
+  /// No description provided for @homeRecentTrips.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent trips'**
+  String get homeRecentTrips;
+
+  /// No description provided for @homeSelectedLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected location'**
+  String get homeSelectedLocation;
+
+  /// No description provided for @homeActiveRide.
+  ///
+  /// In en, this message translates to:
+  /// **'Your ride'**
+  String get homeActiveRide;
+
+  /// No description provided for @homeActiveFood.
+  ///
+  /// In en, this message translates to:
+  /// **'Food order'**
+  String get homeActiveFood;
+
+  /// No description provided for @homeViewStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'View status'**
+  String get homeViewStatus;
+
+  /// No description provided for @homeStatusInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'In progress...'**
+  String get homeStatusInProgress;
+
+  /// No description provided for @homeStatusFindingDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Finding a driver...'**
+  String get homeStatusFindingDriver;
+
+  /// No description provided for @homeFoodStatusPlaced.
+  ///
+  /// In en, this message translates to:
+  /// **'Placing your order...'**
+  String get homeFoodStatusPlaced;
+
+  /// No description provided for @homeFoodStatusConfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Order confirmed'**
+  String get homeFoodStatusConfirmed;
+
+  /// No description provided for @homeFoodStatusPreparing.
+  ///
+  /// In en, this message translates to:
+  /// **'The restaurant is preparing your food...'**
+  String get homeFoodStatusPreparing;
+
+  /// No description provided for @homeFoodStatusReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready - waiting for pickup'**
+  String get homeFoodStatusReady;
+
+  /// No description provided for @homeFoodStatusRiderAssigned.
+  ///
+  /// In en, this message translates to:
+  /// **'Rider assigned'**
+  String get homeFoodStatusRiderAssigned;
+
+  /// No description provided for @homeFoodStatusOnTheWay.
+  ///
+  /// In en, this message translates to:
+  /// **'Your food is on the way'**
+  String get homeFoodStatusOnTheWay;
+
+  /// No description provided for @homeRideStatusAccepted.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver accepted'**
+  String get homeRideStatusAccepted;
+
+  /// No description provided for @homeRideStatusArrived.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver has arrived at pickup'**
+  String get homeRideStatusArrived;
+
+  /// No description provided for @homeRideStatusOnTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'On the way'**
+  String get homeRideStatusOnTrip;
+
+  /// No description provided for @homeParcelStatusAccepted.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver accepted the job'**
+  String get homeParcelStatusAccepted;
+
+  /// No description provided for @homeParcelStatusArrived.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver is at the pickup point'**
+  String get homeParcelStatusArrived;
+
+  /// No description provided for @homeParcelStatusDelivering.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivering your parcel'**
+  String get homeParcelStatusDelivering;
+
+  /// No description provided for @homeChooseAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose address'**
+  String get homeChooseAddress;
+
+  /// No description provided for @homeUseThisPickup.
+  ///
+  /// In en, this message translates to:
+  /// **'Use this pickup point'**
+  String get homeUseThisPickup;
+
+  /// No description provided for @homeUseThisFoodDropoff.
+  ///
+  /// In en, this message translates to:
+  /// **'Deliver food here'**
+  String get homeUseThisFoodDropoff;
+
+  /// No description provided for @homeUseThisDestination.
+  ///
+  /// In en, this message translates to:
+  /// **'Use this destination'**
+  String get homeUseThisDestination;
+
+  /// No description provided for @homePlaceNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Home, Work, Gym'**
+  String get homePlaceNameHint;
+
+  /// No description provided for @homeChooseParcelDropoff.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose drop-off point'**
+  String get homeChooseParcelDropoff;
+
+  /// No description provided for @homeChooseParcelPickup.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose pickup point'**
+  String get homeChooseParcelPickup;
+
+  /// No description provided for @homeSearchParcelDropoff.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for a drop-off point'**
+  String get homeSearchParcelDropoff;
+
+  /// No description provided for @homeSearchParcelPickup.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for a pickup point'**
+  String get homeSearchParcelPickup;
+
+  /// No description provided for @homeFoodLocationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery location'**
+  String get homeFoodLocationTitle;
+
+  /// No description provided for @homeFoodWhereHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Where should we deliver?'**
+  String get homeFoodWhereHint;
+
+  /// No description provided for @homeChooseOnMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose on map'**
+  String get homeChooseOnMap;
+
+  /// No description provided for @homeNoRecentPlaces.
+  ///
+  /// In en, this message translates to:
+  /// **'No recent places yet'**
+  String get homeNoRecentPlaces;
+
+  /// No description provided for @homeNoSavedPlaces.
+  ///
+  /// In en, this message translates to:
+  /// **'No saved places yet'**
+  String get homeNoSavedPlaces;
+
+  /// No description provided for @homeSearchFoodHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search restaurants or dishes'**
+  String get homeSearchFoodHint;
+
+  /// No description provided for @homeErrorDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Error: {error}'**
+  String homeErrorDetail(String error);
+
+  /// No description provided for @homeSearchFoodPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for what you\'re craving'**
+  String get homeSearchFoodPrompt;
+
+  /// No description provided for @homeNoResultsFor.
+  ///
+  /// In en, this message translates to:
+  /// **'No results for \"{query}\"'**
+  String homeNoResultsFor(String query);
+
+  /// No description provided for @homeRestaurants.
+  ///
+  /// In en, this message translates to:
+  /// **'Restaurants'**
+  String get homeRestaurants;
+
+  /// No description provided for @homeRestaurant.
+  ///
+  /// In en, this message translates to:
+  /// **'Restaurant'**
+  String get homeRestaurant;
+
+  /// No description provided for @homeCategoryNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Category not found'**
+  String get homeCategoryNotFound;
+
+  /// No description provided for @homeNoRestaurantsInCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'No restaurants in this category'**
+  String get homeNoRestaurantsInCategory;
+
+  /// No description provided for @homeClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed'**
+  String get homeClosed;
+
+  /// No description provided for @homeStartingPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'From ฿{price}'**
+  String homeStartingPrice(String price);
+
+  /// No description provided for @homeSelectAtLeast.
+  ///
+  /// In en, this message translates to:
+  /// **'Select at least {count}'**
+  String homeSelectAtLeast(int count);
+
+  /// No description provided for @homeOptionalAddOns.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional add-ons'**
+  String get homeOptionalAddOns;
+
+  /// No description provided for @homeUpToItems.
+  ///
+  /// In en, this message translates to:
+  /// **'(up to {count})'**
+  String homeUpToItems(int count);
+
+  /// No description provided for @homeSpecialInstructions.
+  ///
+  /// In en, this message translates to:
+  /// **'Special instructions'**
+  String get homeSpecialInstructions;
+
+  /// No description provided for @homeOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional'**
+  String get homeOptional;
+
+  /// No description provided for @homeNoteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. less spicy, no fried garlic'**
+  String get homeNoteHint;
+
+  /// No description provided for @homeAddToCart.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to cart - ฿{total}'**
+  String homeAddToCart(String total);
+
+  /// No description provided for @commonComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming soon'**
+  String get commonComingSoon;
+
+  /// No description provided for @commonComingSoonMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This service is launching soon.'**
+  String get commonComingSoonMessage;
+
+  /// No description provided for @commonGotIt.
+  ///
+  /// In en, this message translates to:
+  /// **'Got it'**
+  String get commonGotIt;
+
+  /// No description provided for @commonCantConnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t connect to the internet'**
+  String get commonCantConnect;
+
+  /// No description provided for @commonNoInternet.
+  ///
+  /// In en, this message translates to:
+  /// **'No internet connection'**
+  String get commonNoInternet;
+
+  /// No description provided for @commonWeakConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'Weak or unstable connection'**
+  String get commonWeakConnection;
+
+  /// No description provided for @commonCheckWifi.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your Wi-Fi or mobile data'**
+  String get commonCheckWifi;
+
+  /// No description provided for @commonSlowConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'Slow connection, things may not run smoothly'**
+  String get commonSlowConnection;
+
+  /// No description provided for @commonGoToSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get commonGoToSettings;
+
+  /// No description provided for @commonCheckAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Check again'**
+  String get commonCheckAgain;
+
+  /// No description provided for @commonLoginFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Please log in'**
+  String get commonLoginFirst;
+
+  /// No description provided for @commonLoginToUse.
+  ///
+  /// In en, this message translates to:
+  /// **'Log in to use this service'**
+  String get commonLoginToUse;
+
+  /// No description provided for @commonContinueBrowsing.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue browsing'**
+  String get commonContinueBrowsing;
+
+  /// No description provided for @commonLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong while loading'**
+  String get commonLoadError;
+
+  /// No description provided for @commonNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get commonNext;
+
+  /// No description provided for @commonBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get commonBack;
+
+  /// No description provided for @commonCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get commonCopy;
+
+  /// No description provided for @promoUseCoupon.
+  ///
+  /// In en, this message translates to:
+  /// **'Use'**
+  String get promoUseCoupon;
+
+  /// No description provided for @promoApply.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get promoApply;
+
+  /// No description provided for @promoEnterCodeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a coupon code'**
+  String get promoEnterCodeHint;
+
+  /// No description provided for @promoViewDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'View details ›'**
+  String get promoViewDetails;
+
+  /// No description provided for @promoMinSpend.
+  ///
+  /// In en, this message translates to:
+  /// **'Min. ฿{amount}'**
+  String promoMinSpend(String amount);
+
+  /// No description provided for @promoMaxDiscount.
+  ///
+  /// In en, this message translates to:
+  /// **'Up to ฿{amount}'**
+  String promoMaxDiscount(String amount);
+
+  /// No description provided for @promoStubOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get promoStubOff;
+
+  /// No description provided for @promoHeadlinePercent.
+  ///
+  /// In en, this message translates to:
+  /// **'{value}% off'**
+  String promoHeadlinePercent(String value);
+
+  /// No description provided for @promoHeadlineBaht.
+  ///
+  /// In en, this message translates to:
+  /// **'฿{value} off'**
+  String promoHeadlineBaht(String value);
+
+  /// No description provided for @promoHeadlineFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Promotion'**
+  String get promoHeadlineFallback;
+
+  /// No description provided for @promoScopeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All services'**
+  String get promoScopeAll;
+
+  /// No description provided for @promoScopeRide.
+  ///
+  /// In en, this message translates to:
+  /// **'Rides only'**
+  String get promoScopeRide;
+
+  /// No description provided for @promoScopeFood.
+  ///
+  /// In en, this message translates to:
+  /// **'Food only'**
+  String get promoScopeFood;
+
+  /// No description provided for @promoScopeMessenger.
+  ///
+  /// In en, this message translates to:
+  /// **'Messenger only'**
+  String get promoScopeMessenger;
+
+  /// No description provided for @promoTabEverything.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get promoTabEverything;
+
+  /// No description provided for @promoTabGeneral.
+  ///
+  /// In en, this message translates to:
+  /// **'General'**
+  String get promoTabGeneral;
+
+  /// No description provided for @promoTabRide.
+  ///
+  /// In en, this message translates to:
+  /// **'Ride'**
+  String get promoTabRide;
+
+  /// No description provided for @promoTabMessenger.
+  ///
+  /// In en, this message translates to:
+  /// **'Messenger'**
+  String get promoTabMessenger;
+
+  /// No description provided for @promoMyPromos.
+  ///
+  /// In en, this message translates to:
+  /// **'My promotions'**
+  String get promoMyPromos;
+
+  /// No description provided for @promoLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading promotions...'**
+  String get promoLoading;
+
+  /// No description provided for @promoNoneNow.
+  ///
+  /// In en, this message translates to:
+  /// **'No promotions right now'**
+  String get promoNoneNow;
+
+  /// No description provided for @promoNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'This promotion wasn\'t found'**
+  String get promoNotFound;
+
+  /// No description provided for @promoInvalidCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid promotion code'**
+  String get promoInvalidCode;
+
+  /// No description provided for @promoCodeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Promo code'**
+  String get promoCodeLabel;
+
+  /// No description provided for @promoCodeCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied {code}!'**
+  String promoCodeCopied(String code);
+
+  /// No description provided for @promoTerms.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms & conditions'**
+  String get promoTerms;
+
+  /// No description provided for @promoRejectedFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'This coupon can\'t be used for this order'**
+  String get promoRejectedFallback;
+
+  /// No description provided for @promoRejectNewUser.
+  ///
+  /// In en, this message translates to:
+  /// **'This coupon is for new customers only'**
+  String get promoRejectNewUser;
+
+  /// No description provided for @promoRejectExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'This coupon has expired'**
+  String get promoRejectExpired;
+
+  /// No description provided for @promoRejectNotStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'This coupon isn\'t active yet'**
+  String get promoRejectNotStarted;
+
+  /// No description provided for @promoRejectLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve reached the usage limit for this coupon'**
+  String get promoRejectLimit;
+
+  /// No description provided for @promoRejectMinSpend.
+  ///
+  /// In en, this message translates to:
+  /// **'Your order hasn\'t reached this coupon\'s minimum'**
+  String get promoRejectMinSpend;
+
+  /// No description provided for @promoRejectNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Coupon code not found'**
+  String get promoRejectNotFound;
+
+  /// No description provided for @promoRejectWrongService.
+  ///
+  /// In en, this message translates to:
+  /// **'This coupon can\'t be used for this service'**
+  String get promoRejectWrongService;
+
+  /// No description provided for @errGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Please try again.'**
+  String get errGeneric;
+
+  /// No description provided for @errLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load data'**
+  String get errLoadFailed;
+
+  /// No description provided for @errTimeout.
+  ///
+  /// In en, this message translates to:
+  /// **'The connection timed out. Please try again.'**
+  String get errTimeout;
+
+  /// No description provided for @errConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t reach the server. Check your internet connection and try again.'**
+  String get errConnection;
+
+  /// No description provided for @errUnauthorized.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re not authorized. Please log in again.'**
+  String get errUnauthorized;
+
+  /// No description provided for @errNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'The requested information wasn\'t found.'**
+  String get errNotFound;
+
+  /// No description provided for @errTooManyRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many requests. Please try again.'**
+  String get errTooManyRequests;
+
+  /// No description provided for @errServer.
+  ///
+  /// In en, this message translates to:
+  /// **'The system is temporarily unavailable. Please try again later.'**
+  String get errServer;
+
+  /// No description provided for @errBadRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid request. Please check and try again.'**
+  String get errBadRequest;
+
+  /// No description provided for @errPlaceSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t search for places'**
+  String get errPlaceSearch;
+
+  /// No description provided for @errPlaceDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t get place details'**
+  String get errPlaceDetails;
+
+  /// No description provided for @errRecentPlaces.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load recent places'**
+  String get errRecentPlaces;
+
+  /// No description provided for @errSavedPlaces.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load saved places'**
+  String get errSavedPlaces;
+
+  /// No description provided for @errSavePlace.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t save the place'**
+  String get errSavePlace;
+
+  /// No description provided for @errSetDefaultPlace.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t set the default place'**
+  String get errSetDefaultPlace;
+
+  /// No description provided for @errGetDefaultPlace.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t get the default place'**
+  String get errGetDefaultPlace;
 }
 
 class _AppLocalizationsDelegate

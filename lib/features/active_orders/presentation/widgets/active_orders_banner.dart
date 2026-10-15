@@ -2,6 +2,7 @@ import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/features/active_orders/domain/models/active_order_item.dart';
 import 'package:customer_app/features/active_orders/presentation/controllers/active_orders_controller.dart';
+import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -24,20 +25,21 @@ class ActiveOrdersBanner extends ConsumerWidget {
 
         // Newest first per spec — surface the most recent one
         final ActiveOrderItem order = orders.first;
+        final l10n = AppLocalizations.of(context)!;
         final String statusText;
         final String title;
         final IconData icon;
         if (order.isRide) {
-          statusText = _getRideStatusText(order.status);
-          title = 'การเดินทางของคุณ';
+          statusText = _getRideStatusText(l10n, order.status);
+          title = l10n.homeActiveRide;
           icon = Icons.local_taxi;
         } else if (order.isMessenger) {
-          statusText = _getMessengerStatusText(order.status);
-          title = 'ส่งพัสดุ';
+          statusText = _getMessengerStatusText(l10n, order.status);
+          title = l10n.homeServiceParcel;
           icon = Icons.local_shipping;
         } else {
-          statusText = _getFoodStatusText(order.status);
-          title = 'ร้านอาหาร';
+          statusText = _getFoodStatusText(l10n, order.status);
+          title = l10n.homeActiveFood;
           icon = Icons.delivery_dining;
         }
 
@@ -172,7 +174,7 @@ class ActiveOrdersBanner extends ConsumerWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            'ดูสถานะ',
+                            l10n.homeViewStatus,
                             style: AppTypography.caption4.copyWith(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
@@ -220,59 +222,59 @@ class ActiveOrdersBanner extends ConsumerWidget {
     }
   }
 
-  String _getFoodStatusText(String status) {
+  String _getFoodStatusText(AppLocalizations l10n, String status) {
     final s = status.toUpperCase();
     switch (s) {
       case 'PLACED':
-        return 'กำลังส่งคำสั่งซื้อ...';
+        return l10n.homeFoodStatusPlaced;
       case 'RESTAURANT_ACCEPTED':
       case 'ACCEPTED':
       case 'CONFIRMING':
-        return 'ยืนยันการสั่งซื้อแล้ว';
+        return l10n.homeFoodStatusConfirmed;
       case 'PREPARING':
-        return 'ร้านอาหารกำลังเตรียมอาหาร...';
+        return l10n.homeFoodStatusPreparing;
       case 'READY_FOR_PICKUP':
-        return 'ปรุงเสร็จแล้ว - รอรับอาหาร';
+        return l10n.homeFoodStatusReady;
       case 'DRIVER_ASSIGNED':
-        return 'จับคู่คนส่งอาหารสำเร็จ';
+        return l10n.homeFoodStatusRiderAssigned;
       case 'DRIVER_PICKED_UP':
       case 'PICKED_UP':
-        return 'คนขับกำลังจัดส่งอาหารให้คุณ';
+        return l10n.homeFoodStatusOnTheWay;
       default:
-        return 'กำลังดำเนินการ...';
+        return l10n.homeStatusInProgress;
     }
   }
 
-  String _getRideStatusText(String status) {
+  String _getRideStatusText(AppLocalizations l10n, String status) {
     final s = status.toUpperCase();
     switch (s) {
       case 'PENDING':
-        return 'กำลังค้นหาคนขับ...';
+        return l10n.homeStatusFindingDriver;
       case 'ACCEPTED':
-        return 'คนขับตอบรับแล้ว';
+        return l10n.homeRideStatusAccepted;
       case 'ARRIVED_AT_PICK_UP':
-        return 'คนขับถึงจุดรับแล้ว';
+        return l10n.homeRideStatusArrived;
       case 'PICKED_UP':
-        return 'กำลังเดินทาง';
+        return l10n.homeRideStatusOnTrip;
       default:
-        return 'กำลังดำเนินการ...';
+        return l10n.homeStatusInProgress;
     }
   }
 
   // Messenger uses ARRIVED_AT_PICKUP — no middle underscore, unlike ride.
-  String _getMessengerStatusText(String status) {
+  String _getMessengerStatusText(AppLocalizations l10n, String status) {
     final s = status.toUpperCase();
     switch (s) {
       case 'PENDING':
-        return 'กำลังค้นหาคนขับ...';
+        return l10n.homeStatusFindingDriver;
       case 'ACCEPTED':
-        return 'คนขับรับงานแล้ว';
+        return l10n.homeParcelStatusAccepted;
       case 'ARRIVED_AT_PICKUP':
-        return 'คนขับถึงจุดรับพัสดุ';
+        return l10n.homeParcelStatusArrived;
       case 'PICKED_UP':
-        return 'กำลังนำส่งพัสดุ';
+        return l10n.homeParcelStatusDelivering;
       default:
-        return 'กำลังดำเนินการ...';
+        return l10n.homeStatusInProgress;
     }
   }
 }

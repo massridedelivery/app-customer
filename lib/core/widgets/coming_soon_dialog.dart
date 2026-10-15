@@ -1,5 +1,6 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
+import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 /// A friendly "coming soon" dialog for features that aren't live yet
@@ -9,14 +10,16 @@ import 'package:flutter/material.dart';
 ///
 /// Pass [iconAsset] (a 3D service icon) to swap the default rocket for the
 /// tapped section's own icon; [title] customises the headline (e.g.
-/// "เร็วๆ นี้ในพื้นที่ของคุณ" for the out-of-area case).
+/// "เร็วๆ นี้ในพื้นที่ของคุณ" for the out-of-area case). [title] and [message]
+/// default to the localized "เร็วๆ นี้" / "Coming soon" texts.
 Future<void> showComingSoonDialog(
   BuildContext context, {
-  String title = 'เร็วๆ นี้',
-  String message = 'กำลังจะเปิดให้บริการเร็วๆ นี้',
+  String? title,
+  String? message,
   String? iconAsset,
   String? locationLabel,
 }) {
+  final l10n = AppLocalizations.of(context)!;
   return showDialog<void>(
     context: context,
     builder: (ctx) => Dialog(
@@ -45,7 +48,7 @@ Future<void> showComingSoonDialog(
             ),
             const SizedBox(height: 16),
             Text(
-              title,
+              title ?? l10n.commonComingSoon,
               textAlign: TextAlign.center,
               style: AppTypography.heading4.copyWith(
                 color: AppColors.textPrimary,
@@ -53,7 +56,7 @@ Future<void> showComingSoonDialog(
             ),
             const SizedBox(height: 8),
             Text(
-              message,
+              message ?? l10n.commonComingSoonMessage,
               textAlign: TextAlign.center,
               style: AppTypography.body2.copyWith(
                 color: AppColors.textSecondary,
@@ -102,7 +105,7 @@ Future<void> showComingSoonDialog(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: Text('รับทราบ', style: AppTypography.label2),
+                child: Text(l10n.commonGotIt, style: AppTypography.label2),
               ),
             ),
           ],

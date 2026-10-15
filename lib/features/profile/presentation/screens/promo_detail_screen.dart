@@ -46,10 +46,11 @@ class PromoDetailScreen extends ConsumerWidget {
         // 404 = promo closed/removed, 400 = bad id → a message + "back";
         // anything else (5xx / network) → message + "retry", never a stuck spinner.
         final bool gone = status == 404 || status == 400;
+        final l10n = AppLocalizations.of(context)!;
         final String msg = status == 404
-            ? 'ไม่พบโปรโมชันนี้'
+            ? l10n.promoNotFound
             : status == 400
-                ? 'รหัสโปรโมชันไม่ถูกต้อง'
+                ? l10n.promoInvalidCode
                 : friendlyError(e);
         return Scaffold(
           backgroundColor: AppColors.background,
@@ -76,7 +77,7 @@ class PromoDetailScreen extends ConsumerWidget {
                   if (gone)
                     OutlinedButton(
                       onPressed: () => Navigator.of(context).pop(),
-                      child: const Text('กลับ'),
+                      child: Text(l10n.commonBack),
                     )
                   else
                     ElevatedButton(
@@ -85,9 +86,9 @@ class PromoDetailScreen extends ConsumerWidget {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
                       ),
-                      child: const Text(
-                        'ลองใหม่',
-                        style: TextStyle(color: Colors.white),
+                      child: Text(
+                        l10n.tryAgain,
+                        style: const TextStyle(color: Colors.white),
                       ),
                     ),
                 ],
@@ -112,7 +113,7 @@ class PromoDetailScreen extends ConsumerWidget {
                     _buildCodeSection(context, promo),
                     _buildExpiry(context, promo),
                     const SizedBox(height: 32),
-                    _buildTermsSection(promo),
+                    _buildTermsSection(context, promo),
                     const SizedBox(height: 100),
                   ],
                 ),
@@ -149,6 +150,7 @@ class PromoDetailScreen extends ConsumerWidget {
     final tag = (promo['tag'] ?? '').toString().trim();
     final title = (promo['title'] ?? promo['name'] ?? '').toString();
     final expiry = _expiryDate(promo);
+    final l10n = AppLocalizations.of(context)!;
 
     return Stack(
       children: [
@@ -185,7 +187,7 @@ class PromoDetailScreen extends ConsumerWidget {
               children: [
                 Row(
                   children: [
-                    _pill(scope.label, scope.foreground, scope.background),
+                    _pill(scope.label(l10n), scope.foreground, scope.background),
                     if (tag.isNotEmpty) ...[
                       const SizedBox(width: 6),
                       _pill(tag, barColor, barColor.withValues(alpha: 0.1)),
@@ -193,7 +195,7 @@ class PromoDetailScreen extends ConsumerWidget {
                     const Spacer(),
                     if (expiry != null)
                       Text(
-                        AppLocalizations.of(context)!.promoValidUntilShort(AppDates.of(context).date(expiry)),
+                        l10n.promoValidUntilShort(AppDates.of(context).date(expiry)),
                         style: AppTypography.caption5.copyWith(
                           color: AppColors.textSecondary,
                         ),
@@ -202,7 +204,7 @@ class PromoDetailScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 10),
                 Text(
-                  promoHeadlineOf(promo, fallback: title),
+                  promoHeadlineOf(promo, l10n, fallback: title),
                   style: TextStyle(
                     fontSize: 30,
                     fontWeight: FontWeight.w800,
@@ -320,7 +322,7 @@ class PromoDetailScreen extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'รหัสโปรโมชัน',
+                          AppLocalizations.of(context)!.promoCodeLabel,
                           style: AppTypography.caption4.copyWith(
                             color: AppColors.textSecondary,
                             fontWeight: FontWeight.w500,
@@ -350,7 +352,7 @@ class PromoDetailScreen extends ConsumerWidget {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(
-                            'คัดลอกรหัส $code แล้ว!',
+                            AppLocalizations.of(context)!.promoCodeCopied('$code'),
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                           backgroundColor: barColor,
@@ -367,7 +369,7 @@ class PromoDetailScreen extends ConsumerWidget {
                       textStyle: AppTypography.label1,
                     ),
                     child: Text(
-                      'คัดลอก',
+                      AppLocalizations.of(context)!.commonCopy,
                       style: AppTypography.caption3.copyWith(
                         color: AppColors.textSecondary,
                       ),
@@ -411,7 +413,7 @@ class PromoDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildTermsSection(Map<String, dynamic> promo) {
+  Widget _buildTermsSection(BuildContext context, Map<String, dynamic> promo) {
     final terms = promo['terms'] as List<dynamic>? ?? [];
     // Hide the whole section when the backend sends no terms, so it doesn't
     // leave a dangling header.
@@ -419,7 +421,10 @@ class PromoDetailScreen extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('ข้อกำหนดและเงื่อนไข', style: AppTypography.heading4),
+        Text(
+          AppLocalizations.of(context)!.promoTerms,
+          style: AppTypography.heading4,
+        ),
         const SizedBox(height: 16),
         ...terms.map(
           (term) => Padding(

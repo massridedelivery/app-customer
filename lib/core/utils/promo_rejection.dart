@@ -1,14 +1,18 @@
-/// Turning a promo-validate rejection into a Thai message for the coupon
-/// screens. The backend reports a refused code either as a non-2xx with a
-/// `message`/`error`, or as a 200 whose `applied[]` lacks the code (optionally
-/// with a `rejected[]` entry carrying a `reason`). Its reasons are English and
-/// unstable, so only well-known ones are translated; anything else falls back
-/// to a generic line instead of showing raw English.
+/// Turning a promo-validate rejection into a message for the coupon screens,
+/// in the app's current language. The backend reports a refused code either as
+/// a non-2xx with a `message`/`error`, or as a 200 whose `applied[]` lacks the
+/// code (optionally with a `rejected[]` entry carrying a `reason`). Its reasons
+/// are English and unstable, so only well-known ones are mapped (to Thai in
+/// Thai mode, to clean English otherwise); anything else falls back to a
+/// generic line instead of showing the raw reason.
 library;
 
-const String kPromoRejectedFallback = 'ใช้คูปองนี้กับรายการนี้ไม่ได้';
+import 'package:customer_app/core/localization/app_language.dart';
 
-/// The Thai message for a validate response that did not apply [code].
+/// Generic "this coupon can't be used here" line, in the current language.
+String get kPromoRejectedFallback => AppLanguage.l10n().promoRejectedFallback;
+
+/// The message for a validate response that did not apply [code].
 String promoRejectionMessage(Map<String, dynamic> response, String code) {
   final upper = code.toUpperCase();
   final rejected = response['rejected'];
@@ -28,40 +32,42 @@ String promoRejectionMessage(Map<String, dynamic> response, String code) {
       kPromoRejectedFallback;
 }
 
-/// Maps a known backend rejection reason to Thai; null when unrecognised.
-/// A reason that is already Thai is returned as-is.
-String? promoReasonToThai(String? reason) {
+/// Maps a known backend rejection reason to a message in the current
+/// language (Thai in Thai mode, English otherwise; [languageCode] overrides);
+/// null when unrecognised. A reason that is already Thai is returned as-is.
+String? promoReasonToThai(String? reason, {String? languageCode}) {
   final raw = (reason ?? '').trim();
   if (raw.isEmpty) return null;
   if (RegExp(r'[฀-๿]').hasMatch(raw)) return raw;
 
+  final l10n = AppLanguage.l10n(languageCode);
   final s = raw.toLowerCase();
   if (s.contains('new user') || s.contains('first')) {
-    return 'คูปองนี้สำหรับลูกค้าใหม่เท่านั้น';
+    return l10n.promoRejectNewUser;
   }
-  if (s.contains('expire')) return 'คูปองนี้หมดอายุแล้ว';
+  if (s.contains('expire')) return l10n.promoRejectExpired;
   if (s.contains('not started') || s.contains('not yet')) {
-    return 'คูปองนี้ยังไม่เริ่มใช้งาน';
+    return l10n.promoRejectNotStarted;
   }
   if (s.contains('limit') ||
       s.contains('already used') ||
       s.contains('used up')) {
-    return 'คุณใช้สิทธิ์คูปองนี้ครบแล้ว';
+    return l10n.promoRejectLimit;
   }
   if (s.contains('minimum') ||
       s.contains('min order') ||
       s.contains('min_spend')) {
-    return 'ยอดยังไม่ถึงขั้นต่ำของคูปองนี้';
+    return l10n.promoRejectMinSpend;
   }
   if (s.contains('not found') ||
       s.contains('invalid code') ||
       s.contains('invalid promo')) {
-    return 'ไม่พบรหัสคูปองนี้';
+    return l10n.promoRejectNotFound;
   }
   if (s.contains('not applicable') ||
       s.contains('scope') ||
       s.contains('service')) {
-    return 'คูปองนี้ใช้กับบริการนี้ไม่ได้';
+    return l10n.promoRejectWrongService;
   }
   return null;
 }

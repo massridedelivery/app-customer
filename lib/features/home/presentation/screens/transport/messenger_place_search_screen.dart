@@ -114,7 +114,9 @@ class _MessengerPlaceSearchScreenState
       backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text(
-          _isDropoff ? 'เลือกจุดส่งพัสดุ' : 'เลือกจุดรับพัสดุ',
+          _isDropoff
+              ? l10n.homeChooseParcelDropoff
+              : l10n.homeChooseParcelPickup,
           style: AppTypography.heading4,
         ),
         backgroundColor: Colors.white,
@@ -171,8 +173,8 @@ class _MessengerPlaceSearchScreenState
                 textInputAction: TextInputAction.search,
                 decoration: InputDecoration(
                   hintText: _isDropoff
-                      ? 'ค้นหาจุดส่งพัสดุ'
-                      : 'ค้นหาจุดรับพัสดุ',
+                      ? AppLocalizations.of(context)!.homeSearchParcelDropoff
+                      : AppLocalizations.of(context)!.homeSearchParcelPickup,
                   border: InputBorder.none,
                   isDense: true,
                   contentPadding: EdgeInsets.zero,

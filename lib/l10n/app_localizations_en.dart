@@ -2249,4 +2249,458 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get payCheckIntentFailed => 'Couldn\'t check the payment';
+
+  @override
+  String get homeChooseDeliveryLocation => 'Deliver to';
+
+  @override
+  String get homePleaseChooseLocation => 'Choose a location';
+
+  @override
+  String get homeWhatToOrder => 'What are you craving?';
+
+  @override
+  String get homeServiceRide => 'Ride';
+
+  @override
+  String get homeServiceRideSub => 'Your first ride';
+
+  @override
+  String get homeServiceFood => 'Food';
+
+  @override
+  String get homeServiceFoodSub => 'Best prices daily';
+
+  @override
+  String get homeServiceMessenger => 'Messenger';
+
+  @override
+  String get homeServiceMessengerSub => 'Parcels & packages';
+
+  @override
+  String get homeServiceParcel => 'Parcel delivery';
+
+  @override
+  String get homeYourArea => 'your area';
+
+  @override
+  String get homeComingSoonInYourArea => 'Coming soon to your area';
+
+  @override
+  String homeZoneComingSoonMessage(String service, String area) {
+    return '$service is coming soon to $area. Drivers may not be available yet.';
+  }
+
+  @override
+  String homeYourLocation(String area) {
+    return 'Your location: $area';
+  }
+
+  @override
+  String get homeArticlesTitle => 'Tips & insights from MASS';
+
+  @override
+  String get homeArticleCatServices => 'Our services';
+
+  @override
+  String get homeArticleCatTips => 'Tips';
+
+  @override
+  String get homeArticleCatSafety => 'Safety';
+
+  @override
+  String get homeArticleMassTitle =>
+      'What is MASS? Meet the Thai super app that does it all';
+
+  @override
+  String get homeArticleFoodTitle =>
+      '5 tips for food delivery that\'s great value and as tasty as dining in';
+
+  @override
+  String get homeArticleRideTitle =>
+      'Ride safe with MASS Ride: safety features you should know';
+
+  @override
+  String get homePromosForYou => 'Promotions for you';
+
+  @override
+  String get homeRecentTrips => 'Recent trips';
+
+  @override
+  String get homeSelectedLocation => 'Selected location';
+
+  @override
+  String get homeActiveRide => 'Your ride';
+
+  @override
+  String get homeActiveFood => 'Food order';
+
+  @override
+  String get homeViewStatus => 'View status';
+
+  @override
+  String get homeStatusInProgress => 'In progress...';
+
+  @override
+  String get homeStatusFindingDriver => 'Finding a driver...';
+
+  @override
+  String get homeFoodStatusPlaced => 'Placing your order...';
+
+  @override
+  String get homeFoodStatusConfirmed => 'Order confirmed';
+
+  @override
+  String get homeFoodStatusPreparing =>
+      'The restaurant is preparing your food...';
+
+  @override
+  String get homeFoodStatusReady => 'Ready - waiting for pickup';
+
+  @override
+  String get homeFoodStatusRiderAssigned => 'Rider assigned';
+
+  @override
+  String get homeFoodStatusOnTheWay => 'Your food is on the way';
+
+  @override
+  String get homeRideStatusAccepted => 'Driver accepted';
+
+  @override
+  String get homeRideStatusArrived => 'Driver has arrived at pickup';
+
+  @override
+  String get homeRideStatusOnTrip => 'On the way';
+
+  @override
+  String get homeParcelStatusAccepted => 'Driver accepted the job';
+
+  @override
+  String get homeParcelStatusArrived => 'Driver is at the pickup point';
+
+  @override
+  String get homeParcelStatusDelivering => 'Delivering your parcel';
+
+  @override
+  String get homeChooseAddress => 'Choose address';
+
+  @override
+  String get homeUseThisPickup => 'Use this pickup point';
+
+  @override
+  String get homeUseThisFoodDropoff => 'Deliver food here';
+
+  @override
+  String get homeUseThisDestination => 'Use this destination';
+
+  @override
+  String get homePlaceNameHint => 'e.g. Home, Work, Gym';
+
+  @override
+  String get homeChooseParcelDropoff => 'Choose drop-off point';
+
+  @override
+  String get homeChooseParcelPickup => 'Choose pickup point';
+
+  @override
+  String get homeSearchParcelDropoff => 'Search for a drop-off point';
+
+  @override
+  String get homeSearchParcelPickup => 'Search for a pickup point';
+
+  @override
+  String get homeFoodLocationTitle => 'Delivery location';
+
+  @override
+  String get homeFoodWhereHint => 'Where should we deliver?';
+
+  @override
+  String get homeChooseOnMap => 'Choose on map';
+
+  @override
+  String get homeNoRecentPlaces => 'No recent places yet';
+
+  @override
+  String get homeNoSavedPlaces => 'No saved places yet';
+
+  @override
+  String get homeSearchFoodHint => 'Search restaurants or dishes';
+
+  @override
+  String homeErrorDetail(String error) {
+    return 'Error: $error';
+  }
+
+  @override
+  String get homeSearchFoodPrompt => 'Search for what you\'re craving';
+
+  @override
+  String homeNoResultsFor(String query) {
+    return 'No results for \"$query\"';
+  }
+
+  @override
+  String get homeRestaurants => 'Restaurants';
+
+  @override
+  String get homeRestaurant => 'Restaurant';
+
+  @override
+  String get homeCategoryNotFound => 'Category not found';
+
+  @override
+  String get homeNoRestaurantsInCategory => 'No restaurants in this category';
+
+  @override
+  String get homeClosed => 'Closed';
+
+  @override
+  String homeStartingPrice(String price) {
+    return 'From ฿$price';
+  }
+
+  @override
+  String homeSelectAtLeast(int count) {
+    return 'Select at least $count';
+  }
+
+  @override
+  String get homeOptionalAddOns => 'Optional add-ons';
+
+  @override
+  String homeUpToItems(int count) {
+    return '(up to $count)';
+  }
+
+  @override
+  String get homeSpecialInstructions => 'Special instructions';
+
+  @override
+  String get homeOptional => 'Optional';
+
+  @override
+  String get homeNoteHint => 'e.g. less spicy, no fried garlic';
+
+  @override
+  String homeAddToCart(String total) {
+    return 'Add to cart - ฿$total';
+  }
+
+  @override
+  String get commonComingSoon => 'Coming soon';
+
+  @override
+  String get commonComingSoonMessage => 'This service is launching soon.';
+
+  @override
+  String get commonGotIt => 'Got it';
+
+  @override
+  String get commonCantConnect => 'Can\'t connect to the internet';
+
+  @override
+  String get commonNoInternet => 'No internet connection';
+
+  @override
+  String get commonWeakConnection => 'Weak or unstable connection';
+
+  @override
+  String get commonCheckWifi => 'Check your Wi-Fi or mobile data';
+
+  @override
+  String get commonSlowConnection =>
+      'Slow connection, things may not run smoothly';
+
+  @override
+  String get commonGoToSettings => 'Settings';
+
+  @override
+  String get commonCheckAgain => 'Check again';
+
+  @override
+  String get commonLoginFirst => 'Please log in';
+
+  @override
+  String get commonLoginToUse => 'Log in to use this service';
+
+  @override
+  String get commonContinueBrowsing => 'Continue browsing';
+
+  @override
+  String get commonLoadError => 'Something went wrong while loading';
+
+  @override
+  String get commonNext => 'Next';
+
+  @override
+  String get commonBack => 'Back';
+
+  @override
+  String get commonCopy => 'Copy';
+
+  @override
+  String get promoUseCoupon => 'Use';
+
+  @override
+  String get promoApply => 'Apply';
+
+  @override
+  String get promoEnterCodeHint => 'Enter a coupon code';
+
+  @override
+  String get promoViewDetails => 'View details ›';
+
+  @override
+  String promoMinSpend(String amount) {
+    return 'Min. ฿$amount';
+  }
+
+  @override
+  String promoMaxDiscount(String amount) {
+    return 'Up to ฿$amount';
+  }
+
+  @override
+  String get promoStubOff => 'Save';
+
+  @override
+  String promoHeadlinePercent(String value) {
+    return '$value% off';
+  }
+
+  @override
+  String promoHeadlineBaht(String value) {
+    return '฿$value off';
+  }
+
+  @override
+  String get promoHeadlineFallback => 'Promotion';
+
+  @override
+  String get promoScopeAll => 'All services';
+
+  @override
+  String get promoScopeRide => 'Rides only';
+
+  @override
+  String get promoScopeFood => 'Food only';
+
+  @override
+  String get promoScopeMessenger => 'Messenger only';
+
+  @override
+  String get promoTabEverything => 'All';
+
+  @override
+  String get promoTabGeneral => 'General';
+
+  @override
+  String get promoTabRide => 'Ride';
+
+  @override
+  String get promoTabMessenger => 'Messenger';
+
+  @override
+  String get promoMyPromos => 'My promotions';
+
+  @override
+  String get promoLoading => 'Loading promotions...';
+
+  @override
+  String get promoNoneNow => 'No promotions right now';
+
+  @override
+  String get promoNotFound => 'This promotion wasn\'t found';
+
+  @override
+  String get promoInvalidCode => 'Invalid promotion code';
+
+  @override
+  String get promoCodeLabel => 'Promo code';
+
+  @override
+  String promoCodeCopied(String code) {
+    return 'Copied $code!';
+  }
+
+  @override
+  String get promoTerms => 'Terms & conditions';
+
+  @override
+  String get promoRejectedFallback =>
+      'This coupon can\'t be used for this order';
+
+  @override
+  String get promoRejectNewUser => 'This coupon is for new customers only';
+
+  @override
+  String get promoRejectExpired => 'This coupon has expired';
+
+  @override
+  String get promoRejectNotStarted => 'This coupon isn\'t active yet';
+
+  @override
+  String get promoRejectLimit =>
+      'You\'ve reached the usage limit for this coupon';
+
+  @override
+  String get promoRejectMinSpend =>
+      'Your order hasn\'t reached this coupon\'s minimum';
+
+  @override
+  String get promoRejectNotFound => 'Coupon code not found';
+
+  @override
+  String get promoRejectWrongService =>
+      'This coupon can\'t be used for this service';
+
+  @override
+  String get errGeneric => 'Something went wrong. Please try again.';
+
+  @override
+  String get errLoadFailed => 'Couldn\'t load data';
+
+  @override
+  String get errTimeout => 'The connection timed out. Please try again.';
+
+  @override
+  String get errConnection =>
+      'Can\'t reach the server. Check your internet connection and try again.';
+
+  @override
+  String get errUnauthorized => 'You\'re not authorized. Please log in again.';
+
+  @override
+  String get errNotFound => 'The requested information wasn\'t found.';
+
+  @override
+  String get errTooManyRequests => 'Too many requests. Please try again.';
+
+  @override
+  String get errServer =>
+      'The system is temporarily unavailable. Please try again later.';
+
+  @override
+  String get errBadRequest => 'Invalid request. Please check and try again.';
+
+  @override
+  String get errPlaceSearch => 'Couldn\'t search for places';
+
+  @override
+  String get errPlaceDetails => 'Couldn\'t get place details';
+
+  @override
+  String get errRecentPlaces => 'Couldn\'t load recent places';
+
+  @override
+  String get errSavedPlaces => 'Couldn\'t load saved places';
+
+  @override
+  String get errSavePlace => 'Couldn\'t save the place';
+
+  @override
+  String get errSetDefaultPlace => 'Couldn\'t set the default place';
+
+  @override
+  String get errGetDefaultPlace => 'Couldn\'t get the default place';
 }

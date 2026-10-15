@@ -1,10 +1,14 @@
 import 'package:customer_app/core/widgets/async_state_view.dart';
 import 'package:customer_app/core/widgets/mass_loading_m.dart';
+import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Widget _host(Widget child) => MaterialApp(
   debugShowCheckedModeBanner: false,
+  localizationsDelegates: AppLocalizations.localizationsDelegates,
+  supportedLocales: AppLocalizations.supportedLocales,
+  locale: const Locale('th'),
   home: Scaffold(
     backgroundColor: Colors.white,
     body: Center(child: child),
@@ -54,6 +58,19 @@ void main() {
     testWidgets('falls back to the default message', (tester) async {
       await tester.pumpWidget(_host(const ErrorRetryView()));
       expect(find.text('เกิดข้อผิดพลาดในการโหลดข้อมูล'), findsOneWidget);
+    });
+
+    testWidgets('English mode uses English defaults', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('en'),
+          home: Scaffold(body: ErrorRetryView(onRetry: () {})),
+        ),
+      );
+      expect(find.text('Something went wrong while loading'), findsOneWidget);
+      expect(find.text('Try Again'), findsOneWidget);
     });
 
     testWidgets('honours a custom retry label', (tester) async {

@@ -1,3 +1,4 @@
+import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:customer_app/core/utils/app_dates.dart';
 import 'package:customer_app/core/constants/app_assets.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
@@ -246,6 +247,7 @@ class _ServiceSelectionScreenState
   }
 
   Widget _buildTopNav(BuildContext context, HomeState homeState) {
+    final l10n = AppLocalizations.of(context)!;
     return Row(
       children: [
         Expanded(
@@ -266,7 +268,7 @@ class _ServiceSelectionScreenState
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'เลือกสถานที่จัดส่ง',
+                        l10n.homeChooseDeliveryLocation,
                         style: AppTypography.caption4.copyWith(
                           color: Colors.white70,
                         ),
@@ -275,7 +277,8 @@ class _ServiceSelectionScreenState
                         children: [
                           Flexible(
                             child: Text(
-                              homeState.foodAddress ?? 'โปรดเลือกสถานที่',
+                              homeState.foodAddress ??
+                                  l10n.homePleaseChooseLocation,
                               style: AppTypography.label2.copyWith(
                                 color: Colors.white,
                               ),
@@ -332,7 +335,7 @@ class _ServiceSelectionScreenState
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                'สั่งอะไรดี?',
+                AppLocalizations.of(context)!.homeWhatToOrder,
                 style: AppTypography.caption3.copyWith(color: Colors.black54),
               ),
             ),
@@ -361,13 +364,14 @@ class _ServiceSelectionScreenState
     BuildContext context,
     List<Map<String, dynamic>> promos,
   ) {
+    final l10n = AppLocalizations.of(context)!;
     // Badge per service, derived from the real promo list. Null → no badge.
-    final rideBadge = serviceBadgeOf(promos, 'ride');
+    final rideBadge = serviceBadgeOf(promos, 'ride', l10n);
     // Food ordering isn't live (the card opens "coming soon"), so it gets no
     // badge — a discount on a service nobody can use reads as bait. Restore
     // `serviceBadgeOf(promos, 'food')` when the card opens the real flow.
     const ({String text, Color color})? foodBadge = null;
-    final messengerBadge = serviceBadgeOf(promos, 'messenger');
+    final messengerBadge = serviceBadgeOf(promos, 'messenger', l10n);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12),
       child: GridView.count(
@@ -385,22 +389,22 @@ class _ServiceSelectionScreenState
         children: [
           _buildServiceCard(
             context,
-            'เรียกรถ',
-            'เรียกครั้งแรก',
+            l10n.homeServiceRide,
+            l10n.homeServiceRideSub,
             rideBadge?.text,
             rideBadge?.color,
             AppAssets.ic3dRide,
             onTap: () => _openWithZoneCheck(
               service: 'ride',
               iconAsset: AppAssets.ic3dRide,
-              serviceName: 'เรียกรถ',
+              serviceName: l10n.homeServiceRide,
               onAvailable: () => context.push('/ride-landing'),
             ),
           ),
           _buildServiceCard(
             context,
-            'สั่งอาหาร',
-            'ถูกสุดทุกวัน',
+            l10n.homeServiceFood,
+            l10n.homeServiceFoodSub,
             foodBadge?.text,
             foodBadge?.color,
             AppAssets.ic3dFood,
@@ -410,15 +414,15 @@ class _ServiceSelectionScreenState
           ),
           _buildServiceCard(
             context,
-            'เมสเซนเจอร์',
-            'ส่งของ พัสดุ',
+            l10n.homeServiceMessenger,
+            l10n.homeServiceMessengerSub,
             messengerBadge?.text,
             messengerBadge?.color,
             AppAssets.ic3dMessenger,
             onTap: () => _openWithZoneCheck(
               service: 'messenger',
               iconAsset: AppAssets.ic3dMessenger,
-              serviceName: 'ส่งพัสดุ',
+              serviceName: l10n.homeServiceParcel,
               onAvailable: () {
                 // If a messenger order is already running, resume it instead of
                 // letting the customer start a second one.
@@ -461,16 +465,16 @@ class _ServiceSelectionScreenState
       onAvailable();
       return;
     }
+    final l10n = AppLocalizations.of(context)!;
     final area =
-        result.areaName.isNotEmpty ? result.areaName : 'พื้นที่ของคุณ';
+        result.areaName.isNotEmpty ? result.areaName : l10n.homeYourArea;
     // Out of area → notify, then continue into the flow on acknowledge.
     await showComingSoonDialog(
       context,
-      title: 'เร็วๆ นี้ในพื้นที่ของคุณ',
-      message:
-          'บริการ$serviceName ใน$areaกำลังจะเปิดเร็วๆ นี้ ขณะนี้อาจยังไม่มีคนขับพร้อมให้บริการ',
+      title: l10n.homeComingSoonInYourArea,
+      message: l10n.homeZoneComingSoonMessage(serviceName, area),
       iconAsset: iconAsset,
-      locationLabel: 'ตำแหน่งของคุณ: $area',
+      locationLabel: l10n.homeYourLocation(area),
     );
     if (mounted) onAvailable(); // proceed after the heads-up
   }
@@ -562,26 +566,27 @@ class _ServiceSelectionScreenState
 
   // ─── Latest articles (massridedelivery.com/blog) ──────────────────────────
   Widget _buildArticlesSection(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final articles =
         <({String image, String category, String title, DateTime date, String url})>[
       (
         image: 'assets/images/article_mass.webp',
-        category: 'แนะนำบริการ',
-        title: 'MASS คืออะไร? รู้จักซูเปอร์แอปสัญชาติไทยที่ครบจบในแอปเดียว',
+        category: l10n.homeArticleCatServices,
+        title: l10n.homeArticleMassTitle,
         date: DateTime(2026, 6, 15),
         url: 'https://massridedelivery.com/blog/what-is-mass-super-app',
       ),
       (
         image: 'assets/images/article_food.webp',
-        category: 'เคล็ดลับ',
-        title: '5 เคล็ดลับสั่งอาหารเดลิเวอรีให้คุ้มค่าและอร่อยเหมือนทานที่ร้าน',
+        category: l10n.homeArticleCatTips,
+        title: l10n.homeArticleFoodTitle,
         date: DateTime(2026, 6, 22),
         url: 'https://massridedelivery.com/blog/food-delivery-tips',
       ),
       (
         image: 'assets/images/article_ride.webp',
-        category: 'ความปลอดภัย',
-        title: 'เดินทางปลอดภัยกับ MASS Ride: ฟีเจอร์ความปลอดภัยที่คุณควรรู้',
+        category: l10n.homeArticleCatSafety,
+        title: l10n.homeArticleRideTitle,
         date: DateTime(2026, 6, 28),
         url: 'https://massridedelivery.com/blog/ride-safety-features',
       ),
@@ -593,7 +598,7 @@ class _ServiceSelectionScreenState
         Padding(
           padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
           child: Text(
-            'ความรู้และเคล็ดลับจาก MASS',
+            l10n.homeArticlesTitle,
             style: AppTypography.heading5.copyWith(
               fontWeight: FontWeight.bold,
               color: AppColors.textPrimary,

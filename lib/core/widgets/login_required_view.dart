@@ -1,5 +1,6 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
+import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -8,17 +9,21 @@ import 'package:go_router/go_router.dart';
 /// #3). Guests browse non-account features freely (App Store 5.1.1); this
 /// replaces the screen's content with a card and a button into the login flow.
 class LoginRequiredView extends StatelessWidget {
-  final String title;
-  final String message;
+  /// Defaults to the localized "เข้าสู่ระบบก่อน" / "Please log in".
+  final String? title;
+
+  /// Defaults to the localized "กรุณาเข้าสู่ระบบเพื่อใช้บริการนี้".
+  final String? message;
 
   const LoginRequiredView({
     super.key,
-    this.title = 'เข้าสู่ระบบก่อน',
-    this.message = 'กรุณาเข้าสู่ระบบเพื่อใช้บริการนี้',
+    this.title,
+    this.message,
   });
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       color: AppColors.foundationGrayscale100,
       alignment: Alignment.center,
@@ -58,7 +63,7 @@ class LoginRequiredView extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               Text(
-                title,
+                title ?? l10n.commonLoginFirst,
                 textAlign: TextAlign.center,
                 style: AppTypography.heading4.copyWith(
                   color: AppColors.textPrimary,
@@ -66,7 +71,7 @@ class LoginRequiredView extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                message,
+                message ?? l10n.commonLoginToUse,
                 textAlign: TextAlign.center,
                 style: AppTypography.body2.copyWith(
                   color: AppColors.textSecondary,
@@ -86,7 +91,7 @@ class LoginRequiredView extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: Text('เข้าสู่ระบบ', style: AppTypography.label2),
+                  child: Text(l10n.signIn, style: AppTypography.label2),
                 ),
               ),
               const SizedBox(height: 4),
@@ -99,7 +104,7 @@ class LoginRequiredView extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 10),
                   ),
                   child: Text(
-                    'ดูบริการต่อ',
+                    l10n.commonContinueBrowsing,
                     style: AppTypography.label2.copyWith(
                       color: AppColors.textSecondary,
                     ),

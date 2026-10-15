@@ -1,3 +1,5 @@
+import 'package:customer_app/core/localization/app_language.dart';
+import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:dio/dio.dart';
 
 /// Maps any thrown error (especially a [DioException]) to a short, user-facing
@@ -6,8 +8,16 @@ import 'package:dio/dio.dart';
 /// for diagnosis. Prefer the server-provided message when present so the real
 /// reason (e.g. which field failed a 422 validation) surfaces instead of a
 /// generic string.
-String apiErrorMessage(Object? error, {String? fallback}) {
-  final generic = fallback ?? 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง';
+///
+/// Our own messages follow the app's current language ([languageCode]
+/// overrides it); a server-provided message is shown as sent.
+String apiErrorMessage(
+  Object? error, {
+  String? fallback,
+  String? languageCode,
+}) {
+  final l10n = AppLanguage.l10n(languageCode);
+  final generic = fallback ?? l10n.errGeneric;
   if (error == null) return generic;
 
   if (error is DioException) {
@@ -15,14 +25,14 @@ String apiErrorMessage(Object? error, {String? fallback}) {
       case DioExceptionType.connectionTimeout:
       case DioExceptionType.sendTimeout:
       case DioExceptionType.receiveTimeout:
-        return 'การเชื่อมต่อใช้เวลานานเกินไป กรุณาลองใหม่';
+        return l10n.errTimeout;
       case DioExceptionType.connectionError:
-        return 'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองใหม่';
+        return l10n.errConnection;
       case DioExceptionType.badResponse:
         // The server's own message is the most useful — it names the reason.
         final serverMsg = _serverMessage(error.response?.data);
         if (serverMsg != null) return serverMsg;
-        return _statusMessage(error.response?.statusCode) ?? generic;
+        return _statusMessage(error.response?.statusCode, l10n) ?? generic;
       case DioExceptionType.cancel:
       case DioExceptionType.badCertificate:
       case DioExceptionType.unknown:
@@ -53,14 +63,12 @@ String? _serverMessage(dynamic data) {
   return null;
 }
 
-String? _statusMessage(int? status) {
+String? _statusMessage(int? status, AppLocalizations l10n) {
   if (status == null) return null;
-  if (status == 401 || status == 403) {
-    return 'ไม่มีสิทธิ์ใช้งาน กรุณาเข้าสู่ระบบใหม่';
-  }
-  if (status == 404) return 'ไม่พบข้อมูลที่ต้องการ';
-  if (status == 429) return 'มีคำขอมากเกินไป กรุณาลองใหม่อีกครั้ง';
-  if (status >= 500) return 'ระบบขัดข้องชั่วคราว กรุณาลองใหม่ภายหลัง';
-  if (status >= 400) return 'ข้อมูลคำขอไม่ถูกต้อง กรุณาตรวจสอบแล้วลองใหม่';
+  if (status == 401 || status == 403) return l10n.errUnauthorized;
+  if (status == 404) return l10n.errNotFound;
+  if (status == 429) return l10n.errTooManyRequests;
+  if (status >= 500) return l10n.errServer;
+  if (status >= 400) return l10n.errBadRequest;
   return null;
 }

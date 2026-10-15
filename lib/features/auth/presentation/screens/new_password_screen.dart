@@ -81,7 +81,9 @@ class _NewPasswordScreenState extends ConsumerState<NewPasswordScreen> {
         ..hideCurrentSnackBar()
         ..showSnackBar(
           SnackBar(
-            content: Text(err ?? 'เปลี่ยนรหัสผ่านไม่สำเร็จ กรุณาลองใหม่'),
+            content: Text(
+              err ?? AppLocalizations.of(context)!.authChangePasswordFailed,
+            ),
             backgroundColor: AppColors.error,
           ),
         );

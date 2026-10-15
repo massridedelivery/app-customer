@@ -3198,6 +3198,1026 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'by rating this trip'**
   String get tripRatingPromptSub;
+
+  /// No description provided for @authTabPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get authTabPhone;
+
+  /// No description provided for @authEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get authEmail;
+
+  /// No description provided for @authRequestOtp.
+  ///
+  /// In en, this message translates to:
+  /// **'Request OTP'**
+  String get authRequestOtp;
+
+  /// No description provided for @authShowPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Show password'**
+  String get authShowPassword;
+
+  /// No description provided for @authHidePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide password'**
+  String get authHidePassword;
+
+  /// No description provided for @authWelcome.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome'**
+  String get authWelcome;
+
+  /// No description provided for @authLoginSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to book rides, send parcels and order food'**
+  String get authLoginSubtitle;
+
+  /// No description provided for @authNoAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t have an account?'**
+  String get authNoAccount;
+
+  /// No description provided for @authAccountDeletedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Account deleted'**
+  String get authAccountDeletedTitle;
+
+  /// No description provided for @authAccountSuspendedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Account suspended'**
+  String get authAccountSuspendedTitle;
+
+  /// No description provided for @authAccountDeletedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact us if you have any questions, or sign up again with the same phone number to start a new account.'**
+  String get authAccountDeletedBody;
+
+  /// No description provided for @authAccountSuspendedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This account can\'t be used right now. Please contact us.'**
+  String get authAccountSuspendedBody;
+
+  /// No description provided for @authContactSupportPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact support {phone}'**
+  String authContactSupportPhone(String phone);
+
+  /// No description provided for @authCallSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Call support'**
+  String get authCallSupport;
+
+  /// No description provided for @authOk.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get authOk;
+
+  /// No description provided for @authInvalidOtp.
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect OTP. Please try again.'**
+  String get authInvalidOtp;
+
+  /// No description provided for @authChangePasswordFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t change your password. Please try again.'**
+  String get authChangePasswordFailed;
+
+  /// No description provided for @authGenericError.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Please try again.'**
+  String get authGenericError;
+
+  /// No description provided for @authInvalidServerResponse.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid response from the server'**
+  String get authInvalidServerResponse;
+
+  /// No description provided for @authInvalidCredentials.
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect email or password'**
+  String get authInvalidCredentials;
+
+  /// No description provided for @authEmailAlreadyRegistered.
+  ///
+  /// In en, this message translates to:
+  /// **'This email already has an account. Please sign in.'**
+  String get authEmailAlreadyRegistered;
+
+  /// No description provided for @authRegisterFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign-up failed. Please try again.'**
+  String get authRegisterFailed;
+
+  /// No description provided for @onboardSplashTagline.
+  ///
+  /// In en, this message translates to:
+  /// **'Elevating city services'**
+  String get onboardSplashTagline;
+
+  /// No description provided for @onboardRideTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Book a ride'**
+  String get onboardRideTitle;
+
+  /// No description provided for @onboardRideDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Book a ride and get service from\ndrivers in your neighbourhood'**
+  String get onboardRideDesc;
+
+  /// No description provided for @onboardDriverTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm your driver'**
+  String get onboardDriverTitle;
+
+  /// No description provided for @onboardDriverDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Our wide driver network gets you\nwhere you need to go — easy, safe and affordable'**
+  String get onboardDriverDesc;
+
+  /// No description provided for @onboardTrackTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Track your trip'**
+  String get onboardTrackTitle;
+
+  /// No description provided for @onboardTrackDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'See your driver\'s details in advance and\nfollow their live location on the map'**
+  String get onboardTrackDesc;
+
+  /// No description provided for @onboardGetStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Get started!'**
+  String get onboardGetStarted;
+
+  /// No description provided for @onboardNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get onboardNext;
+
+  /// No description provided for @onboardSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get onboardSkip;
+
+  /// No description provided for @profilePrivacyPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy policy'**
+  String get profilePrivacyPolicy;
+
+  /// No description provided for @profileContactSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact support'**
+  String get profileContactSupport;
+
+  /// No description provided for @profileManageAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage account'**
+  String get profileManageAccount;
+
+  /// No description provided for @profileDeleteAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete account'**
+  String get profileDeleteAccount;
+
+  /// No description provided for @profileVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version}'**
+  String profileVersion(String version);
+
+  /// No description provided for @profileDeleteAccountConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleting your account permanently removes all your data and can\'t be undone. Delete your account?'**
+  String get profileDeleteAccountConfirm;
+
+  /// No description provided for @profileAccountDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account has been deleted'**
+  String get profileAccountDeleted;
+
+  /// No description provided for @profileDeleteAccountFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t delete your account. Please try again.'**
+  String get profileDeleteAccountFailed;
+
+  /// No description provided for @profileLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load data'**
+  String get profileLoadFailed;
+
+  /// No description provided for @profileClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get profileClose;
+
+  /// No description provided for @profilePdpaTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy (PDPA)'**
+  String get profilePdpaTitle;
+
+  /// No description provided for @profilePdpaRightsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your PDPA rights'**
+  String get profilePdpaRightsTitle;
+
+  /// No description provided for @profilePdpaRightsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You have the right to manage your personal data under the PDPA (Personal Data Protection Act).'**
+  String get profilePdpaRightsBody;
+
+  /// No description provided for @profilePdpaDataManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Data management'**
+  String get profilePdpaDataManagement;
+
+  /// No description provided for @profilePdpaExportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Export my data'**
+  String get profilePdpaExportTitle;
+
+  /// No description provided for @profilePdpaExportSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Download all your personal data as JSON'**
+  String get profilePdpaExportSubtitle;
+
+  /// No description provided for @profilePdpaConsentHistoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Consent history'**
+  String get profilePdpaConsentHistoryTitle;
+
+  /// No description provided for @profilePdpaConsentHistorySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'View your consent status'**
+  String get profilePdpaConsentHistorySubtitle;
+
+  /// No description provided for @profilePdpaDangerZone.
+  ///
+  /// In en, this message translates to:
+  /// **'Danger zone'**
+  String get profilePdpaDangerZone;
+
+  /// No description provided for @profilePdpaDeletionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Request account deletion'**
+  String get profilePdpaDeletionTitle;
+
+  /// No description provided for @profilePdpaDeletionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Request deletion of your account and all data (can\'t be undone)'**
+  String get profilePdpaDeletionSubtitle;
+
+  /// No description provided for @profilePdpaExporting.
+  ///
+  /// In en, this message translates to:
+  /// **'Exporting data...'**
+  String get profilePdpaExporting;
+
+  /// No description provided for @profilePdpaExportSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Data exported. Check your email.'**
+  String get profilePdpaExportSuccess;
+
+  /// No description provided for @profilePdpaExportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t export your data right now'**
+  String get profilePdpaExportFailed;
+
+  /// No description provided for @profilePdpaConsentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Consent'**
+  String get profilePdpaConsentTitle;
+
+  /// No description provided for @profilePdpaConsentPolicyVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy policy v2.1'**
+  String get profilePdpaConsentPolicyVersion;
+
+  /// No description provided for @profilePdpaConsentStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status: Consented ✓'**
+  String get profilePdpaConsentStatus;
+
+  /// No description provided for @profilePdpaDeletionReasonPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Please tell us why you want to delete your account'**
+  String get profilePdpaDeletionReasonPrompt;
+
+  /// No description provided for @profilePdpaDeletionReasonHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason...'**
+  String get profilePdpaDeletionReasonHint;
+
+  /// No description provided for @profilePdpaSubmitRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit request'**
+  String get profilePdpaSubmitRequest;
+
+  /// No description provided for @profilePdpaDeletionReceived.
+  ///
+  /// In en, this message translates to:
+  /// **'Request received. Our team will process it within 30 days.'**
+  String get profilePdpaDeletionReceived;
+
+  /// No description provided for @profilePdpaDeletionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t submit your request right now'**
+  String get profilePdpaDeletionFailed;
+
+  /// No description provided for @profileReferralTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite friends'**
+  String get profileReferralTitle;
+
+  /// No description provided for @profileReferralHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite friends to MASS'**
+  String get profileReferralHeadline;
+
+  /// No description provided for @profileReferralSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Get 100 points every time a friend signs up and rides'**
+  String get profileReferralSubtitle;
+
+  /// No description provided for @profileReferralFriendsInvited.
+  ///
+  /// In en, this message translates to:
+  /// **'Friends invited'**
+  String get profileReferralFriendsInvited;
+
+  /// No description provided for @profileReferralPointsEarned.
+  ///
+  /// In en, this message translates to:
+  /// **'Points earned'**
+  String get profileReferralPointsEarned;
+
+  /// No description provided for @profileReferralYourCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Your referral code'**
+  String get profileReferralYourCode;
+
+  /// No description provided for @profileReferralCodeCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Code copied!'**
+  String get profileReferralCodeCopied;
+
+  /// No description provided for @profileReferralCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get profileReferralCopy;
+
+  /// No description provided for @profileReferralShareMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Try Mass Move! Use code {code} to get a discount 🚀'**
+  String profileReferralShareMessage(String code);
+
+  /// No description provided for @profileReferralInviteCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite message copied'**
+  String get profileReferralInviteCopied;
+
+  /// No description provided for @profileReferralShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get profileReferralShare;
+
+  /// No description provided for @profileReferralHaveCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Have a referral code?'**
+  String get profileReferralHaveCode;
+
+  /// No description provided for @profileReferralHaveCodeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the code a friend sent you to get bonus points'**
+  String get profileReferralHaveCodeSubtitle;
+
+  /// No description provided for @profileReferralCodeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. MASS-XXXX'**
+  String get profileReferralCodeHint;
+
+  /// No description provided for @profileReferralApply.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get profileReferralApply;
+
+  /// No description provided for @profileReferralApplySuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Code applied! Bonus points added.'**
+  String get profileReferralApplySuccess;
+
+  /// No description provided for @profileReferralApplyInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid or already-used code'**
+  String get profileReferralApplyInvalid;
+
+  /// No description provided for @profileSosTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'SOS safety'**
+  String get profileSosTitle;
+
+  /// No description provided for @profileSosHoldHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Press and hold to send an emergency alert'**
+  String get profileSosHoldHint;
+
+  /// No description provided for @profileSosCallCenter.
+  ///
+  /// In en, this message translates to:
+  /// **'Call support center {phone}'**
+  String profileSosCallCenter(String phone);
+
+  /// No description provided for @profileSosInfoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency info'**
+  String get profileSosInfoTitle;
+
+  /// No description provided for @profileSosInfoBody.
+  ///
+  /// In en, this message translates to:
+  /// **'When you press SOS, we alert our admins and the driver on your trip, and the details are recorded for your safety.'**
+  String get profileSosInfoBody;
+
+  /// No description provided for @profileSosHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'SOS history'**
+  String get profileSosHistory;
+
+  /// No description provided for @profileSosNoHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'No SOS history'**
+  String get profileSosNoHistory;
+
+  /// No description provided for @profileSosEvent.
+  ///
+  /// In en, this message translates to:
+  /// **'SOS event'**
+  String get profileSosEvent;
+
+  /// No description provided for @profileSosResolved.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolved'**
+  String get profileSosResolved;
+
+  /// No description provided for @profileSosOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get profileSosOpen;
+
+  /// No description provided for @profileSosConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Send SOS alert'**
+  String get profileSosConfirmTitle;
+
+  /// No description provided for @profileSosConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Send an emergency alert? Our team will be notified right away.'**
+  String get profileSosConfirmBody;
+
+  /// No description provided for @profileSosSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send SOS'**
+  String get profileSosSend;
+
+  /// No description provided for @profileSosSent.
+  ///
+  /// In en, this message translates to:
+  /// **'SOS sent. Our team has been notified.'**
+  String get profileSosSent;
+
+  /// No description provided for @profileSosSendFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t send SOS right now'**
+  String get profileSosSendFailed;
+
+  /// No description provided for @profileLoyaltyLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load data'**
+  String get profileLoyaltyLoadFailed;
+
+  /// No description provided for @profileLoyaltyPointsBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Points'**
+  String get profileLoyaltyPointsBalance;
+
+  /// No description provided for @profileLoyaltyCashbackBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Cashback (฿)'**
+  String get profileLoyaltyCashbackBalance;
+
+  /// No description provided for @profileLoyaltyRedeemPoints.
+  ///
+  /// In en, this message translates to:
+  /// **'Redeem points'**
+  String get profileLoyaltyRedeemPoints;
+
+  /// No description provided for @profileLoyaltyPointsHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Points history'**
+  String get profileLoyaltyPointsHistory;
+
+  /// No description provided for @profileLoyaltyCashbackHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Cashback history'**
+  String get profileLoyaltyCashbackHistory;
+
+  /// No description provided for @profileLoyaltyYouHavePoints.
+  ///
+  /// In en, this message translates to:
+  /// **'You have {points} points'**
+  String profileLoyaltyYouHavePoints(String points);
+
+  /// No description provided for @profileLoyaltyRedeemAmountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Points to redeem'**
+  String get profileLoyaltyRedeemAmountLabel;
+
+  /// No description provided for @profileLoyaltyRedeemSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Points redeemed!'**
+  String get profileLoyaltyRedeemSuccess;
+
+  /// No description provided for @profileLoyaltyRedeem.
+  ///
+  /// In en, this message translates to:
+  /// **'Redeem'**
+  String get profileLoyaltyRedeem;
+
+  /// No description provided for @profileLoyaltyCashbackRate.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% back'**
+  String profileLoyaltyCashbackRate(String percent);
+
+  /// No description provided for @profileLoyaltyPoints.
+  ///
+  /// In en, this message translates to:
+  /// **'{points} points'**
+  String profileLoyaltyPoints(String points);
+
+  /// No description provided for @profileLoyaltyNextTier.
+  ///
+  /// In en, this message translates to:
+  /// **'Next tier: {tier}'**
+  String profileLoyaltyNextTier(String tier);
+
+  /// No description provided for @profileLoyaltyPointsToGo.
+  ///
+  /// In en, this message translates to:
+  /// **'{points} points to go'**
+  String profileLoyaltyPointsToGo(String points);
+
+  /// No description provided for @profileSavedPlacesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery addresses'**
+  String get profileSavedPlacesTitle;
+
+  /// No description provided for @profileDeleteAddressTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete address'**
+  String get profileDeleteAddressTitle;
+
+  /// No description provided for @profileDeleteAddressConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this address?'**
+  String get profileDeleteAddressConfirm;
+
+  /// No description provided for @profileDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get profileDelete;
+
+  /// No description provided for @profileDeleteAddressFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t delete right now'**
+  String get profileDeleteAddressFailed;
+
+  /// No description provided for @profileNoAddressInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'No address details'**
+  String get profileNoAddressInfo;
+
+  /// No description provided for @profileNoSavedAddresses.
+  ///
+  /// In en, this message translates to:
+  /// **'No saved addresses yet'**
+  String get profileNoSavedAddresses;
+
+  /// No description provided for @profileNoSavedAddressesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add an address for faster delivery'**
+  String get profileNoSavedAddressesHint;
+
+  /// No description provided for @profileEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit profile'**
+  String get profileEditTitle;
+
+  /// No description provided for @profileFullNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your full name'**
+  String get profileFullNameHint;
+
+  /// No description provided for @profileFillAllFields.
+  ///
+  /// In en, this message translates to:
+  /// **'Please fill in all required fields'**
+  String get profileFillAllFields;
+
+  /// No description provided for @profileAvatarUploadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t upload photo. Please try again.'**
+  String get profileAvatarUploadFailed;
+
+  /// No description provided for @payTryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get payTryAgain;
+
+  /// No description provided for @payBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get payBack;
+
+  /// No description provided for @payVoidedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This payment was cancelled — for example, you switched to cash or the trip was cancelled.'**
+  String get payVoidedSubtitle;
+
+  /// No description provided for @payFailedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment failed'**
+  String get payFailedTitle;
+
+  /// No description provided for @payFailedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Please try creating a new payment.'**
+  String get payFailedSubtitle;
+
+  /// No description provided for @payAwaitingPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for payment...'**
+  String get payAwaitingPayment;
+
+  /// No description provided for @payCardOpenFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t open the payment page'**
+  String get payCardOpenFailed;
+
+  /// No description provided for @payCardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay by card'**
+  String get payCardTitle;
+
+  /// No description provided for @payCardStartFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t start the payment'**
+  String get payCardStartFailed;
+
+  /// No description provided for @payCardVoidedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No card payment needed'**
+  String get payCardVoidedTitle;
+
+  /// No description provided for @payCardExpiredTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment expired'**
+  String get payCardExpiredTitle;
+
+  /// No description provided for @payCardExpiredSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Please start the payment again.'**
+  String get payCardExpiredSubtitle;
+
+  /// No description provided for @payStartOver.
+  ///
+  /// In en, this message translates to:
+  /// **'Start over'**
+  String get payStartOver;
+
+  /// No description provided for @payCardUnavailableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Card payment unavailable'**
+  String get payCardUnavailableTitle;
+
+  /// No description provided for @payCardUnavailableSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Card payments aren\'t supported right now. Please choose another method.'**
+  String get payCardUnavailableSubtitle;
+
+  /// No description provided for @payChooseAnotherMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose another method'**
+  String get payChooseAnotherMethod;
+
+  /// No description provided for @payCardPayInBrowser.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete payment on the page that opened'**
+  String get payCardPayInBrowser;
+
+  /// No description provided for @payCardPayInBrowserHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your card details on the secure payment page. When you\'re done, come back to the app and we\'ll confirm automatically.'**
+  String get payCardPayInBrowserHint;
+
+  /// No description provided for @payCardReopen.
+  ///
+  /// In en, this message translates to:
+  /// **'Reopen payment page'**
+  String get payCardReopen;
+
+  /// No description provided for @payCardIPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'I\'ve paid · Check status'**
+  String get payCardIPaid;
+
+  /// No description provided for @payPromptPayTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay with PromptPay'**
+  String get payPromptPayTitle;
+
+  /// No description provided for @payQrVoidedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This QR no longer needs to be paid'**
+  String get payQrVoidedTitle;
+
+  /// No description provided for @payQrCreateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t create QR'**
+  String get payQrCreateFailed;
+
+  /// No description provided for @payPayCashInstead.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay cash instead'**
+  String get payPayCashInstead;
+
+  /// No description provided for @payQrExpiredTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'QR expired'**
+  String get payQrExpiredTitle;
+
+  /// No description provided for @payQrExpiredSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a new QR or switch to cash.'**
+  String get payQrExpiredSubtitle;
+
+  /// No description provided for @payQrCreateNew.
+  ///
+  /// In en, this message translates to:
+  /// **'Create new QR'**
+  String get payQrCreateNew;
+
+  /// No description provided for @payQrNotFoundTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment QR not found'**
+  String get payQrNotFoundTitle;
+
+  /// No description provided for @payQrNotFoundSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Please try again.'**
+  String get payQrNotFoundSubtitle;
+
+  /// No description provided for @payAmountChangedNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'The amount has changed. Please scan this new QR instead of the old one.'**
+  String get payAmountChangedNotice;
+
+  /// No description provided for @payQrScanHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan this QR with your banking app to pay'**
+  String get payQrScanHint;
+
+  /// No description provided for @payQrExpiresIn.
+  ///
+  /// In en, this message translates to:
+  /// **'QR expires in {time}'**
+  String payQrExpiresIn(String time);
+
+  /// No description provided for @payQrLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load QR'**
+  String get payQrLoadFailed;
+
+  /// No description provided for @payAddCreditCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Add credit card'**
+  String get payAddCreditCard;
+
+  /// No description provided for @payNoCreditCards.
+  ///
+  /// In en, this message translates to:
+  /// **'No credit cards yet'**
+  String get payNoCreditCards;
+
+  /// No description provided for @payNoCreditCardsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a card for easier payments'**
+  String get payNoCreditCardsHint;
+
+  /// No description provided for @payCardHolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Card holder'**
+  String get payCardHolder;
+
+  /// No description provided for @payCardExpires.
+  ///
+  /// In en, this message translates to:
+  /// **'Expires'**
+  String get payCardExpires;
+
+  /// No description provided for @payCardAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Card added'**
+  String get payCardAdded;
+
+  /// No description provided for @payCardDevNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'In development — can\'t be used for real payments yet, and card details aren\'t stored permanently.'**
+  String get payCardDevNotice;
+
+  /// No description provided for @payCardNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Card number'**
+  String get payCardNumber;
+
+  /// No description provided for @payCardNameOnCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Name on card'**
+  String get payCardNameOnCard;
+
+  /// No description provided for @payCardNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Full name'**
+  String get payCardNameHint;
+
+  /// No description provided for @payCardExpiryDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Expiry date'**
+  String get payCardExpiryDate;
+
+  /// No description provided for @payCardSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save card'**
+  String get payCardSave;
+
+  /// No description provided for @payCreateIntentFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t create the payment'**
+  String get payCreateIntentFailed;
+
+  /// No description provided for @payCheckStatusFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t check the payment status'**
+  String get payCheckStatusFailed;
+
+  /// No description provided for @payCheckIntentFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t check the payment'**
+  String get payCheckIntentFailed;
 }
 
 class _AppLocalizationsDelegate

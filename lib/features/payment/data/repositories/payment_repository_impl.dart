@@ -1,9 +1,12 @@
 import 'package:customer_app/core/error/server_exception.dart';
+import 'package:customer_app/core/localization/locale_controller.dart';
 import 'package:customer_app/core/managers/providers.dart';
 import 'package:customer_app/features/payment/data/datasources/payment_data_source.dart';
 import 'package:customer_app/features/payment/domain/models/payment_intent.dart';
 import 'package:customer_app/features/payment/domain/repositories/i_payment_repository.dart';
+import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/widgets.dart' show Locale;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'payment_repository_impl.g.dart';
@@ -11,13 +14,19 @@ part 'payment_repository_impl.g.dart';
 @riverpod
 IPaymentRepository paymentRepository(Ref ref) {
   final apiService = ref.watch(apiServiceProvider);
-  return PaymentRepositoryImpl(PaymentDataSource(apiService));
+  // Fallback error messages follow the app language.
+  final locale = ref.watch(localeControllerProvider);
+  return PaymentRepositoryImpl(
+    PaymentDataSource(apiService),
+    lookupAppLocalizations(Locale(locale.languageCode)),
+  );
 }
 
 class PaymentRepositoryImpl implements IPaymentRepository {
   final PaymentDataSource _dataSource;
+  final AppLocalizations _l10n;
 
-  PaymentRepositoryImpl(this._dataSource);
+  PaymentRepositoryImpl(this._dataSource, this._l10n);
 
   @override
   Future<void> saveCard({
@@ -41,7 +50,7 @@ class PaymentRepositoryImpl implements IPaymentRepository {
       );
       return PaymentIntent.fromJson(data);
     } on DioException catch (e) {
-      throw _serverError(e, 'สร้างรายการชำระเงินไม่สำเร็จ');
+      throw _serverError(e, _l10n.payCreateIntentFailed);
     }
   }
 
@@ -51,7 +60,7 @@ class PaymentRepositoryImpl implements IPaymentRepository {
       final data = await _dataSource.getIntent(intentId);
       return PaymentIntent.fromJson(data);
     } on DioException catch (e) {
-      throw ServerException(_message(e, 'ตรวจสอบสถานะการชำระเงินไม่สำเร็จ'));
+      throw ServerException(_message(e, _l10n.payCheckStatusFailed));
     }
   }
 
@@ -62,7 +71,7 @@ class PaymentRepositoryImpl implements IPaymentRepository {
       return PaymentIntent.fromJson(data);
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) return null;
-      throw ServerException(_message(e, 'ตรวจสอบรายการชำระเงินไม่สำเร็จ'));
+      throw ServerException(_message(e, _l10n.payCheckIntentFailed));
     }
   }
 
@@ -80,7 +89,7 @@ class PaymentRepositoryImpl implements IPaymentRepository {
       );
       return PaymentIntent.fromJson(data);
     } on DioException catch (e) {
-      throw _serverError(e, 'สร้างรายการชำระเงินไม่สำเร็จ');
+      throw _serverError(e, _l10n.payCreateIntentFailed);
     }
   }
 
@@ -91,7 +100,7 @@ class PaymentRepositoryImpl implements IPaymentRepository {
       return PaymentIntent.fromJson(data);
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) return null;
-      throw ServerException(_message(e, 'ตรวจสอบรายการชำระเงินไม่สำเร็จ'));
+      throw ServerException(_message(e, _l10n.payCheckIntentFailed));
     }
   }
 

@@ -6,6 +6,7 @@ import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/features/payment/presentation/controllers/promptpay_controller.dart';
 import 'package:customer_app/features/payment/presentation/screens/qr_payload.dart';
 import 'package:customer_app/features/payment/presentation/states/promptpay_state.dart';
+import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -82,8 +83,8 @@ class _PromptPayQrScreenState extends ConsumerState<PromptPayQrScreen> {
         ScaffoldMessenger.of(context)
           ..hideCurrentSnackBar()
           ..showSnackBar(
-            const SnackBar(
-              content: Text('ไม่ต้องชำระด้วย QR นี้แล้ว'),
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.payQrVoidedTitle),
             ),
           );
         if (context.canPop()) context.pop();
@@ -93,7 +94,10 @@ class _PromptPayQrScreenState extends ConsumerState<PromptPayQrScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text('ชำระเงินด้วย PromptPay', style: AppTypography.heading4),
+        title: Text(
+          AppLocalizations.of(context)!.payPromptPayTitle,
+          style: AppTypography.heading4,
+        ),
         backgroundColor: AppColors.background,
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
@@ -109,6 +113,7 @@ class _PromptPayQrScreenState extends ConsumerState<PromptPayQrScreen> {
   }
 
   Widget _buildBody(PromptPayState state) {
+    final l10n = AppLocalizations.of(context)!;
     if (state.isCreating) {
       return const Center(child: MassLoadingM(size: 72));
     }
@@ -117,12 +122,12 @@ class _PromptPayQrScreenState extends ConsumerState<PromptPayQrScreen> {
       return _StatusMessage(
         icon: Icons.error_outline_rounded,
         color: AppColors.error,
-        title: 'สร้าง QR ไม่สำเร็จ',
+        title: l10n.payQrCreateFailed,
         subtitle: state.error!,
-        primaryLabel: 'ลองอีกครั้ง',
+        primaryLabel: l10n.payTryAgain,
         onPrimary: () =>
             ref.read(promptPayControllerProvider.notifier).retry(),
-        secondaryLabel: 'จ่ายเงินสดแทน',
+        secondaryLabel: l10n.payPayCashInstead,
         onSecondary: () => context.pop(),
       );
     }
@@ -131,9 +136,9 @@ class _PromptPayQrScreenState extends ConsumerState<PromptPayQrScreen> {
       return _StatusMessage(
         icon: Icons.info_outline_rounded,
         color: AppColors.textSecondary,
-        title: 'ไม่ต้องชำระด้วย QR นี้แล้ว',
-        subtitle: 'รายการนี้ถูกยกเลิก เช่น เปลี่ยนเป็นเงินสดหรือเที่ยวถูกยกเลิก',
-        primaryLabel: 'กลับ',
+        title: l10n.payQrVoidedTitle,
+        subtitle: l10n.payVoidedSubtitle,
+        primaryLabel: l10n.payBack,
         onPrimary: () => context.pop(),
       );
     }
@@ -142,12 +147,12 @@ class _PromptPayQrScreenState extends ConsumerState<PromptPayQrScreen> {
       return _StatusMessage(
         icon: Icons.timer_off_rounded,
         color: AppColors.error,
-        title: 'QR หมดอายุแล้ว',
-        subtitle: 'กรุณาสร้าง QR ใหม่ หรือเปลี่ยนเป็นชำระเงินสด',
-        primaryLabel: 'สร้าง QR ใหม่',
+        title: l10n.payQrExpiredTitle,
+        subtitle: l10n.payQrExpiredSubtitle,
+        primaryLabel: l10n.payQrCreateNew,
         onPrimary: () =>
             ref.read(promptPayControllerProvider.notifier).retry(),
-        secondaryLabel: 'จ่ายเงินสดแทน',
+        secondaryLabel: l10n.payPayCashInstead,
         onSecondary: () => context.pop(),
       );
     }
@@ -156,12 +161,12 @@ class _PromptPayQrScreenState extends ConsumerState<PromptPayQrScreen> {
       return _StatusMessage(
         icon: Icons.cancel_outlined,
         color: AppColors.error,
-        title: 'ชำระเงินไม่สำเร็จ',
-        subtitle: 'กรุณาลองสร้างรายการใหม่อีกครั้ง',
-        primaryLabel: 'สร้าง QR ใหม่',
+        title: l10n.payFailedTitle,
+        subtitle: l10n.payFailedSubtitle,
+        primaryLabel: l10n.payQrCreateNew,
         onPrimary: () =>
             ref.read(promptPayControllerProvider.notifier).retry(),
-        secondaryLabel: 'จ่ายเงินสดแทน',
+        secondaryLabel: l10n.payPayCashInstead,
         onSecondary: () => context.pop(),
       );
     }
@@ -172,9 +177,9 @@ class _PromptPayQrScreenState extends ConsumerState<PromptPayQrScreen> {
       return _StatusMessage(
         icon: Icons.qr_code_2_rounded,
         color: AppColors.textSecondary,
-        title: 'ไม่พบ QR สำหรับชำระเงิน',
-        subtitle: 'กรุณาลองใหม่อีกครั้ง',
-        primaryLabel: 'ลองอีกครั้ง',
+        title: l10n.payQrNotFoundTitle,
+        subtitle: l10n.payQrNotFoundSubtitle,
+        primaryLabel: l10n.payTryAgain,
         onPrimary: () =>
             ref.read(promptPayControllerProvider.notifier).retry(),
       );
@@ -184,7 +189,11 @@ class _PromptPayQrScreenState extends ConsumerState<PromptPayQrScreen> {
       qrUrl: qrUrl,
       amount: intent.amount,
       secondsLeft: state.secondsLeft < 0 ? 0 : state.secondsLeft,
-      notice: state.notice,
+      // The controller flags a re-issued QR with a sentinel; say it in the
+      // app's language here.
+      notice: state.notice == PromptPayController.amountChangedNotice
+          ? l10n.payAmountChangedNotice
+          : state.notice,
     );
   }
 }
@@ -210,6 +219,7 @@ class _QrView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       children: [
         // The previous QR was voided because the amount changed (waiting
@@ -245,7 +255,7 @@ class _QrView extends StatelessWidget {
         ],
         const SizedBox(height: 8),
         Text(
-          'สแกน QR นี้ด้วยแอปธนาคารเพื่อชำระเงิน',
+          l10n.payQrScanHint,
           style: AppTypography.body2.copyWith(color: AppColors.textSecondary),
           textAlign: TextAlign.center,
         ),
@@ -278,7 +288,7 @@ class _QrView extends StatelessWidget {
             const Icon(Icons.timer_outlined, size: 18, color: AppColors.error),
             const SizedBox(width: 6),
             Text(
-              'QR หมดอายุใน $_countdown',
+              l10n.payQrExpiresIn(_countdown),
               style: AppTypography.label1.copyWith(color: AppColors.error),
             ),
           ],
@@ -349,7 +359,9 @@ class _QrImageState extends State<_QrImage> {
         }
         final bytes = snapshot.data;
         if (snapshot.hasError || bytes == null || bytes.isEmpty) {
-          return const Center(child: Text('โหลด QR ไม่สำเร็จ'));
+          return Center(
+            child: Text(AppLocalizations.of(context)!.payQrLoadFailed),
+          );
         }
         if (QrPayload.isSvg(bytes)) {
           return SvgPicture.memory(bytes, fit: BoxFit.contain);
@@ -357,8 +369,9 @@ class _QrImageState extends State<_QrImage> {
         return Image.memory(
           bytes,
           fit: BoxFit.contain,
-          errorBuilder: (context, error, stack) =>
-              const Center(child: Text('โหลด QR ไม่สำเร็จ')),
+          errorBuilder: (context, error, stack) => Center(
+            child: Text(AppLocalizations.of(context)!.payQrLoadFailed),
+          ),
         );
       },
     );
@@ -380,7 +393,7 @@ class _WaitingIndicator extends StatelessWidget {
         ),
         const SizedBox(width: 10),
         Text(
-          'กำลังรอการชำระเงิน...',
+          AppLocalizations.of(context)!.payAwaitingPayment,
           style: AppTypography.body2.copyWith(color: AppColors.textSecondary),
         ),
       ],

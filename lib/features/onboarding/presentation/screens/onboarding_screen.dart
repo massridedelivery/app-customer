@@ -2,6 +2,7 @@ import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/features/onboarding/presentation/controllers/onboarding_controller.dart';
 import 'package:customer_app/features/onboarding/presentation/widgets/onboarding_page.dart';
+import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -30,8 +31,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         size: 100,
         color: AppColors.primary,
       ),
-      'title': 'เรียกรถ',
-      'description': 'เรียกรถและรับการบริการจาก\nคนขับในชุมชนใกล้เคียง',
+      'title': (AppLocalizations l10n) => l10n.onboardRideTitle,
+      'description': (AppLocalizations l10n) => l10n.onboardRideDesc,
     },
     {
       'icon': const Icon(
@@ -39,9 +40,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         size: 100,
         color: AppColors.primary,
       ),
-      'title': 'ยืนยันคนขับของคุณ',
-      'description':
-          'เครือข่ายคนขับที่ครอบคลุมช่วยให้คุณ\nเดินทางได้อย่างสะดวก ปลอดภัย และประหยัด',
+      'title': (AppLocalizations l10n) => l10n.onboardDriverTitle,
+      'description': (AppLocalizations l10n) => l10n.onboardDriverDesc,
     },
     {
       'icon': const Icon(
@@ -49,15 +49,15 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         size: 100,
         color: AppColors.primary,
       ),
-      'title': 'ติดตามการเดินทางของคุณ',
-      'description':
-          'ทราบข้อมูลคนขับล่วงหน้าและสามารถ\nดูตำแหน่งปัจจุบันแบบเรียลไทม์บนแผนที่',
+      'title': (AppLocalizations l10n) => l10n.onboardTrackTitle,
+      'description': (AppLocalizations l10n) => l10n.onboardTrackDesc,
     },
   ];
 
   @override
   Widget build(BuildContext context) {
     final currentPageIndex = ref.watch(onboardingControllerProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     Future<void> onNextPressed() async {
       if (currentPageIndex < _pages.length - 1) {
@@ -93,8 +93,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   final pageData = _pages[index];
                   return OnboardingPageWidget(
                     icon: pageData['icon'],
-                    title: pageData['title'],
-                    description: pageData['description'],
+                    title: pageData['title'](l10n),
+                    description: pageData['description'](l10n),
                   );
                 },
               ),
@@ -122,8 +122,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       ),
                       child: Text(
                         currentPageIndex == _pages.length - 1
-                            ? 'เริ่มต้นใช้งาน!'
-                            : 'ถัดไป',
+                            ? l10n.onboardGetStarted
+                            : l10n.onboardNext,
                         style: AppTypography.label1.copyWith(
                           color: Colors.white,
                         ),
@@ -156,7 +156,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         if (context.mounted) context.go('/main');
                       },
                       child: Text(
-                        'ข้าม',
+                        l10n.onboardSkip,
                         style: AppTypography.label2.copyWith(
                           color: AppColors.textSecondary,
                         ),

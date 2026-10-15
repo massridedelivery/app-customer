@@ -4,6 +4,7 @@ import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/data/support_config_provider.dart';
 import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/features/profile/presentation/controllers/sos_controller.dart';
+import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -18,11 +19,12 @@ class SOSScreen extends ConsumerWidget {
     // Admin-managed call-center number (GET /api/config/support), not hardcoded.
     final supportPhone =
         ref.watch(supportPhoneProvider).asData?.value ?? kSupportPhoneFallback;
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text('ความปลอดภัย SOS', style: AppTypography.heading4),
+        title: Text(l10n.profileSosTitle, style: AppTypography.heading4),
         backgroundColor: AppColors.background,
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
@@ -85,7 +87,7 @@ class SOSScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 14),
                   Text(
-                    'กดค้างเพื่อส่งสัญญาณฉุกเฉิน',
+                    l10n.profileSosHoldHint,
                     style: AppTypography.caption4.copyWith(
                       color: AppColors.textSecondary,
                     ),
@@ -100,7 +102,7 @@ class SOSScreen extends ConsumerWidget {
                   launchUrl(Uri(scheme: 'tel', path: supportPhone)),
               icon: const Icon(Icons.call, color: AppColors.error),
               label: Text(
-                'โทรศูนย์บริการ $supportPhone',
+                l10n.profileSosCallCenter(supportPhone),
                 style: AppTypography.label2.copyWith(color: AppColors.error),
               ),
               style: OutlinedButton.styleFrom(
@@ -133,7 +135,7 @@ class SOSScreen extends ConsumerWidget {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        'ข้อมูลฉุกเฉิน',
+                        l10n.profileSosInfoTitle,
                         style: AppTypography.caption3.copyWith(
                           color: AppColors.error,
                         ),
@@ -142,19 +144,19 @@ class SOSScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'เมื่อกด SOS ระบบจะแจ้งเตือนผู้ดูแล, คนขับที่กำลังร่วมเดินทาง และข้อมูลจะถูกบันทึกไว้เพื่อความปลอดภัย',
+                    l10n.profileSosInfoBody,
                     style: AppTypography.body2.copyWith(color: AppColors.error),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 28),
-            Text('ประวัติ SOS', style: AppTypography.heading4),
+            Text(l10n.profileSosHistory, style: AppTypography.heading4),
             const SizedBox(height: 12),
             historyAsync.when(
               loading: () => const Center(child: MassLoadingM(size: 48)),
               error: (e, s) =>
-                  Text('โหลดข้อมูลไม่สำเร็จ', style: AppTypography.body2),
+                  Text(l10n.profileLoadFailed, style: AppTypography.body2),
               data: (history) => history.isEmpty
                   ? Container(
                       padding: const EdgeInsets.all(20),
@@ -165,7 +167,7 @@ class SOSScreen extends ConsumerWidget {
                       ),
                       child: Center(
                         child: Text(
-                          'ไม่มีประวัติ SOS',
+                          l10n.profileSosNoHistory,
                           style: AppTypography.body2.copyWith(
                             color: AppColors.textSecondary,
                           ),
@@ -215,7 +217,7 @@ class SOSScreen extends ConsumerWidget {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      'เหตุการณ์ SOS',
+                                      l10n.profileSosEvent,
                                       style: AppTypography.caption3,
                                     ),
                                     Text(
@@ -239,7 +241,9 @@ class SOSScreen extends ConsumerWidget {
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Text(
-                                  isResolved ? 'แก้ไขแล้ว' : 'เปิดอยู่',
+                                  isResolved
+                                      ? l10n.profileSosResolved
+                                      : l10n.profileSosOpen,
                                   style: AppTypography.caption5.copyWith(
                                     color: isResolved
                                         ? AppColors.primary
@@ -265,6 +269,7 @@ class SOSScreen extends ConsumerWidget {
       AppDates.of(context).isoDateTime(isoDate, fallback: '');
 
   Future<void> _confirmSOS(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -272,21 +277,19 @@ class SOSScreen extends ConsumerWidget {
           children: [
             const Icon(Icons.sos_rounded, color: AppColors.error),
             const SizedBox(width: 8),
-            const Text('ส่งสัญญาณ SOS', style: AppTypography.heading4),
+            Text(l10n.profileSosConfirmTitle, style: AppTypography.heading4),
           ],
         ),
-        content: const Text(
-          'ต้องการส่งสัญญาณฉุกเฉินใช่หรือไม่? ระบบจะแจ้งเตือนทีมงานทันที',
-        ),
+        content: Text(l10n.profileSosConfirmBody),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text('ยกเลิก', style: AppTypography.label2),
+            child: Text(l10n.cancel, style: AppTypography.label2),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
-            child: const Text('ส่ง SOS', style: AppTypography.label2),
+            child: Text(l10n.profileSosSend, style: AppTypography.label2),
           ),
         ],
       ),
@@ -298,17 +301,17 @@ class SOSScreen extends ConsumerWidget {
 
     if (success) {
       messenger.showSnackBar(
-        const SnackBar(
-          content: Text('ส่งสัญญาณ SOS แล้ว ทีมงานได้รับแจ้งแล้ว'),
+        SnackBar(
+          content: Text(l10n.profileSosSent),
           backgroundColor: AppColors.error,
         ),
       );
       ref.invalidate(sosHistoryProvider);
     } else {
       messenger.showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text(
-            'ไม่สามารถส่ง SOS ได้ในขณะนี้',
+            l10n.profileSosSendFailed,
             style: AppTypography.caption4,
           ),
         ),

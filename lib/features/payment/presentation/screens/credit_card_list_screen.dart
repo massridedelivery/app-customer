@@ -1,6 +1,7 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/features/payment/presentation/controllers/credit_cards_controller.dart';
+import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -13,11 +14,12 @@ class CreditCardListScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cards = ref.watch(creditCardsProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: AppColors.semanticGrayNeutralBgWhite,
       appBar: AppBar(
-        title: const Text('บัตรเครดิต', style: AppTypography.heading4),
+        title: Text(l10n.creditCard, style: AppTypography.heading4),
         backgroundColor: AppColors.semanticGrayNeutralBgWhite,
         elevation: 0,
         surfaceTintColor: Colors.transparent,
@@ -64,7 +66,7 @@ class CreditCardListScreen extends ConsumerWidget {
               onPressed: () => context.push('/credit-cards/add'),
               icon: const Icon(Icons.add),
               label: Text(
-                'เพิ่มบัตรเครดิต',
+                l10n.payAddCreditCard,
                 style: AppTypography.label1.copyWith(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -91,6 +93,7 @@ class _EmptyCards extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -104,14 +107,14 @@ class _EmptyCards extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              'ยังไม่มีบัตรเครดิต',
+              l10n.payNoCreditCards,
               style: AppTypography.heading4.copyWith(
                 color: AppColors.textSecondary,
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              'เพิ่มบัตรเพื่อชำระเงินได้สะดวกขึ้น',
+              l10n.payNoCreditCardsHint,
               style: AppTypography.body2.copyWith(
                 color: AppColors.textDisabled,
               ),
@@ -147,6 +150,7 @@ class CreditCardVisual extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return AspectRatio(
       aspectRatio: 1.586, // ISO 7810 ID-1 card ratio
       child: Container(
@@ -208,7 +212,7 @@ class CreditCardVisual extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'ชื่อผู้ถือบัตร',
+                        l10n.payCardHolder,
                         style: AppTypography.caption5.copyWith(
                           color: Colors.white70,
                         ),
@@ -229,7 +233,7 @@ class CreditCardVisual extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'หมดอายุ',
+                      l10n.payCardExpires,
                       style: AppTypography.caption5.copyWith(
                         color: Colors.white70,
                       ),

@@ -64,13 +64,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             SnackBar(
               content: Text(
                 isConflict
-                    ? 'อีเมลนี้มีบัญชีอยู่แล้ว กรุณาเข้าสู่ระบบ'
-                    : 'ลงทะเบียนไม่สำเร็จ กรุณาลองใหม่อีกครั้ง',
+                    ? l10n.authEmailAlreadyRegistered
+                    : l10n.authRegisterFailed,
               ),
               backgroundColor: Colors.red,
               action: isConflict
                   ? SnackBarAction(
-                      label: 'เข้าสู่ระบบ',
+                      label: l10n.signIn,
                       textColor: Colors.white,
                       onPressed: () => context.go('/auth/email_login'),
                     )

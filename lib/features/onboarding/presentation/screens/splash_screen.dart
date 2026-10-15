@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
+import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:customer_app/router/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -132,7 +133,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                 const SizedBox(height: 8),
                 // Subtitle
                 Text(
-                  'ยกระดับการให้บริการในเมือง',
+                  AppLocalizations.of(context)!.onboardSplashTagline,
                   style: AppTypography.label2.copyWith(
                     fontWeight: FontWeight.bold,
                     color: AppColors.slate,

@@ -963,5 +963,19 @@
   "referralErrCodeFull": "This code has reached its limit",
   "referralErrExpired": "This code has expired",
   "referralErrDisabled": "Referral codes aren't available right now",
-  "promoRejectReferredOnly": "This code is for referred friends only"
+  "promoRejectReferredOnly": "This code is for referred friends only",
+  "authSendCode": "Send code",
+  "authEmailCodeHint": "We'll email you a 6-digit code — it works for signing in and signing up",
+  "authEmailInvalid": "Invalid email address",
+  "authOtpRateLimited": "Too many code requests. Please try again later",
+  "authEmailUnavailable": "Email sign-in isn't available yet. Please use your phone number",
+  "authEmailSendFailed": "Couldn't send the email. Please try again",
+  "authEmailOtpSentTo": "Code sent to {email} · Ref {ref}",
+  "@authEmailOtpSentTo": {"placeholders": {"email": {"type": "String"}, "ref": {"type": "String"}}},
+  "authEmailOtpSpamHint": "Can't find it? Check your Spam folder · The code is valid for 10 minutes",
+  "authEmailNewAccountWarning": "This email has no account yet — a new one will be created. If you signed up with a phone number, sign in with that number instead",
+  "authOtpInvalid": "Incorrect code",
+  "authOtpTooManyAttempts": "Too many wrong attempts. Please request a new code",
+  "authOtpExpired": "The code has expired. Please request a new one",
+  "authSmsEmailFallback": "Didn't get the SMS? Get the code by email"
 }

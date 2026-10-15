@@ -33,16 +33,18 @@ class PhoneLoginScreen extends ConsumerStatefulWidget {
 class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
   final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
   final _phoneFocus = FocusNode();
 
   late LoginMethod _method = widget.initialMethod;
-  bool _obscurePassword = true;
+
+  /// Email login isn't offered by this backend (503 EMAIL_LOGIN_UNAVAILABLE,
+  /// e.g. prod before launch): hide the email tab and stay on phone.
+  bool _emailUnavailable = false;
 
   @override
   void initState() {
     super.initState();
-    for (final c in [_phoneController, _emailController, _passwordController]) {
+    for (final c in [_phoneController, _emailController]) {
       c.addListener(() => setState(() {}));
     }
   }
@@ -51,16 +53,15 @@ class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
   void dispose() {
     _phoneController.dispose();
     _emailController.dispose();
-    _passwordController.dispose();
     _phoneFocus.dispose();
     super.dispose();
   }
 
   bool get _isValidPhone => _phoneController.text.trim().length >= 9;
 
-  bool get _isValidEmail =>
-      _emailController.text.contains('@') &&
-      _passwordController.text.isNotEmpty;
+  bool get _isValidEmail => RegExp(
+    r'^[^@\s]+@[^@\s]+\.[^@\s]+$',
+  ).hasMatch(_emailController.text.trim());
 
   Future<void> _requestOtp() async {
     if (!_isValidPhone) return;
@@ -89,18 +90,49 @@ class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
     }
   }
 
-  void _loginEmail() {
+  /// Email login is a one-time code (no password): send it, then the OTP
+  /// screen. The backend signs a new email up on verify, so there's no
+  /// separate sign-up.
+  Future<void> _sendEmailCode() async {
     if (!_isValidEmail) return;
-    ref
+    final l10n = AppLocalizations.of(context)!;
+    final email = _emailController.text.trim();
+    final result = await ref
         .read(authControllerProvider.notifier)
-        .login(_emailController.text.trim(), _passwordController.text);
-  }
-
-  /// Sign-up starts from a phone number (OTP, then the profile form), so the
-  /// footer link brings the user to the phone tab.
-  void _startSignUp() {
-    setState(() => _method = LoginMethod.phone);
-    _phoneFocus.requestFocus();
+        .sendEmailOtp(email);
+    if (!mounted) return;
+    if (result.ok) {
+      context.push(
+        '/auth/email-otp',
+        extra: {
+          'email': email,
+          'refId': result.refId,
+          'isRegistered': result.isRegistered,
+        },
+      );
+      return;
+    }
+    if (result.error == EmailOtpError.accountBlocked) return; // own screen
+    if (result.error == EmailOtpError.unavailable) {
+      setState(() {
+        _emailUnavailable = true;
+        _method = LoginMethod.phone;
+      });
+    }
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(switch (result.error!) {
+            EmailOtpError.invalidEmail => l10n.authEmailInvalid,
+            EmailOtpError.rateLimited => l10n.authOtpRateLimited,
+            EmailOtpError.unavailable => l10n.authEmailUnavailable,
+            _ => l10n.authEmailSendFailed,
+          }),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
   }
 
   @override
@@ -143,27 +175,6 @@ class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
                     padding: const EdgeInsets.fromLTRB(20, 6, 20, 0),
                     child: _form(l10n, isLoading),
                   ),
-                  // Phone sign-up happens inside the OTP flow (a new number goes
-                  // to the profile form), so the sign-up row is email-only.
-                  if (_method == LoginMethod.email) ...[
-                  const SizedBox(height: 24),
-                  Wrap(
-                    alignment: WrapAlignment.center,
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    children: [
-                      Text(
-                        l10n.authNoAccount,
-                        style: AppTypography.body2.copyWith(color: _kInkSoft),
-                      ),
-                      TextButton(
-                        key: const Key('loginGoRegister'),
-                        onPressed: _startSignUp,
-                        style: _textButtonStyle,
-                        child: Text(l10n.signUp),
-                      ),
-                    ],
-                  ),
-                  ],
                   const SizedBox(height: 8),
                 ],
               ),
@@ -178,6 +189,8 @@ class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        // No tabs when email login isn't offered (503 from the backend).
+        if (!_emailUnavailable) ...[
         PillTabs<LoginMethod>(
           key: const Key('loginMethodTabs'),
           items: [
@@ -188,6 +201,7 @@ class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
           onChanged: (m) => setState(() => _method = m),
         ),
         const SizedBox(height: 18),
+        ],
         if (_method == LoginMethod.phone)
           ..._phoneSection(l10n, isLoading)
         else
@@ -231,50 +245,23 @@ class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
         key: const Key('loginIdentifier'),
         controller: _emailController,
         keyboardType: TextInputType.emailAddress,
-        autofillHints: const [AutofillHints.username, AutofillHints.email],
-        textInputAction: TextInputAction.next,
+        autofillHints: const [AutofillHints.email],
+        textInputAction: TextInputAction.done,
+        onSubmitted: (_) => _sendEmailCode(),
         style: AppTypography.body1.copyWith(color: _kInk),
         decoration: _decoration(label: l10n.authEmail, hint: 'you@email.com'),
       ),
+      const SizedBox(height: 8),
+      Text(
+        l10n.authEmailCodeHint,
+        style: AppTypography.caption5.copyWith(color: _kMuted),
+      ),
       const SizedBox(height: 14),
-      TextField(
-        key: const Key('loginPassword'),
-        controller: _passwordController,
-        obscureText: _obscurePassword,
-        autofillHints: const [AutofillHints.password],
-        textInputAction: TextInputAction.done,
-        onSubmitted: (_) => _loginEmail(),
-        style: AppTypography.body1.copyWith(color: _kInk),
-        decoration: _decoration(label: l10n.password).copyWith(
-          suffixIcon: IconButton(
-            tooltip: _obscurePassword
-                ? l10n.authShowPassword
-                : l10n.authHidePassword,
-            icon: Icon(
-              _obscurePassword
-                  ? Icons.visibility_outlined
-                  : Icons.visibility_off_outlined,
-              color: _kInkSoft,
-            ),
-            onPressed: () =>
-                setState(() => _obscurePassword = !_obscurePassword),
-          ),
-        ),
-      ),
-      Align(
-        alignment: AlignmentDirectional.centerEnd,
-        child: TextButton(
-          onPressed: () => context.push('/auth/forgot-password'),
-          style: _textButtonStyle,
-          child: Text(l10n.forgotPassword),
-        ),
-      ),
-      const SizedBox(height: 6),
       _PrimaryButton(
-        key: const Key('loginSubmit'),
-        label: l10n.signIn,
+        key: const Key('loginEmailSend'),
+        label: l10n.authSendCode,
         loading: isLoading,
-        onPressed: _isValidEmail && !isLoading ? _loginEmail : null,
+        onPressed: _isValidEmail && !isLoading ? _sendEmailCode : null,
       ),
     ];
   }
@@ -310,12 +297,6 @@ class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
     );
   }
 }
-
-final ButtonStyle _textButtonStyle = TextButton.styleFrom(
-  foregroundColor: AppColors.primary,
-  minimumSize: const Size(48, 48),
-  textStyle: AppTypography.label2,
-);
 
 /// Brand-red gradient hero with the S-curve wave bottom shared by the home,
 /// ride and messenger headers: back button, the white M mark beside the

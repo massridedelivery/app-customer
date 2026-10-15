@@ -20,8 +20,11 @@ const Color _kTextSecondary = Color(0xFF64748B);
 const Color _kDisabledBg = Color(0xFFE2E8F0);
 const Color _kDisabledText = Color(0xFF94A3B8);
 
+/// One-time-code entry for phone (SMS) or email login. Email mode is chosen
+/// by passing [email]; the backend signs a new email up on verify.
 class OtpScreen extends ConsumerStatefulWidget {
   final String phone;
+  final String? email;
   final String refId;
   final bool isRegistered;
 
@@ -30,7 +33,14 @@ class OtpScreen extends ConsumerStatefulWidget {
     required this.phone,
     required this.refId,
     required this.isRegistered,
-  });
+  }) : email = null;
+
+  const OtpScreen.email({
+    super.key,
+    required String this.email,
+    required this.refId,
+    required this.isRegistered,
+  }) : phone = '';
 
   @override
   ConsumerState<OtpScreen> createState() => _OtpScreenState();
@@ -51,6 +61,15 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
   Timer? _timer;
   bool _autoSubmitted = false;
 
+  bool get _isEmail => widget.email != null;
+
+  /// Email-mode verify error (phone mode uses the controller's error).
+  String? _emailError;
+
+  /// SMS mode: the backend says the code may not have arrived and offers email.
+  bool _offerEmail = false;
+  Timer? _smsStatusTimer;
+
   String get _otp => _otpController.text;
   bool get _isComplete => _otp.length == _otpLength;
 
@@ -60,6 +79,14 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
     _otpController.addListener(_onOtpChanged);
     _otpFocus.addListener(() => setState(() {}));
     _startResendTimer();
+    // SMS may never arrive: poll its delivery and offer email when the
+    // backend says so (email_fallback).
+    if (!_isEmail) {
+      _smsStatusTimer = Timer.periodic(
+        const Duration(seconds: 10),
+        (_) => _checkSmsDelivery(),
+      );
+    }
     // Open the keyboard as soon as the screen settles.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _otpFocus.requestFocus();
@@ -69,6 +96,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
   @override
   void dispose() {
     _timer?.cancel();
+    _smsStatusTimer?.cancel();
     _otpController.dispose();
     _otpFocus.dispose();
     super.dispose();
@@ -108,6 +136,28 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
     return '$m:$s';
   }
 
+  Future<void> _checkSmsDelivery() async {
+    final offered = await ref
+        .read(authControllerProvider.notifier)
+        .smsEmailFallbackOffered(_refId);
+    if (!mounted || !offered) return;
+    _smsStatusTimer?.cancel();
+    setState(() => _offerEmail = true);
+  }
+
+  /// "a***@gmail.com": first character and the domain only.
+  String get _maskedEmail {
+    final e = widget.email ?? '';
+    final at = e.indexOf('@');
+    if (at <= 1) return e;
+    return '${e[0]}***${e.substring(at)}';
+  }
+
+  /// The last 4 characters of the ref id — the email subject carries the same
+  /// "(Ref: XXXX)" so the user can match the right email.
+  String get _refShort =>
+      _refId.length <= 4 ? _refId : _refId.substring(_refId.length - 4);
+
   /// Masks the middle of the phone number, keeping the country prefix and the
   /// last three digits so the user can still recognise it.
   String get _maskedPhone {
@@ -118,8 +168,38 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
     return '$head${'•' * (p.length - 6)}$tail';
   }
 
+  Future<void> _verifyEmailOtp() async {
+    final l10n = AppLocalizations.of(context)!;
+    final error = await ref
+        .read(authControllerProvider.notifier)
+        .verifyEmailOtp(email: widget.email!, otp: _otp, refId: _refId);
+    if (!mounted || error == null) return; // success → router leaves /auth
+    setState(() {
+      switch (error) {
+        case EmailOtpError.tooManyAttempts:
+        case EmailOtpError.expired:
+          // This code is dead: let them request a new one right away.
+          _timer?.cancel();
+          _secondsRemaining = 0;
+          _emailError = error == EmailOtpError.expired
+              ? l10n.authOtpExpired
+              : l10n.authOtpTooManyAttempts;
+        case EmailOtpError.invalidOtp:
+          _emailError = l10n.authOtpInvalid;
+        case EmailOtpError.accountBlocked:
+          _emailError = null; // the account-blocked screen takes over
+        default:
+          _emailError = l10n.authEmailSendFailed;
+      }
+    });
+    _otpController.clear();
+    _autoSubmitted = false;
+    _otpFocus.requestFocus();
+  }
+
   Future<void> _verifyOtp() async {
     if (!_isComplete) return;
+    if (_isEmail) return _verifyEmailOtp();
     final success = await ref
         .read(authControllerProvider.notifier)
         .sendVerifyOtp(
@@ -145,8 +225,41 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
     }
   }
 
+  Future<void> _resendEmailOtp() async {
+    final l10n = AppLocalizations.of(context)!;
+    final result = await ref
+        .read(authControllerProvider.notifier)
+        .sendEmailOtp(widget.email!);
+    if (!mounted) return;
+    if (!result.ok) {
+      if (result.error == EmailOtpError.accountBlocked) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            result.error == EmailOtpError.rateLimited
+                ? l10n.authOtpRateLimited
+                : l10n.authEmailSendFailed,
+          ),
+        ),
+      );
+      return;
+    }
+    setState(() {
+      _refId = result.refId;
+      _emailError = null;
+      _autoSubmitted = false;
+      _otpController.clear();
+    });
+    _startResendTimer();
+    _otpFocus.requestFocus();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.otpResent)),
+    );
+  }
+
   Future<void> _resendOtp() async {
     if (_secondsRemaining > 0) return;
+    if (_isEmail) return _resendEmailOtp();
     final response = await ref
         .read(authControllerProvider.notifier)
         .sendOtp(widget.phone);
@@ -208,10 +321,42 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
               ),
               const SizedBox(height: 12),
               Text(
-                l10n.otpSentMsg(_maskedPhone),
+                _isEmail
+                    ? l10n.authEmailOtpSentTo(_maskedEmail, _refShort)
+                    : l10n.otpSentMsg(_maskedPhone),
+                key: const Key('otpSentTo'),
                 textAlign: TextAlign.center,
                 style: AppTypography.caption4.copyWith(color: _kTextSecondary),
               ),
+              if (_isEmail) ...[
+                const SizedBox(height: 8),
+                Text(
+                  l10n.authEmailOtpSpamHint,
+                  textAlign: TextAlign.center,
+                  style: AppTypography.caption5.copyWith(
+                    color: _kTextSecondary,
+                  ),
+                ),
+                // Email accounts aren't linked to phone accounts: warn before
+                // a phone customer creates an empty second account.
+                if (!widget.isRegistered) ...[
+                  const SizedBox(height: 12),
+                  Container(
+                    key: const Key('emailNewAccountWarning'),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppColors.semanticWarningBgLowOnWhite,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      l10n.authEmailNewAccountWarning,
+                      style: AppTypography.caption4.copyWith(
+                        color: _kTextPrimary,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
               const SizedBox(height: 48),
 
               _buildOtpField(),
@@ -219,11 +364,11 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
 
               _buildVerifyButton(l10n, isLoading),
 
-              if (authState.error != null)
+              if ((_isEmail ? _emailError : authState.error) != null)
                 Padding(
                   padding: const EdgeInsets.only(top: 16),
                   child: Text(
-                    authState.error!,
+                    (_isEmail ? _emailError : authState.error)!,
                     style: TextStyle(color: AppColors.error),
                     textAlign: TextAlign.center,
                   ),
@@ -231,6 +376,17 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
 
               const SizedBox(height: 32),
               _buildResendRow(l10n),
+              if (_offerEmail)
+                TextButton(
+                  key: const Key('smsEmailFallback'),
+                  onPressed: () => context.go('/auth/email_login'),
+                  child: Text(
+                    l10n.authSmsEmailFallback,
+                    style: AppTypography.label2.copyWith(
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ),
 
               const SizedBox(height: 64),
               _buildHelpCard(l10n),

@@ -281,6 +281,17 @@ final routerProvider = Provider<GoRouter>((ref) {
             },
           ),
           GoRoute(
+            path: 'email-otp',
+            builder: (context, state) {
+              final extra = state.extra as Map<String, dynamic>? ?? {};
+              return OtpScreen.email(
+                email: extra['email'] as String? ?? '',
+                refId: extra['refId'] as String? ?? '',
+                isRegistered: extra['isRegistered'] as bool? ?? false,
+              );
+            },
+          ),
+          GoRoute(
             path: 'forgot-password',
             builder: (context, state) => const ForgotPasswordScreen(),
           ),

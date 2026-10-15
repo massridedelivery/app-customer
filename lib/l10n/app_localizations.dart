@@ -1651,6 +1651,726 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Expected around {time}'**
   String etaExpectedAround(String time);
+
+  /// No description provided for @rideDriversNearby.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 driver nearby} other{{count} drivers nearby}}'**
+  String rideDriversNearby(int count);
+
+  /// No description provided for @rideNoDriversNow.
+  ///
+  /// In en, this message translates to:
+  /// **'No drivers available right now'**
+  String get rideNoDriversNow;
+
+  /// No description provided for @rideDiscountOff.
+  ///
+  /// In en, this message translates to:
+  /// **'฿{amount} off'**
+  String rideDiscountOff(String amount);
+
+  /// No description provided for @rideDropoffUnspecified.
+  ///
+  /// In en, this message translates to:
+  /// **'Drop-off not specified'**
+  String get rideDropoffUnspecified;
+
+  /// No description provided for @rideCouponNeedRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose pickup and drop-off before using a coupon'**
+  String get rideCouponNeedRoute;
+
+  /// No description provided for @rideCouponInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid promo code'**
+  String get rideCouponInvalid;
+
+  /// No description provided for @rideCouponApplyFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t use this coupon. Please try again.'**
+  String get rideCouponApplyFailed;
+
+  /// No description provided for @rideCouponSelectTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a coupon'**
+  String get rideCouponSelectTitle;
+
+  /// No description provided for @rideCouponUse.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get rideCouponUse;
+
+  /// No description provided for @rideCouponLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load coupons'**
+  String get rideCouponLoadFailed;
+
+  /// No description provided for @rideCouponAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Available coupons'**
+  String get rideCouponAvailable;
+
+  /// No description provided for @rideCouponNoneAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No coupons available right now'**
+  String get rideCouponNoneAvailable;
+
+  /// No description provided for @rideFareEstimateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t calculate the fare. Please try again.'**
+  String get rideFareEstimateFailed;
+
+  /// No description provided for @rideRequestFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t request a ride. Please try again.'**
+  String get rideRequestFailed;
+
+  /// No description provided for @liveNoDriverTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No driver found yet'**
+  String get liveNoDriverTitle;
+
+  /// No description provided for @liveNoDriverBody.
+  ///
+  /// In en, this message translates to:
+  /// **'No drivers are available right now. Keep searching, or change the service type?'**
+  String get liveNoDriverBody;
+
+  /// No description provided for @liveKeepSearching.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep searching'**
+  String get liveKeepSearching;
+
+  /// No description provided for @liveChangeService.
+  ///
+  /// In en, this message translates to:
+  /// **'Change service'**
+  String get liveChangeService;
+
+  /// No description provided for @liveAutoCancelNoDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Your ride was cancelled because no drivers are available right now'**
+  String get liveAutoCancelNoDriver;
+
+  /// No description provided for @liveAutoCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Your ride was cancelled automatically'**
+  String get liveAutoCancelled;
+
+  /// No description provided for @liveCancelledWithFee.
+  ///
+  /// In en, this message translates to:
+  /// **'Ride cancelled • Cancellation fee ฿{fee}'**
+  String liveCancelledWithFee(String fee);
+
+  /// No description provided for @liveTripNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Trip #{id}'**
+  String liveTripNumber(String id);
+
+  /// No description provided for @liveCancelRide.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel ride'**
+  String get liveCancelRide;
+
+  /// No description provided for @liveCancelFeeConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Your driver has accepted. Cancelling now costs a ฿{fee} cancellation fee.\nCancel anyway?'**
+  String liveCancelFeeConfirm(String fee);
+
+  /// No description provided for @liveCancelMayFeeConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Your driver has accepted. Cancelling now may incur a cancellation fee.\nCancel anyway?'**
+  String get liveCancelMayFeeConfirm;
+
+  /// No description provided for @liveCancelRideQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel ride?'**
+  String get liveCancelRideQuestion;
+
+  /// No description provided for @liveNo.
+  ///
+  /// In en, this message translates to:
+  /// **'No'**
+  String get liveNo;
+
+  /// No description provided for @liveConfirmCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, cancel'**
+  String get liveConfirmCancel;
+
+  /// No description provided for @liveTripCancelledSub.
+  ///
+  /// In en, this message translates to:
+  /// **'This trip has been cancelled'**
+  String get liveTripCancelledSub;
+
+  /// No description provided for @liveFindingNearYou.
+  ///
+  /// In en, this message translates to:
+  /// **'Looking for drivers near you...'**
+  String get liveFindingNearYou;
+
+  /// No description provided for @liveDriverOnTheWay.
+  ///
+  /// In en, this message translates to:
+  /// **'Your driver is on the way'**
+  String get liveDriverOnTheWay;
+
+  /// No description provided for @liveWaitAtPickup.
+  ///
+  /// In en, this message translates to:
+  /// **'Please wait at the pickup point'**
+  String get liveWaitAtPickup;
+
+  /// No description provided for @livePleaseBoard.
+  ///
+  /// In en, this message translates to:
+  /// **'Please get in'**
+  String get livePleaseBoard;
+
+  /// No description provided for @liveHeadingToDestTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'On the way to your destination'**
+  String get liveHeadingToDestTitle;
+
+  /// No description provided for @liveEtaHeadingToDropoff.
+  ///
+  /// In en, this message translates to:
+  /// **'Heading to your drop-off'**
+  String get liveEtaHeadingToDropoff;
+
+  /// No description provided for @liveEtaDriverComing.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver is coming to pick you up'**
+  String get liveEtaDriverComing;
+
+  /// No description provided for @liveNoDriverPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver\'s phone number isn\'t available'**
+  String get liveNoDriverPhone;
+
+  /// No description provided for @liveChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat'**
+  String get liveChat;
+
+  /// No description provided for @liveCall.
+  ///
+  /// In en, this message translates to:
+  /// **'Call'**
+  String get liveCall;
+
+  /// No description provided for @liveTripSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Trip summary'**
+  String get liveTripSummary;
+
+  /// No description provided for @liveTotalFare.
+  ///
+  /// In en, this message translates to:
+  /// **'Total fare'**
+  String get liveTotalFare;
+
+  /// No description provided for @livePayCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Card'**
+  String get livePayCard;
+
+  /// No description provided for @livePaymentMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment method'**
+  String get livePaymentMethod;
+
+  /// No description provided for @livePayCod.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash on delivery'**
+  String get livePayCod;
+
+  /// No description provided for @livePayUnspecified.
+  ///
+  /// In en, this message translates to:
+  /// **'Not specified'**
+  String get livePayUnspecified;
+
+  /// No description provided for @livePaymentSummaryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment summary'**
+  String get livePaymentSummaryTitle;
+
+  /// No description provided for @liveFareSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Fare summary'**
+  String get liveFareSummary;
+
+  /// No description provided for @liveFare.
+  ///
+  /// In en, this message translates to:
+  /// **'Fare'**
+  String get liveFare;
+
+  /// No description provided for @liveTollFee.
+  ///
+  /// In en, this message translates to:
+  /// **'Tolls'**
+  String get liveTollFee;
+
+  /// No description provided for @liveWaitingFee.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting fee'**
+  String get liveWaitingFee;
+
+  /// No description provided for @liveDiscount.
+  ///
+  /// In en, this message translates to:
+  /// **'Discount'**
+  String get liveDiscount;
+
+  /// No description provided for @liveDriverTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver tip'**
+  String get liveDriverTip;
+
+  /// No description provided for @liveTotalToPay.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get liveTotalToPay;
+
+  /// No description provided for @liveTipTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tip your driver (optional)'**
+  String get liveTipTitle;
+
+  /// No description provided for @liveTipNote.
+  ///
+  /// In en, this message translates to:
+  /// **'The tip is charged to your selected payment method'**
+  String get liveTipNote;
+
+  /// No description provided for @liveConfirmAndRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm and rate'**
+  String get liveConfirmAndRate;
+
+  /// No description provided for @liveChatDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver'**
+  String get liveChatDriver;
+
+  /// No description provided for @liveChatSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Trip chat'**
+  String get liveChatSubtitle;
+
+  /// No description provided for @liveChatSendFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t send your message. Please try again.'**
+  String get liveChatSendFailed;
+
+  /// No description provided for @liveChatLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load messages'**
+  String get liveChatLoadFailed;
+
+  /// No description provided for @liveChatHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Type a message...'**
+  String get liveChatHint;
+
+  /// No description provided for @ratingRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please rate your driver first'**
+  String get ratingRequired;
+
+  /// No description provided for @ratingTagGoodDriving.
+  ///
+  /// In en, this message translates to:
+  /// **'Good driving'**
+  String get ratingTagGoodDriving;
+
+  /// No description provided for @ratingTagPolite.
+  ///
+  /// In en, this message translates to:
+  /// **'Polite'**
+  String get ratingTagPolite;
+
+  /// No description provided for @ratingTagCleanCar.
+  ///
+  /// In en, this message translates to:
+  /// **'Clean car'**
+  String get ratingTagCleanCar;
+
+  /// No description provided for @ratingTagOnTime.
+  ///
+  /// In en, this message translates to:
+  /// **'On time'**
+  String get ratingTagOnTime;
+
+  /// No description provided for @ratingTagSafeDriving.
+  ///
+  /// In en, this message translates to:
+  /// **'Safe driving'**
+  String get ratingTagSafeDriving;
+
+  /// No description provided for @ratingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Review your trip'**
+  String get ratingTitle;
+
+  /// No description provided for @ratingSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get ratingSkip;
+
+  /// No description provided for @ratingDriverNameUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver name unavailable'**
+  String get ratingDriverNameUnknown;
+
+  /// No description provided for @ratingYourDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Your driver'**
+  String get ratingYourDriver;
+
+  /// No description provided for @ratingRateDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate your driver'**
+  String get ratingRateDriver;
+
+  /// No description provided for @ratingCommentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Additional comments'**
+  String get ratingCommentTitle;
+
+  /// No description provided for @ratingCommentHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell us what you liked or didn\'t like...'**
+  String get ratingCommentHint;
+
+  /// No description provided for @ratingSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit review'**
+  String get ratingSubmit;
+
+  /// No description provided for @ratingSkipForNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip for now'**
+  String get ratingSkipForNow;
+
+  /// No description provided for @tripFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get tripFilterAll;
+
+  /// No description provided for @tripFilterFood.
+  ///
+  /// In en, this message translates to:
+  /// **'Food'**
+  String get tripFilterFood;
+
+  /// No description provided for @tripFilterRide.
+  ///
+  /// In en, this message translates to:
+  /// **'Rides'**
+  String get tripFilterRide;
+
+  /// No description provided for @tripFilterMessenger.
+  ///
+  /// In en, this message translates to:
+  /// **'Parcels'**
+  String get tripFilterMessenger;
+
+  /// No description provided for @tripTitleTo.
+  ///
+  /// In en, this message translates to:
+  /// **'{from} to {to}'**
+  String tripTitleTo(String from, String to);
+
+  /// No description provided for @tripFoodOrderTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Food order to {address}'**
+  String tripFoodOrderTo(String address);
+
+  /// No description provided for @tripMartItemsTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Shopping: {items} to {address}'**
+  String tripMartItemsTo(String items, String address);
+
+  /// No description provided for @tripMartOrderTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Mart order to {address}'**
+  String tripMartOrderTo(String address);
+
+  /// No description provided for @tripOrderNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Order #{id}'**
+  String tripOrderNumber(String id);
+
+  /// No description provided for @tripParcelDropoffFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'parcel drop-off'**
+  String get tripParcelDropoffFallback;
+
+  /// No description provided for @tripParcelTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Parcel to {address}'**
+  String tripParcelTo(String address);
+
+  /// No description provided for @tripStatusFindingDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Finding a driver'**
+  String get tripStatusFindingDriver;
+
+  /// No description provided for @tripStatusDriverAccepted.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver accepted'**
+  String get tripStatusDriverAccepted;
+
+  /// No description provided for @tripStatusDriverAtPickup.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver at pickup'**
+  String get tripStatusDriverAtPickup;
+
+  /// No description provided for @tripStatusOnTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'On trip'**
+  String get tripStatusOnTrip;
+
+  /// No description provided for @tripStatusPreparing.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing food'**
+  String get tripStatusPreparing;
+
+  /// No description provided for @tripStatusReadyForPickup.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready for pickup'**
+  String get tripStatusReadyForPickup;
+
+  /// No description provided for @tripStatusDriverAssigned.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver assigned'**
+  String get tripStatusDriverAssigned;
+
+  /// No description provided for @tripStatusDelivering.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivering'**
+  String get tripStatusDelivering;
+
+  /// No description provided for @tripStatusInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'In progress'**
+  String get tripStatusInProgress;
+
+  /// No description provided for @tripStatusAtParcelPickup.
+  ///
+  /// In en, this message translates to:
+  /// **'At parcel pickup'**
+  String get tripStatusAtParcelPickup;
+
+  /// No description provided for @tripStatusParcelEnRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'Out for delivery'**
+  String get tripStatusParcelEnRoute;
+
+  /// No description provided for @tripDetailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Trip details'**
+  String get tripDetailTitle;
+
+  /// No description provided for @tripNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking not found'**
+  String get tripNotFound;
+
+  /// No description provided for @tripNoMapData.
+  ///
+  /// In en, this message translates to:
+  /// **'No map data'**
+  String get tripNoMapData;
+
+  /// No description provided for @tripBookingDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking date'**
+  String get tripBookingDate;
+
+  /// No description provided for @tripBookingCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking ID'**
+  String get tripBookingCode;
+
+  /// No description provided for @tripBookingCodeCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking ID copied'**
+  String get tripBookingCodeCopied;
+
+  /// No description provided for @tripDriverUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver not specified'**
+  String get tripDriverUnknown;
+
+  /// No description provided for @tripRestaurant.
+  ///
+  /// In en, this message translates to:
+  /// **'Restaurant'**
+  String get tripRestaurant;
+
+  /// No description provided for @tripRouteDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Route details'**
+  String get tripRouteDetails;
+
+  /// No description provided for @tripFoodItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Food items'**
+  String get tripFoodItems;
+
+  /// No description provided for @tripServiceRide.
+  ///
+  /// In en, this message translates to:
+  /// **'Ride'**
+  String get tripServiceRide;
+
+  /// No description provided for @tripTollFee.
+  ///
+  /// In en, this message translates to:
+  /// **'Tolls'**
+  String get tripTollFee;
+
+  /// No description provided for @tripWaitingFee.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting fee'**
+  String get tripWaitingFee;
+
+  /// No description provided for @tripFoodTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Food / items'**
+  String get tripFoodTotal;
+
+  /// No description provided for @tripDeliveryFee.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery fee'**
+  String get tripDeliveryFee;
+
+  /// No description provided for @tripNetTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get tripNetTotal;
+
+  /// No description provided for @tripRebook.
+  ///
+  /// In en, this message translates to:
+  /// **'Book again'**
+  String get tripRebook;
+
+  /// No description provided for @tripHelpReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Get help / Report a problem'**
+  String get tripHelpReport;
+
+  /// No description provided for @tripRatingThanks.
+  ///
+  /// In en, this message translates to:
+  /// **'Thanks for your review'**
+  String get tripRatingThanks;
+
+  /// No description provided for @tripRatingAlreadyRated.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve rated this trip'**
+  String get tripRatingAlreadyRated;
+
+  /// No description provided for @tripRatingPromptTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Help us improve your experience'**
+  String get tripRatingPromptTitle;
+
+  /// No description provided for @tripRatingPromptSub.
+  ///
+  /// In en, this message translates to:
+  /// **'by rating this trip'**
+  String get tripRatingPromptSub;
 }
 
 class _AppLocalizationsDelegate

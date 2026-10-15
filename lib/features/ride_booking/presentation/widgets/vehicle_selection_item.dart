@@ -93,10 +93,13 @@ class VehicleSelectionItem extends StatelessWidget {
                                 Row(
                                   children: [
                                     Text(
-                                      vehicleNameTh(
+                                      vehicleName(
                                         estimation.displayName,
                                         vehicleTypeName:
                                             estimation.vehicleTypeName,
+                                        languageCode:
+                                            Localizations.localeOf(context)
+                                                .languageCode,
                                       ),
                                       style: AppTypography.heading5.copyWith(
                                         fontWeight: FontWeight.bold,
@@ -164,8 +167,8 @@ class VehicleSelectionItem extends StatelessWidget {
                                       const SizedBox(width: 3),
                                       Text(
                                         estimation.driversNearby! > 0
-                                            ? 'มีคนขับใกล้ฉัน ${estimation.driversNearby} คน'
-                                            : 'ยังไม่มีคนขับว่างขณะนี้',
+                                            ? l10n.rideDriversNearby(estimation.driversNearby!)
+                                            : l10n.rideNoDriversNow,
                                         style: AppTypography.caption5.copyWith(
                                           color: estimation.driversNearby! > 0
                                               ? AppColors.foundationGreen600
@@ -217,7 +220,7 @@ class VehicleSelectionItem extends StatelessWidget {
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                   child: Text(
-                                    'ลด ฿${estimation.discount.toStringAsFixed(0)}',
+                                    l10n.rideDiscountOff(estimation.discount.toStringAsFixed(0)),
                                     style: AppTypography.caption5.copyWith(
                                       color: const Color(0xFF2E7D32),
                                       fontWeight: FontWeight.bold,

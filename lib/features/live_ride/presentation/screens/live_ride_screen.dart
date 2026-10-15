@@ -101,21 +101,18 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
     final choice = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('ยังหาคนขับให้ไม่ได้'),
-        content: const Text(
-          'ตอนนี้ยังไม่พบคนขับที่ว่างรับงาน '
-          'ต้องการค้นหาต่อ หรือเปลี่ยนประเภทบริการ?',
-        ),
+        title: Text(AppLocalizations.of(ctx)!.liveNoDriverTitle),
+        content: Text(AppLocalizations.of(ctx)!.liveNoDriverBody),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop('retry'),
-            child: const Text('ค้นหาต่อ'),
+            child: Text(AppLocalizations.of(ctx)!.liveKeepSearching),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop('change'),
-            child: const Text(
-              'เปลี่ยนประเภทบริการ',
-              style: TextStyle(color: AppColors.primary),
+            child: Text(
+              AppLocalizations.of(ctx)!.liveChangeService,
+              style: const TextStyle(color: AppColors.primary),
             ),
           ),
         ],
@@ -278,11 +275,10 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
           // System-initiated cancel (SCRUM-111): frame it as the system helping,
           // not as an error the user caused.
           cancelMsg = reason == 'driver_unavailable'
-              ? 'ระบบยกเลิกการเดินทางให้ เนื่องจากไม่พบคนขับที่ว่างในขณะนี้'
-              : 'ระบบยกเลิกการเดินทางให้อัตโนมัติ';
+              ? l10n.liveAutoCancelNoDriver
+              : l10n.liveAutoCancelled;
         } else if (cancelFee > 0) {
-          cancelMsg =
-              'ยกเลิกการเดินทางแล้ว • มีค่าบริการยกเลิก ฿${cancelFee.toStringAsFixed(0)}';
+          cancelMsg = l10n.liveCancelledWithFee(cancelFee.toStringAsFixed(0));
         } else {
           cancelMsg = l10n.rideCancelled;
         }
@@ -336,7 +332,7 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
               _buildTimeline(uiState),
               const SizedBox(height: 12),
               Text(
-                'เลขการเดินทาง-${_getJobIdLabel()}', // Job ID
+                l10n.liveTripNumber(_getJobIdLabel()), // Job ID
                 style: AppTypography.caption5.copyWith(
                   color: AppColors.semanticGrayNeutralFgLowOnWhite,
                 ),
@@ -493,7 +489,7 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
                           : Text(
                               uiState == RideUIState.finding
                                   ? l10n.cancelSearch
-                                  : 'ยกเลิกการเดินทาง',
+                                  : l10n.liveCancelRide,
                               style: AppTypography.caption4.copyWith(
                                 color: AppColors.semanticGrayNeutralFgHigh,
                                 fontWeight: FontWeight.w600,
@@ -516,27 +512,26 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
     final st = ref.read(liveRideControllerProvider);
     final hasDriver = st.driverId?.isNotEmpty ?? false;
     if (hasDriver) {
+      final l10n = AppLocalizations.of(context)!;
       final fee = st.estimatedCancelFee ?? 0;
       final content = fee > 0
-          ? 'คนขับรับงานแล้ว หากยกเลิกตอนนี้จะมีค่าบริการยกเลิก '
-                '฿${fee.toStringAsFixed(0)}\nต้องการยกเลิกหรือไม่?'
-          : 'คนขับรับงานแล้ว การยกเลิกตอนนี้อาจมีค่าบริการในการยกเลิก\n'
-                'ต้องการยกเลิกหรือไม่?';
+          ? l10n.liveCancelFeeConfirm(fee.toStringAsFixed(0))
+          : l10n.liveCancelMayFeeConfirm;
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: const Text('ยกเลิกการเดินทาง?'),
+          title: Text(l10n.liveCancelRideQuestion),
           content: Text(content),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(false),
-              child: const Text('ไม่'),
+              child: Text(l10n.liveNo),
             ),
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(true),
-              child: const Text(
-                'ยืนยันยกเลิก',
-                style: TextStyle(color: AppColors.error),
+              child: Text(
+                l10n.liveConfirmCancel,
+                style: const TextStyle(color: AppColors.error),
               ),
             ),
           ],
@@ -600,29 +595,30 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
   }
 
   Widget _buildHeaderTitle(RideUIState state, String? status) {
+    final l10n = AppLocalizations.of(context)!;
     String title = '';
     String subtitle = '';
 
     if (status == 'CANCELLED') {
-      title = AppLocalizations.of(context)!.rideCancelled;
-      subtitle = 'การเดินทางถูกยกเลิกแล้ว';
+      title = l10n.rideCancelled;
+      subtitle = l10n.liveTripCancelledSub;
     } else {
       switch (state) {
         case RideUIState.finding:
-          title = AppLocalizations.of(context)!.searchingDriver;
-          subtitle = 'กำลังหาคนขับรถที่อยู่ใกล้คุณ...';
+          title = l10n.searchingDriver;
+          subtitle = l10n.liveFindingNearYou;
           break;
         case RideUIState.confirming:
-          title = 'คนขับรถกำลังเดินทางมารับ';
-          subtitle = 'โปรดรอที่จุดรับผู้โดยสาร';
+          title = l10n.liveDriverOnTheWay;
+          subtitle = l10n.liveWaitAtPickup;
           break;
         case RideUIState.pickupArrived:
-          title = 'คนขับรถมาถึงแล้ว!';
-          subtitle = 'กรุณาขึ้นรถ';
+          title = l10n.driverArrived;
+          subtitle = l10n.livePleaseBoard;
           break;
         case RideUIState.onTrip:
-          title = 'กำลังเดินทางไปยังที่หมาย';
-          subtitle = 'มุ่งหน้าสู่จุดหมายปลายทาง...';
+          title = l10n.liveHeadingToDestTitle;
+          subtitle = l10n.headingToDest;
           break;
       }
     }
@@ -780,7 +776,9 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
     final minutes = diff < 1 ? 1 : diff;
     final pickedUp =
         (liveState.jobStatus as String?)?.toUpperCase() == 'PICKED_UP';
-    final title = pickedUp ? 'กำลังเดินทางไปส่ง' : 'ไรเดอร์กำลังมารับ';
+    final title = pickedUp
+        ? AppLocalizations.of(context)!.liveEtaHeadingToDropoff
+        : AppLocalizations.of(context)!.liveEtaDriverComing;
 
     final minLabel = AppLocalizations.of(context)!.minutes;
     return Padding(
@@ -852,7 +850,9 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
     if (number.isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('ไม่พบเบอร์โทรของคนขับ')),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.liveNoDriverPhone),
+          ),
         );
       }
       return;
@@ -944,7 +944,7 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
                     }
                   },
                   icon: const Icon(Icons.chat_bubble_outline, size: 18),
-                  label: const Text('แชท'),
+                  label: Text(AppLocalizations.of(context)!.liveChat),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.accentRedDeep,
                     side: BorderSide(color: Colors.grey.shade200),
@@ -961,7 +961,7 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
                   onPressed: () =>
                       _callDriver(liveState.driverProfile?.driverInfo.phone),
                   icon: const Icon(Icons.phone_outlined, size: 18),
-                  label: const Text('โทร'),
+                  label: Text(AppLocalizations.of(context)!.liveCall),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.accentRedDeep,
                     side: BorderSide(color: Colors.grey.shade200),
@@ -1022,7 +1022,10 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('สรุปการเดินทาง', style: AppTypography.label2),
+          Text(
+            AppLocalizations.of(context)!.liveTripSummary,
+            style: AppTypography.label2,
+          ),
           const SizedBox(height: 12),
           // Always visible: distance now; travel time only appears once the ride
           // is underway (PICKED_UP), as a live Google ETA to the destination.
@@ -1051,7 +1054,10 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('ราคารวม', style: AppTypography.label1),
+              Text(
+                AppLocalizations.of(context)!.liveTotalFare,
+                style: AppTypography.label1,
+              ),
               Text(
                 '฿${liveState.fare?.toStringAsFixed(0) ?? '--'}',
                 style: AppTypography.heading3.copyWith(
@@ -1088,16 +1094,17 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
   }
 
   Widget _buildPaymentMethodSection() {
+    final l10n = AppLocalizations.of(context)!;
     final method =
         (ref.watch(bookingControllerProvider).value?.paymentMethod ?? 'CASH')
             .toUpperCase();
     final isPromptPay = method == 'PROMPTPAY';
     final isCard = method == 'CARD';
     final label = isPromptPay
-        ? 'พร้อมเพย์'
+        ? l10n.promptPay
         : isCard
-        ? 'บัตร'
-        : 'เงินสด';
+        ? l10n.livePayCard
+        : l10n.cashLabel;
     final badgeBg = isPromptPay
         ? AppColors.foundationBlue100
         : isCard
@@ -1130,7 +1137,7 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
               const Icon(Icons.payment, size: 20, color: Colors.grey),
               const SizedBox(width: 8),
               Text(
-                'วิธีชำระเงิน',
+                l10n.livePaymentMethod,
                 style: AppTypography.caption4.copyWith(
                   color: Colors.grey.shade700,
                 ),

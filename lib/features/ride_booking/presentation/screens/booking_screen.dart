@@ -495,7 +495,7 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                       pickupAddress:
                           pickupAddress ?? l10n.currentLocation,
                       dropoffAddress:
-                          dropoffAddress ?? 'ไม่ระบุจุดส่ง',
+                          dropoffAddress ?? l10n.rideDropoffUnspecified,
                     );
               },
             ),

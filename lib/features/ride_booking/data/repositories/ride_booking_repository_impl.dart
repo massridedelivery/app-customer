@@ -1,11 +1,13 @@
 import 'package:customer_app/core/error/api_error.dart';
+import 'package:customer_app/core/localization/locale_controller.dart';
 import 'package:customer_app/core/utils/promo_rejection.dart';
 import 'package:customer_app/features/ride_booking/data/datasources/ride_booking_remote_datasource.dart';
 import 'package:customer_app/features/ride_booking/domain/models/fare_estimation_response.dart';
 import 'package:customer_app/features/ride_booking/domain/models/ride_promo.dart';
 import 'package:customer_app/features/ride_booking/domain/repositories/ride_booking_repository.dart';
+import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'ride_booking_repository_impl.g.dart';
@@ -13,13 +15,23 @@ part 'ride_booking_repository_impl.g.dart';
 @riverpod
 RideBookingRepository rideBookingRepository(Ref ref) {
   final dataSource = ref.watch(rideBookingRemoteDataSourceProvider);
-  return RideBookingRepositoryImpl(dataSource);
+  return RideBookingRepositoryImpl(
+    dataSource,
+    // Fallback error text follows the app language at the time of the error.
+    l10n: () => lookupAppLocalizations(
+      Locale(ref.read(localeControllerProvider).languageCode),
+    ),
+  );
 }
 
 class RideBookingRepositoryImpl implements RideBookingRepository {
   final RideBookingRemoteDataSource _dataSource;
+  final AppLocalizations Function() _l10n;
 
-  RideBookingRepositoryImpl(this._dataSource);
+  RideBookingRepositoryImpl(
+    this._dataSource, {
+    AppLocalizations Function()? l10n,
+  }) : _l10n = l10n ?? (() => lookupAppLocalizations(const Locale('th')));
 
   @override
   Future<FareEstimationResponse> estimateFare({
@@ -48,11 +60,11 @@ class RideBookingRepositoryImpl implements RideBookingRepository {
         'estimateFare failed: ${e.response?.statusCode} ${e.response?.data}',
       );
       throw Exception(
-        apiErrorMessage(e, fallback: 'ไม่สามารถคำนวณค่าโดยสารได้ กรุณาลองใหม่'),
+        apiErrorMessage(e, fallback: _l10n().rideFareEstimateFailed),
       );
     } catch (e) {
       throw Exception(
-        apiErrorMessage(e, fallback: 'ไม่สามารถคำนวณค่าโดยสารได้ กรุณาลองใหม่'),
+        apiErrorMessage(e, fallback: _l10n().rideFareEstimateFailed),
       );
     }
   }
@@ -144,11 +156,11 @@ class RideBookingRepositoryImpl implements RideBookingRepository {
         'createJob failed: ${e.response?.statusCode} ${e.response?.data}',
       );
       throw Exception(
-        apiErrorMessage(e, fallback: 'ไม่สามารถเรียกรถได้ กรุณาลองใหม่'),
+        apiErrorMessage(e, fallback: _l10n().rideRequestFailed),
       );
     } catch (e) {
       throw Exception(
-        apiErrorMessage(e, fallback: 'ไม่สามารถเรียกรถได้ กรุณาลองใหม่'),
+        apiErrorMessage(e, fallback: _l10n().rideRequestFailed),
       );
     }
   }

@@ -831,4 +831,400 @@ class AppLocalizationsEn extends AppLocalizations {
   String etaExpectedAround(String time) {
     return 'Expected around $time';
   }
+
+  @override
+  String rideDriversNearby(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count drivers nearby',
+      one: '1 driver nearby',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get rideNoDriversNow => 'No drivers available right now';
+
+  @override
+  String rideDiscountOff(String amount) {
+    return '฿$amount off';
+  }
+
+  @override
+  String get rideDropoffUnspecified => 'Drop-off not specified';
+
+  @override
+  String get rideCouponNeedRoute =>
+      'Choose pickup and drop-off before using a coupon';
+
+  @override
+  String get rideCouponInvalid => 'Invalid promo code';
+
+  @override
+  String get rideCouponApplyFailed =>
+      'Couldn\'t use this coupon. Please try again.';
+
+  @override
+  String get rideCouponSelectTitle => 'Choose a coupon';
+
+  @override
+  String get rideCouponUse => 'Apply';
+
+  @override
+  String get rideCouponLoadFailed => 'Couldn\'t load coupons';
+
+  @override
+  String get rideCouponAvailable => 'Available coupons';
+
+  @override
+  String get rideCouponNoneAvailable => 'No coupons available right now';
+
+  @override
+  String get rideFareEstimateFailed =>
+      'Couldn\'t calculate the fare. Please try again.';
+
+  @override
+  String get rideRequestFailed => 'Couldn\'t request a ride. Please try again.';
+
+  @override
+  String get liveNoDriverTitle => 'No driver found yet';
+
+  @override
+  String get liveNoDriverBody =>
+      'No drivers are available right now. Keep searching, or change the service type?';
+
+  @override
+  String get liveKeepSearching => 'Keep searching';
+
+  @override
+  String get liveChangeService => 'Change service';
+
+  @override
+  String get liveAutoCancelNoDriver =>
+      'Your ride was cancelled because no drivers are available right now';
+
+  @override
+  String get liveAutoCancelled => 'Your ride was cancelled automatically';
+
+  @override
+  String liveCancelledWithFee(String fee) {
+    return 'Ride cancelled • Cancellation fee ฿$fee';
+  }
+
+  @override
+  String liveTripNumber(String id) {
+    return 'Trip #$id';
+  }
+
+  @override
+  String get liveCancelRide => 'Cancel ride';
+
+  @override
+  String liveCancelFeeConfirm(String fee) {
+    return 'Your driver has accepted. Cancelling now costs a ฿$fee cancellation fee.\nCancel anyway?';
+  }
+
+  @override
+  String get liveCancelMayFeeConfirm =>
+      'Your driver has accepted. Cancelling now may incur a cancellation fee.\nCancel anyway?';
+
+  @override
+  String get liveCancelRideQuestion => 'Cancel ride?';
+
+  @override
+  String get liveNo => 'No';
+
+  @override
+  String get liveConfirmCancel => 'Yes, cancel';
+
+  @override
+  String get liveTripCancelledSub => 'This trip has been cancelled';
+
+  @override
+  String get liveFindingNearYou => 'Looking for drivers near you...';
+
+  @override
+  String get liveDriverOnTheWay => 'Your driver is on the way';
+
+  @override
+  String get liveWaitAtPickup => 'Please wait at the pickup point';
+
+  @override
+  String get livePleaseBoard => 'Please get in';
+
+  @override
+  String get liveHeadingToDestTitle => 'On the way to your destination';
+
+  @override
+  String get liveEtaHeadingToDropoff => 'Heading to your drop-off';
+
+  @override
+  String get liveEtaDriverComing => 'Driver is coming to pick you up';
+
+  @override
+  String get liveNoDriverPhone => 'Driver\'s phone number isn\'t available';
+
+  @override
+  String get liveChat => 'Chat';
+
+  @override
+  String get liveCall => 'Call';
+
+  @override
+  String get liveTripSummary => 'Trip summary';
+
+  @override
+  String get liveTotalFare => 'Total fare';
+
+  @override
+  String get livePayCard => 'Card';
+
+  @override
+  String get livePaymentMethod => 'Payment method';
+
+  @override
+  String get livePayCod => 'Cash on delivery';
+
+  @override
+  String get livePayUnspecified => 'Not specified';
+
+  @override
+  String get livePaymentSummaryTitle => 'Payment summary';
+
+  @override
+  String get liveFareSummary => 'Fare summary';
+
+  @override
+  String get liveFare => 'Fare';
+
+  @override
+  String get liveTollFee => 'Tolls';
+
+  @override
+  String get liveWaitingFee => 'Waiting fee';
+
+  @override
+  String get liveDiscount => 'Discount';
+
+  @override
+  String get liveDriverTip => 'Driver tip';
+
+  @override
+  String get liveTotalToPay => 'Total';
+
+  @override
+  String get liveTipTitle => 'Tip your driver (optional)';
+
+  @override
+  String get liveTipNote =>
+      'The tip is charged to your selected payment method';
+
+  @override
+  String get liveConfirmAndRate => 'Confirm and rate';
+
+  @override
+  String get liveChatDriver => 'Driver';
+
+  @override
+  String get liveChatSubtitle => 'Trip chat';
+
+  @override
+  String get liveChatSendFailed =>
+      'Couldn\'t send your message. Please try again.';
+
+  @override
+  String get liveChatLoadFailed => 'Couldn\'t load messages';
+
+  @override
+  String get liveChatHint => 'Type a message...';
+
+  @override
+  String get ratingRequired => 'Please rate your driver first';
+
+  @override
+  String get ratingTagGoodDriving => 'Good driving';
+
+  @override
+  String get ratingTagPolite => 'Polite';
+
+  @override
+  String get ratingTagCleanCar => 'Clean car';
+
+  @override
+  String get ratingTagOnTime => 'On time';
+
+  @override
+  String get ratingTagSafeDriving => 'Safe driving';
+
+  @override
+  String get ratingTitle => 'Review your trip';
+
+  @override
+  String get ratingSkip => 'Skip';
+
+  @override
+  String get ratingDriverNameUnknown => 'Driver name unavailable';
+
+  @override
+  String get ratingYourDriver => 'Your driver';
+
+  @override
+  String get ratingRateDriver => 'Rate your driver';
+
+  @override
+  String get ratingCommentTitle => 'Additional comments';
+
+  @override
+  String get ratingCommentHint => 'Tell us what you liked or didn\'t like...';
+
+  @override
+  String get ratingSubmit => 'Submit review';
+
+  @override
+  String get ratingSkipForNow => 'Skip for now';
+
+  @override
+  String get tripFilterAll => 'All';
+
+  @override
+  String get tripFilterFood => 'Food';
+
+  @override
+  String get tripFilterRide => 'Rides';
+
+  @override
+  String get tripFilterMessenger => 'Parcels';
+
+  @override
+  String tripTitleTo(String from, String to) {
+    return '$from to $to';
+  }
+
+  @override
+  String tripFoodOrderTo(String address) {
+    return 'Food order to $address';
+  }
+
+  @override
+  String tripMartItemsTo(String items, String address) {
+    return 'Shopping: $items to $address';
+  }
+
+  @override
+  String tripMartOrderTo(String address) {
+    return 'Mart order to $address';
+  }
+
+  @override
+  String tripOrderNumber(String id) {
+    return 'Order #$id';
+  }
+
+  @override
+  String get tripParcelDropoffFallback => 'parcel drop-off';
+
+  @override
+  String tripParcelTo(String address) {
+    return 'Parcel to $address';
+  }
+
+  @override
+  String get tripStatusFindingDriver => 'Finding a driver';
+
+  @override
+  String get tripStatusDriverAccepted => 'Driver accepted';
+
+  @override
+  String get tripStatusDriverAtPickup => 'Driver at pickup';
+
+  @override
+  String get tripStatusOnTrip => 'On trip';
+
+  @override
+  String get tripStatusPreparing => 'Preparing food';
+
+  @override
+  String get tripStatusReadyForPickup => 'Ready for pickup';
+
+  @override
+  String get tripStatusDriverAssigned => 'Driver assigned';
+
+  @override
+  String get tripStatusDelivering => 'Delivering';
+
+  @override
+  String get tripStatusInProgress => 'In progress';
+
+  @override
+  String get tripStatusAtParcelPickup => 'At parcel pickup';
+
+  @override
+  String get tripStatusParcelEnRoute => 'Out for delivery';
+
+  @override
+  String get tripDetailTitle => 'Trip details';
+
+  @override
+  String get tripNotFound => 'Booking not found';
+
+  @override
+  String get tripNoMapData => 'No map data';
+
+  @override
+  String get tripBookingDate => 'Booking date';
+
+  @override
+  String get tripBookingCode => 'Booking ID';
+
+  @override
+  String get tripBookingCodeCopied => 'Booking ID copied';
+
+  @override
+  String get tripDriverUnknown => 'Driver not specified';
+
+  @override
+  String get tripRestaurant => 'Restaurant';
+
+  @override
+  String get tripRouteDetails => 'Route details';
+
+  @override
+  String get tripFoodItems => 'Food items';
+
+  @override
+  String get tripServiceRide => 'Ride';
+
+  @override
+  String get tripTollFee => 'Tolls';
+
+  @override
+  String get tripWaitingFee => 'Waiting fee';
+
+  @override
+  String get tripFoodTotal => 'Food / items';
+
+  @override
+  String get tripDeliveryFee => 'Delivery fee';
+
+  @override
+  String get tripNetTotal => 'Total';
+
+  @override
+  String get tripRebook => 'Book again';
+
+  @override
+  String get tripHelpReport => 'Get help / Report a problem';
+
+  @override
+  String get tripRatingThanks => 'Thanks for your review';
+
+  @override
+  String get tripRatingAlreadyRated => 'You\'ve rated this trip';
+
+  @override
+  String get tripRatingPromptTitle => 'Help us improve your experience';
+
+  @override
+  String get tripRatingPromptSub => 'by rating this trip';
 }

@@ -829,4 +829,390 @@ class AppLocalizationsTh extends AppLocalizations {
   String etaExpectedAround(String time) {
     return 'คาดว่าถึงประมาณ $time';
   }
+
+  @override
+  String rideDriversNearby(int count) {
+    return 'มีคนขับใกล้ฉัน $count คน';
+  }
+
+  @override
+  String get rideNoDriversNow => 'ยังไม่มีคนขับว่างขณะนี้';
+
+  @override
+  String rideDiscountOff(String amount) {
+    return 'ลด ฿$amount';
+  }
+
+  @override
+  String get rideDropoffUnspecified => 'ไม่ระบุจุดส่ง';
+
+  @override
+  String get rideCouponNeedRoute => 'กรุณาเลือกจุดรับ-ส่งก่อนใช้คูปอง';
+
+  @override
+  String get rideCouponInvalid => 'รหัสส่วนลดไม่ถูกต้อง';
+
+  @override
+  String get rideCouponApplyFailed => 'ใช้คูปองนี้ไม่ได้ กรุณาลองใหม่';
+
+  @override
+  String get rideCouponSelectTitle => 'เลือกคูปองส่วนลด';
+
+  @override
+  String get rideCouponUse => 'ใช้งาน';
+
+  @override
+  String get rideCouponLoadFailed => 'โหลดคูปองไม่สำเร็จ';
+
+  @override
+  String get rideCouponAvailable => 'คูปองส่วนลดที่มี';
+
+  @override
+  String get rideCouponNoneAvailable => 'ไม่มีคูปองที่สามารถใช้งานได้ในขณะนี้';
+
+  @override
+  String get rideFareEstimateFailed =>
+      'ไม่สามารถคำนวณค่าโดยสารได้ กรุณาลองใหม่';
+
+  @override
+  String get rideRequestFailed => 'ไม่สามารถเรียกรถได้ กรุณาลองใหม่';
+
+  @override
+  String get liveNoDriverTitle => 'ยังหาคนขับให้ไม่ได้';
+
+  @override
+  String get liveNoDriverBody =>
+      'ตอนนี้ยังไม่พบคนขับที่ว่างรับงาน ต้องการค้นหาต่อ หรือเปลี่ยนประเภทบริการ?';
+
+  @override
+  String get liveKeepSearching => 'ค้นหาต่อ';
+
+  @override
+  String get liveChangeService => 'เปลี่ยนประเภทบริการ';
+
+  @override
+  String get liveAutoCancelNoDriver =>
+      'ระบบยกเลิกการเดินทางให้ เนื่องจากไม่พบคนขับที่ว่างในขณะนี้';
+
+  @override
+  String get liveAutoCancelled => 'ระบบยกเลิกการเดินทางให้อัตโนมัติ';
+
+  @override
+  String liveCancelledWithFee(String fee) {
+    return 'ยกเลิกการเดินทางแล้ว • มีค่าบริการยกเลิก ฿$fee';
+  }
+
+  @override
+  String liveTripNumber(String id) {
+    return 'เลขการเดินทาง-$id';
+  }
+
+  @override
+  String get liveCancelRide => 'ยกเลิกการเดินทาง';
+
+  @override
+  String liveCancelFeeConfirm(String fee) {
+    return 'คนขับรับงานแล้ว หากยกเลิกตอนนี้จะมีค่าบริการยกเลิก ฿$fee\nต้องการยกเลิกหรือไม่?';
+  }
+
+  @override
+  String get liveCancelMayFeeConfirm =>
+      'คนขับรับงานแล้ว การยกเลิกตอนนี้อาจมีค่าบริการในการยกเลิก\nต้องการยกเลิกหรือไม่?';
+
+  @override
+  String get liveCancelRideQuestion => 'ยกเลิกการเดินทาง?';
+
+  @override
+  String get liveNo => 'ไม่';
+
+  @override
+  String get liveConfirmCancel => 'ยืนยันยกเลิก';
+
+  @override
+  String get liveTripCancelledSub => 'การเดินทางถูกยกเลิกแล้ว';
+
+  @override
+  String get liveFindingNearYou => 'กำลังหาคนขับรถที่อยู่ใกล้คุณ...';
+
+  @override
+  String get liveDriverOnTheWay => 'คนขับรถกำลังเดินทางมารับ';
+
+  @override
+  String get liveWaitAtPickup => 'โปรดรอที่จุดรับผู้โดยสาร';
+
+  @override
+  String get livePleaseBoard => 'กรุณาขึ้นรถ';
+
+  @override
+  String get liveHeadingToDestTitle => 'กำลังเดินทางไปยังที่หมาย';
+
+  @override
+  String get liveEtaHeadingToDropoff => 'กำลังเดินทางไปส่ง';
+
+  @override
+  String get liveEtaDriverComing => 'ไรเดอร์กำลังมารับ';
+
+  @override
+  String get liveNoDriverPhone => 'ไม่พบเบอร์โทรของคนขับ';
+
+  @override
+  String get liveChat => 'แชท';
+
+  @override
+  String get liveCall => 'โทร';
+
+  @override
+  String get liveTripSummary => 'สรุปการเดินทาง';
+
+  @override
+  String get liveTotalFare => 'ราคารวม';
+
+  @override
+  String get livePayCard => 'บัตร';
+
+  @override
+  String get livePaymentMethod => 'วิธีชำระเงิน';
+
+  @override
+  String get livePayCod => 'เก็บเงินปลายทาง';
+
+  @override
+  String get livePayUnspecified => 'ไม่ระบุ';
+
+  @override
+  String get livePaymentSummaryTitle => 'สรุปการชำระเงิน';
+
+  @override
+  String get liveFareSummary => 'สรุปค่าโดยสาร';
+
+  @override
+  String get liveFare => 'ค่าโดยสาร';
+
+  @override
+  String get liveTollFee => 'ค่าทางด่วน';
+
+  @override
+  String get liveWaitingFee => 'ค่ารอคอย';
+
+  @override
+  String get liveDiscount => 'ส่วนลด';
+
+  @override
+  String get liveDriverTip => 'ทิปให้คนขับ';
+
+  @override
+  String get liveTotalToPay => 'ยอดชำระทั้งหมด';
+
+  @override
+  String get liveTipTitle => 'ให้ทิปคนขับ (ไม่บังคับ)';
+
+  @override
+  String get liveTipNote => 'ทิปจะถูกหักจากช่องทางชำระเงินที่คุณเลือก';
+
+  @override
+  String get liveConfirmAndRate => 'ยืนยันและให้คะแนน';
+
+  @override
+  String get liveChatDriver => 'คนขับ';
+
+  @override
+  String get liveChatSubtitle => 'แชทระหว่างเดินทาง';
+
+  @override
+  String get liveChatSendFailed => 'ส่งข้อความไม่สำเร็จ กรุณาลองใหม่';
+
+  @override
+  String get liveChatLoadFailed => 'โหลดข้อความไม่สำเร็จ';
+
+  @override
+  String get liveChatHint => 'พิมพ์ข้อความ...';
+
+  @override
+  String get ratingRequired => 'กรุณาให้คะแนนคนขับก่อนนะครับ';
+
+  @override
+  String get ratingTagGoodDriving => 'ขับรถดี';
+
+  @override
+  String get ratingTagPolite => 'สุภาพ';
+
+  @override
+  String get ratingTagCleanCar => 'รถสะอาด';
+
+  @override
+  String get ratingTagOnTime => 'ตรงเวลา';
+
+  @override
+  String get ratingTagSafeDriving => 'ขับขี่ปลอดภัย';
+
+  @override
+  String get ratingTitle => 'รีวิวการเดินทางของคุณ';
+
+  @override
+  String get ratingSkip => 'ข้าม';
+
+  @override
+  String get ratingDriverNameUnknown => 'ไม่ระบุชื่อคนขับ';
+
+  @override
+  String get ratingYourDriver => 'คนขับของคุณ';
+
+  @override
+  String get ratingRateDriver => 'ให้คะแนนคนขับ';
+
+  @override
+  String get ratingCommentTitle => 'ความคิดเห็นเพิ่มเติม';
+
+  @override
+  String get ratingCommentHint => 'บอกเราว่าคุณชอบหรือไม่ชอบอะไร...';
+
+  @override
+  String get ratingSubmit => 'ส่งรีวิว';
+
+  @override
+  String get ratingSkipForNow => 'ข้ามไปก่อน';
+
+  @override
+  String get tripFilterAll => 'ทั้งหมด';
+
+  @override
+  String get tripFilterFood => 'ส่งอาหาร';
+
+  @override
+  String get tripFilterRide => 'เรียกรถ';
+
+  @override
+  String get tripFilterMessenger => 'ส่งของ';
+
+  @override
+  String tripTitleTo(String from, String to) {
+    return '$from ไป $to';
+  }
+
+  @override
+  String tripFoodOrderTo(String address) {
+    return 'คำสั่งซื้ออาหาร ไป $address';
+  }
+
+  @override
+  String tripMartItemsTo(String items, String address) {
+    return 'ซื้อของ: $items ไป $address';
+  }
+
+  @override
+  String tripMartOrderTo(String address) {
+    return 'คำสั่งซื้อของใช้ ไป $address';
+  }
+
+  @override
+  String tripOrderNumber(String id) {
+    return 'คำสั่งซื้อ #$id';
+  }
+
+  @override
+  String get tripParcelDropoffFallback => 'จุดส่งพัสดุ';
+
+  @override
+  String tripParcelTo(String address) {
+    return 'ส่งพัสดุ ไป $address';
+  }
+
+  @override
+  String get tripStatusFindingDriver => 'กำลังหาคนขับ';
+
+  @override
+  String get tripStatusDriverAccepted => 'คนขับรับงานแล้ว';
+
+  @override
+  String get tripStatusDriverAtPickup => 'คนขับถึงจุดรับ';
+
+  @override
+  String get tripStatusOnTrip => 'กำลังเดินทาง';
+
+  @override
+  String get tripStatusPreparing => 'กำลังเตรียมอาหาร';
+
+  @override
+  String get tripStatusReadyForPickup => 'รอรับอาหาร';
+
+  @override
+  String get tripStatusDriverAssigned => 'จับคู่คนขับแล้ว';
+
+  @override
+  String get tripStatusDelivering => 'กำลังจัดส่ง';
+
+  @override
+  String get tripStatusInProgress => 'กำลังดำเนินการ';
+
+  @override
+  String get tripStatusAtParcelPickup => 'ถึงจุดรับพัสดุ';
+
+  @override
+  String get tripStatusParcelEnRoute => 'กำลังนำส่ง';
+
+  @override
+  String get tripDetailTitle => 'รายละเอียดการเดินทาง';
+
+  @override
+  String get tripNotFound => 'ไม่พบข้อมูลการจอง';
+
+  @override
+  String get tripNoMapData => 'ไม่มีข้อมูลแผนที่';
+
+  @override
+  String get tripBookingDate => 'วันที่การจอง';
+
+  @override
+  String get tripBookingCode => 'รหัสการจอง';
+
+  @override
+  String get tripBookingCodeCopied => 'คัดลอกรหัสการจองแล้ว';
+
+  @override
+  String get tripDriverUnknown => 'ไม่ระบุคนขับ';
+
+  @override
+  String get tripRestaurant => 'ร้านอาหาร';
+
+  @override
+  String get tripRouteDetails => 'รายละเอียดเส้นทาง';
+
+  @override
+  String get tripFoodItems => 'รายการอาหาร';
+
+  @override
+  String get tripServiceRide => 'การเดินทาง';
+
+  @override
+  String get tripTollFee => 'ค่าผ่านทาง';
+
+  @override
+  String get tripWaitingFee => 'ค่าบริการรอ';
+
+  @override
+  String get tripFoodTotal => 'ค่าอาหาร/สินค้า';
+
+  @override
+  String get tripDeliveryFee => 'ค่าบริการจัดส่ง';
+
+  @override
+  String get tripNetTotal => 'ยอดรวมสุทธิ';
+
+  @override
+  String get tripRebook => 'ทำรายการอีกครั้ง';
+
+  @override
+  String get tripHelpReport => 'ต้องการความช่วยเหลือ / แจ้งปัญหา';
+
+  @override
+  String get tripRatingThanks => 'ขอบคุณสำหรับรีวิว';
+
+  @override
+  String get tripRatingAlreadyRated => 'คุณให้คะแนนการเดินทางนี้แล้ว';
+
+  @override
+  String get tripRatingPromptTitle => 'ช่วยเราปรับปรุงประสบการณ์ให้ดียิ่งขึ้น';
+
+  @override
+  String get tripRatingPromptSub => 'โดยการให้คะแนนการเดินทางครั้งนี้';
 }

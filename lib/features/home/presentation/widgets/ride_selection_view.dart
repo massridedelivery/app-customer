@@ -118,17 +118,17 @@ class RideSelectionView extends ConsumerWidget {
                           children: [
                             Text(
                               isFromAddAddress
-                                  ? 'เลือกที่อยู่'
+                                  ? l10n.homeChooseAddress
                                   : isSavePlace
                                   ? AppLocalizations.of(
                                       context,
                                     )!.saveThisLocation
                                   : isPickup
-                                  ? 'เลือกจุดรับนี้'
+                                  ? l10n.homeUseThisPickup
                                   : homeState.selectionMode ==
                                         RideSelectionMode.food
-                                  ? 'เลือกจุดส่งอาหารนี้'
-                                  : 'เลือกจุดหมายปลายทางนี้',
+                                  ? l10n.homeUseThisFoodDropoff
+                                  : l10n.homeUseThisDestination,
                               style: AppTypography.heading4.copyWith(
                                 color: Colors.black,
                                 fontWeight: FontWeight.bold,
@@ -220,7 +220,7 @@ class RideSelectionView extends ConsumerWidget {
                         elevation: 0,
                       ),
                       child: Text(
-                        'ถัดไป',
+                        l10n.commonNext,
                         style: AppTypography.heading4.copyWith(
                           color: Colors.white,
                         ),
@@ -255,7 +255,7 @@ class RideSelectionView extends ConsumerWidget {
           content: TextField(
             controller: nameController,
             decoration: InputDecoration(
-              hintText: 'เช่น บ้าน, ที่ทำงาน, ฟิตเนส',
+              hintText: AppLocalizations.of(context)!.homePlaceNameHint,
               hintStyle: AppTypography.caption4.copyWith(
                 color: AppColors.semanticGrayNeutralFgLowOnGray,
               ),

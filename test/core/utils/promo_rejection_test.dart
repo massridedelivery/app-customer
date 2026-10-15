@@ -2,6 +2,20 @@ import 'package:customer_app/core/utils/promo_rejection.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  group('promoReasonToThai · English mode', () {
+    test('maps well-known reasons to English', () {
+      expect(
+        promoReasonToThai('Promo expired', languageCode: 'en'),
+        'This coupon has expired',
+      );
+      expect(
+        promoReasonToThai('minimum order not met', languageCode: 'en'),
+        "Your order hasn't reached this coupon's minimum",
+      );
+      expect(promoReasonToThai('invalid request', languageCode: 'en'), isNull);
+    });
+  });
+
   group('promoReasonToThai', () {
     test('translates well-known reasons', () {
       expect(

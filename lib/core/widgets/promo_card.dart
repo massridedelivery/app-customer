@@ -1,4 +1,5 @@
 import 'package:customer_app/core/constants/app_colors.dart';
+import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 /// Apply / cancel toggle shared by the promo cards: an outlined "use" button
@@ -12,19 +13,23 @@ class PromoApplyButton extends StatelessWidget {
     required this.onApply,
     required this.onCancel,
     this.isEnabled = true,
-    this.applyLabel = 'ใช้คูปอง',
-    this.cancelLabel = 'ยกเลิก',
+    this.applyLabel,
+    this.cancelLabel,
   });
 
   final bool isSelected;
   final bool isEnabled;
   final VoidCallback onApply;
   final VoidCallback onCancel;
-  final String applyLabel;
-  final String cancelLabel;
+  /// Defaults to the localized "ใช้คูปอง" / "Use".
+  final String? applyLabel;
+
+  /// Defaults to the localized "ยกเลิก" / "Cancel".
+  final String? cancelLabel;
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 200),
       switchInCurve: Curves.easeOut,
@@ -50,7 +55,7 @@ class PromoApplyButton extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                 ),
                 child: Text(
-                  cancelLabel,
+                  cancelLabel ?? l10n.cancel,
                   style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
@@ -70,7 +75,7 @@ class PromoApplyButton extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                 ),
                 child: Text(
-                  applyLabel,
+                  applyLabel ?? l10n.promoUseCoupon,
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,

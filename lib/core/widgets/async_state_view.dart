@@ -1,6 +1,7 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/widgets/mass_loading_m.dart';
+import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 /// Centered progress spinner for full-screen loading states.
@@ -26,19 +27,23 @@ class LoadingView extends StatelessWidget {
 class ErrorRetryView extends StatelessWidget {
   const ErrorRetryView({
     super.key,
-    this.message = 'เกิดข้อผิดพลาดในการโหลดข้อมูล',
+    this.message,
     this.detail,
     this.onRetry,
-    this.retryLabel = 'ลองใหม่',
+    this.retryLabel,
   });
 
-  final String message;
+  /// Defaults to the localized "เกิดข้อผิดพลาดในการโหลดข้อมูล".
+  final String? message;
   final String? detail;
   final VoidCallback? onRetry;
-  final String retryLabel;
+
+  /// Defaults to the localized "ลองใหม่" / "Try Again".
+  final String? retryLabel;
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24.0),
@@ -48,7 +53,7 @@ class ErrorRetryView extends StatelessWidget {
             const Icon(Icons.error_outline, color: Colors.red, size: 48),
             const SizedBox(height: 16),
             Text(
-              message,
+              message ?? l10n.commonLoadError,
               style: AppTypography.heading4,
               textAlign: TextAlign.center,
             ),
@@ -68,7 +73,7 @@ class ErrorRetryView extends StatelessWidget {
                   backgroundColor: AppColors.primary,
                 ),
                 child: Text(
-                  retryLabel,
+                  retryLabel ?? l10n.tryAgain,
                   style: const TextStyle(color: Colors.white),
                 ),
               ),

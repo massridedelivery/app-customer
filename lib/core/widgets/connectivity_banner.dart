@@ -2,6 +2,7 @@ import 'package:app_settings/app_settings.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/services/connectivity_monitor.dart';
+import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -45,16 +46,17 @@ class _AlertStrip extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final offline = status.quality == NetworkQuality.offline;
     final color = offline ? AppColors.error : AppColors.foundationOrange600;
     final title = offline
         ? (status.hasCarrier
-              ? 'เชื่อมต่ออินเทอร์เน็ตไม่ได้'
-              : 'ไม่มีสัญญาณอินเทอร์เน็ต')
-        : 'สัญญาณอินเทอร์เน็ตอ่อน / ไม่เสถียร';
+              ? l10n.commonCantConnect
+              : l10n.commonNoInternet)
+        : l10n.commonWeakConnection;
     final subtitle = offline
-        ? 'ตรวจสอบ Wi-Fi หรือเน็ตมือถือของคุณ'
-        : 'การเชื่อมต่อช้า อาจใช้งานไม่ราบรื่น';
+        ? l10n.commonCheckWifi
+        : l10n.commonSlowConnection;
 
     return Material(
       color: color,
@@ -104,7 +106,7 @@ class _AlertStrip extends ConsumerWidget {
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
                 child: Text(
-                  'ไปที่ตั้งค่า',
+                  l10n.commonGoToSettings,
                   style: AppTypography.caption4.copyWith(color: Colors.white),
                 ),
               ),
@@ -113,7 +115,7 @@ class _AlertStrip extends ConsumerWidget {
                   ref.read(connectivityMonitorProvider.notifier).refresh(),
               icon: const Icon(Icons.refresh_rounded, color: Colors.white),
               iconSize: 20,
-              tooltip: 'ตรวจสอบอีกครั้ง',
+              tooltip: l10n.commonCheckAgain,
               visualDensity: VisualDensity.compact,
             ),
           ],

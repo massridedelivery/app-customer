@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:customer_app/core/constants/feature_flags.dart';
 import 'package:customer_app/core/constants/map_defaults.dart';
+import 'package:customer_app/core/localization/app_language.dart';
 import 'package:customer_app/core/services/google_roads_service.dart';
 import 'package:customer_app/core/utils/address_formatter.dart';
 import 'package:customer_app/features/home/domain/usecases/add_saved_place_usecase_impl.dart';
@@ -24,10 +25,11 @@ part 'home_controller.g.dart';
 /// ride be booked from the city centre when GPS was slow or denied.
 const LatLng _kMapCameraFallback = MapDefaults.bangkokCenter;
 
-/// Stands in for the address when reverse geocoding returns nothing or fails.
+/// Stands in for the address when reverse geocoding returns nothing or fails,
+/// in the app's language ("ตำแหน่งที่เลือก" / "Selected location").
 /// Never null: a null [HomeState.tempAddress] means "still resolving", and
 /// [HomeController.confirmSelection] blocks on it.
-const String _kFallbackPlaceName = 'Selected Location';
+String get _kFallbackPlaceName => AppLanguage.l10n().homeSelectedLocation;
 
 /// Snap-to-road tuning (metres). Under [_kSnapMinMeters] the pin is already on a
 /// road — leave it. Over [_kSnapMaxMeters] the nearest road is too far (e.g. the

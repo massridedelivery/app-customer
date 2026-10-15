@@ -4,6 +4,7 @@ import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/features/food_order/domain/models/food_models.dart';
 import 'package:customer_app/features/food_order/presentation/controllers/food_search_controller.dart';
+import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:customer_app/core/widgets/app_network_image.dart';
 import 'package:customer_app/core/widgets/mass_loading_m.dart';
@@ -73,7 +74,7 @@ class _ItemSearchScreenState extends ConsumerState<ItemSearchScreen> {
                     onChanged: _onSearchChanged,
                     textAlignVertical: TextAlignVertical.center,
                     decoration: InputDecoration(
-                      hintText: 'ค้นหาร้านหรือเมนูอาหาร',
+                      hintText: AppLocalizations.of(context)!.homeSearchFoodHint,
                       hintStyle: AppTypography.caption4.copyWith(
                         color: Colors.grey,
                       ),
@@ -115,6 +116,7 @@ class _ItemSearchScreenState extends ConsumerState<ItemSearchScreen> {
   }
 
   Widget _buildBody(FoodSearchState state) {
+    final l10n = AppLocalizations.of(context)!;
     if (state.isLoading) {
       return const Center(
         child: MassLoadingM(size: 72),
@@ -124,7 +126,7 @@ class _ItemSearchScreenState extends ConsumerState<ItemSearchScreen> {
     if (state.error != null) {
       return Center(
         child: Text(
-          'เกิดข้อผิดพลาด: ${state.error}',
+          l10n.homeErrorDetail('${state.error}'),
           style: const TextStyle(color: Colors.red),
         ),
       );
@@ -138,7 +140,7 @@ class _ItemSearchScreenState extends ConsumerState<ItemSearchScreen> {
             Icon(Icons.search, size: 60, color: Colors.grey[300]),
             const SizedBox(height: 16),
             Text(
-              'ค้นหาของที่อยากกินเลย',
+              l10n.homeSearchFoodPrompt,
               style: AppTypography.heading4.copyWith(color: Colors.grey),
             ),
           ],
@@ -149,7 +151,7 @@ class _ItemSearchScreenState extends ConsumerState<ItemSearchScreen> {
     if (state.restaurantResults.isEmpty) {
       return Center(
         child: Text(
-          'ไม่พบผลลัพธ์สำหรับ "${state.query}"',
+          l10n.homeNoResultsFor(state.query),
           style: AppTypography.caption3.copyWith(color: Colors.grey),
         ),
       );
@@ -158,7 +160,7 @@ class _ItemSearchScreenState extends ConsumerState<ItemSearchScreen> {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        Text('ร้านอาหาร', style: AppTypography.heading4),
+        Text(l10n.homeRestaurants, style: AppTypography.heading4),
         const SizedBox(height: 12),
         ...state.restaurantResults.map((e) => _buildRestaurantListTile(e)),
       ],
@@ -166,6 +168,7 @@ class _ItemSearchScreenState extends ConsumerState<ItemSearchScreen> {
   }
 
   Widget _buildRestaurantListTile(RestaurantProfileModel restaurant) {
+    final l10n = AppLocalizations.of(context)!;
     return ListTile(
       contentPadding: EdgeInsets.zero,
       onTap: () => context.push('/restaurant/${restaurant.id}'),
@@ -194,14 +197,14 @@ class _ItemSearchScreenState extends ConsumerState<ItemSearchScreen> {
           const SizedBox(width: 8),
           Text(
             restaurant.durationMin != null
-                ? '• ${restaurant.durationMin} นาที'
-                : '• 20+ นาที',
+                ? '• ${restaurant.durationMin} ${l10n.minUnit}'
+                : '• 20+ ${l10n.minUnit}',
             style: AppTypography.caption5,
           ),
           const SizedBox(width: 8),
           Text(
             restaurant.deliveryFee == null || restaurant.deliveryFee == 0
-                ? '• ส่งฟรี'
+                ? '• ${l10n.freeDelivery}'
                 : '• ฿${restaurant.deliveryFee!.toStringAsFixed(0)}',
             style: AppTypography.caption5.copyWith(
               color:

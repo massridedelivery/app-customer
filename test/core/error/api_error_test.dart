@@ -69,5 +69,23 @@ void main() {
       expect(msg.contains('DioException'), isFalse);
       expect(msg.contains('validateStatus'), isFalse);
     });
+
+    test('our own messages follow the language; server text is kept', () {
+      expect(
+        apiErrorMessage(_badResponse(null, status: 500), languageCode: 'en'),
+        'The system is temporarily unavailable. Please try again later.',
+      );
+      expect(
+        apiErrorMessage(null, languageCode: 'en'),
+        'Something went wrong. Please try again.',
+      );
+      expect(
+        apiErrorMessage(
+          _badResponse({'message': 'dropoff is outside service area'}),
+          languageCode: 'en',
+        ),
+        'dropoff is outside service area',
+      );
+    });
   });
 }

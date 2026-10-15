@@ -2,11 +2,15 @@
 library;
 
 import 'package:customer_app/core/widgets/async_state_view.dart';
+import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Widget _host(Widget child) => MaterialApp(
   debugShowCheckedModeBanner: false,
+  localizationsDelegates: AppLocalizations.localizationsDelegates,
+  supportedLocales: AppLocalizations.supportedLocales,
+  locale: const Locale('th'),
   home: Scaffold(
     backgroundColor: Colors.white,
     body: Center(child: child),

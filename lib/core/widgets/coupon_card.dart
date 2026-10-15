@@ -12,15 +12,24 @@ import 'package:flutter/material.dart';
 /// coupon shape (ride's typed [RidePromo], messenger/profile's raw JSON maps).
 class CouponCardData {
   final String code;
-  final String title;
+
+  /// Promo title; null when the source has none (the card then shows the
+  /// localized "โปรโมชั่น" / "Promotion").
+  final String? title;
   final String description;
 
   /// Big value shown in the left ticket stub, e.g. "20%" or "฿50". Empty when
-  /// the source has no numeric discount (then the stub shows an icon).
+  /// the source has no numeric discount (then the stub shows an icon, unless
+  /// [freeShipping]).
   final String discountValue;
 
-  /// Secondary discount line, e.g. "สูงสุด ฿100". Null when not applicable.
-  final String? subDiscount;
+  /// Free-shipping promo: the stub reads "ส่งฟรี" / "Free Delivery" (with no
+  /// "ลด" prefix) instead of [discountValue].
+  final bool freeShipping;
+
+  /// Percentage cap shown under the value as "สูงสุด ฿100" / "Up to ฿100".
+  /// Null when not applicable.
+  final double? maxDiscount;
 
   final double minSpend;
 
@@ -32,10 +41,6 @@ class CouponCardData {
   /// percentage → orange, free shipping → green.
   final Color color;
 
-  /// Small line above [discountValue] in the stub — "ลด", or empty for
-  /// "ส่งฟรี" which reads on its own.
-  final String stubPrefix;
-
   /// Which service the promo is for; shown as a text label. Null hides it.
   final PromoScope? scope;
 
@@ -44,11 +49,11 @@ class CouponCardData {
     required this.title,
     required this.description,
     required this.discountValue,
-    this.subDiscount,
+    this.freeShipping = false,
+    this.maxDiscount,
     this.minSpend = 0,
     this.expiresAt,
     this.color = AppColors.primary,
-    this.stubPrefix = 'ลด',
     this.scope,
   });
 
@@ -61,9 +66,7 @@ class CouponCardData {
       discountValue: p.discountValue <= 0
           ? ''
           : (isPct ? '${_fmt(p.discountValue)}%' : '฿${_fmt(p.discountValue)}'),
-      subDiscount: (isPct && (p.maxDiscount ?? 0) > 0)
-          ? 'สูงสุด ฿${_fmt(p.maxDiscount!)}'
-          : null,
+      maxDiscount: (isPct && (p.maxDiscount ?? 0) > 0) ? p.maxDiscount : null,
       minSpend: p.minSpend,
       expiresAt: _expiry(p.validUntil),
       color: promoColorOf({'discount_type': p.discountType}),
@@ -82,18 +85,17 @@ class CouponCardData {
         (m['promo_type'] ?? '').toString().toLowerCase() == 'free_shipping';
     return CouponCardData(
       code: (m['code'] ?? '').toString(),
-      title: (m['title'] ?? m['name'] ?? 'โปรโมชั่น').toString(),
+      title: (m['title'] ?? m['name'])?.toString(),
       description: (m['description'] ?? '').toString(),
       discountValue: isFreeShip
-          ? 'ส่งฟรี'
+          ? ''
           : (val <= 0 ? '' : (isPct ? '${_fmt(val)}%' : '฿${_fmt(val)}')),
-      subDiscount:
-          (!isFreeShip && isPct && maxV > 0) ? 'สูงสุด ฿${_fmt(maxV)}' : null,
+      freeShipping: isFreeShip,
+      maxDiscount: (!isFreeShip && isPct && maxV > 0) ? maxV : null,
       minSpend: _num(m['min_order'] ?? m['min_spend']),
       expiresAt:
           _expiry((m['valid_until'] ?? m['expires_at'] ?? '').toString()),
       color: promoColorOf(m),
-      stubPrefix: isFreeShip ? '' : 'ลด',
       scope: promoScopeOf(m),
     );
   }
@@ -120,6 +122,10 @@ class CouponCardData {
 
   static String _fmt(double v) => v.toStringAsFixed(0);
 
+  /// [maxDiscount] formatted for display ("100"), or null.
+  String? get maxDiscountText =>
+      maxDiscount == null ? null : _fmt(maxDiscount!);
+
   static DateTime? _expiry(String raw) =>
       raw.trim().isEmpty ? null : DateTime.tryParse(raw);
 }
@@ -139,7 +145,9 @@ class CouponCard extends StatelessWidget {
   final bool isSelected;
   final VoidCallback? onApply;
   final VoidCallback? onCancel;
-  final String applyLabel;
+
+  /// Apply-button label; defaults to the localized "ใช้คูปอง" / "Use".
+  final String? applyLabel;
 
   /// Browse mode: tapping the card (e.g. opening the promo detail).
   final VoidCallback? onTap;
@@ -157,7 +165,7 @@ class CouponCard extends StatelessWidget {
     this.isSelected = false,
     this.onApply,
     this.onCancel,
-    this.applyLabel = 'ใช้คูปอง',
+    this.applyLabel,
     this.onTap,
     this.isEnabled = true,
     this.footer,
@@ -177,6 +185,8 @@ class CouponCard extends StatelessWidget {
   }
 
   Widget _buildCard(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final title = data.title ?? l10n.promotionTitle;
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
@@ -223,7 +233,7 @@ class CouponCard extends StatelessWidget {
                         children: [
                           Expanded(
                             child: Text(
-                              data.code.isEmpty ? data.title : data.code,
+                              data.code.isEmpty ? title : data.code,
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
@@ -242,9 +252,9 @@ class CouponCard extends StatelessWidget {
                           ],
                         ],
                       ),
-                      if (data.code.isNotEmpty && data.title.isNotEmpty)
+                      if (data.code.isNotEmpty && title.isNotEmpty)
                         Text(
-                          data.title,
+                          title,
                           style: const TextStyle(
                             fontSize: 12,
                             color: Colors.black87,
@@ -268,7 +278,9 @@ class CouponCard extends StatelessWidget {
                         children: [
                           if (data.minSpend > 0) ...[
                             _Chip(
-                              'ขั้นต่ำ ฿${data.minSpend.toStringAsFixed(0)}',
+                              l10n.promoMinSpend(
+                                data.minSpend.toStringAsFixed(0),
+                              ),
                             ),
                             const SizedBox(width: 6),
                           ],
@@ -285,7 +297,7 @@ class CouponCard extends StatelessWidget {
                                       const SizedBox(width: 3),
                                       Flexible(
                                         child: Text(
-                                          AppLocalizations.of(context)!.couponValidUntil(
+                                          l10n.couponValidUntil(
                                               AppDates.of(context).date(AppDates.bangkok(data.expiresAt!))),
                                           style: TextStyle(
                                             fontSize: 11,
@@ -301,7 +313,7 @@ class CouponCard extends StatelessWidget {
                           const SizedBox(width: 6),
                           _browse
                               ? Text(
-                                  'ดูรายละเอียด ›',
+                                  l10n.promoViewDetails,
                                   style: AppTypography.caption5.copyWith(
                                     color: data.color,
                                     fontWeight: FontWeight.bold,
@@ -312,7 +324,7 @@ class CouponCard extends StatelessWidget {
                                   isEnabled: isEnabled,
                                   onApply: onApply!,
                                   onCancel: onCancel ?? () {},
-                                  applyLabel: applyLabel,
+                                  applyLabel: applyLabel ?? l10n.promoUseCoupon,
                                 ),
                         ],
                       ),
@@ -349,7 +361,7 @@ class _ScopeLabel extends StatelessWidget {
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
-        scope.label,
+        scope.label(AppLocalizations.of(context)!),
         maxLines: 1,
         style: TextStyle(
           fontSize: 9,
@@ -368,7 +380,10 @@ class _ValueStub extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final base = enabled ? data.color : Colors.grey.shade400;
+    final value = data.freeShipping ? l10n.freeDelivery : data.discountValue;
+    final maxText = data.maxDiscountText;
     return Container(
       width: 72,
       padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -380,7 +395,7 @@ class _ValueStub extends StatelessWidget {
         ),
       ),
       child: Center(
-        child: data.discountValue.isEmpty
+        child: value.isEmpty
             ? const Icon(
                 Icons.confirmation_number_rounded,
                 color: Colors.white,
@@ -389,28 +404,28 @@ class _ValueStub extends StatelessWidget {
             : Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  if (data.stubPrefix.isNotEmpty)
+                  if (!data.freeShipping)
                     Text(
-                      data.stubPrefix,
+                      l10n.promoStubOff,
                       style: AppTypography.caption5.copyWith(
                         fontSize: 10,
                         color: Colors.white.withValues(alpha: 0.9),
                       ),
                     ),
                   Text(
-                    data.discountValue,
+                    value,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: data.discountValue.length > 4 ? 14 : 18,
+                      fontSize: value.length > 4 ? 14 : 18,
                       fontWeight: FontWeight.w800,
                       height: 1.05,
                     ),
                   ),
-                  if (data.subDiscount != null) ...[
+                  if (maxText != null) ...[
                     const SizedBox(height: 2),
                     Text(
-                      data.subDiscount!,
+                      l10n.promoMaxDiscount(maxText),
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.9),
@@ -486,8 +501,12 @@ class _DashedLinePainter extends CustomPainter {
 class CouponManualEntry extends StatelessWidget {
   final TextEditingController controller;
   final ValueChanged<String> onApply;
-  final String applyLabel;
-  final String hint;
+
+  /// Defaults to the localized "ใช้งาน" / "Apply".
+  final String? applyLabel;
+
+  /// Defaults to the localized "กรอกรหัสคูปองด้วยตนเอง" / "Enter a coupon code".
+  final String? hint;
   final String? errorText;
   final bool isLoading;
   final VoidCallback? onChanged;
@@ -496,8 +515,8 @@ class CouponManualEntry extends StatelessWidget {
     super.key,
     required this.controller,
     required this.onApply,
-    this.applyLabel = 'ใช้งาน',
-    this.hint = 'กรอกรหัสคูปองด้วยตนเอง',
+    this.applyLabel,
+    this.hint,
     this.errorText,
     this.isLoading = false,
     this.onChanged,
@@ -505,6 +524,7 @@ class CouponManualEntry extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final hasError = errorText != null && errorText!.isNotEmpty;
     return Padding(
       padding: const EdgeInsets.all(16),
@@ -536,7 +556,7 @@ class CouponManualEntry extends StatelessWidget {
                     onChanged: (_) => onChanged?.call(),
                     onSubmitted: (v) => onApply(v.trim()),
                     decoration: InputDecoration(
-                      hintText: hint,
+                      hintText: hint ?? l10n.promoEnterCodeHint,
                       hintStyle: const TextStyle(
                         color: Colors.grey,
                         fontSize: 14,
@@ -574,7 +594,7 @@ class CouponManualEntry extends StatelessWidget {
                             ),
                           )
                         : Text(
-                            applyLabel,
+                            applyLabel ?? l10n.promoApply,
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 13,

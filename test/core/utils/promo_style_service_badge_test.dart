@@ -1,5 +1,10 @@
 import 'package:customer_app/core/utils/promo_style.dart';
+import 'package:customer_app/l10n/app_localizations.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+final _th = lookupAppLocalizations(const Locale('th'));
+final _en = lookupAppLocalizations(const Locale('en'));
 
 /// Verifies the home service-card badge is derived from real promo data.
 ///
@@ -11,41 +16,45 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('serviceBadgeOf', () {
     test('no promos → every service shows no badge', () {
-      expect(serviceBadgeOf(const [], 'ride'), isNull);
-      expect(serviceBadgeOf(const [], 'food'), isNull);
-      expect(serviceBadgeOf(const [], 'messenger'), isNull);
+      expect(serviceBadgeOf(const [], 'ride', _th), isNull);
+      expect(serviceBadgeOf(const [], 'food', _th), isNull);
+      expect(serviceBadgeOf(const [], 'messenger', _th), isNull);
     });
 
     test('applies_to RIDE badges only the ride card', () {
       final promos = [
         {'applies_to': 'RIDE', 'promo_type': 'fixed', 'discount_value': 50},
       ];
-      expect(serviceBadgeOf(promos, 'ride')!.text, 'ลด ฿50*');
-      expect(serviceBadgeOf(promos, 'food'), isNull);
-      expect(serviceBadgeOf(promos, 'messenger'), isNull);
+      expect(serviceBadgeOf(promos, 'ride', _th)!.text, 'ลด ฿50*');
+      expect(serviceBadgeOf(promos, 'food', _th), isNull);
+      expect(serviceBadgeOf(promos, 'messenger', _th), isNull);
     });
 
     test('applies_to ALL covers every service', () {
       final promos = [
         {'applies_to': 'ALL', 'promo_type': 'fixed', 'discount_value': 25},
       ];
-      expect(serviceBadgeOf(promos, 'ride')!.text, 'ลด ฿25*');
-      expect(serviceBadgeOf(promos, 'food')!.text, 'ลด ฿25*');
-      expect(serviceBadgeOf(promos, 'messenger')!.text, 'ลด ฿25*');
+      expect(serviceBadgeOf(promos, 'ride', _th)!.text, 'ลด ฿25*');
+      expect(serviceBadgeOf(promos, 'food', _th)!.text, 'ลด ฿25*');
+      expect(serviceBadgeOf(promos, 'messenger', _th)!.text, 'ลด ฿25*');
     });
 
     test('free shipping shows "ส่งฟรี*"', () {
       final promos = [
         {'applies_to': 'FOOD', 'promo_type': 'free_shipping'},
       ];
-      expect(serviceBadgeOf(promos, 'food')!.text, 'ส่งฟรี*');
+      expect(serviceBadgeOf(promos, 'food', _th)!.text, 'ส่งฟรี*');
     });
 
     test('percentage discount renders as a percent badge', () {
       final promos = [
-        {'applies_to': 'MESSENGER', 'promo_type': 'percentage', 'discount_value': 20},
+        {
+          'applies_to': 'MESSENGER',
+          'promo_type': 'percentage',
+          'discount_value': 20,
+        },
       ];
-      expect(serviceBadgeOf(promos, 'messenger')!.text, 'ลด 20%*');
+      expect(serviceBadgeOf(promos, 'messenger', _th)!.text, 'ลด 20%*');
     });
 
     test('strongest offer wins when several promos match a service', () {
@@ -53,7 +62,7 @@ void main() {
         {'applies_to': 'RIDE', 'promo_type': 'fixed', 'discount_value': 30},
         {'applies_to': 'RIDE', 'promo_type': 'fixed', 'discount_value': 80},
       ];
-      expect(serviceBadgeOf(promos, 'ride')!.text, 'ลด ฿80*');
+      expect(serviceBadgeOf(promos, 'ride', _th)!.text, 'ลด ฿80*');
     });
 
     test('free shipping outranks a fixed discount on the same service', () {
@@ -61,22 +70,37 @@ void main() {
         {'applies_to': 'FOOD', 'promo_type': 'fixed', 'discount_value': 99},
         {'applies_to': 'FOOD', 'promo_type': 'free_shipping'},
       ];
-      expect(serviceBadgeOf(promos, 'food')!.text, 'ส่งฟรี*');
+      expect(serviceBadgeOf(promos, 'food', _th)!.text, 'ส่งฟรี*');
     });
 
     test('a FOOD promo never leaks onto the ride card', () {
       final promos = [
         {'applies_to': 'FOOD', 'promo_type': 'fixed', 'discount_value': 60},
       ];
-      expect(serviceBadgeOf(promos, 'ride'), isNull);
+      expect(serviceBadgeOf(promos, 'ride', _th), isNull);
     });
 
     test('keyword fallback applies only when applies_to is absent', () {
       final promos = [
         {'tag': 'เดินทาง', 'promo_type': 'fixed', 'discount_value': 60},
       ];
-      expect(serviceBadgeOf(promos, 'ride')!.text, 'ลด ฿60*');
-      expect(serviceBadgeOf(promos, 'food'), isNull);
+      expect(serviceBadgeOf(promos, 'ride', _th)!.text, 'ลด ฿60*');
+      expect(serviceBadgeOf(promos, 'food', _th), isNull);
+    });
+
+    test('badge text follows the language', () {
+      final promos = [
+        {'applies_to': 'RIDE', 'promo_type': 'fixed', 'discount_value': 50},
+        {
+          'applies_to': 'MESSENGER',
+          'promo_type': 'percentage',
+          'discount_value': 20,
+        },
+        {'applies_to': 'FOOD', 'promo_type': 'free_shipping'},
+      ];
+      expect(serviceBadgeOf(promos, 'ride', _en)!.text, '฿50 off*');
+      expect(serviceBadgeOf(promos, 'messenger', _en)!.text, '20% off*');
+      expect(serviceBadgeOf(promos, 'food', _en)!.text, 'Free Delivery*');
     });
   });
 }

@@ -1,6 +1,7 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/features/food_order/domain/models/food_models.dart';
+import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 class MenuItemBottomSheet extends StatefulWidget {
@@ -240,7 +241,9 @@ class _MenuItemBottomSheetState extends State<MenuItemBottomSheet> {
           ],
           const SizedBox(height: 12),
           Text(
-            'ราคาเริ่มต้น ฿${widget.item.price.toStringAsFixed(0)}',
+            AppLocalizations.of(context)!.homeStartingPrice(
+              widget.item.price.toStringAsFixed(0),
+            ),
             style: AppTypography.heading4.copyWith(color: AppColors.primary),
           ),
         ],
@@ -254,15 +257,16 @@ class _MenuItemBottomSheetState extends State<MenuItemBottomSheet> {
 
   Widget _buildModifierGroupSection(ModifierGroupModel group) {
     final isRadio = group.maxSelect == 1;
+    final l10n = AppLocalizations.of(context)!;
 
     String hintText = '';
     if (group.minSelect > 0) {
-      hintText = 'จำเป็นต้องเลือกอย่างน้อย ${group.minSelect} รายการ';
+      hintText = l10n.homeSelectAtLeast(group.minSelect);
     } else {
-      hintText = 'เลือกซื้อเพิ่มได้';
+      hintText = l10n.homeOptionalAddOns;
     }
     if (group.maxSelect > 0 && group.maxSelect != 1) {
-      hintText += ' (สูงสุด ${group.maxSelect} รายการ)';
+      hintText += ' ${l10n.homeUpToItems(group.maxSelect)}';
     }
 
     return Padding(
@@ -378,6 +382,7 @@ class _MenuItemBottomSheetState extends State<MenuItemBottomSheet> {
   }
 
   Widget _buildSpecialInstructions() {
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -386,7 +391,7 @@ class _MenuItemBottomSheetState extends State<MenuItemBottomSheet> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('รายละเอียดเพิ่มเติม', style: AppTypography.label1),
+              Text(l10n.homeSpecialInstructions, style: AppTypography.label1),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
@@ -394,7 +399,7 @@ class _MenuItemBottomSheetState extends State<MenuItemBottomSheet> {
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Text(
-                  'ไม่จำเป็นต้องระบุ',
+                  l10n.homeOptional,
                   style: AppTypography.caption5.copyWith(color: Colors.grey),
                 ),
               ),
@@ -406,7 +411,7 @@ class _MenuItemBottomSheetState extends State<MenuItemBottomSheet> {
             maxLines: 3,
             maxLength: 200, // SCRUM-44: items[].notes ≤ 200 chars
             decoration: InputDecoration(
-              hintText: 'เช่น เผ็ดน้อย, ไม่ใส่กระเทียมเจียว',
+              hintText: l10n.homeNoteHint,
               hintStyle: AppTypography.caption3.copyWith(color: Colors.grey),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -494,7 +499,9 @@ class _MenuItemBottomSheetState extends State<MenuItemBottomSheet> {
                 elevation: 0,
               ),
               child: Text(
-                'เพิ่มไปยังตะกร้า - ฿${totalPrice.toStringAsFixed(0)}',
+                AppLocalizations.of(context)!.homeAddToCart(
+                  totalPrice.toStringAsFixed(0),
+                ),
                 style: AppTypography.heading5.copyWith(color: Colors.white),
               ),
             ),

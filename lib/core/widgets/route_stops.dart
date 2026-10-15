@@ -2,6 +2,7 @@ import 'package:customer_app/core/constants/app_assets.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_icons.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
+import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 /// Pickup → dropoff route stops shown as a vertical timeline: the standard
@@ -14,8 +15,8 @@ class RouteStops extends StatelessWidget {
     super.key,
     required this.pickupAddress,
     required this.dropoffAddress,
-    this.pickupLabel = 'จุดรับ',
-    this.dropoffLabel = 'จุดส่ง',
+    this.pickupLabel,
+    this.dropoffLabel,
     this.pinSize = 20,
     this.labelStyle,
     this.addressStyle,
@@ -24,8 +25,11 @@ class RouteStops extends StatelessWidget {
 
   final String? pickupAddress;
   final String? dropoffAddress;
-  final String pickupLabel;
-  final String dropoffLabel;
+  /// Defaults to the localized "จุดรับ" / "Pickup Point".
+  final String? pickupLabel;
+
+  /// Defaults to the localized "จุดส่ง" / "Drop-off Point".
+  final String? dropoffLabel;
   final double pinSize;
   final TextStyle? labelStyle;
   final TextStyle? addressStyle;
@@ -36,6 +40,7 @@ class RouteStops extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -69,7 +74,7 @@ class RouteStops extends StatelessWidget {
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.only(bottom: 16),
-                  child: _stop(pickupLabel, pickupAddress),
+                  child: _stop(pickupLabel ?? l10n.pickupPoint, pickupAddress),
                 ),
               ),
             ],
@@ -80,7 +85,7 @@ class RouteStops extends StatelessWidget {
           children: [
             _pin(AppColors.foundationRed700),
             const SizedBox(width: 12),
-            Expanded(child: _stop(dropoffLabel, dropoffAddress)),
+            Expanded(child: _stop(dropoffLabel ?? l10n.dropoffPoint, dropoffAddress)),
           ],
         ),
       ],

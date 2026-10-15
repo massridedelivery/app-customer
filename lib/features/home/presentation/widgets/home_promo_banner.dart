@@ -1,6 +1,7 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/utils/promo_style.dart';
+import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:customer_app/features/profile/presentation/screens/promo_list_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -28,6 +29,7 @@ class HomePromoBanner extends ConsumerWidget {
             )
             .toList();
         if (promos.isEmpty) return const SizedBox.shrink();
+        final l10n = AppLocalizations.of(context)!;
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -37,7 +39,7 @@ class HomePromoBanner extends ConsumerWidget {
               child: Row(
                 children: [
                   Text(
-                    'โปรโมชั่นสำหรับคุณ',
+                    l10n.homePromosForYou,
                     style: AppTypography.heading5.copyWith(
                       fontWeight: FontWeight.bold,
                       color: AppColors.textPrimary,
@@ -47,7 +49,7 @@ class HomePromoBanner extends ConsumerWidget {
                   GestureDetector(
                     onTap: () => context.push('/promos'),
                     child: Text(
-                      'ดูทั้งหมด',
+                      l10n.seeAll,
                       style: AppTypography.label2.copyWith(
                         color: AppColors.primary,
                       ),
@@ -81,8 +83,8 @@ class _PromoCard extends StatelessWidget {
   final Map<String, dynamic> promo;
   const _PromoCard({required this.promo});
 
-  String get _title =>
-      (promo['title'] ?? promo['name'] ?? 'โปรโมชั่น').toString();
+  String _title(AppLocalizations l10n) =>
+      (promo['title'] ?? promo['name'] ?? l10n.promotionTitle).toString();
 
   String? get _code => promo['code']?.toString();
 
@@ -94,10 +96,13 @@ class _PromoCard extends StatelessWidget {
   }
 
   /// Headline like "ลด ฿100" / "ลด 20%" / "ส่งฟรี", derived from discount_type.
-  String get _headline => promoHeadlineOf(promo, fallback: _title);
+  String _headline(AppLocalizations l10n) =>
+      promoHeadlineOf(promo, l10n, fallback: _title(l10n));
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final title = _title(l10n);
     // Card color: admin-set `color` if present, else auto by discount_type
     // (fixed→red, percentage→orange, free_shipping→green). Tapping opens detail.
     final Color base = promoColorOf(promo);
@@ -143,7 +148,7 @@ class _PromoCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        _headline,
+                        _headline(l10n),
                         style: AppTypography.heading4.copyWith(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -154,8 +159,8 @@ class _PromoCard extends StatelessWidget {
                       const SizedBox(height: 2),
                       Text(
                         _minSpend > 0
-                            ? '$_title · ขั้นต่ำ ฿${_minSpend.toStringAsFixed(0)}'
-                            : _title,
+                            ? '$title · ${l10n.promoMinSpend(_minSpend.toStringAsFixed(0))}'
+                            : title,
                         style: AppTypography.caption5.copyWith(
                           color: Colors.white.withValues(alpha: 0.9),
                         ),

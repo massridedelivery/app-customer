@@ -829,4 +829,451 @@ class AppLocalizationsTh extends AppLocalizations {
   String etaExpectedAround(String time) {
     return 'คาดว่าถึงประมาณ $time';
   }
+
+  @override
+  String get homeChooseDeliveryLocation => 'เลือกสถานที่จัดส่ง';
+
+  @override
+  String get homePleaseChooseLocation => 'โปรดเลือกสถานที่';
+
+  @override
+  String get homeWhatToOrder => 'สั่งอะไรดี?';
+
+  @override
+  String get homeServiceRide => 'เรียกรถ';
+
+  @override
+  String get homeServiceRideSub => 'เรียกครั้งแรก';
+
+  @override
+  String get homeServiceFood => 'สั่งอาหาร';
+
+  @override
+  String get homeServiceFoodSub => 'ถูกสุดทุกวัน';
+
+  @override
+  String get homeServiceMessenger => 'เมสเซนเจอร์';
+
+  @override
+  String get homeServiceMessengerSub => 'ส่งของ พัสดุ';
+
+  @override
+  String get homeServiceParcel => 'ส่งพัสดุ';
+
+  @override
+  String get homeYourArea => 'พื้นที่ของคุณ';
+
+  @override
+  String get homeComingSoonInYourArea => 'เร็วๆ นี้ในพื้นที่ของคุณ';
+
+  @override
+  String homeZoneComingSoonMessage(String service, String area) {
+    return 'บริการ$service ใน$areaกำลังจะเปิดเร็วๆ นี้ ขณะนี้อาจยังไม่มีคนขับพร้อมให้บริการ';
+  }
+
+  @override
+  String homeYourLocation(String area) {
+    return 'ตำแหน่งของคุณ: $area';
+  }
+
+  @override
+  String get homeArticlesTitle => 'ความรู้และเคล็ดลับจาก MASS';
+
+  @override
+  String get homeArticleCatServices => 'แนะนำบริการ';
+
+  @override
+  String get homeArticleCatTips => 'เคล็ดลับ';
+
+  @override
+  String get homeArticleCatSafety => 'ความปลอดภัย';
+
+  @override
+  String get homeArticleMassTitle =>
+      'MASS คืออะไร? รู้จักซูเปอร์แอปสัญชาติไทยที่ครบจบในแอปเดียว';
+
+  @override
+  String get homeArticleFoodTitle =>
+      '5 เคล็ดลับสั่งอาหารเดลิเวอรีให้คุ้มค่าและอร่อยเหมือนทานที่ร้าน';
+
+  @override
+  String get homeArticleRideTitle =>
+      'เดินทางปลอดภัยกับ MASS Ride: ฟีเจอร์ความปลอดภัยที่คุณควรรู้';
+
+  @override
+  String get homePromosForYou => 'โปรโมชั่นสำหรับคุณ';
+
+  @override
+  String get homeRecentTrips => 'การเดินทางล่าสุด';
+
+  @override
+  String get homeSelectedLocation => 'ตำแหน่งที่เลือก';
+
+  @override
+  String get homeActiveRide => 'การเดินทางของคุณ';
+
+  @override
+  String get homeActiveFood => 'ร้านอาหาร';
+
+  @override
+  String get homeViewStatus => 'ดูสถานะ';
+
+  @override
+  String get homeStatusInProgress => 'กำลังดำเนินการ...';
+
+  @override
+  String get homeStatusFindingDriver => 'กำลังค้นหาคนขับ...';
+
+  @override
+  String get homeFoodStatusPlaced => 'กำลังส่งคำสั่งซื้อ...';
+
+  @override
+  String get homeFoodStatusConfirmed => 'ยืนยันการสั่งซื้อแล้ว';
+
+  @override
+  String get homeFoodStatusPreparing => 'ร้านอาหารกำลังเตรียมอาหาร...';
+
+  @override
+  String get homeFoodStatusReady => 'ปรุงเสร็จแล้ว - รอรับอาหาร';
+
+  @override
+  String get homeFoodStatusRiderAssigned => 'จับคู่คนส่งอาหารสำเร็จ';
+
+  @override
+  String get homeFoodStatusOnTheWay => 'คนขับกำลังจัดส่งอาหารให้คุณ';
+
+  @override
+  String get homeRideStatusAccepted => 'คนขับตอบรับแล้ว';
+
+  @override
+  String get homeRideStatusArrived => 'คนขับถึงจุดรับแล้ว';
+
+  @override
+  String get homeRideStatusOnTrip => 'กำลังเดินทาง';
+
+  @override
+  String get homeParcelStatusAccepted => 'คนขับรับงานแล้ว';
+
+  @override
+  String get homeParcelStatusArrived => 'คนขับถึงจุดรับพัสดุ';
+
+  @override
+  String get homeParcelStatusDelivering => 'กำลังนำส่งพัสดุ';
+
+  @override
+  String get homeChooseAddress => 'เลือกที่อยู่';
+
+  @override
+  String get homeUseThisPickup => 'เลือกจุดรับนี้';
+
+  @override
+  String get homeUseThisFoodDropoff => 'เลือกจุดส่งอาหารนี้';
+
+  @override
+  String get homeUseThisDestination => 'เลือกจุดหมายปลายทางนี้';
+
+  @override
+  String get homePlaceNameHint => 'เช่น บ้าน, ที่ทำงาน, ฟิตเนส';
+
+  @override
+  String get homeChooseParcelDropoff => 'เลือกจุดส่งพัสดุ';
+
+  @override
+  String get homeChooseParcelPickup => 'เลือกจุดรับพัสดุ';
+
+  @override
+  String get homeSearchParcelDropoff => 'ค้นหาจุดส่งพัสดุ';
+
+  @override
+  String get homeSearchParcelPickup => 'ค้นหาจุดรับพัสดุ';
+
+  @override
+  String get homeFoodLocationTitle => 'ระบุสถานที่ส่งอาหาร';
+
+  @override
+  String get homeFoodWhereHint => 'ให้เราไปส่งอาหารที่ไหนดี?';
+
+  @override
+  String get homeChooseOnMap => 'เลือกบนแผนที่';
+
+  @override
+  String get homeNoRecentPlaces => 'ยังไม่มีสถานที่ล่าสุด';
+
+  @override
+  String get homeNoSavedPlaces => 'ยังไม่มีสถานที่ที่บันทึกไว้';
+
+  @override
+  String get homeSearchFoodHint => 'ค้นหาร้านหรือเมนูอาหาร';
+
+  @override
+  String homeErrorDetail(String error) {
+    return 'เกิดข้อผิดพลาด: $error';
+  }
+
+  @override
+  String get homeSearchFoodPrompt => 'ค้นหาของที่อยากกินเลย';
+
+  @override
+  String homeNoResultsFor(String query) {
+    return 'ไม่พบผลลัพธ์สำหรับ \"$query\"';
+  }
+
+  @override
+  String get homeRestaurants => 'ร้านอาหาร';
+
+  @override
+  String get homeRestaurant => 'ร้านอาหาร';
+
+  @override
+  String get homeCategoryNotFound => 'ไม่พบข้อมูลหมวดหมู่';
+
+  @override
+  String get homeNoRestaurantsInCategory => 'ไม่พบร้านอาหารในหมวดหมู่นี้';
+
+  @override
+  String get homeClosed => 'ปิดทำการ';
+
+  @override
+  String homeStartingPrice(String price) {
+    return 'ราคาเริ่มต้น ฿$price';
+  }
+
+  @override
+  String homeSelectAtLeast(int count) {
+    return 'จำเป็นต้องเลือกอย่างน้อย $count รายการ';
+  }
+
+  @override
+  String get homeOptionalAddOns => 'เลือกซื้อเพิ่มได้';
+
+  @override
+  String homeUpToItems(int count) {
+    return '(สูงสุด $count รายการ)';
+  }
+
+  @override
+  String get homeSpecialInstructions => 'รายละเอียดเพิ่มเติม';
+
+  @override
+  String get homeOptional => 'ไม่จำเป็นต้องระบุ';
+
+  @override
+  String get homeNoteHint => 'เช่น เผ็ดน้อย, ไม่ใส่กระเทียมเจียว';
+
+  @override
+  String homeAddToCart(String total) {
+    return 'เพิ่มไปยังตะกร้า - ฿$total';
+  }
+
+  @override
+  String get commonComingSoon => 'เร็วๆ นี้';
+
+  @override
+  String get commonComingSoonMessage => 'กำลังจะเปิดให้บริการเร็วๆ นี้';
+
+  @override
+  String get commonGotIt => 'รับทราบ';
+
+  @override
+  String get commonCantConnect => 'เชื่อมต่ออินเทอร์เน็ตไม่ได้';
+
+  @override
+  String get commonNoInternet => 'ไม่มีสัญญาณอินเทอร์เน็ต';
+
+  @override
+  String get commonWeakConnection => 'สัญญาณอินเทอร์เน็ตอ่อน / ไม่เสถียร';
+
+  @override
+  String get commonCheckWifi => 'ตรวจสอบ Wi-Fi หรือเน็ตมือถือของคุณ';
+
+  @override
+  String get commonSlowConnection => 'การเชื่อมต่อช้า อาจใช้งานไม่ราบรื่น';
+
+  @override
+  String get commonGoToSettings => 'ไปที่ตั้งค่า';
+
+  @override
+  String get commonCheckAgain => 'ตรวจสอบอีกครั้ง';
+
+  @override
+  String get commonLoginFirst => 'เข้าสู่ระบบก่อน';
+
+  @override
+  String get commonLoginToUse => 'กรุณาเข้าสู่ระบบเพื่อใช้บริการนี้';
+
+  @override
+  String get commonContinueBrowsing => 'ดูบริการต่อ';
+
+  @override
+  String get commonLoadError => 'เกิดข้อผิดพลาดในการโหลดข้อมูล';
+
+  @override
+  String get commonNext => 'ถัดไป';
+
+  @override
+  String get commonBack => 'กลับ';
+
+  @override
+  String get commonCopy => 'คัดลอก';
+
+  @override
+  String get promoUseCoupon => 'ใช้คูปอง';
+
+  @override
+  String get promoApply => 'ใช้งาน';
+
+  @override
+  String get promoEnterCodeHint => 'กรอกรหัสคูปองด้วยตนเอง';
+
+  @override
+  String get promoViewDetails => 'ดูรายละเอียด ›';
+
+  @override
+  String promoMinSpend(String amount) {
+    return 'ขั้นต่ำ ฿$amount';
+  }
+
+  @override
+  String promoMaxDiscount(String amount) {
+    return 'สูงสุด ฿$amount';
+  }
+
+  @override
+  String get promoStubOff => 'ลด';
+
+  @override
+  String promoHeadlinePercent(String value) {
+    return 'ลด $value%';
+  }
+
+  @override
+  String promoHeadlineBaht(String value) {
+    return 'ลด ฿$value';
+  }
+
+  @override
+  String get promoHeadlineFallback => 'โปรโมชัน';
+
+  @override
+  String get promoScopeAll => 'ลดทั่วไป';
+
+  @override
+  String get promoScopeRide => 'เฉพาะเรียกรถ';
+
+  @override
+  String get promoScopeFood => 'เฉพาะอาหาร';
+
+  @override
+  String get promoScopeMessenger => 'เฉพาะส่งของ';
+
+  @override
+  String get promoTabEverything => 'ทั้งหมด';
+
+  @override
+  String get promoTabGeneral => 'ทั่วไป';
+
+  @override
+  String get promoTabRide => 'เรียกรถ';
+
+  @override
+  String get promoTabMessenger => 'ส่งของ';
+
+  @override
+  String get promoMyPromos => 'โปรโมชั่นของฉัน';
+
+  @override
+  String get promoLoading => 'กำลังโหลดโปรโมชัน...';
+
+  @override
+  String get promoNoneNow => 'ไม่พบโปรโมชันในขณะนี้';
+
+  @override
+  String get promoNotFound => 'ไม่พบโปรโมชันนี้';
+
+  @override
+  String get promoInvalidCode => 'รหัสโปรโมชันไม่ถูกต้อง';
+
+  @override
+  String get promoCodeLabel => 'รหัสโปรโมชัน';
+
+  @override
+  String promoCodeCopied(String code) {
+    return 'คัดลอกรหัส $code แล้ว!';
+  }
+
+  @override
+  String get promoTerms => 'ข้อกำหนดและเงื่อนไข';
+
+  @override
+  String get promoRejectedFallback => 'ใช้คูปองนี้กับรายการนี้ไม่ได้';
+
+  @override
+  String get promoRejectNewUser => 'คูปองนี้สำหรับลูกค้าใหม่เท่านั้น';
+
+  @override
+  String get promoRejectExpired => 'คูปองนี้หมดอายุแล้ว';
+
+  @override
+  String get promoRejectNotStarted => 'คูปองนี้ยังไม่เริ่มใช้งาน';
+
+  @override
+  String get promoRejectLimit => 'คุณใช้สิทธิ์คูปองนี้ครบแล้ว';
+
+  @override
+  String get promoRejectMinSpend => 'ยอดยังไม่ถึงขั้นต่ำของคูปองนี้';
+
+  @override
+  String get promoRejectNotFound => 'ไม่พบรหัสคูปองนี้';
+
+  @override
+  String get promoRejectWrongService => 'คูปองนี้ใช้กับบริการนี้ไม่ได้';
+
+  @override
+  String get errGeneric => 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง';
+
+  @override
+  String get errLoadFailed => 'โหลดข้อมูลไม่สำเร็จ';
+
+  @override
+  String get errTimeout => 'การเชื่อมต่อใช้เวลานานเกินไป กรุณาลองใหม่';
+
+  @override
+  String get errConnection =>
+      'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองใหม่';
+
+  @override
+  String get errUnauthorized => 'ไม่มีสิทธิ์ใช้งาน กรุณาเข้าสู่ระบบใหม่';
+
+  @override
+  String get errNotFound => 'ไม่พบข้อมูลที่ต้องการ';
+
+  @override
+  String get errTooManyRequests => 'มีคำขอมากเกินไป กรุณาลองใหม่อีกครั้ง';
+
+  @override
+  String get errServer => 'ระบบขัดข้องชั่วคราว กรุณาลองใหม่ภายหลัง';
+
+  @override
+  String get errBadRequest => 'ข้อมูลคำขอไม่ถูกต้อง กรุณาตรวจสอบแล้วลองใหม่';
+
+  @override
+  String get errPlaceSearch => 'ค้นหาสถานที่ไม่สำเร็จ';
+
+  @override
+  String get errPlaceDetails => 'ดึงข้อมูลสถานที่ไม่สำเร็จ';
+
+  @override
+  String get errRecentPlaces => 'โหลดสถานที่ล่าสุดไม่สำเร็จ';
+
+  @override
+  String get errSavedPlaces => 'โหลดสถานที่ที่บันทึกไม่สำเร็จ';
+
+  @override
+  String get errSavePlace => 'บันทึกสถานที่ไม่สำเร็จ';
+
+  @override
+  String get errSetDefaultPlace => 'ตั้งค่าสถานที่เริ่มต้นไม่สำเร็จ';
+
+  @override
+  String get errGetDefaultPlace => 'ดึงสถานที่เริ่มต้นไม่สำเร็จ';
 }

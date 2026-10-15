@@ -1,5 +1,7 @@
 import 'package:customer_app/core/utils/promo_style.dart';
 import 'package:customer_app/core/widgets/coupon_card.dart';
+import 'package:customer_app/l10n/app_localizations.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -18,10 +20,25 @@ void main() {
     });
 
     test('labels are text only', () {
-      expect(PromoScope.all.label, 'ลดทั่วไป');
-      expect(PromoScope.ride.label, 'เฉพาะเรียกรถ');
-      expect(PromoScope.food.label, 'เฉพาะอาหาร');
-      expect(PromoScope.messenger.label, 'เฉพาะส่งของ');
+      final th = lookupAppLocalizations(const Locale('th'));
+      expect(PromoScope.all.label(th), 'ลดทั่วไป');
+      expect(PromoScope.ride.label(th), 'เฉพาะเรียกรถ');
+      expect(PromoScope.food.label(th), 'เฉพาะอาหาร');
+      expect(PromoScope.messenger.label(th), 'เฉพาะส่งของ');
+    });
+
+    test('labels and tabs follow the language', () {
+      final en = lookupAppLocalizations(const Locale('en'));
+      expect(PromoScope.all.label(en), 'All services');
+      expect(PromoScope.ride.label(en), 'Rides only');
+      expect(PromoScope.food.label(en), 'Food only');
+      expect(PromoScope.messenger.label(en), 'Messenger only');
+      expect(PromoScope.ride.tabLabel(en), 'Ride');
+      final th = lookupAppLocalizations(const Locale('th'));
+      expect(PromoScope.all.tabLabel(th), 'ทั่วไป');
+      expect(PromoScope.ride.tabLabel(th), 'เรียกรถ');
+      expect(PromoScope.food.tabLabel(th), 'อาหาร');
+      expect(PromoScope.messenger.tabLabel(th), 'ส่งของ');
     });
   });
 
@@ -35,7 +52,7 @@ void main() {
         'applies_to': 'RIDE',
       });
       expect(d.discountValue, '฿50');
-      expect(d.stubPrefix, 'ลด');
+      expect(d.freeShipping, isFalse);
       expect(d.scope, PromoScope.ride);
       expect(d.color, promoColorOf({'discount_type': 'fixed'}));
     });
@@ -49,9 +66,9 @@ void main() {
         'max_discount': 40,
         'applies_to': 'MESSENGER',
       });
-      expect(d.discountValue, 'ส่งฟรี');
-      expect(d.stubPrefix, '');
-      expect(d.subDiscount, isNull);
+      expect(d.freeShipping, isTrue);
+      expect(d.discountValue, isEmpty);
+      expect(d.maxDiscount, isNull);
       expect(d.scope, PromoScope.messenger);
       expect(d.color, promoColorOf({'promo_type': 'free_shipping'}));
     });

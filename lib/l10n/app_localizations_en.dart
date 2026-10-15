@@ -2749,7 +2749,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String referralShareText(String code, String value) {
-    return 'Use code $code on Mass Move and get ฿$value off';
+    return 'Use code $code on Mass Move and get ฿$value off 🎉';
   }
 
   @override
@@ -2777,13 +2777,13 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String referralUseWelcomeCode(String code) {
-    return 'Don\'t forget to use $code on your first order';
+  String referralUseWelcomeCode(String code, String value) {
+    return 'Don\'t forget to use $code on your first order for ฿$value off';
   }
 
   @override
   String referralApplySuccessPromo(String code, String value) {
-    return 'You got code $code: ฿$value off';
+    return 'You got code $code: ฿$value off 🎁';
   }
 
   @override
@@ -2865,4 +2865,12 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get authSmsEmailFallback =>
       'Didn\'t get the SMS? Get the code by email';
+
+  @override
+  String get referralCodeFull => 'Your code has reached its friend limit';
+
+  @override
+  String referralReferredBy(String code) {
+    return 'You signed up with code $code';
+  }
 }

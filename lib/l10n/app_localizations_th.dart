@@ -2724,7 +2724,7 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String referralShareText(String code, String value) {
-    return 'ใช้รหัส $code สมัคร Mass Move รับส่วนลด ฿$value';
+    return 'ใช้รหัส $code สมัคร Mass Move รับส่วนลด ฿$value 🎉';
   }
 
   @override
@@ -2752,13 +2752,13 @@ class AppLocalizationsTh extends AppLocalizations {
   }
 
   @override
-  String referralUseWelcomeCode(String code) {
-    return 'อย่าลืมใช้โค้ด $code ในออเดอร์แรก';
+  String referralUseWelcomeCode(String code, String value) {
+    return 'อย่าลืมใช้โค้ด $code ในออเดอร์แรก ลด ฿$value';
   }
 
   @override
   String referralApplySuccessPromo(String code, String value) {
-    return 'ได้รับโค้ด $code ส่วนลด ฿$value';
+    return 'ได้รับโค้ด $code ส่วนลด ฿$value 🎁';
   }
 
   @override
@@ -2772,7 +2772,7 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get referralErrNotNewCustomer =>
-      'รหัสแนะนำใช้ได้เฉพาะลูกค้าใหม่ก่อนใช้บริการครั้งแรก';
+      'รหัสแนะนำใช้ได้เฉพาะลูกค้าใหม่ ก่อนใช้บริการครั้งแรก';
 
   @override
   String get referralErrWindowClosed => 'เลยเวลากรอกรหัสแนะนำแล้ว';
@@ -2787,8 +2787,7 @@ class AppLocalizationsTh extends AppLocalizations {
   String get referralErrDisabled => 'ขณะนี้ยังไม่เปิดให้ใช้รหัสแนะนำ';
 
   @override
-  String get promoRejectReferredOnly =>
-      'โค้ดนี้สำหรับเพื่อนที่กรอกรหัสแนะนำเท่านั้น';
+  String get promoRejectReferredOnly => 'โค้ดนี้สำหรับเพื่อนที่ถูกชวนเท่านั้น';
 
   @override
   String get authSendCode => 'ส่งรหัส';
@@ -2834,4 +2833,12 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get authSmsEmailFallback => 'ไม่ได้รับ SMS? รับรหัสทางอีเมลแทน';
+
+  @override
+  String get referralCodeFull => 'รหัสนี้ชวนเพื่อนครบจำนวนแล้ว';
+
+  @override
+  String referralReferredBy(String code) {
+    return 'คุณสมัครด้วยรหัส $code';
+  }
 }

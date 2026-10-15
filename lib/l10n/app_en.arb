@@ -940,7 +940,7 @@
   "homeLocationPromptLater": "Not now",
   "referralRewardSummary": "Your friend gets ฿{friendValue} off · you get {points} points after their first order",
   "@referralRewardSummary": {"placeholders": {"friendValue": {"type": "String"}, "points": {"type": "int"}}},
-  "referralShareText": "Use code {code} on Mass Move and get ฿{value} off",
+  "referralShareText": "Use code {code} on Mass Move and get ฿{value} off 🎉",
   "@referralShareText": {"placeholders": {"code": {"type": "String"}, "value": {"type": "String"}}},
   "referralStatInvited": "Invited",
   "referralStatCompleted": "Completed",
@@ -951,9 +951,9 @@
   "@referralApplySubtitle": {"placeholders": {"value": {"type": "String"}}},
   "referralApplyBefore": "Enter by {date}",
   "@referralApplyBefore": {"placeholders": {"date": {"type": "String"}}},
-  "referralUseWelcomeCode": "Don't forget to use {code} on your first order",
-  "@referralUseWelcomeCode": {"placeholders": {"code": {"type": "String"}}},
-  "referralApplySuccessPromo": "You got code {code}: ฿{value} off",
+  "referralUseWelcomeCode": "Don't forget to use {code} on your first order for ฿{value} off",
+  "@referralUseWelcomeCode": {"placeholders": {"code": {"type": "String"}, "value": {"type": "String"}}},
+  "referralApplySuccessPromo": "You got code {code}: ฿{value} off 🎁",
   "@referralApplySuccessPromo": {"placeholders": {"code": {"type": "String"}, "value": {"type": "String"}}},
   "referralErrInvalidCode": "Invalid code",
   "referralErrSelf": "You can't use your own code",
@@ -977,5 +977,8 @@
   "authOtpInvalid": "Incorrect code",
   "authOtpTooManyAttempts": "Too many wrong attempts. Please request a new code",
   "authOtpExpired": "The code has expired. Please request a new one",
-  "authSmsEmailFallback": "Didn't get the SMS? Get the code by email"
+  "authSmsEmailFallback": "Didn't get the SMS? Get the code by email",
+  "referralCodeFull": "Your code has reached its friend limit",
+  "referralReferredBy": "You signed up with code {code}",
+  "@referralReferredBy": {"placeholders": {"code": {"type": "String"}}}
 }

@@ -11,10 +11,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 Map<String, dynamic> _json({
   bool enabled = true,
   bool canApply = false,
+  int currentUses = 3,
   Map<String, dynamic>? referredBy,
 }) => {
   'enabled': enabled,
-  'referral_code': {'code': 'AB12CD34', 'max_uses': 50, 'current_uses': 3},
+  'referral_code': {
+    'code': 'AB12CD34',
+    'max_uses': 50,
+    'current_uses': currentUses,
+  },
   'referrer_reward_points': 500,
   'friend_reward': {
     'code': 'FRIEND50',
@@ -95,6 +100,8 @@ void main() {
     expect(find.text('รอเพื่อนใช้บริการ 1 คน (500 แต้ม)'), findsOneWidget);
     // Not a new customer → no apply card.
     expect(find.byKey(const Key('referralApplyCard')), findsNothing);
+    expect(find.byKey(const Key('referralCodeFull')), findsNothing);
+    expect(find.byKey(const Key('referralReferredBy')), findsNothing);
   });
 
   testWidgets('a new customer can enter a code (with its deadline)', (
@@ -114,14 +121,29 @@ void main() {
         _json(
           canApply: true,
           referredBy: {
+            'code': '3F2AK7QX',
             'status': 'PENDING',
-            'welcome_promo': {'code': 'FRIEND50'},
+            'welcome_promo': {'code': 'FRIEND50', 'discount_value': 50},
           },
         ),
       ),
     );
     expect(find.byKey(const Key('referralApplyCard')), findsNothing);
-    expect(find.text('อย่าลืมใช้โค้ด FRIEND50 ในออเดอร์แรก'), findsOneWidget);
+    expect(find.text('คุณสมัครด้วยรหัส 3F2AK7QX'), findsOneWidget);
+    expect(
+      find.text('อย่าลืมใช้โค้ด FRIEND50 ในออเดอร์แรก ลด ฿50'),
+      findsOneWidget,
+    );
+  });
+
+  test('codeFull only once current_uses reaches max_uses', () {
+    expect(ReferralInfo.fromJson(_json()).codeFull, isFalse);
+    expect(ReferralInfo.fromJson(_json(currentUses: 50)).codeFull, isTrue);
+  });
+
+  testWidgets('a code with every friend slot used says so', (tester) async {
+    await _pump(tester, ReferralInfo.fromJson(_json(currentUses: 50)));
+    expect(find.text('รหัสนี้ชวนเพื่อนครบจำนวนแล้ว'), findsOneWidget);
   });
 
   testWidgets('programme switched off', (tester) async {

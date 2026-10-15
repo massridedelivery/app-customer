@@ -1,3 +1,5 @@
+import 'package:customer_app/l10n/app_localizations.dart';
+import 'package:customer_app/core/utils/app_dates.dart';
 import 'package:customer_app/core/constants/app_assets.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_icons.dart';
@@ -641,11 +643,11 @@ class _MessengerTrackingScreenState
     if (arrive == null) return null;
     final minutesLeft = arrive.difference(DateTime.now()).inMinutes;
     if (minutesLeft < 0) return null;
-    final hh = arrive.hour.toString().padLeft(2, '0');
-    final mm = arrive.minute.toString().padLeft(2, '0');
+    final l10n = AppLocalizations.of(context)!;
+    final time = AppDates.of(context).time(arrive);
     final label = minutesLeft <= 0
-        ? 'กำลังจะถึง · ถึงประมาณ $hh:$mm น.'
-        : 'อีกประมาณ $minutesLeft นาที · ถึงประมาณ $hh:$mm น.';
+        ? l10n.etaArrivingSoonAround(time)
+        : l10n.etaMinutesArriveAround(minutesLeft, time);
     return Padding(
       padding: const EdgeInsets.only(top: 6),
       child: Row(

@@ -1,3 +1,5 @@
+import 'package:customer_app/l10n/app_localizations.dart';
+import 'package:customer_app/core/utils/app_dates.dart';
 import 'dart:async';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
@@ -454,7 +456,7 @@ class _LiveFoodTrackingScreenState
                     textBaseline: TextBaseline.alphabetic,
                     children: [
                       Text(
-                        'อีกประมาณ ',
+                        '${AppLocalizations.of(context)!.etaAbout} ',
                         style: AppTypography.label1.copyWith(
                           color: AppColors.foundationGreen700,
                         ),
@@ -468,7 +470,7 @@ class _LiveFoodTrackingScreenState
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        'นาที',
+                        AppLocalizations.of(context)!.minutes,
                         style: AppTypography.label1.copyWith(
                           color: AppColors.foundationGreen700,
                         ),
@@ -477,7 +479,7 @@ class _LiveFoodTrackingScreenState
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    'คาดว่าถึงประมาณ ${_formatClock(padded)} น.',
+                    AppLocalizations.of(context)!.etaExpectedAround(AppDates.of(context).time(padded)),
                     style: AppTypography.caption4.copyWith(
                       color: AppColors.semanticGrayNeutralFgLowOnWhite,
                     ),
@@ -490,10 +492,6 @@ class _LiveFoodTrackingScreenState
       ),
     );
   }
-
-  /// Formats a [DateTime] as a 24h HH:mm clock.
-  String _formatClock(DateTime t) =>
-      '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
 
   Widget _buildHeaderTitle(OrderState currentState) {
     String title = '';

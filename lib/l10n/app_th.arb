@@ -278,5 +278,18 @@
   "locationPermissionHint": "อนุญาตการเข้าถึงตำแหน่ง เพื่อใช้ตำแหน่งปัจจุบันเป็นจุดรับ",
   "locationServiceOffHint": "เปิดบริการตำแหน่ง (GPS) เพื่อใช้ตำแหน่งปัจจุบัน",
   "locationUnavailableHint": "ระบุตำแหน่งปัจจุบันไม่สำเร็จ",
-  "allowLocation": "อนุญาต"
+  "allowLocation": "อนุญาต",
+  "couponValidUntil": "ใช้ถึง {date}",
+  "promoValidUntilShort": "ถึง {date}",
+  "promoValidUntilFull": "ใช้ได้ถึง {date} {time}",
+  "orderedAt": "สั่งเมื่อ: {date}",
+  "etaArrivingSoonAround": "กำลังจะถึง · ถึงประมาณ {time}",
+  "etaMinutesArriveAround": "อีกประมาณ {minutes} นาที · ถึงประมาณ {time}",
+  "deliverByAround": "ส่งถึงประมาณ {time}",
+  "pickupInMinutes": "ไปรับใน {minutes} นาที",
+  "etaIn": "อีก",
+  "etaAbout": "อีกประมาณ",
+  "etaArriveApprox": "ถึง ~{time}",
+  "etaExpectedArrival": "คาดว่าจะถึง",
+  "etaExpectedAround": "คาดว่าถึงประมาณ {time}"
 }

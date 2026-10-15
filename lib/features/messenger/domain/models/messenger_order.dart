@@ -1,4 +1,3 @@
-import 'package:customer_app/core/utils/thai_date_formatter.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'messenger_order.freezed.dart';
@@ -157,5 +156,4 @@ abstract class MessengerOrder with _$MessengerOrder {
     return null;
   }
 
-  String get formattedCreatedAt => ThaiDateFormatter.dateTime(createdAt);
 }

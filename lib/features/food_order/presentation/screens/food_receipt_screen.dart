@@ -1,6 +1,6 @@
+import 'package:customer_app/core/utils/app_dates.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
-import 'package:customer_app/core/utils/thai_date_formatter.dart';
 import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/features/food_order/domain/models/food_models.dart';
 import 'package:customer_app/features/food_order/presentation/controllers/food_receipt_controller.dart';
@@ -228,7 +228,7 @@ class FoodReceiptScreen extends ConsumerWidget {
                 _buildMetaRow(
                   Icons.access_time,
                   'วันที่สั่งซื้อ',
-                  ThaiDateFormatter.dateTime(order.placedAt),
+                  AppDates.of(context).isoDateTime(order.placedAt),
                 ),
               ],
             ),

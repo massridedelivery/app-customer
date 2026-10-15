@@ -1,3 +1,4 @@
+import 'package:customer_app/core/utils/app_dates.dart';
 import 'dart:async';
 
 import 'package:customer_app/core/constants/map_defaults.dart';
@@ -817,7 +818,7 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
                         color: AppColors.foundationGreen700,
                       ),
                       children: [
-                        const TextSpan(text: 'อีก '),
+                        TextSpan(text: '${AppLocalizations.of(context)!.etaIn} '),
                         TextSpan(
                           text: '$minutes',
                           style: AppTypography.label1.copyWith(
@@ -827,7 +828,7 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
                         ),
                         TextSpan(text: ' $minLabel'),
                         TextSpan(
-                          text: '  ·  ถึง ~${_formatClock(arriveAt)} น.',
+                          text: '  ·  ${AppLocalizations.of(context)!.etaArriveApprox(AppDates.of(context).time(arriveAt))}',
                           style: AppTypography.caption4.copyWith(
                             color: AppColors.semanticGrayNeutralFgLowOnWhite,
                           ),
@@ -843,10 +844,6 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
       ),
     );
   }
-
-  /// Formats a [DateTime] as a 24h HH:mm clock.
-  String _formatClock(DateTime t) =>
-      '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
 
   /// Opens the phone dialer with the driver's number (free, uses the mobile
   /// network). No masked/VoIP layer yet — the rider sees the real number.
@@ -1042,8 +1039,8 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
                   liveState.etaArriveAt != null)
                 Expanded(
                   child: _buildStatColumn(
-                    'คาดว่าจะถึง',
-                    '${_formatClock((liveState.etaArriveAt as DateTime).add(const Duration(minutes: _kEtaBufferMinutes)))} น.',
+                    AppLocalizations.of(context)!.etaExpectedArrival,
+                    AppDates.of(context).time((liveState.etaArriveAt as DateTime).add(const Duration(minutes: _kEtaBufferMinutes))),
                   ),
                 ),
             ],

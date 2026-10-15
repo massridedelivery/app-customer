@@ -1,3 +1,4 @@
+import 'package:customer_app/core/utils/app_dates.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/data/support_config_provider.dart';
@@ -218,7 +219,7 @@ class SOSScreen extends ConsumerWidget {
                                       style: AppTypography.caption3,
                                     ),
                                     Text(
-                                      _formatDate(s['created_at'] as String?),
+                                      _formatDate(context, s['created_at'] as String?),
                                       style: AppTypography.caption5.copyWith(
                                         color: AppColors.textSecondary,
                                       ),
@@ -259,11 +260,9 @@ class SOSScreen extends ConsumerWidget {
     );
   }
 
-  /// Safely extracts the `YYYY-MM-DD` portion of an ISO timestamp.
-  String _formatDate(String? isoDate) {
-    if (isoDate == null || isoDate.length < 10) return isoDate ?? '';
-    return isoDate.substring(0, 10);
-  }
+  /// An ISO timestamp as a localized local-time date + time.
+  String _formatDate(BuildContext context, String? isoDate) =>
+      AppDates.of(context).isoDateTime(isoDate, fallback: '');
 
   Future<void> _confirmSOS(BuildContext context, WidgetRef ref) async {
     final confirmed = await showDialog<bool>(

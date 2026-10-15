@@ -9,12 +9,9 @@ library;
 const String kDeliveryInstant = 'INSTANT';
 const String kDeliveryTwoHour = 'TWO_HOUR';
 
-/// Format a backend `deliver_by` ISO8601 timestamp as a local HH:mm clock.
+/// A backend `deliver_by` ISO8601 timestamp in device-local time.
 /// Returns null when [iso] is null/blank/unparseable.
-String? formatDeliverBy(String? iso) {
+DateTime? parseDeliverBy(String? iso) {
   if (iso == null || iso.isEmpty) return null;
-  final dt = DateTime.tryParse(iso)?.toLocal();
-  if (dt == null) return null;
-  return '${dt.hour.toString().padLeft(2, '0')}:'
-      '${dt.minute.toString().padLeft(2, '0')}';
+  return DateTime.tryParse(iso)?.toLocal();
 }

@@ -1573,6 +1573,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Allow'**
   String get allowLocation;
+
+  /// No description provided for @couponValidUntil.
+  ///
+  /// In en, this message translates to:
+  /// **'Valid until {date}'**
+  String couponValidUntil(String date);
+
+  /// No description provided for @promoValidUntilShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Until {date}'**
+  String promoValidUntilShort(String date);
+
+  /// No description provided for @promoValidUntilFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Valid until {date}, {time}'**
+  String promoValidUntilFull(String date, String time);
+
+  /// No description provided for @orderedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Ordered: {date}'**
+  String orderedAt(String date);
+
+  /// No description provided for @etaArrivingSoonAround.
+  ///
+  /// In en, this message translates to:
+  /// **'Arriving soon · around {time}'**
+  String etaArrivingSoonAround(String time);
+
+  /// No description provided for @etaMinutesArriveAround.
+  ///
+  /// In en, this message translates to:
+  /// **'About {minutes} min · arrives around {time}'**
+  String etaMinutesArriveAround(int minutes, String time);
+
+  /// No description provided for @deliverByAround.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivered by about {time}'**
+  String deliverByAround(String time);
+
+  /// No description provided for @pickupInMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'Pickup in {minutes} min'**
+  String pickupInMinutes(int minutes);
+
+  /// No description provided for @etaIn.
+  ///
+  /// In en, this message translates to:
+  /// **'In'**
+  String get etaIn;
+
+  /// No description provided for @etaAbout.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get etaAbout;
+
+  /// No description provided for @etaArriveApprox.
+  ///
+  /// In en, this message translates to:
+  /// **'arrives ~{time}'**
+  String etaArriveApprox(String time);
+
+  /// No description provided for @etaExpectedArrival.
+  ///
+  /// In en, this message translates to:
+  /// **'Expected arrival'**
+  String get etaExpectedArrival;
+
+  /// No description provided for @etaExpectedAround.
+  ///
+  /// In en, this message translates to:
+  /// **'Expected around {time}'**
+  String etaExpectedAround(String time);
 }
 
 class _AppLocalizationsDelegate

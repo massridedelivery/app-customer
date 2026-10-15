@@ -1,3 +1,5 @@
+import 'package:customer_app/l10n/app_localizations.dart';
+import 'package:customer_app/core/utils/app_dates.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/utils/promo_style.dart';
@@ -22,8 +24,9 @@ class CouponCardData {
 
   final double minSpend;
 
-  /// e.g. "ใช้ถึง 31/12/68". Null when there's no/invalid expiry.
-  final String? expiryLabel;
+  /// When the promo ends (from the API, UTC). Shown as "ใช้ถึง 31 ธ.ค. 2569" /
+  /// "Valid until 31 Dec 2026" in Bangkok time. Null when absent/invalid.
+  final DateTime? expiresAt;
 
   /// Ticket-stub color, by discount kind (see [promoColorOf]): fixed → red,
   /// percentage → orange, free shipping → green.
@@ -43,7 +46,7 @@ class CouponCardData {
     required this.discountValue,
     this.subDiscount,
     this.minSpend = 0,
-    this.expiryLabel,
+    this.expiresAt,
     this.color = AppColors.primary,
     this.stubPrefix = 'ลด',
     this.scope,
@@ -62,7 +65,7 @@ class CouponCardData {
           ? 'สูงสุด ฿${_fmt(p.maxDiscount!)}'
           : null,
       minSpend: p.minSpend,
-      expiryLabel: _expiry(p.validUntil),
+      expiresAt: _expiry(p.validUntil),
       color: promoColorOf({'discount_type': p.discountType}),
       scope: PromoScope.fromAppliesTo(p.appliesTo),
     );
@@ -87,7 +90,7 @@ class CouponCardData {
       subDiscount:
           (!isFreeShip && isPct && maxV > 0) ? 'สูงสุด ฿${_fmt(maxV)}' : null,
       minSpend: _num(m['min_order'] ?? m['min_spend']),
-      expiryLabel:
+      expiresAt:
           _expiry((m['valid_until'] ?? m['expires_at'] ?? '').toString()),
       color: promoColorOf(m),
       stubPrefix: isFreeShip ? '' : 'ลด',
@@ -104,7 +107,7 @@ class CouponCardData {
       description: p.description,
       discountValue: p.discount <= 0 ? '' : '฿${_fmt(p.discount)}',
       minSpend: p.minOrder,
-      expiryLabel: _expiry(p.expiresAt),
+      expiresAt: _expiry(p.expiresAt),
       color: p.color != null ? Color(p.color!) : AppColors.primary,
       scope: PromoScope.food,
     );
@@ -117,13 +120,8 @@ class CouponCardData {
 
   static String _fmt(double v) => v.toStringAsFixed(0);
 
-  static String? _expiry(String raw) {
-    if (raw.trim().isEmpty) return null;
-    final d = DateTime.tryParse(raw);
-    if (d == null) return null;
-    final yy = ((d.year + 543) % 100).toString().padLeft(2, '0');
-    return 'ใช้ถึง ${d.day}/${d.month}/$yy';
-  }
+  static DateTime? _expiry(String raw) =>
+      raw.trim().isEmpty ? null : DateTime.tryParse(raw);
 }
 
 /// Ticket-style promo card used everywhere a promo is listed — the
@@ -169,7 +167,7 @@ class CouponCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final card = _buildCard();
+    final card = _buildCard(context);
     if (!_browse || onTap == null) return card;
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -178,7 +176,7 @@ class CouponCard extends StatelessWidget {
     );
   }
 
-  Widget _buildCard() {
+  Widget _buildCard(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
@@ -275,7 +273,7 @@ class CouponCard extends StatelessWidget {
                             const SizedBox(width: 6),
                           ],
                           Expanded(
-                            child: data.expiryLabel == null
+                            child: data.expiresAt == null
                                 ? const SizedBox.shrink()
                                 : Row(
                                     children: [
@@ -287,7 +285,8 @@ class CouponCard extends StatelessWidget {
                                       const SizedBox(width: 3),
                                       Flexible(
                                         child: Text(
-                                          data.expiryLabel!,
+                                          AppLocalizations.of(context)!.couponValidUntil(
+                                              AppDates.of(context).date(AppDates.bangkok(data.expiresAt!))),
                                           style: TextStyle(
                                             fontSize: 11,
                                             color: Colors.grey[500],

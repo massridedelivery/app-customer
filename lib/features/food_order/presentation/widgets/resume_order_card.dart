@@ -1,3 +1,5 @@
+import 'package:customer_app/l10n/app_localizations.dart';
+import 'package:customer_app/core/utils/app_dates.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/features/active_orders/domain/models/active_order_item.dart';
@@ -73,7 +75,7 @@ class ResumeOrderCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'สั่งเมื่อ: ${order.formattedCreatedAt}',
+                        AppLocalizations.of(context)!.orderedAt(AppDates.of(context).isoDateTime(order.createdAt)),
                         style: AppTypography.caption5.copyWith(color: AppColors.textSecondary),
                       ),
                     ],

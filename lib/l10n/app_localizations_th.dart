@@ -770,4 +770,63 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get allowLocation => 'อนุญาต';
+
+  @override
+  String couponValidUntil(String date) {
+    return 'ใช้ถึง $date';
+  }
+
+  @override
+  String promoValidUntilShort(String date) {
+    return 'ถึง $date';
+  }
+
+  @override
+  String promoValidUntilFull(String date, String time) {
+    return 'ใช้ได้ถึง $date $time';
+  }
+
+  @override
+  String orderedAt(String date) {
+    return 'สั่งเมื่อ: $date';
+  }
+
+  @override
+  String etaArrivingSoonAround(String time) {
+    return 'กำลังจะถึง · ถึงประมาณ $time';
+  }
+
+  @override
+  String etaMinutesArriveAround(int minutes, String time) {
+    return 'อีกประมาณ $minutes นาที · ถึงประมาณ $time';
+  }
+
+  @override
+  String deliverByAround(String time) {
+    return 'ส่งถึงประมาณ $time';
+  }
+
+  @override
+  String pickupInMinutes(int minutes) {
+    return 'ไปรับใน $minutes นาที';
+  }
+
+  @override
+  String get etaIn => 'อีก';
+
+  @override
+  String get etaAbout => 'อีกประมาณ';
+
+  @override
+  String etaArriveApprox(String time) {
+    return 'ถึง ~$time';
+  }
+
+  @override
+  String get etaExpectedArrival => 'คาดว่าจะถึง';
+
+  @override
+  String etaExpectedAround(String time) {
+    return 'คาดว่าถึงประมาณ $time';
+  }
 }

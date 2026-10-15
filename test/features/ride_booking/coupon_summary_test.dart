@@ -148,4 +148,25 @@ void main() {
     expect(find.byKey(const Key('ridePromoRemove')), findsNothing);
     expect(find.byKey(const Key('ridePromoRemoveLink')), findsNothing);
   });
+
+  testWidgets('shows the validate reason when the code took ฿0 off', (
+    tester,
+  ) async {
+    final est = _est(discount: 0);
+    await _pump(
+      tester,
+      BookingState(
+        estimations: [est],
+        vehicleTypeId: est.vehicleTypeId,
+        appliedPromoCode: 'RIDE50',
+        promoRejectReason: 'คูปองนี้สำหรับลูกค้าใหม่เท่านั้น',
+      ),
+    );
+
+    expect(
+      find.text('โค้ด RIDE50 ใช้ไม่ได้: คูปองนี้สำหรับลูกค้าใหม่เท่านั้น'),
+      findsOneWidget,
+    );
+  });
 }
+

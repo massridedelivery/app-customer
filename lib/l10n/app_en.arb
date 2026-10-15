@@ -926,5 +926,12 @@
   "errSetDefaultPlace": "Couldn't set the default place",
   "errGetDefaultPlace": "Couldn't get the default place",
   "couponRemove": "Remove code",
-  "homeAllowLocation": "Tap to use your current location"
+  "homeAllowLocation": "Tap to use your current location",
+  "promoRejectFullyRedeemed": "This code has been fully redeemed",
+  "promoRejectNotAvailable": "This code isn't available right now",
+  "promoRejectMinSpendAmount": "Spend at least ฿{amount} to use this code",
+  "@promoRejectMinSpendAmount": {"placeholders": {"amount": {"type": "String"}}},
+  "couponNotAppliedReason": "Code {code} can't be used: {reason}",
+  "@couponNotAppliedReason": {"placeholders": {"code": {"type": "String"}, "reason": {"type": "String"}}},
+  "promoEnded": "This promotion has ended"
 }

@@ -28,6 +28,18 @@ class _RideCouponScreenState extends ConsumerState<RideCouponScreen> {
   AppLocalizations get _l10n => AppLocalizations.of(context)!;
 
   @override
+  void initState() {
+    super.initState();
+    // Always show the current list (admins delete / refill promos; a code
+    // can come back after a cancelled trip) instead of a cached one.
+    Future.microtask(() {
+      if (!mounted) return;
+      ref.invalidate(discoverPromosProvider);
+      ref.invalidate(promoListProvider);
+    });
+  }
+
+  @override
   void dispose() {
     _manualController.dispose();
     super.dispose();
@@ -71,6 +83,10 @@ class _RideCouponScreenState extends ConsumerState<RideCouponScreen> {
         });
       }
     } catch (e) {
+      // The list may be stale (e.g. "promotion fully redeemed" just now):
+      // reload it so a code that can't be used any more drops out.
+      ref.invalidate(discoverPromosProvider);
+      ref.invalidate(promoListProvider);
       setState(() {
         _errorMessage = friendlyError(
           e,

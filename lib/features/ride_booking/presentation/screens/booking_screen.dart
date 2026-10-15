@@ -268,6 +268,15 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
     }
     est ??= (st?.estimations.isNotEmpty ?? false) ? st!.estimations.first : null;
     final notApplied = promoCode != null && est != null && est.discount <= 0;
+    // The estimate only says "฿0"; /promos/validate says why (new users only,
+    // minimum spend, fully redeemed…). Fall back to the generic line.
+    String? reason;
+    if (notApplied) {
+      reason = await ref
+          .read(bookingControllerProvider.notifier)
+          .promoRejectionReason(promoCode);
+      if (!mounted) return;
+    }
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
@@ -276,7 +285,9 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
             promoCode == null
                 ? l10n.couponRemoved
                 : notApplied
-                ? l10n.couponNotAppliedToFare(promoCode)
+                ? (reason != null
+                      ? l10n.couponNotAppliedReason(promoCode, reason)
+                      : l10n.couponNotAppliedToFare(promoCode))
                 : l10n.couponApplied(promoCode),
           ),
           backgroundColor:

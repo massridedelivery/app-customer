@@ -197,10 +197,13 @@ class VehicleSelectionItem extends StatelessWidget {
                                 ),
                               ),
 
+                              // Struck-through "before" price: with a coupon it's
+                              // the pre-discount fare (gross_fare); with only a
+                              // surge it's the un-surged base fare.
                               if (estimation.discount > 0 ||
                                   estimation.surgeMultiplier > 1.0)
                                 Text(
-                                  '฿${estimation.baseFare.toStringAsFixed(0)}',
+                                  '฿${(estimation.discount > 0 ? (estimation.grossFare ?? estimation.totalFare + estimation.discount) : estimation.baseFare).toStringAsFixed(0)}',
                                   style: AppTypography.caption4.copyWith(
                                     color: Colors.grey,
                                     decoration: TextDecoration.lineThrough,

@@ -55,6 +55,8 @@ class BookingController extends _$BookingController {
         encodedPolyline: response.waypoint,
         surgeMultiplier: response.surgeMultiplier,
         appliedPromoCode: promoCode,
+        // A fresh estimate invalidates any reason fetched for the old one.
+        promoRejectReason: null,
         // Clear the stashed coupon discount when the promo is removed.
         promoDiscount: promoCode == null ? 0.0 : previousState.promoDiscount,
         error: null,
@@ -127,6 +129,34 @@ class BookingController extends _$BookingController {
     final discount = await useCase(code, subtotal);
     state = AsyncValue.data(currentState.copyWith(promoDiscount: discount));
     return true;
+  }
+
+  /// Why [code] took nothing off the current estimate, from /promos/validate
+  /// (already localized), or null when validate accepts it / can't say.
+  /// Also stores it on the state so the sheet's coupon note can show it.
+  Future<String?> promoRejectionReason(String code) async {
+    final current = state.value ?? const BookingState();
+    String? reason;
+    try {
+      await ref.read(validatePromoUseCaseProvider)(code, _subtotal(current));
+    } catch (e) {
+      reason = e.toString().replaceFirst('Exception: ', '').trim();
+      if (reason.isEmpty) reason = null;
+    }
+    final latest = state.value;
+    if (latest != null && latest.appliedPromoCode == code) {
+      state = AsyncValue.data(latest.copyWith(promoRejectReason: reason));
+    }
+    return reason;
+  }
+
+  double _subtotal(BookingState s) {
+    if (s.estimations.isEmpty) return 0;
+    final e = s.estimations.firstWhere(
+      (e) => e.vehicleTypeId == s.vehicleTypeId,
+      orElse: () => s.estimations.first,
+    );
+    return e.grossFare ?? e.totalFare + e.discount;
   }
 
   Future<bool> dispatchRide({

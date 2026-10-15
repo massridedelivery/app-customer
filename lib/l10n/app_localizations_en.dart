@@ -2709,4 +2709,23 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homeAllowLocation => 'Tap to use your current location';
+
+  @override
+  String get promoRejectFullyRedeemed => 'This code has been fully redeemed';
+
+  @override
+  String get promoRejectNotAvailable => 'This code isn\'t available right now';
+
+  @override
+  String promoRejectMinSpendAmount(String amount) {
+    return 'Spend at least ฿$amount to use this code';
+  }
+
+  @override
+  String couponNotAppliedReason(String code, String reason) {
+    return 'Code $code can\'t be used: $reason';
+  }
+
+  @override
+  String get promoEnded => 'This promotion has ended';
 }

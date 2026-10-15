@@ -42,6 +42,18 @@ String? promoReasonToThai(String? reason, {String? languageCode}) {
 
   final l10n = AppLanguage.l10n(languageCode);
   final s = raw.toLowerCase();
+  // Checked before the generic "limit" / "minimum" matches below.
+  if (s.contains('fully redeemed')) return l10n.promoRejectFullyRedeemed;
+  if (s.contains('not available') || s.contains('not active')) {
+    return l10n.promoRejectNotAvailable;
+  }
+  final minSpend = RegExp(r'minimum spend\s+([\d,.]+)').firstMatch(s);
+  if (minSpend != null) {
+    final amount = double.tryParse(minSpend.group(1)!.replaceAll(',', ''));
+    if (amount != null) {
+      return l10n.promoRejectMinSpendAmount(amount.toStringAsFixed(0));
+    }
+  }
   if (s.contains('new user') || s.contains('first')) {
     return l10n.promoRejectNewUser;
   }

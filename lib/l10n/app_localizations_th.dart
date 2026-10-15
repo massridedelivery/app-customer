@@ -2684,4 +2684,23 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get homeAllowLocation => 'แตะเพื่อใช้ตำแหน่งปัจจุบัน';
+
+  @override
+  String get promoRejectFullyRedeemed => 'สิทธิ์ของโค้ดนี้เต็มแล้ว';
+
+  @override
+  String get promoRejectNotAvailable => 'โค้ดนี้ใช้ไม่ได้ในขณะนี้';
+
+  @override
+  String promoRejectMinSpendAmount(String amount) {
+    return 'ยอดขั้นต่ำ ฿$amount จึงจะใช้โค้ดนี้ได้';
+  }
+
+  @override
+  String couponNotAppliedReason(String code, String reason) {
+    return 'โค้ด $code ใช้ไม่ได้: $reason';
+  }
+
+  @override
+  String get promoEnded => 'โปรนี้สิ้นสุดแล้ว';
 }

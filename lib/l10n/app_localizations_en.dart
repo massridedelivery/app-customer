@@ -2703,4 +2703,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errGetDefaultPlace => 'Couldn\'t get the default place';
+
+  @override
+  String get couponRemove => 'Remove code';
 }

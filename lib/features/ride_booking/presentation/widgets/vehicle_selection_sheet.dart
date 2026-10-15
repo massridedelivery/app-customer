@@ -23,6 +23,9 @@ class VehicleSelectionSheet extends ConsumerWidget {
   final VoidCallback onRequest;
   final VoidCallback onPromoTap;
 
+  /// Removes the applied code (✕ on the coupon button). Null hides it.
+  final VoidCallback? onPromoRemove;
+
   /// Pickup or dropoff is still unset, so no estimate can be requested.
   final bool isMissingLocation;
 
@@ -38,6 +41,7 @@ class VehicleSelectionSheet extends ConsumerWidget {
     required this.estimations,
     required this.onRequest,
     required this.onPromoTap,
+    this.onPromoRemove,
     required this.onVehicleSelected,
     this.isMissingLocation = false,
     this.onPickLocation,
@@ -262,13 +266,35 @@ class VehicleSelectionSheet extends ConsumerWidget {
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                            Icon(
-                              Icons.chevron_right,
-                              size: 16,
-                              color: bookingState.appliedPromoCode != null
-                                  ? _kSuccessFg
-                                  : AppColors.semanticGrayNeutralFgLowOnWhite,
-                            ),
+                            if (bookingState.appliedPromoCode != null &&
+                                onPromoRemove != null)
+                              // Tapping the rest of the button still opens the
+                              // coupon list to switch codes.
+                              Semantics(
+                                button: true,
+                                label: l10n.couponRemove,
+                                child: InkResponse(
+                                  key: const Key('ridePromoRemove'),
+                                  onTap: onPromoRemove,
+                                  radius: 20,
+                                  child: const Padding(
+                                    padding: EdgeInsets.all(4),
+                                    child: Icon(
+                                      Icons.close_rounded,
+                                      size: 18,
+                                      color: _kSuccessFg,
+                                    ),
+                                  ),
+                                ),
+                              )
+                            else
+                              Icon(
+                                Icons.chevron_right,
+                                size: 16,
+                                color: bookingState.appliedPromoCode != null
+                                    ? _kSuccessFg
+                                    : AppColors.semanticGrayNeutralFgLowOnWhite,
+                              ),
                           ],
                         ),
                       ),
@@ -289,6 +315,7 @@ class VehicleSelectionSheet extends ConsumerWidget {
             _CouponSummary(
               code: bookingState.appliedPromoCode!,
               discount: (selectedEstimation ?? estimations.first).discount,
+              onRemove: onPromoRemove,
             ),
 
           // Request button. Disabled until a vehicle is picked — and the label
@@ -435,8 +462,13 @@ class _EmptyEstimate extends StatelessWidget {
 class _CouponSummary extends StatelessWidget {
   final String code;
   final double discount;
+  final VoidCallback? onRemove;
 
-  const _CouponSummary({required this.code, required this.discount});
+  const _CouponSummary({
+    required this.code,
+    required this.discount,
+    this.onRemove,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -471,6 +503,19 @@ class _CouponSummary extends StatelessWidget {
             ),
           ),
           if (applied) Text('-฿${discount.toStringAsFixed(0)}', style: style),
+          // A code that doesn't apply can be dropped right here.
+          if (!applied && onRemove != null)
+            TextButton(
+              key: const Key('ridePromoRemoveLink'),
+              onPressed: onRemove,
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.primary,
+                minimumSize: const Size(0, 32),
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: Text(l10n.couponRemove),
+            ),
         ],
       ),
     );

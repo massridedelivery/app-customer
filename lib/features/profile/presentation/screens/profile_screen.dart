@@ -1,3 +1,4 @@
+import 'package:customer_app/features/profile/presentation/screens/referral_screen.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/constants/layout.dart';
@@ -531,13 +532,17 @@ class _ProfileHeaderShimmer extends StatelessWidget {
 
 // ─── Quick Actions ────────────────────────────────────────────────────────────
 
-class _QuickActionsGrid extends StatelessWidget {
+class _QuickActionsGrid extends ConsumerWidget {
   final AppLocalizations l10n;
 
   const _QuickActionsGrid({required this.l10n});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Shown only once the backend says the programme is on (`enabled`).
+    final referralOn = ref.watch(
+      referralInfoProvider.select((a) => a.value?.enabled ?? false),
+    );
     final actions = [
       _ActionItem(
         icon: Icons.history_rounded,
@@ -566,6 +571,13 @@ class _QuickActionsGrid extends StatelessWidget {
         comingSoon: true,
         color: Color(0xFFF5F3FF),
       ),
+      if (referralOn)
+        _ActionItem(
+          icon: Icons.group_add_rounded,
+          label: l10n.profileReferralTitle,
+          route: '/referral',
+          color: Color(0xFFFFF7ED),
+        ),
     ];
 
     return Container(

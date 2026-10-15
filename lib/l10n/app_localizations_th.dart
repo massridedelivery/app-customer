@@ -1886,7 +1886,7 @@ class AppLocalizationsTh extends AppLocalizations {
   String get profilePdpaDeletionFailed => 'ไม่สามารถยื่นคำร้องได้ในขณะนี้';
 
   @override
-  String get profileReferralTitle => 'ชวนเพื่อน';
+  String get profileReferralTitle => 'แนะนำเพื่อน';
 
   @override
   String get profileReferralHeadline => 'ชวนเพื่อนมาใช้ MASS';
@@ -2716,4 +2716,77 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get homeLocationPromptLater => 'ไว้ทีหลัง';
+
+  @override
+  String referralRewardSummary(String friendValue, int points) {
+    return 'เพื่อนได้ส่วนลด ฿$friendValue · คุณรับ $points แต้มเมื่อเพื่อนใช้บริการครั้งแรก';
+  }
+
+  @override
+  String referralShareText(String code, String value) {
+    return 'ใช้รหัส $code สมัคร Mass Move รับส่วนลด ฿$value';
+  }
+
+  @override
+  String get referralStatInvited => 'ชวนแล้ว';
+
+  @override
+  String get referralStatCompleted => 'สำเร็จ';
+
+  @override
+  String get referralStatPoints => 'แต้มที่ได้';
+
+  @override
+  String referralStatPending(int count, int points) {
+    return 'รอเพื่อนใช้บริการ $count คน ($points แต้ม)';
+  }
+
+  @override
+  String referralApplySubtitle(String value) {
+    return 'กรอกรหัสจากเพื่อน รับส่วนลด ฿$value สำหรับออเดอร์แรก';
+  }
+
+  @override
+  String referralApplyBefore(String date) {
+    return 'กรอกได้ถึง $date';
+  }
+
+  @override
+  String referralUseWelcomeCode(String code) {
+    return 'อย่าลืมใช้โค้ด $code ในออเดอร์แรก';
+  }
+
+  @override
+  String referralApplySuccessPromo(String code, String value) {
+    return 'ได้รับโค้ด $code ส่วนลด ฿$value';
+  }
+
+  @override
+  String get referralErrInvalidCode => 'รหัสไม่ถูกต้อง';
+
+  @override
+  String get referralErrSelf => 'ใช้รหัสของตัวเองไม่ได้';
+
+  @override
+  String get referralErrAlreadyUsed => 'คุณใช้รหัสแนะนำไปแล้ว';
+
+  @override
+  String get referralErrNotNewCustomer =>
+      'รหัสแนะนำใช้ได้เฉพาะลูกค้าใหม่ก่อนใช้บริการครั้งแรก';
+
+  @override
+  String get referralErrWindowClosed => 'เลยเวลากรอกรหัสแนะนำแล้ว';
+
+  @override
+  String get referralErrCodeFull => 'รหัสนี้ถูกใช้ครบจำนวนแล้ว';
+
+  @override
+  String get referralErrExpired => 'รหัสหมดอายุ';
+
+  @override
+  String get referralErrDisabled => 'ขณะนี้ยังไม่เปิดให้ใช้รหัสแนะนำ';
+
+  @override
+  String get promoRejectReferredOnly =>
+      'โค้ดนี้สำหรับเพื่อนที่กรอกรหัสแนะนำเท่านั้น';
 }

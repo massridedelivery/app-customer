@@ -1,3 +1,4 @@
+import 'package:customer_app/features/profile/data/welcome_promo_store.dart';
 import 'dart:async';
 
 import 'package:customer_app/core/localization/locale_controller.dart';
@@ -35,7 +36,11 @@ class MessengerBookingController extends _$MessengerBookingController {
     });
     ref.onDispose(() => _estimateDebounce?.cancel());
     Future.microtask(loadVehicleTypes);
-    return const MessengerBookingState(isLoadingVehicles: true);
+    // A referred newcomer's welcome code is pre-filled on their first parcel.
+    return MessengerBookingState(
+      isLoadingVehicles: true,
+      promoCode: ref.read(welcomePromoStoreProvider).code ?? '',
+    );
   }
 
   Future<void> loadVehicleTypes() async {
@@ -241,6 +246,7 @@ class MessengerBookingController extends _$MessengerBookingController {
             promoCode: state.promoCode,
             payer: state.payer,
           );
+      await ref.read(welcomePromoStoreProvider).consume(state.promoCode);
       state = state.copyWith(isCreating: false, createdOrderId: order.id);
     } catch (e) {
       final msg = e.toString().replaceFirst('Exception: ', '');

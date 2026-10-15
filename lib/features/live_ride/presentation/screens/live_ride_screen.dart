@@ -1,4 +1,6 @@
 import 'package:customer_app/core/utils/app_dates.dart';
+import 'package:customer_app/core/utils/ride_payable.dart';
+import 'package:customer_app/features/live_ride/domain/models/driver_profile_model.dart';
 import 'dart:async';
 
 import 'package:customer_app/core/constants/map_defaults.dart';
@@ -1004,6 +1006,25 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
     );
   }
 
+  /// Coupon discount on the live job (0 when none).
+  double _rideDiscount(dynamic liveState) {
+    final DriverProfileModel? profile = liveState.driverProfile;
+    return profile?.discount ?? (liveState.discount as double?) ?? 0;
+  }
+
+  /// What the rider pays (see [ridePayable]); null until the fare is known.
+  double? _ridePayable(dynamic liveState) {
+    final DriverProfileModel? profile = liveState.driverProfile;
+    final double? fare = profile?.fare ?? (liveState.fare as double?);
+    if (fare == null) return null;
+    return ridePayable(
+      fare: fare,
+      discount: _rideDiscount(liveState),
+      tollFee: profile?.tollFee ?? 0,
+      waitingFee: profile?.waitingFee ?? 0,
+    );
+  }
+
   Widget _buildRideSummarySection(dynamic bookingState, dynamic liveState) {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -1051,6 +1072,28 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
           const SizedBox(height: 12),
           const Divider(height: 1),
           const SizedBox(height: 12),
+          // The job's `fare` is the price before the coupon; what the rider
+          // pays is fare - discount (+ tolls / waiting once charged).
+          if (_rideDiscount(liveState) > 0) ...[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  AppLocalizations.of(context)!.couponDiscount,
+                  style: AppTypography.caption3.copyWith(
+                    color: AppColors.foundationGreen600,
+                  ),
+                ),
+                Text(
+                  '-฿${_rideDiscount(liveState).toStringAsFixed(0)}',
+                  style: AppTypography.caption3.copyWith(
+                    color: AppColors.foundationGreen600,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+          ],
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -1059,7 +1102,9 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
                 style: AppTypography.label1,
               ),
               Text(
-                '฿${liveState.fare?.toStringAsFixed(0) ?? '--'}',
+                _ridePayable(liveState) == null
+                    ? '฿--'
+                    : '฿${_ridePayable(liveState)!.toStringAsFixed(0)}',
                 style: AppTypography.heading3.copyWith(
                   color: AppColors.foundationGreen600,
                 ),

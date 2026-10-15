@@ -243,7 +243,7 @@
   "promptPay": "PromptPay",
   "selectPaymentMethod": "Select payment method",
   "couponDiscount": "Coupon discount",
-  "couponNotAppliedToFare": "Code {code} hasn't been taken off the fare",
+  "couponNotAppliedToFare": "Code {code} can't be used on this trip",
   "@couponNotAppliedToFare": {
     "placeholders": {
       "code": {"type": "String"}

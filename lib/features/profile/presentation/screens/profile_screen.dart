@@ -116,12 +116,12 @@ class ProfileScreen extends ConsumerWidget {
                       ),
                       _MenuTile(
                         icon: Icons.shield_outlined,
-                        title: 'นโยบายความเป็นส่วนตัว',
+                        title: l10n.profilePrivacyPolicy,
                         onTap: () => _openPrivacyPolicy(),
                       ),
                       _MenuTile(
                         icon: Icons.headset_mic_outlined,
-                        title: 'ติดต่อเจ้าหน้าที่',
+                        title: l10n.profileContactSupport,
                         trailing: Text(
                           supportPhone,
                           style: AppTypography.body3.copyWith(
@@ -133,13 +133,13 @@ class ProfileScreen extends ConsumerWidget {
                     ],
                   ),
                   const SizedBox(height: 24),
-                  _SectionHeader(title: 'จัดการบัญชี'),
+                  _SectionHeader(title: l10n.profileManageAccount),
                   const SizedBox(height: 8),
                   _MenuCard(
                     items: [
                       _MenuTile(
                         icon: Icons.delete_forever_rounded,
-                        title: 'ลบบัญชี',
+                        title: l10n.profileDeleteAccount,
                         iconColor: AppColors.error,
                         onTap: () => _confirmDeleteAccount(context, ref),
                       ),
@@ -168,7 +168,7 @@ class ProfileScreen extends ConsumerWidget {
                   Center(
                     child: Text(
                       ref.watch(appVersionProvider).maybeWhen(
-                            data: (v) => 'เวอร์ชัน $v',
+                            data: (v) => l10n.profileVersion(v),
                             orElse: () => '',
                           ),
                       style: AppTypography.body3.copyWith(
@@ -205,22 +205,26 @@ class ProfileScreen extends ConsumerWidget {
   /// Permanently delete the account (App Store 5.1.1 requires an in-app option).
   /// Calls DELETE /api/customer/account, then signs the user out.
   Future<void> _confirmDeleteAccount(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('ลบบัญชี', style: AppTypography.heading4),
-        content: const Text(
-          'การลบบัญชีจะลบข้อมูลทั้งหมดของคุณอย่างถาวรและไม่สามารถย้อนกลับได้ '
-          'ต้องการลบบัญชีใช่หรือไม่?',
+        title: Text(
+          l10n.profileDeleteAccount,
+          style: AppTypography.heading4,
         ),
+        content: Text(l10n.profileDeleteAccountConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('ยกเลิก'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('ลบบัญชี', style: TextStyle(color: AppColors.error)),
+            child: Text(
+              l10n.profileDeleteAccount,
+              style: const TextStyle(color: AppColors.error),
+            ),
           ),
         ],
       ),
@@ -234,12 +238,12 @@ class ProfileScreen extends ConsumerWidget {
       await ref.read(authControllerProvider.notifier).logout();
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('ลบบัญชีเรียบร้อยแล้ว')),
+        SnackBar(content: Text(l10n.profileAccountDeleted)),
       );
     } catch (_) {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('ลบบัญชีไม่สำเร็จ กรุณาลองใหม่')),
+        SnackBar(content: Text(l10n.profileDeleteAccountFailed)),
       );
     }
   }

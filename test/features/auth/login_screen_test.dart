@@ -23,6 +23,7 @@ class _SpyAuthController extends AuthController {
 Future<_SpyAuthController> _pump(
   WidgetTester tester, {
   LoginMethod method = LoginMethod.phone,
+  Locale locale = const Locale('th'),
 }) async {
   final spy = _SpyAuthController();
   await tester.pumpWidget(
@@ -31,7 +32,7 @@ Future<_SpyAuthController> _pump(
       child: MaterialApp.router(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        locale: const Locale('th'),
+        locale: locale,
         routerConfig: GoRouter(
           routes: [
             GoRoute(
@@ -107,5 +108,38 @@ void main() {
     await tester.pump();
 
     expect(find.byKey(const Key('loginPhone')), findsOneWidget);
+  });
+
+  testWidgets('Thai locale shows the Thai tabs, button and heading', (
+    tester,
+  ) async {
+    await _pump(tester);
+
+    expect(find.text('เบอร์โทร'), findsOneWidget);
+    expect(find.text('อีเมล'), findsOneWidget);
+    expect(find.text('ขอรหัส OTP'), findsOneWidget);
+    expect(find.text('ยินดีต้อนรับ'), findsOneWidget);
+    expect(find.text('ยังไม่มีบัญชี?'), findsOneWidget);
+    expect(find.text('สมัครสมาชิก'), findsOneWidget);
+  });
+
+  testWidgets('English locale shows English tabs, button and heading', (
+    tester,
+  ) async {
+    await _pump(tester, locale: const Locale('en'));
+
+    expect(find.text('Phone'), findsOneWidget);
+    expect(find.text('Email'), findsOneWidget);
+    expect(find.text('Request OTP'), findsOneWidget);
+    expect(find.text('Welcome'), findsOneWidget);
+    expect(find.text("Don't have an account?"), findsOneWidget);
+    expect(find.text('Sign up'), findsOneWidget);
+    expect(find.textContaining(RegExp('[\u0E00-\u0E7F]')), findsNothing);
+
+    // The email tab's field label and password toggle are English too.
+    await tester.tap(find.text('Email'));
+    await tester.pump();
+    expect(find.text('Email'), findsNWidgets(2)); // tab + field label
+    expect(find.byTooltip('Show password'), findsOneWidget);
   });
 }

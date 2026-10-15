@@ -1,6 +1,9 @@
+import 'package:customer_app/core/localization/locale_controller.dart';
 import 'package:customer_app/features/home/data/datasources/place_data_source.dart';
 import 'package:customer_app/features/profile/presentation/states/address_form_state.dart';
 import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
+import 'package:customer_app/l10n/app_localizations.dart';
+import 'package:flutter/widgets.dart' show Locale;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'address_form_controller.g.dart';
@@ -41,7 +44,10 @@ class AddressFormController extends _$AddressFormController {
         state.contactName.trim().isEmpty ||
         state.contactPhone.trim().isEmpty ||
         activeAddress.isEmpty) {
-      state = state.copyWith(errorMessage: 'กรุณากรอกข้อมูลให้ครบถ้วน');
+      final l10n = lookupAppLocalizations(
+        Locale(ref.read(localeControllerProvider).languageCode),
+      );
+      state = state.copyWith(errorMessage: l10n.profileFillAllFields);
       return false;
     }
 

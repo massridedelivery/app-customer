@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/features/profile/presentation/controllers/profile_controller.dart';
+import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -60,10 +61,11 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       }
     });
 
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AppColors.semanticGrayNeutralBgWhite,
       appBar: AppBar(
-        title: const Text('แก้ไขข้อมูลส่วนตัว', style: AppTypography.heading4),
+        title: Text(l10n.profileEditTitle, style: AppTypography.heading4),
         backgroundColor: AppColors.background,
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
@@ -94,14 +96,14 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                   const SizedBox(height: 40),
 
                   // Form Fields
-                  const _FieldLabel(label: 'ชื่อ-นามสกุล'),
+                  _FieldLabel(label: l10n.fullName),
                   const SizedBox(height: 8),
                   _CustomTextField(
                     controller: _nameController,
                     onChanged: (value) => ref
                         .read(profileControllerProvider.notifier)
                         .updateEditName(value),
-                    hint: 'กรอกชื่อ-นามสกุล',
+                    hint: l10n.profileFullNameHint,
                   ),
                 ],
               ),
@@ -316,7 +318,7 @@ class _SaveButton extends StatelessWidget {
                 ),
               )
             : Text(
-                'บันทึก',
+                AppLocalizations.of(context)!.save,
                 style: AppTypography.heading4.copyWith(color: Colors.white),
               ),
       ),

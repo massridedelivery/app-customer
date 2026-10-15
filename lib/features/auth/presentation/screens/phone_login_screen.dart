@@ -147,15 +147,15 @@ class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
                     alignment: WrapAlignment.center,
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
-                      const Text(
-                        'ยังไม่มีบัญชี?',
-                        style: TextStyle(color: _kInkSoft),
+                      Text(
+                        l10n.authNoAccount,
+                        style: const TextStyle(color: _kInkSoft),
                       ),
                       TextButton(
                         key: const Key('loginGoRegister'),
                         onPressed: _startSignUp,
                         style: _textButtonStyle,
-                        child: const Text('สมัครสมาชิก'),
+                        child: Text(l10n.signUp),
                       ),
                     ],
                   ),
@@ -175,9 +175,9 @@ class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
       children: [
         PillTabs<LoginMethod>(
           key: const Key('loginMethodTabs'),
-          items: const [
-            PillTabItem(value: LoginMethod.phone, label: 'เบอร์โทร'),
-            PillTabItem(value: LoginMethod.email, label: 'อีเมล'),
+          items: [
+            PillTabItem(value: LoginMethod.phone, label: l10n.authTabPhone),
+            PillTabItem(value: LoginMethod.email, label: l10n.authEmail),
           ],
           selected: _method,
           onChanged: (m) => setState(() => _method = m),
@@ -213,7 +213,7 @@ class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
       const SizedBox(height: 14),
       _PrimaryButton(
         key: const Key('loginRequestOtp'),
-        label: 'ขอรหัส OTP',
+        label: l10n.authRequestOtp,
         loading: isLoading,
         onPressed: _isValidPhone && !isLoading ? _requestOtp : null,
       ),
@@ -229,7 +229,7 @@ class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
         autofillHints: const [AutofillHints.username, AutofillHints.email],
         textInputAction: TextInputAction.next,
         style: const TextStyle(fontSize: 16, color: _kInk),
-        decoration: _decoration(label: 'อีเมล', hint: 'you@email.com'),
+        decoration: _decoration(label: l10n.authEmail, hint: 'you@email.com'),
       ),
       const SizedBox(height: 14),
       TextField(
@@ -242,7 +242,9 @@ class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
         style: const TextStyle(fontSize: 16, color: _kInk),
         decoration: _decoration(label: l10n.password).copyWith(
           suffixIcon: IconButton(
-            tooltip: _obscurePassword ? 'แสดงรหัสผ่าน' : 'ซ่อนรหัสผ่าน',
+            tooltip: _obscurePassword
+                ? l10n.authShowPassword
+                : l10n.authHidePassword,
             icon: Icon(
               _obscurePassword
                   ? Icons.visibility_outlined
@@ -320,6 +322,7 @@ class _Hero extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final topPad = MediaQuery.of(context).padding.top;
+    final l10n = AppLocalizations.of(context)!;
     return ClipPath(
       clipper: HeroWaveClipper(),
       child: Container(
@@ -379,9 +382,9 @@ class _Hero extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'ยินดีต้อนรับ',
-                              style: TextStyle(
+                            Text(
+                              l10n.authWelcome,
+                              style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 24,
                                 fontWeight: FontWeight.w800,
@@ -390,7 +393,7 @@ class _Hero extends StatelessWidget {
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              'เข้าสู่ระบบเพื่อเรียกรถ ส่งของ และสั่งอาหาร',
+                              l10n.authLoginSubtitle,
                               style: TextStyle(
                                 color: Colors.white.withValues(alpha: 0.9),
                                 fontSize: 14,

@@ -1,3 +1,4 @@
+import 'package:customer_app/core/widgets/refetch_on_resume.dart';
 import 'package:customer_app/features/profile/presentation/screens/referral_screen.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
@@ -24,7 +25,17 @@ class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context, WidgetRef ref) => RefetchOnResume(
+    onResume: () {
+      if (!ref.read(authControllerProvider).isAuthenticated) return;
+      ref.invalidate(profileControllerProvider);
+      ref.invalidate(accountPhoneProvider);
+      ref.invalidate(accountEmailProvider);
+    },
+    child: _buildPage(context, ref),
+  );
+
+  Widget _buildPage(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
 
     // Guests can open this tab but it needs an account — show the login gate

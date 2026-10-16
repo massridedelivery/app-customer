@@ -91,7 +91,7 @@ class _PaymentSummaryScreenState extends ConsumerState<PaymentSummaryScreen> {
     final tollFee = profile?.tollFee ?? 0;
     final waitingFee = profile?.waitingFee ?? 0;
     final tip = (canTip ? (_selectedTip ?? 0) : 0).toDouble();
-    final total = fare + tollFee + waitingFee - discount + tip;
+    final total = (profile?.payable ?? 0) + tip;
 
     return Scaffold(
       backgroundColor: AppColors.semanticGrayNeutralBgWhite,

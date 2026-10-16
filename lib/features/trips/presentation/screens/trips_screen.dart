@@ -32,6 +32,7 @@ class _TripsScreenState extends ConsumerState<TripsScreen> {
   // filtered via the chips.
   HistoryType? _selectedType;
   late final ScrollController _scrollController;
+  late final AppLifecycleListener _lifecycle;
 
   @override
   void initState() {
@@ -40,10 +41,16 @@ class _TripsScreenState extends ConsumerState<TripsScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadHistory(isRefresh: true);
     });
+    // Server-side changes (e.g. an admin clearing a test account's history)
+    // show up on return to the app, not only on pull-to-refresh.
+    _lifecycle = AppLifecycleListener(
+      onResume: () => _loadHistory(isRefresh: true),
+    );
   }
 
   @override
   void dispose() {
+    _lifecycle.dispose();
     _scrollController.dispose();
     super.dispose();
   }

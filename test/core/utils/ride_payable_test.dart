@@ -18,4 +18,54 @@ void main() {
   test('no coupon → the fare', () {
     expect(ridePayable(fare: 41), 41);
   });
+
+  group('rideAmountDue (dev102 amount_due)', () {
+    test('uses the backend amount_due while unpaid', () {
+      // 44 fare, 44 coupon → 0 due, same as the driver sees.
+      expect(
+        rideAmountDue(
+          amountDue: 0,
+          paymentStatus: 'PENDING',
+          fare: 44,
+          discount: 44,
+        ),
+        0,
+      );
+      expect(
+        rideAmountDue(
+          amountDue: 135,
+          paymentStatus: '',
+          fare: 100,
+          tollFee: 25,
+          waitingFee: 10,
+        ),
+        135,
+      );
+    });
+
+    test('after PAID (amount_due → 0) shows the computed total', () {
+      expect(
+        rideAmountDue(
+          amountDue: 0,
+          paymentStatus: 'PAID',
+          fare: 100,
+          discount: 20,
+          tollFee: 25,
+        ),
+        105,
+      );
+    });
+
+    test('older backend without amount_due computes it', () {
+      expect(
+        rideAmountDue(
+          amountDue: null,
+          paymentStatus: '',
+          fare: 40,
+          discount: 50,
+        ),
+        0,
+      );
+    });
+  });
 }

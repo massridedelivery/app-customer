@@ -1,4 +1,5 @@
 import 'package:customer_app/features/live_ride/domain/models/customer_jobs_active_model.dart';
+import 'package:customer_app/core/utils/ride_payable.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'driver_profile_model.freezed.dart';
@@ -59,6 +60,9 @@ abstract class DriverProfileModel with _$DriverProfileModel {
     @JsonKey(name: 'is_intercity') required bool isIntercity,
     @JsonKey(name: 'distance_category') required String distanceCategory,
     @JsonKey(name: 'booking_type') required String bookingType,
+    // dev102: the backend's total due (0 once paid) — see rideAmountDue.
+    @JsonKey(name: 'amount_due') double? amountDue,
+    @JsonKey(name: 'payment_status') @Default('') String paymentStatus,
   }) = _DriverProfileModel;
 
   factory DriverProfileModel.fromActiveJob(CustomerJobsActiveModel job) {
@@ -128,11 +132,25 @@ abstract class DriverProfileModel with _$DriverProfileModel {
       isIntercity: job.isIntercity,
       distanceCategory: '',
       bookingType: job.bookingType,
+      amountDue: job.amountDue,
+      paymentStatus: job.paymentStatus,
     );
   }
 
   factory DriverProfileModel.fromJson(Map<String, dynamic> json) =>
       _$DriverProfileModelFromJson(json);
+}
+
+extension DriverProfilePayable on DriverProfileModel {
+  /// What the rider pays for this job (backend `amount_due` when it applies).
+  double get payable => rideAmountDue(
+    amountDue: amountDue,
+    paymentStatus: paymentStatus,
+    fare: fare,
+    discount: discount,
+    tollFee: tollFee,
+    waitingFee: waitingFee,
+  );
 }
 
 @freezed

@@ -1,3 +1,4 @@
+import 'package:customer_app/core/widgets/refetch_on_resume.dart';
 import 'package:customer_app/core/utils/app_dates.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
@@ -21,8 +22,19 @@ String _safeAmount(dynamic v) {
 class LoyaltyScreen extends ConsumerWidget {
   const LoyaltyScreen({super.key});
 
+  void _refresh(WidgetRef ref) {
+    ref.invalidate(loyaltySummaryProvider);
+    ref.invalidate(_loyaltyPointsProvider);
+    ref.invalidate(_cashbackProvider);
+  }
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context, WidgetRef ref) => RefetchOnResume(
+    onResume: () => _refresh(ref),
+    child: _buildPage(context, ref),
+  );
+
+  Widget _buildPage(BuildContext context, WidgetRef ref) {
     final summaryAsync = ref.watch(loyaltySummaryProvider);
     final pointsAsync = ref.watch(_loyaltyPointsProvider);
     final cashbackAsync = ref.watch(_cashbackProvider);
@@ -40,107 +52,113 @@ class LoyaltyScreen extends ConsumerWidget {
       body: summaryAsync.when(
         loading: () => const Center(child: MassLoadingM(size: 72)),
         error: (e, s) => Center(
-          child: Text(l10n.profileLoyaltyLoadFailed, style: AppTypography.body2),
+          child: Text(
+            l10n.profileLoyaltyLoadFailed,
+            style: AppTypography.body2,
+          ),
         ),
-        data: (summary) => SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            children: [
-              // Tier card
-              _TierCard(summary: summary),
-              const SizedBox(height: 20),
-              // Stats row
-              Row(
-                children: [
-                  _StatCard(
-                    label: l10n.profileLoyaltyPointsBalance,
-                    value: '${summary['points_balance'] ?? 0}',
-                    icon: Icons.stars_rounded,
-                    color: const Color(0xFFEB8C00),
-                  ),
-                  const SizedBox(width: 12),
-                  _StatCard(
-                    label: l10n.profileLoyaltyCashbackBalance,
-                    value:
-                        _safeAmount(summary['cashback_balance']),
-                    icon: Icons.account_balance_wallet_rounded,
-                    color: AppColors.primary,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              // Redeem button
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: () => _showRedeemDialog(
-                    context,
-                    ref,
-                    summary['points_balance'] ?? 0,
-                  ),
-                  icon: const Icon(Icons.redeem),
-                  label: Text(l10n.profileLoyaltyRedeemPoints),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
+        data: (summary) => RefreshIndicator(
+          onRefresh: () async => _refresh(ref),
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              children: [
+                // Tier card
+                _TierCard(summary: summary),
+                const SizedBox(height: 20),
+                // Stats row
+                Row(
+                  children: [
+                    _StatCard(
+                      label: l10n.profileLoyaltyPointsBalance,
+                      value: '${summary['points_balance'] ?? 0}',
+                      icon: Icons.stars_rounded,
+                      color: const Color(0xFFEB8C00),
+                    ),
+                    const SizedBox(width: 12),
+                    _StatCard(
+                      label: l10n.profileLoyaltyCashbackBalance,
+                      value: _safeAmount(summary['cashback_balance']),
+                      icon: Icons.account_balance_wallet_rounded,
+                      color: AppColors.primary,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                // Redeem button
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () => _showRedeemDialog(
+                      context,
+                      ref,
+                      summary['points_balance'] ?? 0,
+                    ),
+                    icon: const Icon(Icons.redeem),
+                    label: Text(l10n.profileLoyaltyRedeemPoints),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 24),
-              // Points transactions
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  l10n.profileLoyaltyPointsHistory,
-                  style: AppTypography.heading4,
+                const SizedBox(height: 24),
+                // Points transactions
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    l10n.profileLoyaltyPointsHistory,
+                    style: AppTypography.heading4,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 12),
-              pointsAsync.when(
-                loading: () => const Center(child: MassLoadingM(size: 48)),
-                error: (e, s) => const SizedBox.shrink(),
-                data: (data) {
-                  final txns = (data['transactions'] as List?) ?? [];
-                  return Column(
-                    children: txns
+                const SizedBox(height: 12),
+                pointsAsync.when(
+                  loading: () => const Center(child: MassLoadingM(size: 48)),
+                  error: (e, s) => const SizedBox.shrink(),
+                  data: (data) {
+                    final txns = (data['transactions'] as List?) ?? [];
+                    return Column(
+                      children: txns
+                          .map<Widget>(
+                            (t) => _TransactionTile(
+                              type: (t['type'] ?? '').toString(),
+                              desc: (t['description'] ?? '').toString(),
+                              points: (t['points'] as num?)?.toInt() ?? 0,
+                              date: _safeDate(context, t['created_at']),
+                            ),
+                          )
+                          .toList(),
+                    );
+                  },
+                ),
+                const SizedBox(height: 24),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    l10n.profileLoyaltyCashbackHistory,
+                    style: AppTypography.heading4,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                cashbackAsync.when(
+                  loading: () => const Center(child: MassLoadingM(size: 48)),
+                  error: (e, s) => const SizedBox.shrink(),
+                  data: (list) => Column(
+                    children: list
                         .map<Widget>(
-                          (t) => _TransactionTile(
-                            type: (t['type'] ?? '').toString(),
-                            desc: (t['description'] ?? '').toString(),
-                            points: (t['points'] as num?)?.toInt() ?? 0,
-                            date: _safeDate(context, t['created_at']),
-                          ),
+                          (t) => _CashbackTile(item: t as Map<String, dynamic>),
                         )
                         .toList(),
-                  );
-                },
-              ),
-              const SizedBox(height: 24),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  l10n.profileLoyaltyCashbackHistory,
-                  style: AppTypography.heading4,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 12),
-              cashbackAsync.when(
-                loading: () => const Center(child: MassLoadingM(size: 48)),
-                error: (e, s) => const SizedBox.shrink(),
-                data: (list) => Column(
-                  children: list
-                      .map<Widget>(
-                        (t) => _CashbackTile(item: t as Map<String, dynamic>),
-                      )
-                      .toList(),
-                ),
-              ),
-              const SizedBox(height: 80),
-            ],
+                const SizedBox(height: 80),
+              ],
+            ),
           ),
         ),
       ),
@@ -181,7 +199,9 @@ class LoyaltyScreen extends ConsumerWidget {
               final pts = int.tryParse(controller.text) ?? 0;
               if (pts > 0 && pts <= points) {
                 try {
-                  await ref.read(loyaltyRemoteDataSourceProvider).redeemPoints(pts);
+                  await ref
+                      .read(loyaltyRemoteDataSourceProvider)
+                      .redeemPoints(pts);
                   ref.invalidate(loyaltySummaryProvider);
                   ref.invalidate(_loyaltyPointsProvider);
                   if (ctx.mounted) {
@@ -206,15 +226,21 @@ class LoyaltyScreen extends ConsumerWidget {
 // Additional providers scoped to this page. autoDispose so every visit reads
 // fresh balances — points come back after a cancelled trip (and change after a
 // completed one) while the page isn't open.
-final loyaltySummaryProvider = FutureProvider.autoDispose<Map<String, dynamic>>((ref) async {
-  return ref.watch(loyaltyRemoteDataSourceProvider).getSummary();
-});
+final loyaltySummaryProvider = FutureProvider.autoDispose<Map<String, dynamic>>(
+  (ref) async {
+    return ref.watch(loyaltyRemoteDataSourceProvider).getSummary();
+  },
+);
 
-final _loyaltyPointsProvider = FutureProvider.autoDispose<Map<String, dynamic>>((ref) async {
-  return ref.watch(loyaltyRemoteDataSourceProvider).getPoints();
-});
+final _loyaltyPointsProvider = FutureProvider.autoDispose<Map<String, dynamic>>(
+  (ref) async {
+    return ref.watch(loyaltyRemoteDataSourceProvider).getPoints();
+  },
+);
 
-final _cashbackProvider = FutureProvider.autoDispose<List<dynamic>>((ref) async {
+final _cashbackProvider = FutureProvider.autoDispose<List<dynamic>>((
+  ref,
+) async {
   return ref.watch(loyaltyRemoteDataSourceProvider).getCashbackHistory();
 });
 

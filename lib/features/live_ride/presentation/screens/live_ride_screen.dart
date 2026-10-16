@@ -1015,7 +1015,9 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
   /// What the rider pays (see [ridePayable]); null until the fare is known.
   double? _ridePayable(dynamic liveState) {
     final DriverProfileModel? profile = liveState.driverProfile;
-    final double? fare = profile?.fare ?? (liveState.fare as double?);
+    // Same figure the driver sees (dev102 amount_due) once the job is synced.
+    if (profile != null) return profile.payable;
+    final double? fare = liveState.fare as double?;
     if (fare == null) return null;
     return ridePayable(
       fare: fare,

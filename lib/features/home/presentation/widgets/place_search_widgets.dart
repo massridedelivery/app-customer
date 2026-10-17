@@ -96,9 +96,25 @@ class PlaceSearchMainContent extends ConsumerWidget {
     if (searchState.query.isNotEmpty && searchState.hasError) {
       return Expanded(
         child: _SearchErrorView(
-          message: l10n.searchError,
+          message: searchState.isUnavailable
+              ? l10n.searchUnavailable
+              : l10n.searchError,
           onRetry: () =>
               ref.read(placeSearchControllerProvider.notifier).retry(),
+        ),
+      );
+    }
+
+    // The search finished with nothing — say so instead of falling back to
+    // the recent/saved tabs, which looked like the search did nothing.
+    if (searchState.query.isNotEmpty &&
+        searchState.hasSearched &&
+        searchState.results.isEmpty &&
+        !searchState.isSearching) {
+      return Expanded(
+        child: _SearchErrorView(
+          icon: Icons.search_off_rounded,
+          message: l10n.searchNoResults,
         ),
       );
     }
@@ -249,9 +265,14 @@ class _PlaceSearchEmpty extends StatelessWidget {
 /// Error placeholder with a retry affordance for a failed autocomplete call.
 class _SearchErrorView extends StatelessWidget {
   final String message;
-  final VoidCallback onRetry;
+  final VoidCallback? onRetry;
+  final IconData icon;
 
-  const _SearchErrorView({required this.message, required this.onRetry});
+  const _SearchErrorView({
+    required this.message,
+    this.onRetry,
+    this.icon = Icons.cloud_off_outlined,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -265,7 +286,7 @@ class _SearchErrorView extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
-                Icons.cloud_off_outlined,
+                icon,
                 size: 40,
                 color: AppColors.semanticGrayNeutralFgLowOnWhite,
               ),

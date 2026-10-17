@@ -237,6 +237,8 @@
   "noRecentSearches": "ยังไม่มีการเดินทางล่าสุด",
   "recommendedEmpty": "ยังไม่มีรายการแนะนำ",
   "searchError": "ค้นหาไม่สำเร็จ แตะเพื่อลองใหม่",
+  "searchUnavailable": "ค้นหาไม่ได้ชั่วคราว แตะเพื่อลองใหม่",
+  "searchNoResults": "ไม่พบสถานที่",
   "selectPickupFirst": "กรุณาเลือกจุดรับก่อน",
   "useCurrentLocation": "ใช้ตำแหน่งปัจจุบัน",
   "clearField": "ล้างข้อความ",

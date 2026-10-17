@@ -99,6 +99,67 @@ void main() {
       expect(results.single.mainText, 'Somewhere');
     });
 
+    test('parses the flat BE shape (main_text / secondary_text)', () async {
+      final service = PlacesProxyService(
+        _fakeDio((path, query) {
+          return {
+            'predictions': [
+              {
+                'place_id': 'p1',
+                'description': 'เซ็นทรัลเวิลด์ ปทุมวัน',
+                'main_text': 'เซ็นทรัลเวิลด์',
+                'secondary_text': 'ปทุมวัน',
+              },
+            ],
+          };
+        }),
+      );
+      final r = (await service.autocomplete('เซ็นทรัล')).single;
+      expect(r.placeId, 'p1');
+      expect(r.mainText, 'เซ็นทรัลเวิลด์');
+      expect(r.secondaryText, 'ปทุมวัน');
+    });
+
+    test('Thai input is URL-encoded once; lat/lng use "." decimals', () async {
+      late Uri uri;
+      final dio = Dio(BaseOptions(baseUrl: 'https://example.test'));
+      dio.interceptors.add(
+        InterceptorsWrapper(
+          onRequest: (options, handler) {
+            uri = options.uri;
+            handler.resolve(
+              Response(
+                requestOptions: options,
+                statusCode: 200,
+                data: const {'predictions': []},
+              ),
+            );
+          },
+        ),
+      );
+      final results = await PlacesProxyService(dio).autocomplete(
+        'เซ็นทรัล',
+        lat: 13.7563,
+        lng: 100.5018,
+        sessionToken: 's',
+      );
+      expect(results, isEmpty);
+      expect(uri.queryParameters['input'], 'เซ็นทรัล');
+      expect(uri.toString(), isNot(contains('%25'))); // no double encoding
+      expect(uri.queryParameters['lat'], '13.7563');
+      expect(uri.queryParameters['lng'], '100.5018');
+    });
+
+    test('carries the HTTP status so the UI can tell "unavailable"', () async {
+      final service = PlacesProxyService(_errorDio(502));
+      expect(
+        () => service.autocomplete('x'),
+        throwsA(
+          isA<ServerException>().having((e) => e.statusCode, 'status', 502),
+        ),
+      );
+    });
+
     test('503 (key not configured) → Thai "ยังไม่พร้อมใช้งาน"', () async {
       final service = PlacesProxyService(_errorDio(503));
       expect(

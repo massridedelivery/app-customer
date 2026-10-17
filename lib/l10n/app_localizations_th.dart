@@ -669,6 +669,12 @@ class AppLocalizationsTh extends AppLocalizations {
   String get searchError => 'ค้นหาไม่สำเร็จ แตะเพื่อลองใหม่';
 
   @override
+  String get searchUnavailable => 'ค้นหาไม่ได้ชั่วคราว แตะเพื่อลองใหม่';
+
+  @override
+  String get searchNoResults => 'ไม่พบสถานที่';
+
+  @override
   String get selectPickupFirst => 'กรุณาเลือกจุดรับก่อน';
 
   @override

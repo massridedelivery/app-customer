@@ -160,6 +160,28 @@ void main() {
       );
     });
 
+    test('offline / timeout is tagged as a network error', () async {
+      final dio = Dio(BaseOptions(baseUrl: 'https://example.test'));
+      dio.interceptors.add(
+        InterceptorsWrapper(
+          onRequest: (options, handler) => handler.reject(
+            DioException(
+              requestOptions: options,
+              type: DioExceptionType.connectionError,
+            ),
+          ),
+        ),
+      );
+      expect(
+        () => PlacesProxyService(dio).autocomplete('x'),
+        throwsA(
+          isA<ServerException>()
+              .having((e) => e.code, 'code', PlacesProxyService.networkErrorCode)
+              .having((e) => e.statusCode, 'status', isNull),
+        ),
+      );
+    });
+
     test('503 (key not configured) → Thai "ยังไม่พร้อมใช้งาน"', () async {
       final service = PlacesProxyService(_errorDio(503));
       expect(

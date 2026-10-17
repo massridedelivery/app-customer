@@ -1,5 +1,5 @@
 import 'package:customer_app/core/constants/app_colors.dart';
-import 'package:customer_app/core/services/google_directions_service.dart';
+import 'package:customer_app/core/services/directions_service.dart';
 import 'package:customer_app/core/utils/map_marker_providers.dart';
 import 'package:customer_app/features/ride_booking/domain/models/fare_estimation_response.dart';
 import 'package:customer_app/core/utils/polyline_decoder.dart';
@@ -29,12 +29,8 @@ final decodedPolylineProvider = Provider.autoDispose<List<LatLng>>((ref) {
   return points;
 });
 
-final _directionsServiceProvider = Provider(
-  (ref) => GoogleDirectionsService(),
-);
-
-/// Route points for the booking map. Prefers the backend polyline; when it's
-/// missing, fetches a real road-following route from Google Directions. Returns
+/// Route points for the booking map. Prefers the fare-estimate polyline; when
+/// it's missing, fetches a road-following route from `/api/directions`. Returns
 /// an empty list until/unless a route resolves, so the map keeps its straight
 /// pickup→dropoff fallback in the meantime.
 final routePointsProvider = FutureProvider.autoDispose<List<LatLng>>((
@@ -51,7 +47,7 @@ final routePointsProvider = FutureProvider.autoDispose<List<LatLng>>((
   );
   if (pickup == null || dropoff == null) return const <LatLng>[];
 
-  return ref.read(_directionsServiceProvider).route(pickup, dropoff);
+  return ref.read(directionsServiceProvider).route(pickup, dropoff);
 });
 
 class BookingMapWidget extends ConsumerStatefulWidget {
@@ -143,7 +139,7 @@ class _BookingMapWidgetState extends ConsumerState<BookingMapWidget> {
       },
     );
 
-    // Backend polyline when present, otherwise the Google Directions route.
+    // Estimate polyline when present, otherwise the /api/directions route.
     // Empty until it resolves → the Polyline below keeps the straight-line
     // fallback in the meantime.
     final polylinePoints =

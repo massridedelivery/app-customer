@@ -52,6 +52,7 @@ class PlacesProxyService {
       throw ServerException(
         _message(e, 'ค้นหาสถานที่ไม่สำเร็จ'),
         statusCode: e.response?.statusCode,
+        code: _isNetworkError(e) ? networkErrorCode : null,
       );
     }
   }
@@ -76,6 +77,7 @@ class PlacesProxyService {
       throw ServerException(
         _message(e, 'ดึงข้อมูลสถานที่ไม่สำเร็จ'),
         statusCode: e.response?.statusCode,
+        code: _isNetworkError(e) ? networkErrorCode : null,
       );
     }
   }
@@ -128,6 +130,19 @@ class PlacesProxyService {
       lng: lng,
     );
   }
+
+  /// [ServerException.code] for a request that never got a response (offline,
+  /// timeout) — shown as "temporarily unavailable", not "not found".
+  static const networkErrorCode = 'network';
+
+  static bool _isNetworkError(DioException e) => switch (e.type) {
+        DioExceptionType.connectionError ||
+        DioExceptionType.connectionTimeout ||
+        DioExceptionType.sendTimeout ||
+        DioExceptionType.receiveTimeout =>
+          true,
+        _ => false,
+      };
 
   String _message(DioException e, String fallback) {
     switch (e.response?.statusCode) {

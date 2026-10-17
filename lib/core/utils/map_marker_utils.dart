@@ -111,6 +111,10 @@ class MapMarkerUtils {
   /// [BitmapDescriptor.bytes] as `imagePixelRatio` to scale it back down.
   static const double _pinRasterScale = 3;
 
+  /// Empty space below the pin's tip in `ic_location_fill.svg` (viewBox units):
+  /// the shape ends at y = 22 of 24.
+  static const double _pinTipGap = 2;
+
   static Future<BitmapDescriptor> _createCompositeMarker({
     required Color backgroundColor,
     required Color iconColor,
@@ -130,13 +134,20 @@ class MapMarkerUtils {
 
     canvas.save();
     canvas.scale(scale, scale);
+    // The pin shape spans y = 2..22 of the 24-unit viewBox, but the map anchors
+    // a marker at the bitmap's bottom edge (y = 24). Left as is, the pin's tip
+    // hovered ~2 units (~4 logical px) above its real coordinate, so it never
+    // quite sat on the route line. Shift the drawing down so the tip lands on
+    // the bottom edge — i.e. exactly on the anchor, on every map using it.
+    canvas.translate(0, _pinTipGap);
 
     // 2. Draw Shadow (optional but helps it pop)
     final Paint shadowPaint = Paint()
       ..color = Colors.black.withValues(alpha: 0.2)
       ..maskFilter = const ui.MaskFilter.blur(ui.BlurStyle.normal, 1);
-    // Draw a small circle as shadow for the pin's tip
-    canvas.drawCircle(const Offset(12, 22), 2, shadowPaint);
+    // Draw a small circle as shadow for the pin's tip, raised slightly so the
+    // shifted bitmap's bottom edge doesn't cut it in half.
+    canvas.drawCircle(const Offset(12, 20.5), 1.5, shadowPaint);
 
     // 3. Draw the Pin (Colored)
     // We use a Paint with the background color

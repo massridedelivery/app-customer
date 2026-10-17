@@ -104,7 +104,8 @@ void main() {
     expect(find.text('ส่งฟรี'), findsOneWidget);
     expect(find.text('ลด'), findsNothing);
     expect(find.text('ขั้นต่ำ ฿99'), findsOneWidget);
-    expect(find.text('เฉพาะส่งของ'), findsOneWidget);
+    // Free delivery is food-only, even on a promo scoped to messenger.
+    expect(find.text('เฉพาะอาหาร'), findsOneWidget);
     expect(find.text('โปรโมชั่น'), findsOneWidget);
   });
 

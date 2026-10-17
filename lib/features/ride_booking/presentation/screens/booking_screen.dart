@@ -181,80 +181,72 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
     }
   }
 
-  /// Places an address bubble anchored to a marker. Centred over the marker,
-  /// it flips below when there isn't room above (marker near the top safe area)
-  /// and is clamped to the screen edges so it never gets clipped by the status
-  /// bar or run off the sides. The clamping uses the bubble's *measured* size
-  /// (via [_BubbleLayoutDelegate]) rather than an estimate, so a wide two-line
-  /// address near a screen edge stays fully on-screen.
-  Widget _buildLocationOverlay({
-    required Offset pos,
-    required String label,
-    required Color labelColor,
-    required String address,
+  /// The address bubbles for both pins plus the trip duration/distance pill,
+  /// laid out together by [_MapOverlayLayoutDelegate] so the pill can steer
+  /// clear of the bubbles and pins (it used to sit on the pins' midpoint
+  /// regardless, covering the pickup bubble on a mostly vertical route).
+  Widget _buildMapOverlays({
+    required BookingState state,
+    required AppLocalizations l10n,
+    required String pickupAddress,
+    required String dropoffAddress,
+    required bool showMetric,
   }) {
     return Positioned.fill(
-      child: CustomSingleChildLayout(
-        delegate: _BubbleLayoutDelegate(
-          anchor: pos,
+      child: CustomMultiChildLayout(
+        delegate: _MapOverlayLayoutDelegate(
+          pickup: _pickupPos,
+          dropoff: _dropoffPos,
           safeTop: MediaQuery.of(context).padding.top,
         ),
-        child: _LocationOverlay(
-          label: label,
-          labelColor: labelColor,
-          address: address,
-        ),
+        children: [
+          if (_pickupPos != null)
+            LayoutId(
+              id: _MapOverlaySlot.pickup,
+              child: _LocationOverlay(
+                label: "1",
+                labelColor: AppColors.foundationGreen500,
+                address: pickupAddress,
+              ),
+            ),
+          if (_dropoffPos != null)
+            LayoutId(
+              id: _MapOverlaySlot.dropoff,
+              child: _LocationOverlay(
+                label: "2",
+                labelColor: AppColors.foundationRed600,
+                address: dropoffAddress,
+              ),
+            ),
+          // Total-trip duration + distance. Belongs to the route as a whole,
+          // so it is centred between the pins when that spot is free.
+          if (_pickupPos != null && _dropoffPos != null && showMetric)
+            LayoutId(
+              id: _MapOverlaySlot.metric,
+              child: _buildRouteMetricTag(state, l10n),
+            ),
+        ],
       ),
     );
   }
 
-  /// The trip's total duration + distance, centred on the midpoint between the
-  /// pickup and dropoff pins. The centre is clamped by a conservative half-size
-  /// so the pill can never spill past a screen edge or hide under the status bar
-  /// — regardless of where the route sits or how close the two pins are.
+  /// The trip's total duration + distance pill. Positioned by
+  /// [_MapOverlayLayoutDelegate].
   Widget _buildRouteMetricTag(BookingState state, AppLocalizations l10n) {
-    final media = MediaQuery.of(context);
-    final size = media.size;
-
-    final midX = (_pickupPos!.dx + _dropoffPos!.dx) / 2;
-    final midY = (_pickupPos!.dy + _dropoffPos!.dy) / 2;
-
-    const halfW = 80.0;
-    const halfH = 18.0;
-    const margin = 12.0;
-    final left = midX
-        .clamp(margin + halfW, size.width - margin - halfW)
-        .toDouble();
-    final top = midY
-        .clamp(media.padding.top + margin + halfH, size.height - margin - halfH)
-        .toDouble();
-
-    return Positioned(
-      left: left,
-      top: top,
-      child: FractionalTranslation(
-        // Centre the pill on the (clamped) midpoint.
-        translation: const Offset(-0.5, -0.5),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(
-            color: AppColors.semanticGrayNeutralFgHigh,
-            borderRadius: BorderRadius.circular(8),
-            boxShadow: const [
-              BoxShadow(
-                color: Colors.black26,
-                blurRadius: 4,
-                offset: Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Text(
-            "${(state.durationMin ?? 0).toStringAsFixed(0)} ${l10n.minutes} · ${(state.distanceKm ?? 0).toStringAsFixed(1)} ${l10n.km}",
-            style: AppTypography.numericMedium4.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: AppColors.semanticGrayNeutralFgHigh,
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: const [
+          BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 2)),
+        ],
+      ),
+      child: Text(
+        "${(state.durationMin ?? 0).toStringAsFixed(0)} ${l10n.minutes} · ${(state.distanceKm ?? 0).toStringAsFixed(1)} ${l10n.km}",
+        style: AppTypography.numericMedium4.copyWith(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
         ),
       ),
     );
@@ -471,34 +463,17 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
               onCameraIdle: () => _updateScreenPositions(),
             ),
 
-            // Dynamic Location Overlays
-            if (pickup != null && dropoff != null) ...[
-              if (_pickupPos != null)
-                _buildLocationOverlay(
-                  pos: _pickupPos!,
-                  label: "1",
-                  labelColor: AppColors.foundationGreen500,
-                  address: pickupAddress ?? l10n.currentLocation,
-                ),
-              if (_dropoffPos != null)
-                _buildLocationOverlay(
-                  pos: _dropoffPos!,
-                  label: "2",
-                  labelColor: AppColors.foundationRed600,
-                  address: dropoffAddress ?? l10n.dropoffPoint,
-                ),
-              // Total-trip duration + distance. Anchored to the route midpoint
-              // (not the dropoff pin): the value covers the whole pickup→dropoff
-              // trip, and pinning it to one endpoint both mislabelled it and let
-              // it collide with the dropoff bubble or run off the screen edge.
-              // Only once there's an estimate: without one (out of area, failed
-              // or still loading) it would read "0 นาที · 0.0 กม.".
-              if (_pickupPos != null &&
-                  _dropoffPos != null &&
-                  !outOfArea &&
-                  (bookingState.distanceKm ?? 0) > 0)
-                _buildRouteMetricTag(bookingState, l10n),
-            ],
+            // Address bubbles + trip duration/distance pill. The pill only
+            // shows once there's an estimate: without one (out of area,
+            // failed or still loading) it would read "0 นาที · 0.0 กม.".
+            if (pickup != null && dropoff != null)
+              _buildMapOverlays(
+                state: bookingState,
+                l10n: l10n,
+                pickupAddress: pickupAddress ?? l10n.currentLocation,
+                dropoffAddress: dropoffAddress ?? l10n.dropoffPoint,
+                showMetric: !outOfArea && (bookingState.distanceKm ?? 0) > 0,
+              ),
 
             // Top Back Arrow Button
             Positioned(
@@ -649,14 +624,19 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
   }
 }
 
-/// Lays out an address bubble relative to a marker's screen position, using the
-/// bubble's measured size to keep it fully on-screen. Vertically it sits above
-/// the marker, flipping below when there isn't room under the status bar.
-/// Horizontally it centres on the marker, then clamps so neither edge is
-/// clipped — the piece the plain `left: pos.dx` + `FractionalTranslation(-0.5)`
-/// approach was missing.
-class _BubbleLayoutDelegate extends SingleChildLayoutDelegate {
-  final Offset anchor;
+enum _MapOverlaySlot { pickup, dropoff, metric }
+
+/// Lays out the pickup/dropoff address bubbles and the trip metric pill over
+/// the booking map, from the pins' screen positions.
+///
+/// Each bubble sits above its marker, flipping below when there isn't room
+/// under the status bar, and is clamped (using its *measured* size) so neither
+/// edge is clipped. The pill then goes to the first candidate spot — the
+/// pins' midpoint, then nudged sideways / up / down — that overlaps neither
+/// bubble nor either pin, falling back to the midpoint.
+class _MapOverlayLayoutDelegate extends MultiChildLayoutDelegate {
+  final Offset? pickup;
+  final Offset? dropoff;
   final double safeTop;
 
   // Gap between the marker and the bubble on each flip side, and the minimum
@@ -665,37 +645,109 @@ class _BubbleLayoutDelegate extends SingleChildLayoutDelegate {
   static const double _gapBelow = 12.0;
   static const double _margin = 12.0;
 
-  const _BubbleLayoutDelegate({required this.anchor, required this.safeTop});
+  // On-screen pin footprint (MapMarkerUtils draws 44px pins whose tip is the
+  // marker's coordinate) and the clearance the pill keeps from everything.
+  static const double _pinSize = 44.0;
+  static const double _clearance = 6.0;
+
+  _MapOverlayLayoutDelegate({
+    required this.pickup,
+    required this.dropoff,
+    required this.safeTop,
+  });
 
   @override
-  BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
-    // Keep the existing 60%-of-width cap so long addresses wrap instead of
-    // stretching across the whole map.
-    return constraints.copyWith(
-      minWidth: 0,
-      minHeight: 0,
-      maxWidth: constraints.maxWidth * 0.6,
+  void performLayout(Size size) {
+    final occupied = <Rect>[];
+
+    for (final (slot, anchor) in [
+      (_MapOverlaySlot.pickup, pickup),
+      (_MapOverlaySlot.dropoff, dropoff),
+    ]) {
+      if (anchor == null || !hasChild(slot)) continue;
+      // Keep the 60%-of-width cap so long addresses wrap instead of
+      // stretching across the whole map.
+      final bubble = layoutChild(
+        slot,
+        BoxConstraints(maxWidth: size.width * 0.6, maxHeight: size.height),
+      );
+      final offset = _bubbleOffset(anchor, bubble, size);
+      positionChild(slot, offset);
+      occupied
+        ..add(offset & bubble)
+        ..add(
+          Rect.fromLTWH(
+            anchor.dx - _pinSize / 2,
+            anchor.dy - _pinSize,
+            _pinSize,
+            _pinSize,
+          ),
+        );
+    }
+
+    if (!hasChild(_MapOverlaySlot.metric)) return;
+    final pill = layoutChild(
+      _MapOverlaySlot.metric,
+      BoxConstraints.loose(size),
     );
+    if (pickup == null || dropoff == null) {
+      positionChild(_MapOverlaySlot.metric, Offset.zero);
+      return;
+    }
+
+    final mid = (pickup! + dropoff!) / 2;
+    final stepY = pill.height + _clearance * 2;
+    final stepX = pill.width / 2 + _pinSize / 2 + _clearance;
+    // Sideways first: those stay level with the midpoint, which fit-to-bounds
+    // keeps above the bottom sheet; a downward nudge could slide under it.
+    final candidates = [
+      mid,
+      mid.translate(stepX, 0),
+      mid.translate(-stepX, 0),
+      mid.translate(0, -stepY),
+      mid.translate(0, stepY),
+      mid.translate(0, -stepY * 2),
+      mid.translate(0, stepY * 2),
+    ].map((centre) => _clampPill(centre, pill, size)).toList();
+
+    final placed = candidates.firstWhere(
+      (rect) => !occupied.any((o) => o.overlaps(rect.inflate(_clearance))),
+      orElse: () => candidates.first,
+    );
+    positionChild(_MapOverlaySlot.metric, placed.topLeft);
   }
 
-  @override
-  Offset getPositionForChild(Size size, Size childSize) {
-    final placeAbove = anchor.dy - _gapAbove - childSize.height > safeTop + 8;
+  Offset _bubbleOffset(Offset anchor, Size bubble, Size size) {
+    final placeAbove = anchor.dy - _gapAbove - bubble.height > safeTop + 8;
     final top = placeAbove
-        ? anchor.dy - _gapAbove - childSize.height
+        ? anchor.dy - _gapAbove - bubble.height
         : anchor.dy + _gapBelow;
-
-    final left = anchor.dx - childSize.width / 2;
-
+    final left = anchor.dx - bubble.width / 2;
     return Offset(
-      left.clamp(_margin, size.width - childSize.width - _margin),
-      top.clamp(safeTop + 8, size.height - childSize.height - _margin),
+      left.clamp(_margin, size.width - bubble.width - _margin),
+      top.clamp(safeTop + 8, size.height - bubble.height - _margin),
     );
   }
 
+  /// The pill's rect centred on [centre], clamped fully on-screen and below
+  /// the status bar.
+  Rect _clampPill(Offset centre, Size pill, Size size) {
+    final left = (centre.dx - pill.width / 2).clamp(
+      _margin,
+      size.width - pill.width - _margin,
+    );
+    final top = (centre.dy - pill.height / 2).clamp(
+      safeTop + _margin,
+      size.height - pill.height - _margin,
+    );
+    return Offset(left, top) & pill;
+  }
+
   @override
-  bool shouldRelayout(_BubbleLayoutDelegate oldDelegate) =>
-      anchor != oldDelegate.anchor || safeTop != oldDelegate.safeTop;
+  bool shouldRelayout(_MapOverlayLayoutDelegate oldDelegate) =>
+      pickup != oldDelegate.pickup ||
+      dropoff != oldDelegate.dropoff ||
+      safeTop != oldDelegate.safeTop;
 }
 
 class _LocationOverlay extends StatelessWidget {

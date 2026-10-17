@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:customer_app/core/error/server_exception.dart';
+import 'package:customer_app/core/services/places_proxy_service.dart';
 import 'package:customer_app/features/home/domain/models/place.dart';
 import 'package:customer_app/features/home/domain/models/place_prediction.dart';
 import 'package:customer_app/features/home/domain/usecases/get_place_details_usecase_impl.dart';
@@ -69,11 +70,13 @@ class PlaceSearchController extends _$PlaceSearchController {
     } catch (e) {
       debugPrint('Search failed: $e');
       final status = e is ServerException ? e.statusCode : null;
+      final offline =
+          e is ServerException && e.code == PlacesProxyService.networkErrorCode;
       state = state.copyWith(
         results: const [],
         isSearching: false,
         hasError: true,
-        isUnavailable: status == 502 || status == 503,
+        isUnavailable: offline || status == 502 || status == 503,
       );
     }
   }

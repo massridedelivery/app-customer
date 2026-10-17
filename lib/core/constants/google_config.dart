@@ -12,13 +12,12 @@ import 'package:flutter/foundation.dart';
 /// `android/app/src/main/AndroidManifest.xml` and `ios/Runner/AppDelegate.swift`
 /// and are a different concern from these.
 abstract class GoogleConfig {
-  /// No Google web-service key ships in the app any more. Place search goes
-  /// through the BE proxy (`/api/places/*`, see FeatureFlags.placesProxyEnabled);
-  /// the old baked-in keys were dead anyway — Google rejected the Android one
-  /// as invalid and the iOS one isn't authorized for Directions. An
-  /// env/*.json override still works for local debugging; with none set,
-  /// Directions / Roads / the direct Places fallback skip their calls (the
-  /// booking map uses the backend polyline, or a straight line).
+  /// No Google web-service key ships in the app any more. Place search and
+  /// directions go through the BE (`/api/places/*`, `/api/directions`); the
+  /// old baked-in keys were dead anyway — Google rejected the Android one as
+  /// invalid and the iOS one isn't authorized for Directions. An env/*.json
+  /// override still works for local debugging; with none set, Roads and the
+  /// direct Places fallback skip their calls.
   static String get placesApiKey {
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:

@@ -13,8 +13,8 @@ abstract class PlaceSearchState with _$PlaceSearchState {
     @Default(false) bool isSearching,
     @Default(false) bool hasError,
 
-    /// The search backend is down for now (proxy 502/503) — show "try again
-    /// later", not "no places found".
+    /// The search backend is down for now (proxy 502/503, or offline / timed
+    /// out) — show "try again later", not "no places found".
     @Default(false) bool isUnavailable,
 
     /// A search for [query] has completed, so empty [results] really means

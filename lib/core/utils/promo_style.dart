@@ -73,6 +73,10 @@ num _discountValueOf(Map<String, dynamic> promo) {
 bool promoAppliesToService(Map<String, dynamic> promo, String serviceKey) {
   final key = serviceKey.toLowerCase();
 
+  // 0) Free delivery is a food-only perk — rides and messenger only get
+  // discounts — so never offer it there, even when the backend scopes it ALL.
+  if (_type(promo) == 'free_shipping') return key == 'food';
+
   // 1) Primary: the backend's `applies_to`. When present it is authoritative —
   // a promo scoped to another service must NOT fall through to a keyword guess.
   final appliesTo = (promo['applies_to'] ?? '').toString().toUpperCase();
@@ -176,6 +180,9 @@ enum PromoScope {
       };
 }
 
-/// The service scope of [promo] (see [PromoScope]).
+/// The service scope of [promo] (see [PromoScope]). Free delivery is always
+/// food-only (see [promoAppliesToService]), whatever `applies_to` says.
 PromoScope promoScopeOf(Map<String, dynamic> promo) =>
-    PromoScope.fromAppliesTo(promo['applies_to']);
+    _type(promo) == 'free_shipping'
+        ? PromoScope.food
+        : PromoScope.fromAppliesTo(promo['applies_to']);

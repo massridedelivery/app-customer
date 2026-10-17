@@ -64,12 +64,13 @@ void main() {
         'discount_type': 'percentage',
         'discount_value': 100,
         'max_discount': 40,
-        'applies_to': 'MESSENGER',
+        'applies_to': 'ALL',
       });
       expect(d.freeShipping, isTrue);
       expect(d.discountValue, isEmpty);
       expect(d.maxDiscount, isNull);
-      expect(d.scope, PromoScope.messenger);
+      // Free delivery is food-only, even when the backend scopes it ALL.
+      expect(d.scope, PromoScope.food);
       expect(d.color, promoColorOf({'promo_type': 'free_shipping'}));
     });
   });

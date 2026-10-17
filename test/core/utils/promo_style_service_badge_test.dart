@@ -46,6 +46,24 @@ void main() {
       expect(serviceBadgeOf(promos, 'food', _th)!.text, 'ส่งฟรี*');
     });
 
+    test('free shipping is food-only: never on ride / messenger', () {
+      // Mirrors the live "FREE" promo: free_shipping scoped ALL, next to a
+      // fixed discount. Ride / messenger get the discount, not "ส่งฟรี".
+      final promos = [
+        {'applies_to': 'ALL', 'promo_type': 'free_shipping'},
+        {'applies_to': 'ALL', 'promo_type': 'fixed', 'discount_value': 50},
+      ];
+      expect(serviceBadgeOf(promos, 'food', _th)!.text, 'ส่งฟรี*');
+      expect(serviceBadgeOf(promos, 'ride', _th)!.text, 'ลด ฿50*');
+      expect(serviceBadgeOf(promos, 'messenger', _th)!.text, 'ลด ฿50*');
+      expect(promoAppliesToService(promos.first, 'ride'), isFalse);
+      expect(promoAppliesToService(promos.first, 'messenger'), isFalse);
+      expect(
+        serviceBadgeOf([promos.first], 'messenger', _th),
+        isNull,
+      );
+    });
+
     test('percentage discount renders as a percent badge', () {
       final promos = [
         {

@@ -3,6 +3,7 @@ import 'package:customer_app/core/services/google_directions_service.dart';
 import 'package:customer_app/core/utils/map_marker_providers.dart';
 import 'package:customer_app/features/ride_booking/domain/models/fare_estimation_response.dart';
 import 'package:customer_app/core/utils/polyline_decoder.dart';
+import 'package:customer_app/core/utils/route_endpoints.dart';
 import 'package:customer_app/features/ride_booking/presentation/controllers/booking_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -33,16 +34,18 @@ final _directionsServiceProvider = Provider(
   (ref) => GoogleDirectionsService(),
 );
 
-/// Route points for the booking map. Prefers the backend polyline; when it's
-/// missing, fetches a real road-following route from Google Directions. Returns
-/// an empty list until/unless a route resolves, so the map keeps its straight
-/// pickup→dropoff fallback in the meantime.
+/// Route points for the booking map, always for the pins actually shown.
+///
+/// Prefers the backend polyline, but only when it starts and ends at the
+/// pickup / dropoff pins ([routeMatchesEndpoints]). A backend route computed
+/// for a different point (one was seen running on past the dropoff pin along
+/// ทล.106) falls back to a Google Directions route for the pins instead. The
+/// chosen route is stitched to both pins so the line meets them rather than
+/// stopping at the road-snapped ends. Returns an empty list until a route
+/// resolves, so the map keeps its straight pickup→dropoff fallback meanwhile.
 final routePointsProvider = FutureProvider.autoDispose<List<LatLng>>((
   ref,
 ) async {
-  final backendRoute = ref.watch(decodedPolylineProvider);
-  if (backendRoute.isNotEmpty) return backendRoute;
-
   final pickup = ref.watch(
     homeControllerProvider.select((s) => s.pickupLocation),
   );
@@ -51,7 +54,29 @@ final routePointsProvider = FutureProvider.autoDispose<List<LatLng>>((
   );
   if (pickup == null || dropoff == null) return const <LatLng>[];
 
-  return ref.read(_directionsServiceProvider).route(pickup, dropoff);
+  final backendRoute = ref.watch(decodedPolylineProvider);
+  if (routeMatchesEndpoints(backendRoute, pickup, dropoff)) {
+    return joinRouteToPins(backendRoute, pickup, dropoff);
+  }
+  if (backendRoute.isNotEmpty) {
+    debugPrint(
+      'BookingMap: backend route does not end at the pins '
+      '(start ${distanceMeters(backendRoute.first, pickup).round()} m, '
+      'end ${distanceMeters(backendRoute.last, dropoff).round()} m off) '
+      '— using Google Directions',
+    );
+  }
+
+  final googleRoute = await ref
+      .read(_directionsServiceProvider)
+      .route(pickup, dropoff);
+  if (routeMatchesEndpoints(googleRoute, pickup, dropoff)) {
+    return joinRouteToPins(googleRoute, pickup, dropoff);
+  }
+  // Neither route ends at the pins (e.g. a pin far from any road, or
+  // Directions unavailable). Draw what we have, unstitched — joining a far-off
+  // end would add a long straight segment across the map.
+  return googleRoute.isNotEmpty ? googleRoute : backendRoute;
 });
 
 class BookingMapWidget extends ConsumerStatefulWidget {

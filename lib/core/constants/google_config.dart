@@ -12,24 +12,20 @@ import 'package:flutter/foundation.dart';
 /// `android/app/src/main/AndroidManifest.xml` and `ios/Runner/AppDelegate.swift`
 /// and are a different concern from these.
 abstract class GoogleConfig {
-  static const String _androidPlacesApiKey =
-      'AIzaSyBO2_0D2M89FTl1shkEczC1klunUrOqlFs';
-  static const String _iosPlacesApiKey =
-      'AIzaSyAlgz6GR3iQ-u0elel8OAnnGow0FlSMe2M';
-
-  /// The Places API key for the current platform. A non-empty per-environment
-  /// override from [Env] (env/*.json) takes precedence over the baked-in key.
+  /// No Google web-service key ships in the app any more. Place search goes
+  /// through the BE proxy (`/api/places/*`, see FeatureFlags.placesProxyEnabled);
+  /// the old baked-in keys were dead anyway — Google rejected the Android one
+  /// as invalid and the iOS one isn't authorized for Directions. An
+  /// env/*.json override still works for local debugging; with none set,
+  /// Directions / Roads / the direct Places fallback skip their calls (the
+  /// booking map uses the backend polyline, or a straight line).
   static String get placesApiKey {
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
-        return Env.googlePlacesKeyIOS.isNotEmpty
-            ? Env.googlePlacesKeyIOS
-            : _iosPlacesApiKey;
+        return Env.googlePlacesKeyIOS;
       default:
-        return Env.googlePlacesKeyAndroid.isNotEmpty
-            ? Env.googlePlacesKeyAndroid
-            : _androidPlacesApiKey;
+        return Env.googlePlacesKeyAndroid;
     }
   }
 

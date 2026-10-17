@@ -61,6 +61,10 @@ class _ServiceSelectionScreenState
   /// The automatic "turn on location" popup shows at most once per app run.
   static bool _locationPromptShown = false;
 
+  /// True while a service card is opening (zone check in flight → page
+  /// pushed), so a quick double tap doesn't open the page twice.
+  bool _openingService = false;
+
   @override
   void initState() {
     super.initState();
@@ -137,7 +141,9 @@ class _ServiceSelectionScreenState
     // Service-card promo badges come from the customer's real active promos
     // (GET /api/customer/promo/list). While loading, on error, or when empty,
     // this stays an empty list so the cards simply show no badge.
-    final promos = ref.watch(promoListProvider).maybeWhen(
+    final promos = ref
+        .watch(promoListProvider)
+        .maybeWhen(
           data: (raw) => raw
               .map(
                 (e) => e is Map<String, dynamic>
@@ -172,66 +178,69 @@ class _ServiceSelectionScreenState
               child: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Reserve the header's height so content starts below it, then
-                  // scrolls up underneath the fixed wave.
-                  SizedBox(height: heroHeight),
-                  Transform.translate(
-                    offset: const Offset(0, -6),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: AppColors.semanticGrayNeutralBgWhite,
-                        borderRadius: const BorderRadius.vertical(
-                          top: Radius.circular(24),
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Reserve the header's height so content starts below it, then
+                    // scrolls up underneath the fixed wave.
+                    SizedBox(height: heroHeight),
+                    Transform.translate(
+                      offset: const Offset(0, -6),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: AppColors.semanticGrayNeutralBgWhite,
+                          borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(24),
+                          ),
                         ),
-                      ),
-                      child: Padding(
-                        // Reserve the floating bottom nav so the last content clears it.
-                        padding: EdgeInsets.only(
-                          top: 2,
-                          bottom: bottomPadding + kFloatingNavReserve,
-                        ),
-                        child: Column(
-                          children: [
-                            ActiveOrdersBanner(),
-                            // Nudge the service grid up toward the search bar.
-                            Transform.translate(
-                              offset: const Offset(0, -4),
-                              child: _buildServiceGrid(context, promos),
-                            ),
-                            // Real promotions — hides itself when there are none —
-                            // sits tight under the grid (no extra gap).
-                            const HomePromoBanner(),
-                            // Latest articles — the gap above it is owned by the
-                            // promo banner (collapses when there are no promos).
-                            _buildArticlesSection(context),
-                            // Hardcoded promo/restaurant sections with fake ids —
-                            // see FeatureFlags.foodHomePromoSections. Hidden until
-                            // wired to the discovery feed.
-                            if (FeatureFlags.foodHomePromoSections) ...[
-                              _buildPromoBanner(context),
-                              const SizedBox(height: 20),
-                              _buildSectionHeader(
-                                context,
-                                title: 'เมนูลด 60%',
-                                emoji: '🔥',
+                        child: Padding(
+                          // Reserve the floating bottom nav so the last content clears it.
+                          padding: EdgeInsets.only(
+                            top: 2,
+                            bottom: bottomPadding + kFloatingNavReserve,
+                          ),
+                          child: Column(
+                            children: [
+                              ActiveOrdersBanner(),
+                              // Nudge the service grid up toward the search bar.
+                              Transform.translate(
+                                offset: const Offset(0, -4),
+                                child: _buildServiceGrid(context, promos),
                               ),
-                              _buildHorizontalFoodList(context),
-                              const SizedBox(height: 20),
-                              _buildPromoCodeCard(context),
-                              const SizedBox(height: 20),
-                              _buildSectionHeader(context, title: 'ร้านยอดนิยม'),
-                              _buildHorizontalRestaurantList(context),
+                              // Real promotions — hides itself when there are none —
+                              // sits tight under the grid (no extra gap).
+                              const HomePromoBanner(),
+                              // Latest articles — the gap above it is owned by the
+                              // promo banner (collapses when there are no promos).
+                              _buildArticlesSection(context),
+                              // Hardcoded promo/restaurant sections with fake ids —
+                              // see FeatureFlags.foodHomePromoSections. Hidden until
+                              // wired to the discovery feed.
+                              if (FeatureFlags.foodHomePromoSections) ...[
+                                _buildPromoBanner(context),
+                                const SizedBox(height: 20),
+                                _buildSectionHeader(
+                                  context,
+                                  title: 'เมนูลด 60%',
+                                  emoji: '🔥',
+                                ),
+                                _buildHorizontalFoodList(context),
+                                const SizedBox(height: 20),
+                                _buildPromoCodeCard(context),
+                                const SizedBox(height: 20),
+                                _buildSectionHeader(
+                                  context,
+                                  title: 'ร้านยอดนิยม',
+                                ),
+                                _buildHorizontalRestaurantList(context),
+                              ],
+                              const SizedBox(height: 40),
                             ],
-                            const SizedBox(height: 40),
-                          ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -571,31 +580,40 @@ class _ServiceSelectionScreenState
     required String serviceName,
     required VoidCallback onAvailable,
   }) async {
-    final loc = ref.read(homeControllerProvider).currentLocation;
-    if (loc == null) {
-      onAvailable(); // no location yet → don't notify
-      return;
+    // Ignore taps while a card is already opening, or once another page is
+    // on top of home — otherwise a fast double tap pushes the page twice.
+    if (_openingService || ModalRoute.of(context)?.isCurrent == false) return;
+    _openingService = true;
+    try {
+      final loc = ref.read(homeControllerProvider).currentLocation;
+      if (loc == null) {
+        onAvailable(); // no location yet → don't notify
+        return;
+      }
+      final result = await ref
+          .read(serviceAreaRepositoryProvider)
+          .check(lat: loc.latitude, lng: loc.longitude, service: service);
+      if (!mounted) return;
+      if (result.available) {
+        onAvailable();
+        return;
+      }
+      final l10n = AppLocalizations.of(context)!;
+      final area = result.areaName.isNotEmpty
+          ? result.areaName
+          : l10n.homeYourArea;
+      // Out of area → notify, then continue into the flow on acknowledge.
+      await showComingSoonDialog(
+        context,
+        title: l10n.homeComingSoonInYourArea,
+        message: l10n.homeZoneComingSoonMessage(serviceName, area),
+        iconAsset: iconAsset,
+        locationLabel: l10n.homeYourLocation(area),
+      );
+      if (mounted) onAvailable(); // proceed after the heads-up
+    } finally {
+      _openingService = false;
     }
-    final result = await ref
-        .read(serviceAreaRepositoryProvider)
-        .check(lat: loc.latitude, lng: loc.longitude, service: service);
-    if (!mounted) return;
-    if (result.available) {
-      onAvailable();
-      return;
-    }
-    final l10n = AppLocalizations.of(context)!;
-    final area =
-        result.areaName.isNotEmpty ? result.areaName : l10n.homeYourArea;
-    // Out of area → notify, then continue into the flow on acknowledge.
-    await showComingSoonDialog(
-      context,
-      title: l10n.homeComingSoonInYourArea,
-      message: l10n.homeZoneComingSoonMessage(serviceName, area),
-      iconAsset: iconAsset,
-      locationLabel: l10n.homeYourLocation(area),
-    );
-    if (mounted) onAvailable(); // proceed after the heads-up
   }
 
   Widget _buildServiceCard(
@@ -687,29 +705,37 @@ class _ServiceSelectionScreenState
   Widget _buildArticlesSection(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final articles =
-        <({String image, String category, String title, DateTime date, String url})>[
-      (
-        image: 'assets/images/article_mass.webp',
-        category: l10n.homeArticleCatServices,
-        title: l10n.homeArticleMassTitle,
-        date: DateTime(2026, 6, 15),
-        url: 'https://massridedelivery.com/blog/what-is-mass-super-app',
-      ),
-      (
-        image: 'assets/images/article_food.webp',
-        category: l10n.homeArticleCatTips,
-        title: l10n.homeArticleFoodTitle,
-        date: DateTime(2026, 6, 22),
-        url: 'https://massridedelivery.com/blog/food-delivery-tips',
-      ),
-      (
-        image: 'assets/images/article_ride.webp',
-        category: l10n.homeArticleCatSafety,
-        title: l10n.homeArticleRideTitle,
-        date: DateTime(2026, 6, 28),
-        url: 'https://massridedelivery.com/blog/ride-safety-features',
-      ),
-    ];
+        <
+          ({
+            String image,
+            String category,
+            String title,
+            DateTime date,
+            String url,
+          })
+        >[
+          (
+            image: 'assets/images/article_mass.webp',
+            category: l10n.homeArticleCatServices,
+            title: l10n.homeArticleMassTitle,
+            date: DateTime(2026, 6, 15),
+            url: 'https://massridedelivery.com/blog/what-is-mass-super-app',
+          ),
+          (
+            image: 'assets/images/article_food.webp',
+            category: l10n.homeArticleCatTips,
+            title: l10n.homeArticleFoodTitle,
+            date: DateTime(2026, 6, 22),
+            url: 'https://massridedelivery.com/blog/food-delivery-tips',
+          ),
+          (
+            image: 'assets/images/article_ride.webp',
+            category: l10n.homeArticleCatSafety,
+            title: l10n.homeArticleRideTitle,
+            date: DateTime(2026, 6, 28),
+            url: 'https://massridedelivery.com/blog/ride-safety-features',
+          ),
+        ];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -764,8 +790,9 @@ class _ServiceSelectionScreenState
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ClipRRect(
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(18)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(18),
+              ),
               child: Image.asset(
                 a.image,
                 height: 90,
@@ -779,8 +806,10 @@ class _ServiceSelectionScreenState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.foundationRed100,
                       borderRadius: BorderRadius.circular(6),

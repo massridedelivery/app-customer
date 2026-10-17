@@ -49,7 +49,10 @@ class PlacesProxyService {
           .map((e) => _mapPrediction(e as Map<String, dynamic>))
           .toList();
     } on DioException catch (e) {
-      throw ServerException(_message(e, 'ค้นหาสถานที่ไม่สำเร็จ'));
+      throw ServerException(
+        _message(e, 'ค้นหาสถานที่ไม่สำเร็จ'),
+        statusCode: e.response?.statusCode,
+      );
     }
   }
 
@@ -70,7 +73,10 @@ class PlacesProxyService {
       if (result == null) throw ServerException('ไม่พบข้อมูลสถานที่');
       return _mapDetails(result);
     } on DioException catch (e) {
-      throw ServerException(_message(e, 'ดึงข้อมูลสถานที่ไม่สำเร็จ'));
+      throw ServerException(
+        _message(e, 'ดึงข้อมูลสถานที่ไม่สำเร็จ'),
+        statusCode: e.response?.statusCode,
+      );
     }
   }
 

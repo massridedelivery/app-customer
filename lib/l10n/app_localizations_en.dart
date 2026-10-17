@@ -669,6 +669,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get searchError => 'Search failed. Tap to retry.';
 
   @override
+  String get searchUnavailable =>
+      'Search is temporarily unavailable. Tap to retry.';
+
+  @override
+  String get searchNoResults => 'No places found';
+
+  @override
   String get selectPickupFirst => 'Please choose a pickup point first';
 
   @override

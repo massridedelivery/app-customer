@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:customer_app/core/error/server_exception.dart';
 import 'package:customer_app/features/home/domain/models/place.dart';
 import 'package:customer_app/features/home/domain/models/place_prediction.dart';
 import 'package:customer_app/features/home/domain/usecases/get_place_details_usecase_impl.dart';
@@ -26,14 +27,15 @@ class PlaceSearchController extends _$PlaceSearchController {
 
   String _ensureSessionToken() => _sessionToken ??= _newSessionToken();
 
+  /// A random (v4) UUID, the format Google and the BE proxy expect.
   static String _newSessionToken() {
-    final rand = Random();
-    final ts = DateTime.now().microsecondsSinceEpoch.toRadixString(16);
-    final suffix = List.generate(
-      8,
-      (_) => rand.nextInt(16).toRadixString(16),
-    ).join();
-    return '$ts-$suffix';
+    final rand = Random.secure();
+    final b = List<int>.generate(16, (_) => rand.nextInt(256));
+    b[6] = (b[6] & 0x0f) | 0x40; // version 4
+    b[8] = (b[8] & 0x3f) | 0x80; // RFC 4122 variant
+    final hex = b.map((x) => x.toRadixString(16).padLeft(2, '0')).join();
+    return '${hex.substring(0, 8)}-${hex.substring(8, 12)}-'
+        '${hex.substring(12, 16)}-${hex.substring(16, 20)}-${hex.substring(20)}';
   }
 
   Future<void> search(String query) async {
@@ -47,6 +49,8 @@ class PlaceSearchController extends _$PlaceSearchController {
       query: trimmed,
       isSearching: true,
       hasError: false,
+      isUnavailable: false,
+      hasSearched: false,
     );
     try {
       // Read the current location once, without subscribing to home state.
@@ -57,13 +61,19 @@ class PlaceSearchController extends _$PlaceSearchController {
             lng: location?.longitude,
             sessionToken: _ensureSessionToken(),
           );
-      state = state.copyWith(results: predictions, isSearching: false);
+      state = state.copyWith(
+        results: predictions,
+        isSearching: false,
+        hasSearched: true,
+      );
     } catch (e) {
       debugPrint('Search failed: $e');
+      final status = e is ServerException ? e.statusCode : null;
       state = state.copyWith(
         results: const [],
         isSearching: false,
         hasError: true,
+        isUnavailable: status == 502 || status == 503,
       );
     }
   }

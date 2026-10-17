@@ -237,6 +237,8 @@
   "noRecentSearches": "No recent trips yet",
   "recommendedEmpty": "No recommendations yet",
   "searchError": "Search failed. Tap to retry.",
+  "searchUnavailable": "Search is temporarily unavailable. Tap to retry.",
+  "searchNoResults": "No places found",
   "selectPickupFirst": "Please choose a pickup point first",
   "useCurrentLocation": "Use current location",
   "clearField": "Clear text",

@@ -12,6 +12,14 @@ abstract class PlaceSearchState with _$PlaceSearchState {
     @Default([]) List<PlacePrediction> results,
     @Default(false) bool isSearching,
     @Default(false) bool hasError,
+
+    /// The search backend is down for now (proxy 502/503) — show "try again
+    /// later", not "no places found".
+    @Default(false) bool isUnavailable,
+
+    /// A search for [query] has completed, so empty [results] really means
+    /// nothing was found (vs. not searched yet).
+    @Default(false) bool hasSearched,
     @Default('') String query,
   }) = _PlaceSearchState;
 }

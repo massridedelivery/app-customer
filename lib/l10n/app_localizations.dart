@@ -1388,6 +1388,18 @@ abstract class AppLocalizations {
   /// **'Search failed. Tap to retry.'**
   String get searchError;
 
+  /// No description provided for @searchUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Search is temporarily unavailable. Tap to retry.'**
+  String get searchUnavailable;
+
+  /// No description provided for @searchNoResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No places found'**
+  String get searchNoResults;
+
   /// No description provided for @selectPickupFirst.
   ///
   /// In en, this message translates to:

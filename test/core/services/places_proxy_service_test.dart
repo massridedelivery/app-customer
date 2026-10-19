@@ -182,6 +182,16 @@ void main() {
       );
     });
 
+    test('429 (guest rate limit) keeps its status for "unavailable"', () async {
+      final service = PlacesProxyService(_errorDio(429));
+      expect(
+        () => service.autocomplete('x'),
+        throwsA(
+          isA<ServerException>().having((e) => e.statusCode, 'status', 429),
+        ),
+      );
+    });
+
     test('503 (key not configured) → Thai "ยังไม่พร้อมใช้งาน"', () async {
       final service = PlacesProxyService(_errorDio(503));
       expect(

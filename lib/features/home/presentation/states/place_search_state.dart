@@ -13,7 +13,7 @@ abstract class PlaceSearchState with _$PlaceSearchState {
     @Default(false) bool isSearching,
     @Default(false) bool hasError,
 
-    /// The search backend is down for now (proxy 502/503, or offline / timed
+    /// Search can't run right now (proxy 429 / 502 / 503, or offline / timed
     /// out) — show "try again later", not "no places found".
     @Default(false) bool isUnavailable,
 

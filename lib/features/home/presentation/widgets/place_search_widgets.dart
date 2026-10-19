@@ -1,4 +1,6 @@
+import 'package:customer_app/core/constants/app_assets.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
+import 'package:customer_app/core/constants/app_icons.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
@@ -129,7 +131,9 @@ class PlaceSearchMainContent extends ConsumerWidget {
               title: p.mainText.isNotEmpty ? p.mainText : p.description,
               subtitle: p.secondaryText,
               icon: Icons.location_on,
-              iconColor: AppColors.primary,
+              // Same red pin as the drop-off marker beside the search field.
+              iconAsset: AppAssets.icLocationFill,
+              iconColor: AppColors.foundationRed700,
               onTap: () => _selectPrediction(ref, p),
             );
           },
@@ -310,6 +314,9 @@ class SearchItem extends StatelessWidget {
   final String title;
   final String subtitle;
   final IconData icon;
+
+  /// App icon asset drawn instead of [icon] when set.
+  final String? iconAsset;
   final Color iconColor;
   final VoidCallback? onTap;
 
@@ -318,6 +325,7 @@ class SearchItem extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.icon,
+    this.iconAsset,
     required this.iconColor,
     this.onTap,
   });
@@ -332,7 +340,14 @@ class SearchItem extends StatelessWidget {
             color: AppColors.semanticGrayNeutralBgLightgray,
             shape: BoxShape.circle,
           ),
-          child: Icon(icon, color: iconColor, size: 24),
+          child: iconAsset != null
+              ? AppIcons.asset(
+                  iconAsset!,
+                  color: iconColor,
+                  width: 24,
+                  height: 24,
+                )
+              : Icon(icon, color: iconColor, size: 24),
         ),
         title: Text(
           title,

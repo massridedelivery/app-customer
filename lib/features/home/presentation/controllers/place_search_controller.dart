@@ -76,7 +76,9 @@ class PlaceSearchController extends _$PlaceSearchController {
         results: const [],
         isSearching: false,
         hasError: true,
-        isUnavailable: offline || status == 502 || status == 503,
+        // 429 = guest rate limit (60/min per IP); 502/503 = upstream down.
+        isUnavailable:
+            offline || status == 429 || status == 502 || status == 503,
       );
     }
   }

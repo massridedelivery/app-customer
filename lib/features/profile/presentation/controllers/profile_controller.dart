@@ -1,4 +1,5 @@
 import 'package:customer_app/core/localization/locale_controller.dart';
+import 'package:customer_app/core/utils/error_text.dart';
 import 'package:customer_app/features/profile/data/repositories/profile_repository_impl.dart';
 import 'package:customer_app/features/profile/data/services/avatar_upload_service.dart';
 import 'package:customer_app/features/profile/presentation/states/profile_state.dart';
@@ -84,11 +85,14 @@ class ProfileController extends _$ProfileController {
     });
   }
 
-  Future<void> updateProfile({required String fullName, String? email}) async {
+  /// Saves the profile. Returns true on success; on failure the error goes
+  /// into [ProfileState.error] (the edit screen shows it) and returns false.
+  Future<bool> updateProfile({required String fullName, String? email}) async {
     final currentState = state.value;
-    if (currentState == null) return;
+    if (currentState == null) return false;
 
-    state = AsyncData(currentState.copyWith(isUpdating: true));
+    // Clear any previous error so a repeat failure still reaches the screen.
+    state = AsyncData(currentState.copyWith(isUpdating: true, error: null));
 
     // PUT echoes back the full profile, so use its response directly instead of
     // issuing a follow-up GET.
@@ -109,12 +113,22 @@ class ProfileController extends _$ProfileController {
           );
     });
 
+    final saved = result.value;
     state = AsyncData(
       currentState.copyWith(
         profile: result.whenData((p) => p),
         isUpdating: false,
-        error: result.error?.toString(),
+        // The profile header reads these, so mirror what the server saved —
+        // otherwise a new name / photo only showed after the next reload.
+        editName: saved?.fullName ?? currentState.editName,
+        editAvatarUrl: saved?.avatarUrl ?? currentState.editAvatarUrl,
+        // The uploaded file_key is on the profile now; don't resend it.
+        pendingAvatarFileKey: saved != null
+            ? null
+            : currentState.pendingAvatarFileKey,
+        error: result.hasError ? friendlyError(result.error) : null,
       ),
     );
+    return saved != null;
   }
 }

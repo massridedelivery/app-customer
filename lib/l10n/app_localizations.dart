@@ -3937,6 +3937,12 @@ abstract class AppLocalizations {
   /// **'Edit profile'**
   String get profileEditTitle;
 
+  /// No description provided for @profileSaveSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile saved'**
+  String get profileSaveSuccess;
+
   /// No description provided for @profileFullNameHint.
   ///
   /// In en, this message translates to:
@@ -4746,12 +4752,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Log in to use this service'**
   String get commonLoginToUse;
-
-  /// No description provided for @commonContinueBrowsing.
-  ///
-  /// In en, this message translates to:
-  /// **'Continue browsing'**
-  String get commonContinueBrowsing;
 
   /// No description provided for @commonLoadError.
   ///

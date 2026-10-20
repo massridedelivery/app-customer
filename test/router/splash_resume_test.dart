@@ -30,8 +30,9 @@ class _NoopPush implements PushNotificationService {
   dynamic noSuchMethod(Invocation invocation) => null;
 }
 
-/// The splash now creates HomeController at launch (to ask for location
-/// early); keep its GPS / network bootstrap out of these tests.
+/// The splash creates HomeController at launch once onboarding is done (to
+/// resolve location early); keep its GPS / network bootstrap out of these
+/// tests.
 class _FakeHomeController extends HomeController {
   static int builds = 0;
 
@@ -46,6 +47,7 @@ void main() {
   testWidgets(
     'returning to foreground does not re-show the splash screen',
     (tester) async {
+      _FakeHomeController.builds = 0;
       SharedPreferences.setMockInitialValues({});
       final prefs = await SharedPreferences.getInstance();
 
@@ -65,9 +67,9 @@ void main() {
       expect(find.byType(SplashScreen), findsOneWidget);
       expect(
         _FakeHomeController.builds,
-        1,
-        reason: 'the splash starts the location bootstrap (permission ask) '
-            'at launch, before onboarding/home',
+        0,
+        reason: 'first run: the onboarding\'s last page asks for location, '
+            'so the splash must not pop the permission dialog first',
       );
 
       // Splash auto-advances after its 2s delay. Pump manually (not
@@ -101,4 +103,36 @@ void main() {
       expect(find.byType(OnboardingScreen), findsOneWidget);
     },
   );
+
+  testWidgets('after onboarding, the splash starts the location bootstrap', (
+    tester,
+  ) async {
+    _FakeHomeController.builds = 0;
+    SharedPreferences.setMockInitialValues({'has_completed_onboarding': true});
+    final prefs = await SharedPreferences.getInstance();
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(prefs),
+          pushNotificationServiceProvider.overrideWithValue(_NoopPush()),
+          authControllerProvider.overrideWith(_FakeAuthController.new),
+          homeControllerProvider.overrideWith(_FakeHomeController.new),
+        ],
+        child: const App(),
+      ),
+    );
+
+    expect(find.byType(SplashScreen), findsOneWidget);
+    expect(
+      _FakeHomeController.builds,
+      1,
+      reason: 'returning users get location resolved from the splash, so it '
+          'is usually ready by the time home appears',
+    );
+    // Unmount before the splash hands off (home isn't under test here), then
+    // let its 2s timer run out so none is left pending.
+    await tester.pumpWidget(const SizedBox());
+    await tester.pump(const Duration(seconds: 3));
+  });
 }

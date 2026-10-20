@@ -3352,43 +3352,61 @@ abstract class AppLocalizations {
   /// No description provided for @onboardRideTitle.
   ///
   /// In en, this message translates to:
-  /// **'Book a ride'**
+  /// **'Get a ride in a few taps'**
   String get onboardRideTitle;
 
   /// No description provided for @onboardRideDesc.
   ///
   /// In en, this message translates to:
-  /// **'Book a ride and get service from\ndrivers in your neighbourhood'**
+  /// **'Car or motorbike — see the fare before you book, then your driver picks you up.'**
   String get onboardRideDesc;
 
-  /// No description provided for @onboardDriverTitle.
+  /// No description provided for @onboardParcelTitle.
   ///
   /// In en, this message translates to:
-  /// **'Confirm your driver'**
-  String get onboardDriverTitle;
+  /// **'Send parcels'**
+  String get onboardParcelTitle;
 
-  /// No description provided for @onboardDriverDesc.
+  /// No description provided for @onboardParcelDesc.
   ///
   /// In en, this message translates to:
-  /// **'Our wide driver network gets you\nwhere you need to go — easy, safe and affordable'**
-  String get onboardDriverDesc;
+  /// **'A driver picks up and hands it to the recipient — pay now or let them pay on delivery.'**
+  String get onboardParcelDesc;
 
   /// No description provided for @onboardTrackTitle.
   ///
   /// In en, this message translates to:
-  /// **'Track your trip'**
+  /// **'Know who\'s coming, track every step'**
   String get onboardTrackTitle;
 
   /// No description provided for @onboardTrackDesc.
   ///
   /// In en, this message translates to:
-  /// **'See your driver\'s details in advance and\nfollow their live location on the map'**
+  /// **'See your driver\'s details before they arrive and follow them live on the map.'**
   String get onboardTrackDesc;
+
+  /// No description provided for @onboardReadyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re all set!'**
+  String get onboardReadyTitle;
+
+  /// No description provided for @onboardReadyDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on location so we can set your pickup and find drivers near you.'**
+  String get onboardReadyDesc;
+
+  /// No description provided for @onboardPromoSub.
+  ///
+  /// In en, this message translates to:
+  /// **'On rides'**
+  String get onboardPromoSub;
 
   /// No description provided for @onboardGetStarted.
   ///
   /// In en, this message translates to:
-  /// **'Get started!'**
+  /// **'Get started'**
   String get onboardGetStarted;
 
   /// No description provided for @onboardNext.
@@ -3396,12 +3414,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Next'**
   String get onboardNext;
-
-  /// No description provided for @onboardSkip.
-  ///
-  /// In en, this message translates to:
-  /// **'Skip'**
-  String get onboardSkip;
 
   /// No description provided for @profilePrivacyPolicy.
   ///

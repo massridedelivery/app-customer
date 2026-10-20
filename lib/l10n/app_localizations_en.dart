@@ -1777,34 +1777,41 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboardSplashTagline => 'Elevating city services';
 
   @override
-  String get onboardRideTitle => 'Book a ride';
+  String get onboardRideTitle => 'Get a ride in a few taps';
 
   @override
   String get onboardRideDesc =>
-      'Book a ride and get service from\ndrivers in your neighbourhood';
+      'Car or motorbike — see the fare before you book, then your driver picks you up.';
 
   @override
-  String get onboardDriverTitle => 'Confirm your driver';
+  String get onboardParcelTitle => 'Send parcels';
 
   @override
-  String get onboardDriverDesc =>
-      'Our wide driver network gets you\nwhere you need to go — easy, safe and affordable';
+  String get onboardParcelDesc =>
+      'A driver picks up and hands it to the recipient — pay now or let them pay on delivery.';
 
   @override
-  String get onboardTrackTitle => 'Track your trip';
+  String get onboardTrackTitle => 'Know who\'s coming, track every step';
 
   @override
   String get onboardTrackDesc =>
-      'See your driver\'s details in advance and\nfollow their live location on the map';
+      'See your driver\'s details before they arrive and follow them live on the map.';
 
   @override
-  String get onboardGetStarted => 'Get started!';
+  String get onboardReadyTitle => 'You\'re all set!';
+
+  @override
+  String get onboardReadyDesc =>
+      'Turn on location so we can set your pickup and find drivers near you.';
+
+  @override
+  String get onboardPromoSub => 'On rides';
+
+  @override
+  String get onboardGetStarted => 'Get started';
 
   @override
   String get onboardNext => 'Next';
-
-  @override
-  String get onboardSkip => 'Skip';
 
   @override
   String get profilePrivacyPolicy => 'Privacy policy';

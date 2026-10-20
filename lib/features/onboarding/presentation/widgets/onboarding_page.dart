@@ -1,57 +1,83 @@
-import 'package:flutter/material.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
+import 'package:customer_app/core/widgets/hero_header.dart';
+import 'package:flutter/material.dart';
 
+/// One onboarding page: a full-bleed [hero] with the home header's wave on its
+/// bottom edge, then the page dots, title and description.
 class OnboardingPageWidget extends StatelessWidget {
-  final Widget icon;
+  final Widget hero;
   final String title;
   final String description;
+  final int index;
+  final int count;
 
   const OnboardingPageWidget({
     super.key,
-    required this.icon,
+    required this.hero,
     required this.title,
     required this.description,
+    required this.index,
+    required this.count,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 40.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // Placeholder for the illustration
-          Container(
-            width: 200,
-            height: 200,
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              color: Color(
-                0xFFF0F4F8,
-              ), // Light grayish-blue for background circle
-            ),
-            child: icon,
+    final heroHeight = (MediaQuery.sizeOf(context).height * 0.52).clamp(
+      300.0,
+      520.0,
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          height: heroHeight,
+          width: double.infinity,
+          child: ClipPath(clipper: HeroWaveClipper(), child: hero),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(28, 8, 28, 0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: List.generate(
+                  count,
+                  (i) => Container(
+                    margin: const EdgeInsets.only(right: 6),
+                    width: i == index ? 24 : 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: i == index
+                          ? AppColors.primary
+                          : const Color(0xFFD4D4DA),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                title,
+                style: AppTypography.heading2.copyWith(
+                  fontSize: 26,
+                  height: 1.3,
+                  color: AppColors.semanticGrayNeutralFgHigh,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                description,
+                style: AppTypography.body1.copyWith(
+                  fontSize: 15,
+                  height: 1.6,
+                  color: AppColors.semanticGrayNeutralFgMidOnWhite,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 60),
-          Text(
-            title,
-            style: AppTypography.heading3.copyWith(
-              color: AppColors.semanticGrayNeutralFgHigh,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 20),
-          Text(
-            description,
-            style: AppTypography.caption4.copyWith(
-              color: AppColors.semanticGrayNeutralFgHigh,
-              height: 1.5,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

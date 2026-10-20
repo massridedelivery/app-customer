@@ -2966,4 +2966,19 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get authOtpMismatchPhone =>
       'This code wasn\'t issued for this number. Please request a new code';
+
+  @override
+  String get forceUpdateTitle => 'A new version is available';
+
+  @override
+  String get forceUpdateBody =>
+      'Please update to the latest version to keep using the app.';
+
+  @override
+  String forceUpdateVersions(String current, String latest) {
+    return 'Your version $current · Latest $latest';
+  }
+
+  @override
+  String get forceUpdateButton => 'Update now';
 }

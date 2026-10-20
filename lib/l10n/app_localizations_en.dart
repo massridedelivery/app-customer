@@ -2104,6 +2104,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileEditTitle => 'Edit profile';
 
   @override
+  String get profileSaveSuccess => 'Profile saved';
+
+  @override
   String get profileFullNameHint => 'Enter your full name';
 
   @override
@@ -2536,9 +2539,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get commonLoginToUse => 'Log in to use this service';
-
-  @override
-  String get commonContinueBrowsing => 'Continue browsing';
 
   @override
   String get commonLoadError => 'Something went wrong while loading';

@@ -34,6 +34,21 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     super.dispose();
   }
 
+  Future<void> _save() async {
+    FocusScope.of(context).unfocus();
+    // Read the live field text (not the 1s-debounced state) so a quick Save
+    // right after typing still sends the new name.
+    final ok = await ref
+        .read(profileControllerProvider.notifier)
+        .updateProfile(fullName: _nameController.text.trim());
+    if (!ok || !mounted) return; // failures surface via the error listener
+    // Grab what we need before popping — this context goes away with it.
+    final messenger = ScaffoldMessenger.of(context);
+    final message = AppLocalizations.of(context)!.profileSaveSuccess;
+    Navigator.pop(context);
+    messenger.showSnackBar(SnackBar(content: Text(message)));
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(profileControllerProvider);
@@ -117,13 +132,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               child: _SaveButton(
                 isUpdating: state.value?.isUpdating ?? false,
                 isValid: !(state.value?.isUploadingAvatar ?? false),
-                onPressed: () {
-                  // Read the live field text (not the 1s-debounced state) so a
-                  // quick Save right after typing still sends the new name.
-                  ref
-                      .read(profileControllerProvider.notifier)
-                      .updateProfile(fullName: _nameController.text.trim());
-                },
+                onPressed: _save,
               ),
             ),
           ),
@@ -302,7 +311,11 @@ class _SaveButton extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
-          disabledBackgroundColor: AppColors.foundationGrayscale200,
+          // While saving keep the brand color so the white spinner shows (it
+          // vanished on the grey disabled color — saving looked like nothing).
+          disabledBackgroundColor: isUpdating
+              ? AppColors.primary
+              : AppColors.foundationGrayscale200,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),

@@ -2084,6 +2084,9 @@ class AppLocalizationsTh extends AppLocalizations {
   String get profileEditTitle => 'แก้ไขข้อมูลส่วนตัว';
 
   @override
+  String get profileSaveSuccess => 'บันทึกข้อมูลแล้ว';
+
+  @override
   String get profileFullNameHint => 'กรอกชื่อ-นามสกุล';
 
   @override
@@ -2515,9 +2518,6 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get commonLoginToUse => 'กรุณาเข้าสู่ระบบเพื่อใช้บริการนี้';
-
-  @override
-  String get commonContinueBrowsing => 'ดูบริการต่อ';
 
   @override
   String get commonLoadError => 'เกิดข้อผิดพลาดในการโหลดข้อมูล';

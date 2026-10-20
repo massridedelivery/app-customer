@@ -94,23 +94,6 @@ class LoginRequiredView extends StatelessWidget {
                   child: Text(l10n.signIn, style: AppTypography.label2),
                 ),
               ),
-              const SizedBox(height: 4),
-              SizedBox(
-                width: double.infinity,
-                child: TextButton(
-                  onPressed: () => context.go('/main'),
-                  style: TextButton.styleFrom(
-                    foregroundColor: AppColors.textSecondary,
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                  ),
-                  child: Text(
-                    l10n.commonContinueBrowsing,
-                    style: AppTypography.label2.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ),
-              ),
             ],
           ),
         ),

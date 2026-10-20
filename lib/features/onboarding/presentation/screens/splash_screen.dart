@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
+import 'package:customer_app/core/managers/providers.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:customer_app/router/app_routes.dart';
 import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
@@ -32,12 +33,15 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     _scale = Tween<double>(begin: 0.97, end: 1.05).animate(
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
-    // Ask for location as soon as the app opens (iOS + Android): creating
-    // the keep-alive HomeController starts its location bootstrap, which shows
-    // the system permission dialog on first launch. Doing it here rather than
-    // when home first renders means the current location is usually ready by
-    // the time the home screen appears.
-    ref.read(homeControllerProvider);
+    // Resolve location as soon as the app opens (iOS + Android): creating
+    // the keep-alive HomeController starts its location bootstrap, so the
+    // current location is usually ready by the time home appears. On the
+    // first run the onboarding's last page does this instead, so the system
+    // permission dialog comes after the explanation rather than over the
+    // splash.
+    if (ref.read(appStorageProvider).hasCompletedOnboarding) {
+      ref.read(homeControllerProvider);
+    }
     _navigateToNextScreen();
   }
 

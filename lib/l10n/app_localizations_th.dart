@@ -1758,34 +1758,41 @@ class AppLocalizationsTh extends AppLocalizations {
   String get onboardSplashTagline => 'ยกระดับการให้บริการในเมือง';
 
   @override
-  String get onboardRideTitle => 'เรียกรถ';
+  String get onboardRideTitle => 'เรียกรถได้ในไม่กี่แตะ';
 
   @override
   String get onboardRideDesc =>
-      'เรียกรถและรับการบริการจาก\nคนขับในชุมชนใกล้เคียง';
+      'รถยนต์ มอเตอร์ไซค์ เห็นราคาก่อนกดเรียก แล้วรอคนขับมารับถึงที่';
 
   @override
-  String get onboardDriverTitle => 'ยืนยันคนขับของคุณ';
+  String get onboardParcelTitle => 'ส่งของ ส่งพัสดุ';
 
   @override
-  String get onboardDriverDesc =>
-      'เครือข่ายคนขับที่ครอบคลุมช่วยให้คุณ\nเดินทางได้อย่างสะดวก ปลอดภัย และประหยัด';
+  String get onboardParcelDesc =>
+      'คนขับไปรับของและส่งถึงมือผู้รับ จะจ่ายเองหรือให้ผู้รับจ่ายปลายทางก็ได้';
 
   @override
-  String get onboardTrackTitle => 'ติดตามการเดินทางของคุณ';
+  String get onboardTrackTitle => 'รู้ว่าใครมารับ ติดตามได้ตลอดทาง';
 
   @override
   String get onboardTrackDesc =>
-      'ทราบข้อมูลคนขับล่วงหน้าและสามารถ\nดูตำแหน่งปัจจุบันแบบเรียลไทม์บนแผนที่';
+      'ดูข้อมูลคนขับก่อนถึง และดูตำแหน่งรถแบบเรียลไทม์บนแผนที่';
 
   @override
-  String get onboardGetStarted => 'เริ่มต้นใช้งาน!';
+  String get onboardReadyTitle => 'พร้อมใช้งานแล้ว!';
+
+  @override
+  String get onboardReadyDesc =>
+      'เปิดตำแหน่งให้แอปตั้งจุดรับให้อัตโนมัติ และหาคนขับที่อยู่ใกล้คุณ';
+
+  @override
+  String get onboardPromoSub => 'สำหรับการเรียกรถ';
+
+  @override
+  String get onboardGetStarted => 'เริ่มต้นใช้งาน';
 
   @override
   String get onboardNext => 'ถัดไป';
-
-  @override
-  String get onboardSkip => 'ข้าม';
 
   @override
   String get profilePrivacyPolicy => 'นโยบายความเป็นส่วนตัว';

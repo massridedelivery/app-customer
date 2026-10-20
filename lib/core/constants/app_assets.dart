@@ -112,6 +112,11 @@ class AppAssets {
   static const String ic3dMessenger =
       'assets/images/icons/3d/ic3d_messenger.png';
 
+  // Lifestyle photos (ride landing cards + onboarding heroes).
+  static const String expRides = 'assets/images/exp_rides.webp';
+  static const String expSafety = 'assets/images/exp_safety.webp';
+  static const String expFare = 'assets/images/exp_fare.webp';
+
   static const String icLocationFill =
       'assets/images/icons/ic_location_fill.svg';
   static const String icLocationPinLine =

@@ -2981,4 +2981,34 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get forceUpdateButton => 'Update now';
+
+  @override
+  String get coachLocationTitle => 'Pickup & delivery location';
+
+  @override
+  String get coachLocationBody =>
+      'Tap to change your pickup or delivery address. We start from where you are.';
+
+  @override
+  String get coachServicesTitle => 'Pick a service';
+
+  @override
+  String get coachServicesBody =>
+      'Book a ride or send a parcel from here. Red tags are discounts you can use now.';
+
+  @override
+  String get coachOrdersTitle => 'Track your orders';
+
+  @override
+  String get coachOrdersBody =>
+      'Ongoing orders and your history are in this tab.';
+
+  @override
+  String get coachSkip => 'Skip';
+
+  @override
+  String get coachNext => 'Next';
+
+  @override
+  String get coachDone => 'Got it';
 }

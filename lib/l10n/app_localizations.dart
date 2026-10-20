@@ -5508,6 +5508,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Update now'**
   String get forceUpdateButton;
+
+  /// No description provided for @coachLocationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pickup & delivery location'**
+  String get coachLocationTitle;
+
+  /// No description provided for @coachLocationBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to change your pickup or delivery address. We start from where you are.'**
+  String get coachLocationBody;
+
+  /// No description provided for @coachServicesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a service'**
+  String get coachServicesTitle;
+
+  /// No description provided for @coachServicesBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Book a ride or send a parcel from here. Red tags are discounts you can use now.'**
+  String get coachServicesBody;
+
+  /// No description provided for @coachOrdersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Track your orders'**
+  String get coachOrdersTitle;
+
+  /// No description provided for @coachOrdersBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Ongoing orders and your history are in this tab.'**
+  String get coachOrdersBody;
+
+  /// No description provided for @coachSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get coachSkip;
+
+  /// No description provided for @coachNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get coachNext;
+
+  /// No description provided for @coachDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Got it'**
+  String get coachDone;
 }
 
 class _AppLocalizationsDelegate

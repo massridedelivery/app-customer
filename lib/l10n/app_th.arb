@@ -930,5 +930,9 @@
   "profilePhoneInvalid": "รูปแบบเบอร์ไม่ถูกต้อง",
   "profilePhoneSendFailed": "ส่ง SMS ไม่สำเร็จ กรุณาลองใหม่",
   "profilePhoneVerifiedDone": "บันทึกเบอร์แล้ว ใช้เข้าสู่ระบบได้",
-  "authOtpMismatchPhone": "รหัสนี้ไม่ได้ออกให้เบอร์นี้ กรุณากดส่งรหัสใหม่"
+  "authOtpMismatchPhone": "รหัสนี้ไม่ได้ออกให้เบอร์นี้ กรุณากดส่งรหัสใหม่",
+  "forceUpdateTitle": "มีเวอร์ชันใหม่",
+  "forceUpdateBody": "กรุณาอัปเดตแอปเป็นเวอร์ชันล่าสุดเพื่อใช้งานต่อ",
+  "forceUpdateVersions": "เวอร์ชันของคุณ {current} · ล่าสุด {latest}",
+  "forceUpdateButton": "อัปเดตตอนนี้"
 }

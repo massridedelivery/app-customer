@@ -1007,5 +1007,10 @@
   "profilePhoneInvalid": "Invalid phone number",
   "profilePhoneSendFailed": "Couldn't send the SMS. Please try again",
   "profilePhoneVerifiedDone": "Number saved — you can sign in with it",
-  "authOtpMismatchPhone": "This code wasn't issued for this number. Please request a new code"
+  "authOtpMismatchPhone": "This code wasn't issued for this number. Please request a new code",
+  "forceUpdateTitle": "A new version is available",
+  "forceUpdateBody": "Please update to the latest version to keep using the app.",
+  "forceUpdateVersions": "Your version {current} · Latest {latest}",
+  "@forceUpdateVersions": {"placeholders": {"current": {"type": "String"}, "latest": {"type": "String"}}},
+  "forceUpdateButton": "Update now"
 }

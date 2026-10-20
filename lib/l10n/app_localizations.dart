@@ -5484,6 +5484,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This code wasn\'t issued for this number. Please request a new code'**
   String get authOtpMismatchPhone;
+
+  /// No description provided for @forceUpdateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A new version is available'**
+  String get forceUpdateTitle;
+
+  /// No description provided for @forceUpdateBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Please update to the latest version to keep using the app.'**
+  String get forceUpdateBody;
+
+  /// No description provided for @forceUpdateVersions.
+  ///
+  /// In en, this message translates to:
+  /// **'Your version {current} · Latest {latest}'**
+  String forceUpdateVersions(String current, String latest);
+
+  /// No description provided for @forceUpdateButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Update now'**
+  String get forceUpdateButton;
 }
 
 class _AppLocalizationsDelegate

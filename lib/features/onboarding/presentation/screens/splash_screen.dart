@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/managers/providers.dart';
+import 'package:customer_app/core/update/force_update.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:customer_app/router/app_routes.dart';
 import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
@@ -42,6 +43,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     if (ref.read(appStorageProvider).hasCompletedOnboarding) {
       ref.read(homeControllerProvider);
     }
+    // Is this build behind the store's? If so the router holds the app on the
+    // update screen; runs in the background, never delaying the splash.
+    ref.read(forceUpdateProvider.notifier).check();
     _navigateToNextScreen();
   }
 

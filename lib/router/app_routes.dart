@@ -61,6 +61,8 @@ import 'package:customer_app/features/trips/presentation/screens/trip_detail_scr
 import 'package:customer_app/features/trips/presentation/screens/trips_screen.dart';
 import 'package:customer_app/features/trips/domain/models/history_order.dart';
 import 'package:customer_app/core/auth/account_block.dart';
+import 'package:customer_app/core/update/force_update.dart';
+import 'package:customer_app/core/update/force_update_screen.dart';
 import 'package:customer_app/features/auth/presentation/screens/account_blocked_screen.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -87,6 +89,11 @@ class RouterNotifier extends ChangeNotifier {
   }
 
   RouterNotifier(this._ref) {
+    // An outdated build must land on the update screen as soon as the store
+    // check finds it.
+    _ref.listen(forceUpdateProvider, (previous, next) {
+      if ((previous == null) != (next == null)) notifyListeners();
+    });
     // A suspended/deleted account must land on its notice immediately.
     _ref.listen(accountBlockProvider, (previous, next) {
       if (previous != next) notifyListeners();
@@ -144,6 +151,13 @@ final routerProvider = Provider<GoRouter>((ref) {
       final isAuthenticated = authState.isAuthenticated;
       final activeJobId = authState.activeJobId;
       final currentPath = state.matchedLocation;
+
+      // Installed version behind the store's: hold the app on the update
+      // screen — outranks everything, since an old build may not work.
+      if (ref.read(forceUpdateProvider) != null) {
+        return currentPath == '/force-update' ? null : '/force-update';
+      }
+      if (currentPath == '/force-update') return '/main';
 
       // Suspended / deleted account (403 from the backend): hold the app on
       // the notice — it outranks the splash gate and every other rule.
@@ -247,6 +261,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/account-blocked',
         builder: (context, state) => const AccountBlockedScreen(),
+      ),
+      GoRoute(
+        path: '/force-update',
+        builder: (context, state) => const ForceUpdateScreen(),
       ),
       GoRoute(
         path: '/onboarding',

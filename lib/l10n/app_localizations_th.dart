@@ -2928,4 +2928,19 @@ class AppLocalizationsTh extends AppLocalizations {
   @override
   String get authOtpMismatchPhone =>
       'รหัสนี้ไม่ได้ออกให้เบอร์นี้ กรุณากดส่งรหัสใหม่';
+
+  @override
+  String get forceUpdateTitle => 'มีเวอร์ชันใหม่';
+
+  @override
+  String get forceUpdateBody =>
+      'กรุณาอัปเดตแอปเป็นเวอร์ชันล่าสุดเพื่อใช้งานต่อ';
+
+  @override
+  String forceUpdateVersions(String current, String latest) {
+    return 'เวอร์ชันของคุณ $current · ล่าสุด $latest';
+  }
+
+  @override
+  String get forceUpdateButton => 'อัปเดตตอนนี้';
 }

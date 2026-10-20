@@ -49,7 +49,15 @@ double homeHeroHeight({
 }
 
 class ServiceSelectionScreen extends ConsumerStatefulWidget {
-  const ServiceSelectionScreen({super.key});
+  const ServiceSelectionScreen({
+    super.key,
+    this.locationKey,
+    this.servicesKey,
+  });
+
+  /// Targets for the home coach-mark tour (owned by MainScreen).
+  final GlobalKey? locationKey;
+  final GlobalKey? servicesKey;
 
   @override
   ConsumerState<ServiceSelectionScreen> createState() =>
@@ -204,7 +212,10 @@ class _ServiceSelectionScreenState
                               // Nudge the service grid up toward the search bar.
                               Transform.translate(
                                 offset: const Offset(0, -4),
-                                child: _buildServiceGrid(context, promos),
+                                child: KeyedSubtree(
+                                  key: widget.servicesKey,
+                                  child: _buildServiceGrid(context, promos),
+                                ),
                               ),
                               // Real promotions — hides itself when there are none —
                               // sits tight under the grid (no extra gap).
@@ -335,6 +346,7 @@ class _ServiceSelectionScreenState
       children: [
         Expanded(
           child: GestureDetector(
+            key: widget.locationKey,
             onTap: () => _needsLocationAccess(homeState)
                 ? _fixLocationAccess(homeState.locationAccess)
                 : context.push('/food-place-search'),

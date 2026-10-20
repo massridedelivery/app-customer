@@ -934,5 +934,14 @@
   "forceUpdateTitle": "มีเวอร์ชันใหม่",
   "forceUpdateBody": "กรุณาอัปเดตแอปเป็นเวอร์ชันล่าสุดเพื่อใช้งานต่อ",
   "forceUpdateVersions": "เวอร์ชันของคุณ {current} · ล่าสุด {latest}",
-  "forceUpdateButton": "อัปเดตตอนนี้"
+  "forceUpdateButton": "อัปเดตตอนนี้",
+  "coachLocationTitle": "ตำแหน่งรับ-ส่ง",
+  "coachLocationBody": "แตะเพื่อเปลี่ยนจุดรับหรือที่อยู่จัดส่ง แอปตั้งจากตำแหน่งปัจจุบันให้ก่อน",
+  "coachServicesTitle": "เลือกบริการ",
+  "coachServicesBody": "เรียกรถหรือส่งของได้จากตรงนี้ ป้ายแดงคือส่วนลดที่ใช้ได้ตอนนี้",
+  "coachOrdersTitle": "ติดตามคำสั่งซื้อ",
+  "coachOrdersBody": "รายการที่กำลังดำเนินการและประวัติทั้งหมดอยู่ที่แท็บนี้",
+  "coachSkip": "ข้าม",
+  "coachNext": "ถัดไป",
+  "coachDone": "เข้าใจแล้ว"
 }

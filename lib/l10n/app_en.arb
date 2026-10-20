@@ -1012,5 +1012,14 @@
   "forceUpdateBody": "Please update to the latest version to keep using the app.",
   "forceUpdateVersions": "Your version {current} · Latest {latest}",
   "@forceUpdateVersions": {"placeholders": {"current": {"type": "String"}, "latest": {"type": "String"}}},
-  "forceUpdateButton": "Update now"
+  "forceUpdateButton": "Update now",
+  "coachLocationTitle": "Pickup & delivery location",
+  "coachLocationBody": "Tap to change your pickup or delivery address. We start from where you are.",
+  "coachServicesTitle": "Pick a service",
+  "coachServicesBody": "Book a ride or send a parcel from here. Red tags are discounts you can use now.",
+  "coachOrdersTitle": "Track your orders",
+  "coachOrdersBody": "Ongoing orders and your history are in this tab.",
+  "coachSkip": "Skip",
+  "coachNext": "Next",
+  "coachDone": "Got it"
 }

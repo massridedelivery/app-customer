@@ -2943,4 +2943,34 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get forceUpdateButton => 'อัปเดตตอนนี้';
+
+  @override
+  String get coachLocationTitle => 'ตำแหน่งรับ-ส่ง';
+
+  @override
+  String get coachLocationBody =>
+      'แตะเพื่อเปลี่ยนจุดรับหรือที่อยู่จัดส่ง แอปตั้งจากตำแหน่งปัจจุบันให้ก่อน';
+
+  @override
+  String get coachServicesTitle => 'เลือกบริการ';
+
+  @override
+  String get coachServicesBody =>
+      'เรียกรถหรือส่งของได้จากตรงนี้ ป้ายแดงคือส่วนลดที่ใช้ได้ตอนนี้';
+
+  @override
+  String get coachOrdersTitle => 'ติดตามคำสั่งซื้อ';
+
+  @override
+  String get coachOrdersBody =>
+      'รายการที่กำลังดำเนินการและประวัติทั้งหมดอยู่ที่แท็บนี้';
+
+  @override
+  String get coachSkip => 'ข้าม';
+
+  @override
+  String get coachNext => 'ถัดไป';
+
+  @override
+  String get coachDone => 'เข้าใจแล้ว';
 }

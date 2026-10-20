@@ -1,7 +1,10 @@
+import 'dart:async';
 import 'dart:io' show Platform;
 
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
+import 'package:customer_app/core/managers/providers.dart';
+import 'package:customer_app/core/widgets/coach_marks.dart';
 import 'package:customer_app/features/home/presentation/screens/service_selection_screen.dart';
 import 'package:customer_app/features/profile/presentation/screens/profile_screen.dart';
 import 'package:customer_app/features/trips/domain/models/history_order.dart';
@@ -24,15 +27,88 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   late int _currentIndex;
   late List<Widget> _screens;
 
+  // Coach-mark targets. Owned here (not static) so two MainScreens during a
+  // route transition never share a GlobalKey.
+  final _locationKey = GlobalKey(debugLabel: 'coachLocation');
+  final _servicesKey = GlobalKey(debugLabel: 'coachServices');
+  final _ordersTabKey = GlobalKey(debugLabel: 'coachOrdersTab');
+
   @override
   void initState() {
     super.initState();
     _currentIndex = widget.initialTab;
     _screens = [
-      const ServiceSelectionScreen(),
+      ServiceSelectionScreen(
+        locationKey: _locationKey,
+        servicesKey: _servicesKey,
+      ),
       TripsScreen(initialStatus: widget.initialHistoryStatus),
       const ProfileScreen(),
     ];
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _scheduleCoachMarks();
+  }
+
+  bool _coachScheduled = false;
+  Timer? _coachTimer;
+
+  /// First visit to home: a 3-step spotlight tour. Lets the home settle, then
+  /// waits — however long — for a clear screen: no dialog or page on top
+  /// (e.g. the turn-on-location popup) and the home tab showing.
+  void _scheduleCoachMarks() {
+    if (_coachScheduled) return;
+    _coachScheduled = true;
+    if (ref.read(appStorageProvider).hasSeenHomeCoachMarks) return;
+    Future<void>.delayed(const Duration(milliseconds: 1500), () {
+      if (!mounted) return;
+      _coachTimer = Timer.periodic(const Duration(milliseconds: 700), (t) {
+        if (!mounted) return t.cancel();
+        final onTop = ModalRoute.of(context)?.isCurrent ?? false;
+        if (onTop && _currentIndex == 0) {
+          t.cancel();
+          _showCoachMarks();
+        }
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _coachTimer?.cancel();
+    super.dispose();
+  }
+
+  void _showCoachMarks() {
+    final l10n = AppLocalizations.of(context)!;
+    showCoachMarks(
+      context,
+      steps: [
+        CoachMarkStep(
+          target: _locationKey,
+          title: l10n.coachLocationTitle,
+          body: l10n.coachLocationBody,
+        ),
+        CoachMarkStep(
+          target: _servicesKey,
+          title: l10n.coachServicesTitle,
+          body: l10n.coachServicesBody,
+        ),
+        CoachMarkStep(
+          target: _ordersTabKey,
+          title: l10n.coachOrdersTitle,
+          body: l10n.coachOrdersBody,
+        ),
+      ],
+      skipLabel: l10n.coachSkip,
+      nextLabel: l10n.coachNext,
+      doneLabel: l10n.coachDone,
+      onFinish: () =>
+          ref.read(appStorageProvider).setHasSeenHomeCoachMarks(true),
+    );
   }
 
   @override
@@ -142,6 +218,8 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   ) {
     final isSelected = _currentIndex == index;
     return Expanded(
+      // The orders tab is a coach-mark target.
+      key: index == 1 ? _ordersTabKey : null,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () {

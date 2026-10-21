@@ -5562,6 +5562,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Got it'**
   String get coachDone;
+
+  /// No description provided for @profileHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Help'**
+  String get profileHelp;
+
+  /// No description provided for @profileHomeTour.
+  ///
+  /// In en, this message translates to:
+  /// **'Home page tips'**
+  String get profileHomeTour;
 }
 
 class _AppLocalizationsDelegate

@@ -3011,4 +3011,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get coachDone => 'Got it';
+
+  @override
+  String get profileHelp => 'Help';
+
+  @override
+  String get profileHomeTour => 'Home page tips';
 }

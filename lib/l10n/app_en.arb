@@ -1021,5 +1021,7 @@
   "coachOrdersBody": "Ongoing orders and your history are in this tab.",
   "coachSkip": "Skip",
   "coachNext": "Next",
-  "coachDone": "Got it"
+  "coachDone": "Got it",
+  "profileHelp": "Help",
+  "profileHomeTour": "Home page tips"
 }

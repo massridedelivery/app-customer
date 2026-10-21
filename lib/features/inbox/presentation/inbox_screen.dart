@@ -128,13 +128,32 @@ class _InboxScreenState extends ConsumerState<InboxScreen> {
                                     ),
                             ],
                           )
-                        : ListView.builder(
-                            physics: const AlwaysScrollableScrollPhysics(),
-                            padding: EdgeInsets.only(bottom: bottomPad),
-                            itemCount: items.length,
-                            itemBuilder: (context, i) => _InboxTile(
-                              item: items[i],
-                              onTap: () => _open(items[i]),
+                        : NotificationListener<ScrollNotification>(
+                            // Infinite scroll: fetch the next page near the end.
+                            onNotification: (n) {
+                              if (n.metrics.extentAfter < 400) {
+                                ref
+                                    .read(inboxControllerProvider.notifier)
+                                    .loadMore();
+                              }
+                              return false;
+                            },
+                            child: ListView.builder(
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              padding: EdgeInsets.only(bottom: bottomPad),
+                              itemCount: items.length + (s.hasMore ? 1 : 0),
+                              itemBuilder: (context, i) => i == items.length
+                                  ? const Padding(
+                                      key: Key('inboxLoadingMore'),
+                                      padding: EdgeInsets.all(16),
+                                      child: Center(
+                                        child: MassLoadingM(size: 40),
+                                      ),
+                                    )
+                                  : _InboxTile(
+                                      item: items[i],
+                                      onTap: () => _open(items[i]),
+                                    ),
                             ),
                           ),
                   );
@@ -243,7 +262,7 @@ class _InboxTile extends StatelessWidget {
                               color: AppColors.textPrimary,
                               fontWeight: unread
                                   ? FontWeight.w700
-                                  : FontWeight.w600,
+                                  : FontWeight.w500,
                             ),
                           ),
                         ),
@@ -264,6 +283,8 @@ class _InboxTile extends StatelessWidget {
                       const SizedBox(height: 2),
                       Text(
                         item.body,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                         style: AppTypography.body2.copyWith(
                           color: AppColors.textSecondary,
                           height: 1.45,
@@ -272,7 +293,11 @@ class _InboxTile extends StatelessWidget {
                     ],
                     const SizedBox(height: 4),
                     Text(
-                      AppDates.of(context).relative(item.createdAt),
+                      // In Thailand time, whatever the device timezone.
+                      AppDates.of(context).relative(
+                        AppDates.bangkok(item.createdAt),
+                        now: AppDates.bangkok(DateTime.now()),
+                      ),
                       style: AppTypography.caption5.copyWith(
                         color: AppColors.semanticGrayNeutralFgMidOnWhite,
                       ),

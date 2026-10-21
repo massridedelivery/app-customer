@@ -30,6 +30,8 @@ Future<void> _pump(
   WidgetTester tester,
   BookingState state, {
   VoidCallback? onPromoRemove,
+  bool outOfServiceArea = false,
+  VoidCallback? onRequest,
 }) async {
   await tester.pumpWidget(
     ProviderScope(
@@ -46,7 +48,9 @@ Future<void> _pump(
           body: VehicleSelectionSheet(
             scrollController: ScrollController(),
             estimations: state.estimations,
-            onRequest: () {},
+            onRequest: onRequest ?? () {},
+            outOfServiceArea: outOfServiceArea,
+            onPickLocation: () {},
             onPromoTap: () {},
             onVehicleSelected: (_) {},
             onPromoRemove: onPromoRemove,
@@ -168,5 +172,24 @@ void main() {
       findsOneWidget,
     );
   });
-}
 
+  testWidgets('out of service area: notice instead of list, request disabled', (
+    tester,
+  ) async {
+    var requested = 0;
+    final est = _est(discount: 0);
+    await _pump(
+      tester,
+      BookingState(estimations: [est], vehicleTypeId: est.vehicleTypeId),
+      outOfServiceArea: true,
+      onRequest: () => requested++,
+    );
+
+    expect(find.byKey(const Key('rideOutOfServiceArea')), findsOneWidget);
+    expect(find.text('ยังไม่เปิดให้บริการในพื้นที่นี้'), findsOneWidget);
+    expect(find.text('เลือกจุดรับ'), findsOneWidget);
+    final button = tester.widget<ElevatedButton>(find.byType(ElevatedButton));
+    expect(button.onPressed, isNull);
+    expect(requested, 0);
+  });
+}

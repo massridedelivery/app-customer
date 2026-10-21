@@ -1,4 +1,6 @@
 import 'package:customer_app/core/error/api_error.dart';
+import 'package:customer_app/core/error/food_delivery_exception.dart';
+import 'package:customer_app/core/utils/error_text.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -86,6 +88,43 @@ void main() {
         ),
         'dropoff is outside service area',
       );
+    });
+  });
+
+  group('service area (422 out of zone)', () {
+    final outOfZone = _badResponse({
+      'error': 'service not available in your area',
+    });
+
+    test('maps to the localized notice, not the raw English', () {
+      expect(
+        apiErrorMessage(outOfZone, languageCode: 'th'),
+        'ยังไม่เปิดให้บริการในพื้นที่นี้',
+      );
+      expect(
+        apiErrorMessage(outOfZone, languageCode: 'en'),
+        "Service isn't available in this area yet",
+      );
+    });
+
+    test('is recognised raw, mapped, or wrapped in an Exception', () {
+      expect(isServiceAreaError(outOfZone), isTrue);
+      expect(
+        isServiceAreaError(Exception('ยังไม่เปิดให้บริการในพื้นที่นี้')),
+        isTrue,
+      );
+      expect(isServiceAreaError(_badResponse({'error': 'bad promo'})), isFalse);
+      expect(isServiceAreaError(null), isFalse);
+    });
+
+    test('friendlyError and the food mapper use the same notice', () {
+      expect(
+        friendlyError('service not available in your area', languageCode: 'th'),
+        'ยังไม่เปิดให้บริการในพื้นที่นี้',
+      );
+      final mapped = mapDioErrorToException(outOfZone, 'fallback');
+      expect(mapped, isA<CoverageException>());
+      expect(isServiceAreaMessage(mapped.message), isTrue);
     });
   });
 }

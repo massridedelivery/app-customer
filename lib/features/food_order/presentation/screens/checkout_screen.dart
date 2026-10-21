@@ -2,6 +2,7 @@ import 'package:customer_app/core/constants/map_defaults.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/constants/feature_flags.dart';
+import 'package:customer_app/core/error/api_error.dart';
 import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/features/food_order/domain/models/food_models.dart';
 import 'package:customer_app/features/food_order/presentation/controllers/checkout_controller.dart';
@@ -13,9 +14,11 @@ import 'package:customer_app/features/food_order/presentation/widgets/checkout_d
 import 'package:customer_app/features/food_order/presentation/widgets/checkout_order_items.dart';
 import 'package:customer_app/features/food_order/presentation/widgets/checkout_payment_section.dart';
 import 'package:customer_app/features/food_order/presentation/widgets/checkout_save_the_world.dart';
+import 'package:customer_app/features/home/data/repositories/service_area_repository.dart';
 import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
 import 'package:customer_app/features/home/presentation/states/home_state.dart';
 import 'package:customer_app/features/home/domain/usecases/get_default_place_usecase_impl.dart';
+import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -29,6 +32,27 @@ class CheckoutScreen extends ConsumerStatefulWidget {
 }
 
 class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
+  // Service-area check of the delivery address, keyed by the spot it ran for.
+  LatLng? _areaCheckedLocation;
+  bool _outOfArea = false;
+
+  /// Flags a delivery address outside every open zone up front, so the
+  /// customer can change it before ordering. Fails open (error → available).
+  Future<void> _checkDeliveryArea(LatLng location) async {
+    if (location == _areaCheckedLocation) return;
+    _areaCheckedLocation = location;
+    setState(() => _outOfArea = false);
+    final result = await ref
+        .read(serviceAreaRepositoryProvider)
+        .check(
+          lat: location.latitude,
+          lng: location.longitude,
+          service: 'food',
+        );
+    if (!mounted || _areaCheckedLocation != location) return;
+    setState(() => _outOfArea = !result.available);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -69,6 +93,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         }
       }
     }
+
+    final deliverTo = homeState.foodLocation;
+    if (deliverTo != null && mounted) _checkDeliveryArea(deliverTo);
 
     if (cart.restaurantId != null && cart.items.isNotEmpty) {
       final location =
@@ -137,7 +164,12 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         ref.read(foodCartControllerProvider.notifier).clearCart();
         context.pushReplacement('/food-order/tracking/${next.placedOrder!.id}');
       }
-      if (next.error != null && next.error != previous?.error) {
+      if (next.error != null &&
+          next.error != previous?.error &&
+          isServiceAreaMessage(next.error)) {
+        // Rejected as out of zone: show the notice by the order button.
+        setState(() => _outOfArea = true);
+      } else if (next.error != null && next.error != previous?.error) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(next.error!),
@@ -311,9 +343,15 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            if (_outOfArea) ...[
+              _OutOfAreaNotice(
+                onChangeAddress: () => context.push('/food-place-search'),
+              ),
+              const SizedBox(height: 4),
+            ],
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: isPlacingOrder ? null : _onPlaceOrder,
+              onPressed: isPlacingOrder || _outOfArea ? null : _onPlaceOrder,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.foundationGreen500,
                 padding: const EdgeInsets.symmetric(vertical: 16),
@@ -400,6 +438,50 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFFF8F00)),
               minHeight: 6,
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// "ยังไม่เปิดให้บริการในพื้นที่นี้" above the order button, with a shortcut to
+/// pick another delivery address.
+class _OutOfAreaNotice extends StatelessWidget {
+  const _OutOfAreaNotice({required this.onChangeAddress});
+
+  final VoidCallback onChangeAddress;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Container(
+      key: const Key('foodOutOfServiceArea'),
+      padding: const EdgeInsets.fromLTRB(12, 8, 4, 8),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFDF1F3),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.location_off_outlined,
+            color: AppColors.primary,
+            size: 20,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              l10n.errServiceAreaUnavailable,
+              style: AppTypography.label3.copyWith(
+                color: AppColors.textPrimary,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: onChangeAddress,
+            style: TextButton.styleFrom(foregroundColor: AppColors.primary),
+            child: Text(l10n.serviceAreaChangeAddress),
           ),
         ],
       ),

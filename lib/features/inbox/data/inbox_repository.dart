@@ -63,17 +63,20 @@ class InboxItem {
   }
 }
 
-/// `GET /api/notifications` → items + unread count;
+/// `GET /api/notifications?limit&offset` → a page (newest first) + unread count;
 /// `PATCH /api/notifications/{id}/read`. Both need a signed-in customer.
 class InboxRepository {
   InboxRepository(this._dio);
 
   final Dio _dio;
 
-  Future<({List<InboxItem> items, int unread})> fetch({int limit = 50}) async {
+  Future<({List<InboxItem> items, int unread})> fetch({
+    int limit = 20,
+    int offset = 0,
+  }) async {
     final res = await _dio.get(
       '/api/notifications',
-      queryParameters: {'limit': limit},
+      queryParameters: {'limit': limit, 'offset': offset},
     );
     final data = res.data as Map<String, dynamic>;
     final raw = data['items'];
@@ -85,6 +88,13 @@ class InboxRepository {
         items.where((i) => !i.isRead).length;
     return (items: items, unread: unread);
   }
+
+  /// `PATCH /api/notifications/prefs` — opting out stops campaign pushes and
+  /// inbox entries (order-status notifications still arrive).
+  Future<void> setMarketingOptIn(bool optIn) => _dio.patch(
+    '/api/notifications/prefs',
+    data: {'marketing_opt_in': optIn},
+  );
 
   Future<void> markRead(String id) =>
       _dio.patch('/api/notifications/${Uri.encodeComponent(id)}/read');

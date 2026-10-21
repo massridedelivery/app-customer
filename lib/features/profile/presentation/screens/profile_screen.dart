@@ -1,3 +1,4 @@
+import 'package:customer_app/features/inbox/presentation/inbox_controller.dart';
 import 'package:customer_app/features/main/presentation/controllers/home_tour_controller.dart';
 import 'package:customer_app/core/widgets/refetch_on_resume.dart';
 import 'package:customer_app/features/profile/presentation/screens/referral_screen.dart';
@@ -35,6 +36,22 @@ class ProfileScreen extends ConsumerWidget {
     },
     child: _buildPage(context, ref),
   );
+
+  Future<void> _setMarketingOptIn(
+    BuildContext context,
+    WidgetRef ref,
+    bool optIn,
+  ) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final failed = AppLocalizations.of(context)!.marketingOptInFailed;
+    try {
+      await ref.read(marketingOptInProvider.notifier).set(optIn);
+    } catch (_) {
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(failed)));
+    }
+  }
 
   Widget _buildPage(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
@@ -136,6 +153,22 @@ class ProfileScreen extends ConsumerWidget {
                           ),
                         ),
                         onTap: () => _showLangSelector(context, ref, l10n),
+                      ),
+                      _MenuTile(
+                        key: const Key('profileMarketingOptIn'),
+                        icon: Icons.campaign_outlined,
+                        title: l10n.marketingOptIn,
+                        subtitle: l10n.marketingOptInSub,
+                        trailing: Switch.adaptive(
+                          value: ref.watch(marketingOptInProvider),
+                          activeTrackColor: AppColors.primary,
+                          onChanged: (v) => _setMarketingOptIn(context, ref, v),
+                        ),
+                        onTap: () => _setMarketingOptIn(
+                          context,
+                          ref,
+                          !ref.read(marketingOptInProvider),
+                        ),
                       ),
                     ],
                   ),
@@ -765,6 +798,7 @@ class _MenuCard extends StatelessWidget {
 class _MenuTile extends StatelessWidget {
   final IconData icon;
   final String title;
+  final String? subtitle;
   final Widget? trailing;
   final VoidCallback onTap;
   final Color? iconColor;
@@ -773,6 +807,7 @@ class _MenuTile extends StatelessWidget {
     super.key,
     required this.icon,
     required this.title,
+    this.subtitle,
     this.trailing,
     required this.onTap,
     this.iconColor,
@@ -789,6 +824,14 @@ class _MenuTile extends StatelessWidget {
           fontWeight: FontWeight.normal,
         ),
       ),
+      subtitle: subtitle == null
+          ? null
+          : Text(
+              subtitle!,
+              style: AppTypography.caption5.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            ),
       trailing:
           trailing ??
           const Icon(

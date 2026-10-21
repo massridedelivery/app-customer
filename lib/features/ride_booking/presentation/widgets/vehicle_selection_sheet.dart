@@ -35,6 +35,10 @@ class VehicleSelectionSheet extends ConsumerWidget {
   /// Re-runs the fare estimate after it failed.
   final VoidCallback? onRetryEstimate;
 
+  /// The pickup is outside every open service zone: the list says so (with a
+  /// "pick another pickup" action) and the request button stays disabled.
+  final bool outOfServiceArea;
+
   const VehicleSelectionSheet({
     super.key,
     required this.scrollController,
@@ -46,6 +50,7 @@ class VehicleSelectionSheet extends ConsumerWidget {
     this.isMissingLocation = false,
     this.onPickLocation,
     this.onRetryEstimate,
+    this.outOfServiceArea = false,
   });
 
   @override
@@ -101,7 +106,22 @@ class VehicleSelectionSheet extends ConsumerWidget {
           // ScrollController, so dragging it drives the sheet's snap. The
           // loading/empty states are still scrollable so the drag keeps working.
           Expanded(
-            child: bookingAsync.isLoading
+            child: outOfServiceArea
+                ? ListView(
+                    controller: scrollController,
+                    children: [
+                      SizedBox(
+                        key: const Key('rideOutOfServiceArea'),
+                        height: 160,
+                        child: _EmptyEstimate(
+                          message: l10n.errServiceAreaUnavailable,
+                          actionLabel: l10n.choosePickupAction,
+                          onAction: onPickLocation,
+                        ),
+                      ),
+                    ],
+                  )
+                : bookingAsync.isLoading
                 ? ListView(
                     controller: scrollController,
                     children: const [
@@ -333,7 +353,9 @@ class VehicleSelectionSheet extends ConsumerWidget {
               width: double.infinity,
               height: 56,
               child: ElevatedButton(
-                onPressed: hasVehicleSelected ? onRequest : null,
+                onPressed: hasVehicleSelected && !outOfServiceArea
+                    ? onRequest
+                    : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,

@@ -1,3 +1,4 @@
+import 'package:customer_app/core/managers/providers.dart';
 import 'package:customer_app/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:customer_app/features/auth/presentation/states/auth_state.dart';
 import 'package:customer_app/features/inbox/data/inbox_repository.dart';
@@ -8,6 +9,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class _FakeAuthController extends AuthController {
   _FakeAuthController(this.signedIn);
@@ -23,12 +25,31 @@ class _FakeRepo extends InboxRepository {
   final List<InboxItem> items;
   final marked = <String>[];
 
+  final offsets = <int>[];
+
   @override
-  Future<({List<InboxItem> items, int unread})> fetch({int limit = 50}) async =>
-      (items: items, unread: items.where((i) => !i.isRead).length);
+  Future<({List<InboxItem> items, int unread})> fetch({
+    int limit = 20,
+    int offset = 0,
+  }) async {
+    offsets.add(offset);
+    return (
+      items: items.skip(offset).take(limit).toList(),
+      unread: items.where((i) => !i.isRead).length,
+    );
+  }
 
   @override
   Future<void> markRead(String id) async => marked.add(id);
+
+  final optIns = <bool>[];
+  bool failPrefs = false;
+
+  @override
+  Future<void> setMarketingOptIn(bool optIn) async {
+    if (failPrefs) throw Exception('500');
+    optIns.add(optIn);
+  }
 }
 
 InboxItem _item(String id, {bool read = false}) => InboxItem(
@@ -153,5 +174,50 @@ void main() {
     addTearDown(container.dispose);
     await container.read(inboxControllerProvider.future);
     expect(container.read(inboxUnreadProvider), 1);
+  });
+
+  testWidgets('scrolling to the end loads the next page by offset', (
+    tester,
+  ) async {
+    final repo = await _pump(
+      tester,
+      items: [for (var i = 0; i < 45; i++) _item('m$i')],
+    );
+    expect(repo.offsets, [0]);
+    expect(find.byKey(const Key('inboxLoadingMore')), findsNothing);
+    await tester.drag(find.byType(ListView), const Offset(0, -6000));
+    await tester.pumpAndSettle();
+    await tester.drag(find.byType(ListView), const Offset(0, -6000));
+    await tester.pumpAndSettle();
+    expect(repo.offsets, [0, 20, 40]);
+    expect(find.text('Title m44'), findsOneWidget);
+  });
+
+  group('marketing opt-in', () {
+    test('defaults on, saves via PATCH prefs, reverts on failure', () async {
+      SharedPreferences.setMockInitialValues({});
+      final prefs = await SharedPreferences.getInstance();
+      final repo = _FakeRepo(const []);
+      final container = ProviderContainer(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(prefs),
+          inboxRepositoryProvider.overrideWithValue(repo),
+        ],
+      );
+      addTearDown(container.dispose);
+      expect(container.read(marketingOptInProvider), isTrue);
+
+      await container.read(marketingOptInProvider.notifier).set(false);
+      expect(repo.optIns, [false]);
+      expect(container.read(marketingOptInProvider), isFalse);
+      expect(container.read(appStorageProvider).marketingOptIn, isFalse);
+
+      repo.failPrefs = true;
+      await expectLater(
+        container.read(marketingOptInProvider.notifier).set(true),
+        throwsA(anything),
+      );
+      expect(container.read(marketingOptInProvider), isFalse);
+    });
   });
 }

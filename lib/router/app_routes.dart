@@ -380,7 +380,9 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/place-search',
-        builder: (context, state) => const PlaceSearchScreen(),
+        builder: (context, state) => PlaceSearchScreen(
+          focusPickup: state.uri.queryParameters['focus'] == 'pickup',
+        ),
       ),
       GoRoute(
         path: '/select-pickup',

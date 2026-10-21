@@ -618,7 +618,7 @@
   "authInvalidCredentials": "Incorrect email or password",
   "authEmailAlreadyRegistered": "This email already has an account. Please sign in.",
   "authRegisterFailed": "Sign-up failed. Please try again.",
-  "onboardSplashTagline": "Elevating city services",
+  "splashServices": "Rides · Parcels · Food",
   "onboardRideTitle": "Get a ride in a few taps",
   "onboardRideDesc": "Car or motorbike — see the fare before you book, then your driver picks you up.",
   "onboardParcelTitle": "Send parcels",

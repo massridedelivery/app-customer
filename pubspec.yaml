@@ -85,21 +85,23 @@ dev_dependencies:
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
-# Native splash — matches the in-app Flutter splash (light bg + red app icon)
-# so the two don't read as two different screens. The old config was a full
-# RED screen with a big blurry M, which duplicated the Flutter splash; now the
-# system splash is the light background + the rounded red M icon, flowing
-# straight into the "Mass Move" Flutter splash.
-# splash_icon.png = red rounded-square + white M (no text), high-res.
+# Native splash — the brand-red screen with the white MASS MOVE logo, the same
+# red as the app icon (#C0343E) and the same logo at the same size (150dp) as
+# the Flutter splash, so the hand-off doesn't show as two screens.
+# splash_logo.png = white logo, 600 px wide (4x of 150dp).
+# splash_android12.png = the same logo centred in the 1152 px Android 12+
+# canvas, inside its 768 px safe circle.
 # Regenerate after changing color/image: dart run flutter_native_splash:create
 flutter_native_splash:
-  color: "#F8F8F9"                       # = AppColors.foundationGrayscale75 (Flutter splash bg)
+  color: "#C0343E"
+  image: assets/icon/splash_logo.png
   android: true
   ios: true
   web: false
   # Android 12+ uses the system splash API (icon is circle-masked).
   android_12:
-    color: "#F8F8F9"
+    color: "#C0343E"
+    image: assets/icon/splash_android12.png
 
 # App launcher icon (run: dart run flutter_launcher_icons)
 flutter_launcher_icons:

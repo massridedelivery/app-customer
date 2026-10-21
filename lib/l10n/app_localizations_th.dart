@@ -1755,7 +1755,7 @@ class AppLocalizationsTh extends AppLocalizations {
   String get authRegisterFailed => 'ลงทะเบียนไม่สำเร็จ กรุณาลองใหม่อีกครั้ง';
 
   @override
-  String get onboardSplashTagline => 'ยกระดับการให้บริการในเมือง';
+  String get splashServices => 'เรียกรถ · ส่งของ · สั่งอาหาร';
 
   @override
   String get onboardRideTitle => 'เรียกรถได้ในไม่กี่แตะ';

@@ -1774,7 +1774,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authRegisterFailed => 'Sign-up failed. Please try again.';
 
   @override
-  String get onboardSplashTagline => 'Elevating city services';
+  String get splashServices => 'Rides · Parcels · Food';
 
   @override
   String get onboardRideTitle => 'Get a ride in a few taps';

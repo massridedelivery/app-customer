@@ -456,7 +456,12 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
             // (not the dropoff pin): the value covers the whole pickup→dropoff
             // trip, and pinning it to one endpoint both mislabelled it and let
             // it collide with the dropoff bubble or run off the screen edge.
-            if (_pickupPos != null && _dropoffPos != null)
+            // Only once there's an estimate: without one (out of area, failed
+            // or still loading) it would read "0 นาที · 0.0 กม.".
+            if (_pickupPos != null &&
+                _dropoffPos != null &&
+                !outOfArea &&
+                (bookingState.distanceKm ?? 0) > 0)
               _buildRouteMetricTag(bookingState, l10n),
           ],
 
@@ -516,7 +521,10 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
               estimations: bookingState.estimations,
               isMissingLocation: pickup == null || dropoff == null,
               outOfServiceArea: outOfArea,
-              onPickLocation: () => context.pushReplacement('/place-search'),
+              // Out of area it's the pickup that has to change, so open on it.
+              onPickLocation: () => context.pushReplacement(
+                outOfArea ? '/place-search?focus=pickup' : '/place-search',
+              ),
               onRetryEstimate: pickup == null || dropoff == null
                   ? null
                   : () => ref

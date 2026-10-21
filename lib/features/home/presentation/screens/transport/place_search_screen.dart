@@ -18,7 +18,11 @@ import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class PlaceSearchScreen extends ConsumerStatefulWidget {
-  const PlaceSearchScreen({super.key});
+  const PlaceSearchScreen({super.key, this.focusPickup = false});
+
+  /// Open on the pickup field, emptied for a fresh search — used when the
+  /// chosen pickup is outside the service area ("เลือกจุดรับ").
+  final bool focusPickup;
 
   @override
   ConsumerState<PlaceSearchScreen> createState() => _PlaceSearchScreenState();
@@ -41,12 +45,15 @@ class _PlaceSearchScreenState extends ConsumerState<PlaceSearchScreen>
       final state = ref.read(homeControllerProvider);
       // Only label the pickup "current location" when we actually have one;
       // otherwise leave it empty so the placeholder + location hint show.
-      _pickupController.text = state.pickupAddress ??
-          (state.pickupLocation != null
-              ? AppLocalizations.of(context)!.currentLocation
-              : '');
+      _pickupController.text = widget.focusPickup
+          ? ''
+          : state.pickupAddress ??
+                (state.pickupLocation != null
+                    ? AppLocalizations.of(context)!.currentLocation
+                    : '');
       _dropoffController.text = state.dropoffAddress ?? '';
-      _dropoffFocusNode.requestFocus();
+      (widget.focusPickup ? _pickupFocusNode : _dropoffFocusNode)
+          .requestFocus();
 
       // Warm ride history so the "ล่าสุด" tab has a reliable source. The
       // frequent-places endpoint was flaky (recent appearing/disappearing);

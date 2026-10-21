@@ -1023,5 +1023,13 @@
   "coachNext": "Next",
   "coachDone": "Got it",
   "profileHelp": "Help",
-  "profileHomeTour": "Home page tips"
+  "profileHomeTour": "Home page tips",
+  "navInbox": "Inbox",
+  "inboxAll": "All",
+  "inboxUnread": "Unread",
+  "inboxMarkAllRead": "Mark all read",
+  "inboxEmpty": "No messages yet",
+  "inboxEmptySub": "Promotions and news from Mass Move will show up here",
+  "inboxAllCaughtUp": "You're all caught up",
+  "inboxLoadFailed": "Couldn't load messages. Tap to retry."
 }

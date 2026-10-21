@@ -2979,4 +2979,28 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get profileHomeTour => 'ดูคำแนะนำการใช้งานหน้าแรก';
+
+  @override
+  String get navInbox => 'กล่องข้อความ';
+
+  @override
+  String get inboxAll => 'ทั้งหมด';
+
+  @override
+  String get inboxUnread => 'ยังไม่อ่าน';
+
+  @override
+  String get inboxMarkAllRead => 'อ่านทั้งหมดแล้ว';
+
+  @override
+  String get inboxEmpty => 'ยังไม่มีข้อความ';
+
+  @override
+  String get inboxEmptySub => 'โปรโมชันและข่าวสารจาก Mass Move จะมาแสดงที่นี่';
+
+  @override
+  String get inboxAllCaughtUp => 'อ่านครบทุกข้อความแล้ว';
+
+  @override
+  String get inboxLoadFailed => 'โหลดข้อความไม่สำเร็จ แตะเพื่อลองใหม่';
 }

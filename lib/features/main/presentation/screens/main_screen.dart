@@ -6,6 +6,8 @@ import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/managers/providers.dart';
 import 'package:customer_app/core/widgets/coach_marks.dart';
 import 'package:customer_app/features/home/presentation/screens/service_selection_screen.dart';
+import 'package:customer_app/features/inbox/presentation/inbox_controller.dart';
+import 'package:customer_app/features/inbox/presentation/inbox_screen.dart';
 import 'package:customer_app/features/main/presentation/controllers/home_tour_controller.dart';
 import 'package:customer_app/features/profile/presentation/screens/profile_screen.dart';
 import 'package:customer_app/features/trips/domain/models/history_order.dart';
@@ -44,6 +46,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
         servicesKey: _servicesKey,
       ),
       TripsScreen(initialStatus: widget.initialHistoryStatus),
+      const InboxScreen(),
       const ProfileScreen(),
     ];
   }
@@ -206,6 +209,13 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                         ),
                         _buildFloatingNavItem(
                           2,
+                          Icons.inbox_outlined,
+                          Icons.inbox_rounded,
+                          AppLocalizations.of(context)!.navInbox,
+                          badge: ref.watch(inboxUnreadProvider),
+                        ),
+                        _buildFloatingNavItem(
+                          3,
                           Icons.account_circle_outlined,
                           Icons.account_circle,
                           AppLocalizations.of(context)!.navAccount,
@@ -226,8 +236,9 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     int index,
     IconData outlineIcon,
     IconData filledIcon,
-    String label,
-  ) {
+    String label, {
+    int badge = 0,
+  }) {
     final isSelected = _currentIndex == index;
     return Expanded(
       // The orders tab is a coach-mark target.
@@ -240,6 +251,9 @@ class _MainScreenState extends ConsumerState<MainScreen> {
           setState(() => _currentIndex = index);
           if (index == 0) {
             ref.read(activeOrdersControllerProvider.notifier).refresh();
+          }
+          if (index == 2) {
+            ref.read(inboxControllerProvider.notifier).refresh();
           }
         },
         child: Stack(
@@ -283,7 +297,14 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   if (!isSelected) ...[
-                    Icon(outlineIcon, color: const Color(0xFF64748B), size: 24),
+                    _withBadge(
+                      Icon(
+                        outlineIcon,
+                        color: const Color(0xFF64748B),
+                        size: 24,
+                      ),
+                      badge,
+                    ),
                     const SizedBox(height: 4),
                     FittedBox(
                       fit: BoxFit.scaleDown,
@@ -316,6 +337,41 @@ class _MainScreenState extends ConsumerState<MainScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  /// Unread count on a tab icon (hidden at 0; "99+" past 99).
+  Widget _withBadge(Widget icon, int count) {
+    if (count <= 0) return icon;
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        icon,
+        Positioned(
+          right: -10,
+          top: -6,
+          child: Container(
+            key: const Key('navInboxBadge'),
+            constraints: const BoxConstraints(minWidth: 18),
+            height: 18,
+            padding: const EdgeInsets.symmetric(horizontal: 5),
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: AppColors.primary,
+              borderRadius: BorderRadius.circular(9),
+              border: Border.all(color: const Color(0xFFFCF9F8), width: 1.5),
+            ),
+            child: Text(
+              count > 99 ? '99+' : '$count',
+              style: AppTypography.caption5.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+                height: 1.1,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

@@ -58,6 +58,25 @@ class AppDates {
   /// `30 ต.ค. 2569, 14:30 น.` / `30 Oct 2026, 14:30`
   String dateTime(DateTime d) => '${date(d)}, ${time(d)}';
 
+  /// How long ago, for lists: `เมื่อสักครู่`, `5 นาทีที่แล้ว`, `3 ชม.ที่แล้ว`
+  /// (earlier today), `เมื่อวาน`, then the date.
+  String relative(DateTime d, {DateTime? now}) {
+    final n = now ?? DateTime.now();
+    final diff = n.difference(d);
+    if (diff.inMinutes < 1) return _th ? 'เมื่อสักครู่' : 'Just now';
+    if (diff.inHours < 1) {
+      return _th ? '${diff.inMinutes} นาทีที่แล้ว' : '${diff.inMinutes} min ago';
+    }
+    final days = DateTime(n.year, n.month, n.day)
+        .difference(DateTime(d.year, d.month, d.day))
+        .inDays;
+    if (days == 0) {
+      return _th ? '${diff.inHours} ชม.ที่แล้ว' : '${diff.inHours} h ago';
+    }
+    if (days == 1) return _th ? 'เมื่อวาน' : 'Yesterday';
+    return date(d);
+  }
+
   // ── ISO-8601 strings from the API (converted to device-local time) ────────
 
   /// [dateTime] of an API timestamp; [fallback] when null/empty, the raw

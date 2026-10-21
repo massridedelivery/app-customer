@@ -945,5 +945,13 @@
   "coachNext": "ถัดไป",
   "coachDone": "เข้าใจแล้ว",
   "profileHelp": "ช่วยเหลือ",
-  "profileHomeTour": "ดูคำแนะนำการใช้งานหน้าแรก"
+  "profileHomeTour": "ดูคำแนะนำการใช้งานหน้าแรก",
+  "navInbox": "กล่องข้อความ",
+  "inboxAll": "ทั้งหมด",
+  "inboxUnread": "ยังไม่อ่าน",
+  "inboxMarkAllRead": "อ่านทั้งหมดแล้ว",
+  "inboxEmpty": "ยังไม่มีข้อความ",
+  "inboxEmptySub": "โปรโมชันและข่าวสารจาก Mass Move จะมาแสดงที่นี่",
+  "inboxAllCaughtUp": "อ่านครบทุกข้อความแล้ว",
+  "inboxLoadFailed": "โหลดข้อความไม่สำเร็จ แตะเพื่อลองใหม่"
 }

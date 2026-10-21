@@ -3017,4 +3017,29 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profileHomeTour => 'Home page tips';
+
+  @override
+  String get navInbox => 'Inbox';
+
+  @override
+  String get inboxAll => 'All';
+
+  @override
+  String get inboxUnread => 'Unread';
+
+  @override
+  String get inboxMarkAllRead => 'Mark all read';
+
+  @override
+  String get inboxEmpty => 'No messages yet';
+
+  @override
+  String get inboxEmptySub =>
+      'Promotions and news from Mass Move will show up here';
+
+  @override
+  String get inboxAllCaughtUp => 'You\'re all caught up';
+
+  @override
+  String get inboxLoadFailed => 'Couldn\'t load messages. Tap to retry.';
 }

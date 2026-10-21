@@ -6,6 +6,7 @@ import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/managers/providers.dart';
 import 'package:customer_app/core/widgets/coach_marks.dart';
 import 'package:customer_app/features/home/presentation/screens/service_selection_screen.dart';
+import 'package:customer_app/features/main/presentation/controllers/home_tour_controller.dart';
 import 'package:customer_app/features/profile/presentation/screens/profile_screen.dart';
 import 'package:customer_app/features/trips/domain/models/history_order.dart';
 import 'package:customer_app/features/trips/presentation/screens/trips_screen.dart';
@@ -124,8 +125,19 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     }
   }
 
+  /// Account → "ดูคำแนะนำการใช้งานหน้าแรก": back to the home tab, then the
+  /// tour again once home has laid out.
+  void _replayCoachMarks() {
+    _coachTimer?.cancel();
+    setState(() => _currentIndex = 0);
+    Future<void>.delayed(const Duration(milliseconds: 450), () {
+      if (mounted) _showCoachMarks();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    ref.listen(homeTourReplayProvider, (_, _) => _replayCoachMarks());
     // `extendBody: true` draws the body behind the system navigation area.
     // Android's system nav (esp. 3-button) is opaque, so lift the floating bar
     // above it by the device inset. iOS only has a thin home indicator — adding

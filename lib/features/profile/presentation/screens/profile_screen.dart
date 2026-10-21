@@ -1,3 +1,4 @@
+import 'package:customer_app/features/main/presentation/controllers/home_tour_controller.dart';
 import 'package:customer_app/core/widgets/refetch_on_resume.dart';
 import 'package:customer_app/features/profile/presentation/screens/referral_screen.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
@@ -158,6 +159,20 @@ class ProfileScreen extends ConsumerWidget {
                         icon: Icons.shield_outlined,
                         title: l10n.profilePrivacyPolicy,
                         onTap: () => _openPrivacyPolicy(),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  _SectionHeader(title: l10n.profileHelp),
+                  const SizedBox(height: 8),
+                  _MenuCard(
+                    items: [
+                      _MenuTile(
+                        key: const Key('profileHomeTourRow'),
+                        icon: Icons.tips_and_updates_outlined,
+                        title: l10n.profileHomeTour,
+                        onTap: () =>
+                            ref.read(homeTourReplayProvider.notifier).request(),
                       ),
                       _MenuTile(
                         icon: Icons.headset_mic_outlined,

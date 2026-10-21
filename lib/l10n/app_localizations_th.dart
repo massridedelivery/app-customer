@@ -2973,4 +2973,10 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get coachDone => 'เข้าใจแล้ว';
+
+  @override
+  String get profileHelp => 'ช่วยเหลือ';
+
+  @override
+  String get profileHomeTour => 'ดูคำแนะนำการใช้งานหน้าแรก';
 }

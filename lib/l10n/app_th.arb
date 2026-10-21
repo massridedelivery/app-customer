@@ -943,5 +943,7 @@
   "coachOrdersBody": "รายการที่กำลังดำเนินการและประวัติทั้งหมดอยู่ที่แท็บนี้",
   "coachSkip": "ข้าม",
   "coachNext": "ถัดไป",
-  "coachDone": "เข้าใจแล้ว"
+  "coachDone": "เข้าใจแล้ว",
+  "profileHelp": "ช่วยเหลือ",
+  "profileHomeTour": "ดูคำแนะนำการใช้งานหน้าแรก"
 }

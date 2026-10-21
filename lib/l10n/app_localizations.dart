@@ -3343,11 +3343,11 @@ abstract class AppLocalizations {
   /// **'Sign-up failed. Please try again.'**
   String get authRegisterFailed;
 
-  /// No description provided for @onboardSplashTagline.
+  /// No description provided for @splashServices.
   ///
   /// In en, this message translates to:
-  /// **'Elevating city services'**
-  String get onboardSplashTagline;
+  /// **'Rides · Parcels · Food'**
+  String get splashServices;
 
   /// No description provided for @onboardRideTitle.
   ///

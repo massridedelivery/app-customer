@@ -4,6 +4,9 @@ class AppColors {
   // Brand Colors
   static const Color primary = foundationRed700; // Primary Brand Red
   static const Color accentRedDeep = foundationRed800;
+
+  /// The red of the app icon and the splash screens (native + Flutter).
+  static const Color brandIconRed = Color(0xFFC0343E);
   static const Color secondaryRed = foundationRed600;
   static const Color lightRed = foundationRed400;
   static const Color softRedBg = foundationRed100;

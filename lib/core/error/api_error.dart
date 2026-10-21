@@ -31,6 +31,9 @@ String apiErrorMessage(
       case DioExceptionType.badResponse:
         // The server's own message is the most useful — it names the reason.
         final serverMsg = _serverMessage(error.response?.data);
+        if (serverMsg != null && isServiceAreaMessage(serverMsg)) {
+          return l10n.errServiceAreaUnavailable;
+        }
         if (serverMsg != null) return serverMsg;
         return _statusMessage(error.response?.statusCode, l10n) ?? generic;
       case DioExceptionType.cancel:
@@ -44,6 +47,26 @@ String apiErrorMessage(
   // friendly message shows cleanly.
   final text = error.toString().replaceFirst(RegExp(r'^Exception:\s*'), '');
   return text.trim().isEmpty ? generic : text.trim();
+}
+
+/// The backend's out-of-zone refusal — a 422 `{"error":"service not available
+/// in your area"}` from the ride estimate / ride create / food order — or the
+/// localized message it was already mapped to.
+bool isServiceAreaMessage(String? text) {
+  if (text == null) return false;
+  if (text.toLowerCase().contains('service not available')) return true;
+  return text.contains(AppLanguage.l10n('th').errServiceAreaUnavailable) ||
+      text.contains(AppLanguage.l10n('en').errServiceAreaUnavailable);
+}
+
+/// Whether [error] (a [DioException], or an exception wrapping its message)
+/// is the out-of-zone refusal — screens show it as a notice, not a failure.
+bool isServiceAreaError(Object? error) {
+  if (error == null) return false;
+  if (error is DioException) {
+    return isServiceAreaMessage(_serverMessage(error.response?.data));
+  }
+  return isServiceAreaMessage(error.toString());
 }
 
 /// Pulls a human-readable message out of a JSON error body, if present.

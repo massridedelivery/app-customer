@@ -3042,4 +3042,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get inboxLoadFailed => 'Couldn\'t load messages. Tap to retry.';
+
+  @override
+  String get errServiceAreaUnavailable =>
+      'Service isn\'t available in this area yet';
+
+  @override
+  String get serviceAreaChangeAddress => 'Change delivery address';
+
+  @override
+  String get marketingOptIn => 'News & promotions';
+
+  @override
+  String get marketingOptInSub =>
+      'Campaign and promo notifications (order updates still arrive)';
+
+  @override
+  String get marketingOptInFailed =>
+      'Couldn\'t save the setting. Please try again.';
 }

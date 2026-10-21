@@ -3003,4 +3003,21 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get inboxLoadFailed => 'โหลดข้อความไม่สำเร็จ แตะเพื่อลองใหม่';
+
+  @override
+  String get errServiceAreaUnavailable => 'ยังไม่เปิดให้บริการในพื้นที่นี้';
+
+  @override
+  String get serviceAreaChangeAddress => 'เปลี่ยนที่อยู่จัดส่ง';
+
+  @override
+  String get marketingOptIn => 'รับข่าวสารและโปรโมชั่น';
+
+  @override
+  String get marketingOptInSub =>
+      'แจ้งเตือนแคมเปญและโปรโมชั่น (สถานะออเดอร์ยังแจ้งตามปกติ)';
+
+  @override
+  String get marketingOptInFailed =>
+      'บันทึกการตั้งค่าไม่สำเร็จ ลองใหม่อีกครั้ง';
 }

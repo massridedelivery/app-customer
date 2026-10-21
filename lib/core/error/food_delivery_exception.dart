@@ -1,3 +1,5 @@
+import 'package:customer_app/core/error/api_error.dart';
+import 'package:customer_app/core/localization/app_language.dart';
 import 'package:customer_app/core/error/server_exception.dart';
 import 'package:dio/dio.dart';
 
@@ -76,6 +78,10 @@ ServerException mapDioErrorToException(DioException e, String defaultMessage) {
   } else if (statusCode == 404) {
     return NotFoundException(message.toString());
   } else if (statusCode == 422) {
+    // Out of zone: show the same localized notice as the area check.
+    if (isServiceAreaMessage(message.toString())) {
+      return CoverageException(AppLanguage.l10n().errServiceAreaUnavailable);
+    }
     return CoverageException(message.toString());
   } else if (statusCode == 429) {
     return RateLimitException(message.toString());

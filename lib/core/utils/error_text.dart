@@ -1,3 +1,4 @@
+import 'package:customer_app/core/error/api_error.dart';
 import 'package:customer_app/core/localization/app_language.dart';
 
 /// A short, user-facing message for an error shown in the UI, in the app's
@@ -19,6 +20,9 @@ String friendlyError(
   const prefix = 'Exception: ';
   if (s.startsWith(prefix)) s = s.substring(prefix.length).trim();
   if (s.isEmpty) return fallback;
+  if (isServiceAreaMessage(s)) {
+    return AppLanguage.l10n(languageCode).errServiceAreaUnavailable;
+  }
 
   // Translate a recognised backend error (Go validator, common English
   // phrases) to Thai before anything else — Thai mode only.

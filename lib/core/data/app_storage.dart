@@ -23,4 +23,15 @@ class AppStorage {
   Future<void> setHasSeenHomeCoachMarks(bool value) async {
     await _prefs.setBool(_hasSeenHomeCoachMarksKey, value);
   }
+
+  static const _marketingOptInKey = 'marketing_opt_in';
+
+  /// Last "รับข่าวสารและโปรโมชั่น" choice sent to the backend. The API has no
+  /// getter for it, so this is what the switch shows; the backend default
+  /// (opted in) applies until the customer changes it.
+  bool get marketingOptIn => _prefs.getBool(_marketingOptInKey) ?? true;
+
+  Future<void> setMarketingOptIn(bool value) async {
+    await _prefs.setBool(_marketingOptInKey, value);
+  }
 }

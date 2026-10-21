@@ -5622,6 +5622,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Couldn\'t load messages. Tap to retry.'**
   String get inboxLoadFailed;
+
+  /// No description provided for @errServiceAreaUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Service isn\'t available in this area yet'**
+  String get errServiceAreaUnavailable;
+
+  /// No description provided for @serviceAreaChangeAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Change delivery address'**
+  String get serviceAreaChangeAddress;
+
+  /// No description provided for @marketingOptIn.
+  ///
+  /// In en, this message translates to:
+  /// **'News & promotions'**
+  String get marketingOptIn;
+
+  /// No description provided for @marketingOptInSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Campaign and promo notifications (order updates still arrive)'**
+  String get marketingOptInSub;
+
+  /// No description provided for @marketingOptInFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t save the setting. Please try again.'**
+  String get marketingOptInFailed;
 }
 
 class _AppLocalizationsDelegate

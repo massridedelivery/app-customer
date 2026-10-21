@@ -6,6 +6,7 @@ import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/error/api_error.dart';
 import 'package:customer_app/core/utils/auth_gate.dart';
 import 'package:customer_app/core/widgets/mass_loading_m.dart';
+import 'package:customer_app/features/home/data/repositories/service_area_repository.dart';
 import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
 import 'package:customer_app/features/ride_booking/presentation/controllers/booking_controller.dart';
 import 'package:customer_app/features/ride_booking/presentation/states/booking_state.dart';
@@ -48,6 +49,11 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
   // Re-entering builds a fresh screen → fresh estimate + a fresh timer.
   Timer? _nearbyTimer;
   AppLifecycleListener? _lifecycle;
+
+  // Service-area check of the pickup (GET /api/service-area/check), keyed by
+  // the pickup it was run for so a changed pickup is checked again.
+  LatLng? _areaCheckedPickup;
+  bool _pickupOutOfArea = false;
   static const _nearbyRefreshInterval = Duration(seconds: 30);
 
   @override
@@ -88,6 +94,17 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
           dropoff,
           promoCode: st.appliedPromoCode,
         );
+  }
+
+  /// Asks the backend whether [pickup] is inside an open zone, so an
+  /// out-of-area pickup is flagged up front instead of failing at request
+  /// time. Fails open (guest / network error → treated as available).
+  Future<void> _checkPickupArea(LatLng pickup) async {
+    final result = await ref
+        .read(serviceAreaRepositoryProvider)
+        .check(lat: pickup.latitude, lng: pickup.longitude);
+    if (!mounted || _areaCheckedPickup != pickup) return;
+    setState(() => _pickupOutOfArea = !result.available);
   }
 
   @override
@@ -326,6 +343,18 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
     }
     final bookingState = _lastKnownState; // always non-null
 
+    if (pickup != null && pickup != _areaCheckedPickup) {
+      _areaCheckedPickup = pickup;
+      _pickupOutOfArea = false;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _checkPickupArea(pickup);
+      });
+    }
+    // Out of area per the check, or the estimate came back 422 for it.
+    final outOfArea =
+        _pickupOutOfArea ||
+        (bookingAsync.hasError && isServiceAreaError(bookingAsync.error));
+
     // Auto-estimate fare on load (only once if state is empty)
     if (pickup != null && dropoff != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -360,7 +389,8 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
 
     // Listen for errors and show SnackBar (error is shown without replacing UI)
     ref.listen(bookingControllerProvider, (previous, next) {
-      if (next is AsyncError) {
+      // The out-of-area notice is shown in the sheet itself.
+      if (next is AsyncError && !isServiceAreaError(next.error)) {
         final messenger = ScaffoldMessenger.of(context);
         messenger.hideCurrentSnackBar();
         messenger.showSnackBar(
@@ -485,6 +515,7 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
               scrollController: scrollController,
               estimations: bookingState.estimations,
               isMissingLocation: pickup == null || dropoff == null,
+              outOfServiceArea: outOfArea,
               onPickLocation: () => context.pushReplacement('/place-search'),
               onRetryEstimate: pickup == null || dropoff == null
                   ? null

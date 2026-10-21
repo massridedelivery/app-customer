@@ -1031,5 +1031,10 @@
   "inboxEmpty": "No messages yet",
   "inboxEmptySub": "Promotions and news from Mass Move will show up here",
   "inboxAllCaughtUp": "You're all caught up",
-  "inboxLoadFailed": "Couldn't load messages. Tap to retry."
+  "inboxLoadFailed": "Couldn't load messages. Tap to retry.",
+  "errServiceAreaUnavailable": "Service isn't available in this area yet",
+  "serviceAreaChangeAddress": "Change delivery address",
+  "marketingOptIn": "News & promotions",
+  "marketingOptInSub": "Campaign and promo notifications (order updates still arrive)",
+  "marketingOptInFailed": "Couldn't save the setting. Please try again."
 }

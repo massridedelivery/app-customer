@@ -60,4 +60,26 @@ void main() {
     expect(en.date(AppDates.bangkok(DateTime.utc(2026, 10, 30, 17))),
         '31 Oct 2026');
   });
+
+  group('relative (inbox timestamps)', () {
+    final now = DateTime(2026, 10, 30, 14, 5);
+    test('Thai', () {
+      expect(th.relative(now.subtract(const Duration(seconds: 20)), now: now),
+          'เมื่อสักครู่');
+      expect(th.relative(now.subtract(const Duration(minutes: 7)), now: now),
+          '7 นาทีที่แล้ว');
+      expect(th.relative(DateTime(2026, 10, 30, 9, 0), now: now),
+          '5 ชม.ที่แล้ว');
+      expect(th.relative(DateTime(2026, 10, 29, 23, 0), now: now), 'เมื่อวาน');
+      expect(th.relative(DateTime(2026, 10, 20, 8, 0), now: now),
+          '20 ต.ค. 2569');
+    });
+    test('English', () {
+      expect(en.relative(now, now: now), 'Just now');
+      expect(en.relative(now.subtract(const Duration(minutes: 7)), now: now),
+          '7 min ago');
+      expect(en.relative(DateTime(2026, 10, 30, 9, 0), now: now), '5 h ago');
+      expect(en.relative(DateTime(2026, 10, 29, 23, 0), now: now), 'Yesterday');
+    });
+  });
 }

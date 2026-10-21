@@ -5574,6 +5574,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Home page tips'**
   String get profileHomeTour;
+
+  /// No description provided for @navInbox.
+  ///
+  /// In en, this message translates to:
+  /// **'Inbox'**
+  String get navInbox;
+
+  /// No description provided for @inboxAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get inboxAll;
+
+  /// No description provided for @inboxUnread.
+  ///
+  /// In en, this message translates to:
+  /// **'Unread'**
+  String get inboxUnread;
+
+  /// No description provided for @inboxMarkAllRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark all read'**
+  String get inboxMarkAllRead;
+
+  /// No description provided for @inboxEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No messages yet'**
+  String get inboxEmpty;
+
+  /// No description provided for @inboxEmptySub.
+  ///
+  /// In en, this message translates to:
+  /// **'Promotions and news from Mass Move will show up here'**
+  String get inboxEmptySub;
+
+  /// No description provided for @inboxAllCaughtUp.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re all caught up'**
+  String get inboxAllCaughtUp;
+
+  /// No description provided for @inboxLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load messages. Tap to retry.'**
+  String get inboxLoadFailed;
 }
 
 class _AppLocalizationsDelegate

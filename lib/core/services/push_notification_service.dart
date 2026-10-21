@@ -1,5 +1,6 @@
 import 'package:customer_app/core/managers/providers.dart';
 import 'package:customer_app/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:customer_app/features/inbox/presentation/inbox_controller.dart';
 import 'package:customer_app/router/app_routes.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
@@ -153,6 +154,11 @@ class PushNotificationService {
   }
 
   void _showForegroundNotification(RemoteMessage message) {
+    // A campaign push also lands in the inbox: reload it so the tab badge
+    // counts it straight away.
+    if (_ref.read(authControllerProvider).isAuthenticated) {
+      _ref.read(inboxControllerProvider.notifier).refresh();
+    }
     final notification = message.notification;
     if (notification == null) return; // Data-only: nothing to display.
 

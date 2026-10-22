@@ -30,3 +30,11 @@ String formatAddressParts(List<String?> parts) {
 
 bool _opensWith(String longer, String shorter) =>
     longer.toLowerCase().startsWith(shorter.toLowerCase());
+
+/// The label for a chosen place: its name first when it has one — "สยาม
+/// พารากอน, 991 ถ. พระรามที่ 1 …" — so the customer (and the driver) see the
+/// landmark, else the address (house number, road, …). A name the address
+/// already opens with isn't repeated.
+String placeLabel(String? name, String? address) =>
+    formatAddressParts([name, address]);
+

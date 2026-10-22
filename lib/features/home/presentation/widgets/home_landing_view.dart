@@ -1,3 +1,4 @@
+import 'package:customer_app/core/utils/address_formatter.dart';
 import 'package:customer_app/core/constants/app_assets.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_icons.dart';
@@ -309,7 +310,7 @@ class _HomeLandingViewState extends ConsumerState<HomeLandingView> {
                           );
                           notifier.setDropoffLocation(
                             LatLng(place.lat, place.lng),
-                            place.name,
+                            placeLabel(place.name, place.address),
                           );
                           context.push('/booking');
                         },

@@ -1,3 +1,4 @@
+import 'package:customer_app/core/utils/address_formatter.dart';
 import 'package:customer_app/core/constants/map_defaults.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
@@ -72,7 +73,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         final defaultPlace = defaultPlaces.first;
         ref.read(homeControllerProvider.notifier).setFoodLocation(
               LatLng(defaultPlace.lat, defaultPlace.lng),
-              defaultPlace.address ?? defaultPlace.name,
+              placeLabel(defaultPlace.name, defaultPlace.address),
             );
         // Refresh local variable reference to get the updated state
         homeState = ref.read(homeControllerProvider);
@@ -83,7 +84,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           if (place != null) {
             ref.read(homeControllerProvider.notifier).setFoodLocation(
                   LatLng(place.lat, place.lng),
-                  place.address ?? place.name,
+                  placeLabel(place.name, place.address),
                 );
             // Refresh local variable reference to get the updated state
             homeState = ref.read(homeControllerProvider);
@@ -188,7 +189,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           final defaultPlace = defaultPlaces.first;
           ref.read(homeControllerProvider.notifier).setFoodLocation(
                 LatLng(defaultPlace.lat, defaultPlace.lng),
-                defaultPlace.address ?? defaultPlace.name,
+                placeLabel(defaultPlace.name, defaultPlace.address),
               );
           return;
         }

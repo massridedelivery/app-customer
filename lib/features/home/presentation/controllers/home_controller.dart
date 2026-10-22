@@ -423,7 +423,7 @@ class HomeController extends _$HomeController {
         // Fallback only: GPS (or a manual pick) owns the home location.
         if (state.foodLocation == null) {
           state = state.copyWith(
-            foodAddress: defaultPlace.address ?? defaultPlace.name,
+            foodAddress: placeLabel(defaultPlace.name, defaultPlace.address),
             foodLocation: LatLng(defaultPlace.lat, defaultPlace.lng),
           );
         }
@@ -433,7 +433,7 @@ class HomeController extends _$HomeController {
         // manual pick) already won, so we don't clobber it.
         if (state.pickupLocation == null) {
           state = state.copyWith(
-            pickupAddress: defaultPlace.address ?? defaultPlace.name,
+            pickupAddress: placeLabel(defaultPlace.name, defaultPlace.address),
             pickupLocation: LatLng(defaultPlace.lat, defaultPlace.lng),
           );
         }
@@ -450,7 +450,7 @@ class HomeController extends _$HomeController {
         // Fallback only: GPS (or a manual pick) owns the home location.
         if (state.foodLocation == null) {
           state = state.copyWith(
-            foodAddress: place.address ?? place.name,
+            foodAddress: placeLabel(place.name, place.address),
             foodLocation: LatLng(place.lat, place.lng),
           );
         }
@@ -460,7 +460,7 @@ class HomeController extends _$HomeController {
         // manual pick) already won, so we don't clobber it.
         if (state.pickupLocation == null) {
           state = state.copyWith(
-            pickupAddress: place.address ?? place.name,
+            pickupAddress: placeLabel(place.name, place.address),
             pickupLocation: LatLng(place.lat, place.lng),
           );
         }

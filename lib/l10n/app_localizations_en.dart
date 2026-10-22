@@ -1920,7 +1920,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Can\'t submit your request right now';
 
   @override
-  String get profileReferralTitle => 'Refer a friend';
+  String get profileReferralTitle => 'Invite friends';
 
   @override
   String get profileReferralHeadline => 'Invite friends to MASS';

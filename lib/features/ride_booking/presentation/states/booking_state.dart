@@ -32,6 +32,8 @@ abstract class BookingState with _$BookingState {
     // Set when the chosen amount had to come down to a new maximum, so the
     // screen can say "ปรับเป็น N คะแนน" once.
     int? pointsAdjustedTo,
+    // The backend's reason for the cut (points.error), shown with it.
+    String? pointsAdjustMessage,
     // A booking went through without the code's discount (it stopped
     // applying in between) — tell the customer once.
     @Default(false) bool promoDroppedOnBooking,

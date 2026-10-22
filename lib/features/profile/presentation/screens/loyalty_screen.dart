@@ -231,6 +231,8 @@ class _BalanceCard extends StatelessWidget {
 }
 
 /// A history row: Thai label by type, the description, date, ± points.
+final _thai = RegExp(r'[\u0E00-\u0E7F]');
+
 class _EntryRow extends StatelessWidget {
   const _EntryRow({required this.entry});
 
@@ -270,7 +272,10 @@ class _EntryRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(label(l10n, entry), style: AppTypography.label2),
-                if (entry.description.isNotEmpty)
+                // Older rows carry an English description ("Earned from ride
+                // order"); the Thai label above already says it, so only a
+                // Thai description is shown.
+                if (_thai.hasMatch(entry.description))
                   Text(
                     entry.description,
                     maxLines: 2,

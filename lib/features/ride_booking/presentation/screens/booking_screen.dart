@@ -412,7 +412,11 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
             content: Text(
               dropped
                   ? l10n.ridePromoDroppedOnBooking
-                  : l10n.ridePointsAdjusted(fmtPoints(adjusted!)),
+                  : [
+                      // The backend's own reason first, when it gave one.
+                      ?st.pointsAdjustMessage,
+                      l10n.ridePointsAdjusted(fmtPoints(adjusted!)),
+                    ].join(' · '),
             ),
           ),
         );
@@ -545,11 +549,13 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
           // Bottom Vehicle Selection Sheet — draggable, snapping to ~1 row,
           // ~3 rows and almost-full-screen.
           DraggableScrollableSheet(
-            initialChildSize: 0.48,
+            // Tall enough to keep a couple of vehicles in view above the
+            // points row and the price summary.
+            initialChildSize: 0.6,
             minChildSize: 0.32,
             maxChildSize: 0.92,
             snap: true,
-            snapSizes: const [0.32, 0.48, 0.92],
+            snapSizes: const [0.32, 0.6, 0.92],
             builder: (context, scrollController) => VehicleSelectionSheet(
               scrollController: scrollController,
               estimations: bookingState.estimations,

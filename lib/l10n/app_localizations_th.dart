@@ -1899,7 +1899,7 @@ class AppLocalizationsTh extends AppLocalizations {
   String get profilePdpaDeletionFailed => 'ไม่สามารถยื่นคำร้องได้ในขณะนี้';
 
   @override
-  String get profileReferralTitle => 'แนะนำเพื่อน';
+  String get profileReferralTitle => 'ชวนเพื่อน';
 
   @override
   String get profileReferralHeadline => 'ชวนเพื่อนมาใช้ MASS';
@@ -2747,7 +2747,7 @@ class AppLocalizationsTh extends AppLocalizations {
   String get referralStatCompleted => 'สำเร็จ';
 
   @override
-  String get referralStatPoints => 'แต้มที่ได้';
+  String get referralStatPoints => 'คะแนนที่ได้';
 
   @override
   String referralStatPending(int count, int points) {

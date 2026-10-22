@@ -3610,7 +3610,7 @@ abstract class AppLocalizations {
   /// No description provided for @profileReferralTitle.
   ///
   /// In en, this message translates to:
-  /// **'Refer a friend'**
+  /// **'Invite friends'**
   String get profileReferralTitle;
 
   /// No description provided for @profileReferralHeadline.

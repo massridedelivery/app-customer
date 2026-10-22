@@ -66,7 +66,8 @@ class RideConfirmView extends ConsumerWidget {
 
     return Material(
       key: const Key('rideConfirmView'),
-      color: AppColors.semanticGrayNeutralBgWhite,
+      // Light grey page so the white cards stand apart (design D).
+      color: const Color(0xFFF2F2F5),
       child: SafeArea(
         child: Stack(
           children: [
@@ -234,7 +235,12 @@ class RideConfirmView extends ConsumerWidget {
                       ),
                       const SizedBox(height: 12),
                       if (selected != null)
-                        RidePriceSummary(estimation: selected, code: code),
+                        RidePriceSummary(
+                          estimation: selected,
+                          code: code,
+                          color: Colors.white,
+                          margin: EdgeInsets.zero,
+                        ),
                     ],
                   ),
                 ),

@@ -110,10 +110,14 @@ class RidePriceSummary extends StatelessWidget {
     super.key,
     required this.estimation,
     required this.code,
+    this.color = const Color(0xFFF7F7F9),
+    this.margin = const EdgeInsets.fromLTRB(16, 8, 16, 0),
   });
 
   final VehicleEstimation estimation;
   final String? code;
+  final Color color;
+  final EdgeInsetsGeometry margin;
 
   @override
   Widget build(BuildContext context) {
@@ -149,10 +153,10 @@ class RidePriceSummary extends StatelessWidget {
     );
     return Container(
       key: const Key('ridePriceSummary'),
-      margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+      margin: margin,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: const Color(0xFFF7F7F9),
+        color: color,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(

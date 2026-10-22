@@ -3060,4 +3060,233 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get marketingOptInFailed =>
       'Couldn\'t save the setting. Please try again.';
+
+  @override
+  String referralHeadlineV2(String baht, String points) {
+    return 'Friend gets ฿$baht · You get $points points';
+  }
+
+  @override
+  String get referralStepsTitle => 'How it works';
+
+  @override
+  String get referralStep1 => 'Share your code with a friend';
+
+  @override
+  String get referralStep2 => 'They use it on their first ride';
+
+  @override
+  String get referralStep3 => 'You get points when their trip is done';
+
+  @override
+  String referralStatsLine(String invited, String completed, String points) {
+    return 'Invited $invited · Done $completed · Earned $points points';
+  }
+
+  @override
+  String get referralFriendsTitle => 'Your friends';
+
+  @override
+  String get referralFriendPending => 'Waiting for first trip';
+
+  @override
+  String referralFriendRewarded(String points) {
+    return '+$points points';
+  }
+
+  @override
+  String get referralFriendCancelled => 'Cancelled';
+
+  @override
+  String get referralNotOpen => 'The referral programme isn\'t open right now';
+
+  @override
+  String get referralHaveFriendCode => 'Got a code from a friend?';
+
+  @override
+  String referralHaveFriendCodeSub(String baht) {
+    return 'Enter it in the promo box on your first ride for ฿$baht off';
+  }
+
+  @override
+  String get pointsTitle => 'My points';
+
+  @override
+  String get pointsUnit => 'points';
+
+  @override
+  String pointsWorth(String baht) {
+    return 'Worth ≈ ฿$baht';
+  }
+
+  @override
+  String pointsExpiring(String points, String date) {
+    return '$points points expire on $date';
+  }
+
+  @override
+  String get pointsActionRedeem => 'Redeem';
+
+  @override
+  String get pointsActionVouchers => 'My vouchers';
+
+  @override
+  String get pointsActionInvite => 'Invite friends';
+
+  @override
+  String pointsEarnRule(String points, String min) {
+    return 'Earn $points points for every ฿100 paid (min ฿$min)';
+  }
+
+  @override
+  String get pointsDisabled => 'Points are temporarily unavailable';
+
+  @override
+  String get pointsHistory => 'Points history';
+
+  @override
+  String get pointsHistoryEmpty => 'No points activity yet';
+
+  @override
+  String get pointsTypeEarn => 'Earned';
+
+  @override
+  String get pointsTypeReferral => 'Friend referral';
+
+  @override
+  String get pointsTypeRedeem => 'Points used';
+
+  @override
+  String get pointsTypeVoucher => 'Voucher redeemed';
+
+  @override
+  String get pointsTypeRefund => 'Points refunded';
+
+  @override
+  String get pointsTypeExpire => 'Expired';
+
+  @override
+  String get pointsTypeAdjust => 'Adjusted by staff';
+
+  @override
+  String get rewardsTitle => 'Redeem points';
+
+  @override
+  String rewardsYouHave(String points) {
+    return 'You have $points points';
+  }
+
+  @override
+  String rewardsCost(String points) {
+    return '$points pts';
+  }
+
+  @override
+  String rewardsStockLeft(String count) {
+    return '$count left';
+  }
+
+  @override
+  String rewardsEndsAt(String date) {
+    return 'Ends $date';
+  }
+
+  @override
+  String get rewardsRedeem => 'Redeem';
+
+  @override
+  String rewardsShort(String points) {
+    return '$points more points needed';
+  }
+
+  @override
+  String get rewardsOutOfStock => 'Sold out';
+
+  @override
+  String get rewardsLimitReached => 'Limit reached';
+
+  @override
+  String rewardsNotStarted(String date) {
+    return 'Coming soon · starts $date';
+  }
+
+  @override
+  String get rewardsComingSoon => 'Coming soon';
+
+  @override
+  String get rewardsEnded => 'Ended';
+
+  @override
+  String get rewardsEmpty => 'No rewards to redeem yet';
+
+  @override
+  String get rewardsTerms => 'Terms';
+
+  @override
+  String rewardsConfirm(String cost, String item) {
+    return 'Use $cost points for $item?';
+  }
+
+  @override
+  String rewardsConfirmLeft(String points) {
+    return 'Points left: $points';
+  }
+
+  @override
+  String get rewardsConfirmButton => 'Confirm';
+
+  @override
+  String get rewardsSuccessTitle => 'Redeemed!';
+
+  @override
+  String rewardsValidUntil(String date) {
+    return 'Valid until $date';
+  }
+
+  @override
+  String get rewardsUseNow => 'Use now';
+
+  @override
+  String get rewardsSeeVouchers => 'See my vouchers';
+
+  @override
+  String get vouchersTabActive => 'Available';
+
+  @override
+  String get vouchersTabUsed => 'Used';
+
+  @override
+  String get vouchersTabExpired => 'Expired';
+
+  @override
+  String vouchersUsedAt(String date, String service) {
+    return 'Used $date · $service';
+  }
+
+  @override
+  String get vouchersEmpty => 'No vouchers yet';
+
+  @override
+  String get vouchersGoRedeem => 'Redeem points';
+
+  @override
+  String get vouchersChooseService => 'Use this voucher for…';
+
+  @override
+  String get vouchersCodeCopiedHint =>
+      'Code copied — paste it in the promo box';
+
+  @override
+  String get serviceRide => 'Ride';
+
+  @override
+  String get serviceFood => 'Food';
+
+  @override
+  String get serviceMessenger => 'Parcel';
+
+  @override
+  String homeReferralBanner(String points) {
+    return 'Invite friends, get $points points';
+  }
 }

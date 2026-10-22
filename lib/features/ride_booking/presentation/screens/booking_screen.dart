@@ -1,4 +1,5 @@
 import 'package:customer_app/features/profile/data/welcome_promo_store.dart';
+import 'package:customer_app/features/profile/presentation/controllers/loyalty_providers.dart';
 import 'dart:async';
 
 import 'package:customer_app/core/constants/app_colors.dart';
@@ -361,10 +362,12 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
         if (!bookingAsync.isLoading &&
             !bookingAsync.hasError &&
             _lastKnownState.distanceKm == null) {
-          // A referred newcomer's welcome code (e.g. FRIEND50) is applied on
-          // their first ride; they can still remove it (✕ on the coupon).
+          // A voucher picked with "ใช้เลย", else a referred newcomer's
+          // welcome code (e.g. FRIEND50), is applied on this first estimate;
+          // they can still remove it (✕ on the coupon).
           final welcome = _lastKnownState.appliedPromoCode == null
-              ? ref.read(welcomePromoStoreProvider).code
+              ? ref.read(pendingPromoCodeProvider.notifier).take('RIDE') ??
+                    ref.read(welcomePromoStoreProvider).code
               : null;
           ref
               .read(bookingControllerProvider.notifier)

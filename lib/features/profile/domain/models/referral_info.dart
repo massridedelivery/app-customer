@@ -16,7 +16,15 @@ class ReferralInfo {
     this.referredByWelcomeCode,
     this.referredByCode,
     this.referredByWelcomeValue = 0,
+    this.shareMessage,
+    this.friends = const [],
   });
+
+  /// Ready-made share text from the backend ("ใช้โค้ด K7QM2X ลด ฿50 …").
+  final String? shareMessage;
+
+  /// Friends who used the code, names masked by the backend.
+  final List<ReferralFriend> friends;
 
   /// False hides the referral menu and page.
   final bool enabled;
@@ -77,9 +85,20 @@ class ReferralInfo {
       code: asString(codeJson['code']),
       maxUses: codeJson['max_uses'] == null ? null : asInt(codeJson['max_uses']),
       currentUses: asInt(codeJson['current_uses']),
-      referrerRewardPoints: asInt(json['referrer_reward_points']),
+      referrerRewardPoints: asInt(
+        json['referrer_points'] ?? json['referrer_reward_points'],
+      ),
       friendRewardCode: asString(friend['code']),
-      friendRewardValue: asDouble(friend['discount_value']),
+      friendRewardValue: asDouble(
+        json['referee_discount_baht'] ?? friend['discount_value'],
+      ),
+      shareMessage: asString(json['share_message']),
+      friends: json['friends'] is List
+          ? (json['friends'] as List)
+                .whereType<Map>()
+                .map((m) => ReferralFriend.fromJson(map(m)))
+                .toList()
+          : const [],
       stats: ReferralStats.fromJson(map(json['stats'])),
       canApplyCode: json['can_apply_code'] == true,
       applyBefore: DateTime.tryParse('${json['apply_before'] ?? ''}'),
@@ -111,11 +130,42 @@ class ReferralStats {
   factory ReferralStats.fromJson(Map<String, dynamic> json) {
     int asInt(Object? v) => v is num ? v.toInt() : int.tryParse('$v') ?? 0;
     return ReferralStats(
-      totalReferrals: asInt(json['total_referrals']),
-      completedCount: asInt(json['completed_count']),
+      totalReferrals: asInt(json['invited'] ?? json['total_referrals']),
+      completedCount: asInt(json['completed'] ?? json['completed_count']),
       pendingCount: asInt(json['pending_count']),
-      totalRewardPoints: asInt(json['total_reward_points']),
+      totalRewardPoints: asInt(
+        json['points_earned'] ?? json['total_reward_points'],
+      ),
       pendingRewardPoints: asInt(json['pending_reward_points']),
     );
   }
+}
+
+/// One friend on the referral list.
+class ReferralFriend {
+  const ReferralFriend({
+    required this.name,
+    required this.status,
+    this.points = 0,
+    this.createdAt,
+    this.rewardedAt,
+  });
+
+  final String name;
+
+  /// PENDING (first trip not done yet) | REWARDED | CANCELLED.
+  final String status;
+
+  /// The points this friend is worth (earned once REWARDED).
+  final int points;
+  final DateTime? createdAt;
+  final DateTime? rewardedAt;
+
+  factory ReferralFriend.fromJson(Map<String, dynamic> json) => ReferralFriend(
+    name: json['name']?.toString() ?? '',
+    status: (json['status']?.toString() ?? 'PENDING').toUpperCase(),
+    points: json['points'] is num ? (json['points'] as num).toInt() : 0,
+    createdAt: DateTime.tryParse('${json['created_at'] ?? ''}'),
+    rewardedAt: DateTime.tryParse('${json['rewarded_at'] ?? ''}'),
+  );
 }

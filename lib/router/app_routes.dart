@@ -44,7 +44,10 @@ import 'package:customer_app/features/profile/presentation/screens/profile_scree
 import 'package:customer_app/features/profile/presentation/screens/edit_profile_screen.dart';
 import 'package:customer_app/features/profile/presentation/screens/account_email_screen.dart';
 import 'package:customer_app/features/profile/presentation/screens/account_phone_screen.dart';
+import 'package:customer_app/features/profile/domain/models/loyalty_models.dart';
 import 'package:customer_app/features/profile/presentation/screens/loyalty_screen.dart';
+import 'package:customer_app/features/profile/presentation/screens/rewards_screen.dart';
+import 'package:customer_app/features/profile/presentation/screens/vouchers_screen.dart';
 import 'package:customer_app/features/food_delivery/presentation/screens/saved_restaurants_screen.dart';
 import 'package:customer_app/features/payment/presentation/screens/credit_card_list_screen.dart';
 import 'package:customer_app/features/payment/presentation/screens/add_credit_card_screen.dart';
@@ -126,7 +129,7 @@ bool _requiresAuth(String path) {
     '/live', '/rating', '/payment', '/payment-summary',
     '/chat', '/trips', '/trip',
     '/profile', '/edit-profile', '/account-email', '/account-phone',
-    '/loyalty',
+    '/loyalty', '/rewards', '/vouchers',
     '/saved-places', '/saved-restaurants', '/add-address',
     // '/promos' is public (guest can browse promos + detail via the public
     // endpoint); applying a code still happens at checkout, which needs auth.
@@ -548,6 +551,33 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/loyalty',
         builder: (context, state) => const LoyaltyScreen(),
+      ),
+      GoRoute(
+        path: '/rewards',
+        builder: (context, state) => const RewardsScreen(),
+        routes: [
+          GoRoute(
+            path: 'detail',
+            builder: (context, state) {
+              final (reward, balance, enabled) =
+                  state.extra! as (Reward, int, bool);
+              return RewardDetailScreen(
+                reward: reward,
+                balance: balance,
+                pointsEnabled: enabled,
+              );
+            },
+          ),
+          GoRoute(
+            path: 'success',
+            builder: (context, state) =>
+                RedeemSuccessScreen(result: state.extra! as RedeemResult),
+          ),
+        ],
+      ),
+      GoRoute(
+        path: '/vouchers',
+        builder: (context, state) => const VouchersScreen(),
       ),
       GoRoute(
         path: '/saved-places',

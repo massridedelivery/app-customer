@@ -1,271 +1,196 @@
-import 'package:customer_app/core/widgets/refetch_on_resume.dart';
-import 'package:customer_app/core/utils/app_dates.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/widgets/mass_loading_m.dart';
-import 'package:customer_app/features/profile/data/datasources/loyalty_remote_data_source.dart';
+import 'package:customer_app/core/widgets/refetch_on_resume.dart';
+import 'package:customer_app/features/profile/domain/models/loyalty_models.dart';
+import 'package:customer_app/features/profile/presentation/controllers/loyalty_providers.dart';
+import 'package:customer_app/features/profile/presentation/widgets/loyalty_format.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
-/// An API timestamp as a localized date; tolerates null / non-string values
-/// (guards against crashing the list).
-String _safeDate(BuildContext context, dynamic v) =>
-    AppDates.of(context).isoDate(v?.toString(), fallback: '');
-
-/// Format a possibly-null / non-num amount without throwing.
-String _safeAmount(dynamic v) {
-  final n = v is num ? v : num.tryParse(v?.toString() ?? '') ?? 0;
-  return n.toStringAsFixed(2);
-}
-
+/// "คะแนนของฉัน": balance and its baht value, points about to expire,
+/// shortcuts to แลกคะแนน / คูปองของฉัน / ชวนเพื่อน, and the points history.
 class LoyaltyScreen extends ConsumerWidget {
   const LoyaltyScreen({super.key});
 
   void _refresh(WidgetRef ref) {
     ref.invalidate(loyaltySummaryProvider);
-    ref.invalidate(_loyaltyPointsProvider);
-    ref.invalidate(_cashbackProvider);
+    ref.invalidate(pointsHistoryProvider);
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) => RefetchOnResume(
-    onResume: () => _refresh(ref),
-    child: _buildPage(context, ref),
-  );
-
-  Widget _buildPage(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final summaryAsync = ref.watch(loyaltySummaryProvider);
-    final pointsAsync = ref.watch(_loyaltyPointsProvider);
-    final cashbackAsync = ref.watch(_cashbackProvider);
-    final l10n = AppLocalizations.of(context)!;
-
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text('MASS Rewards'),
+    return RefetchOnResume(
+      onResume: () => _refresh(ref),
+      child: Scaffold(
         backgroundColor: AppColors.background,
-        foregroundColor: AppColors.textPrimary,
-        elevation: 0,
-        surfaceTintColor: Colors.transparent,
-      ),
-      body: summaryAsync.when(
-        loading: () => const Center(child: MassLoadingM(size: 72)),
-        error: (e, s) => Center(
-          child: Text(
-            l10n.profileLoyaltyLoadFailed,
-            style: AppTypography.body2,
-          ),
+        appBar: AppBar(
+          title: Text(l10n.pointsTitle, style: AppTypography.heading4),
+          backgroundColor: AppColors.background,
+          foregroundColor: AppColors.textPrimary,
+          elevation: 0,
+          surfaceTintColor: Colors.transparent,
         ),
-        data: (summary) => RefreshIndicator(
-          onRefresh: () async => _refresh(ref),
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              children: [
-                // Tier card
-                _TierCard(summary: summary),
-                const SizedBox(height: 20),
-                // Stats row
-                Row(
-                  children: [
-                    _StatCard(
-                      label: l10n.profileLoyaltyPointsBalance,
-                      value: '${summary['points_balance'] ?? 0}',
-                      icon: Icons.stars_rounded,
-                      color: const Color(0xFFEB8C00),
-                    ),
-                    const SizedBox(width: 12),
-                    _StatCard(
-                      label: l10n.profileLoyaltyCashbackBalance,
-                      value: _safeAmount(summary['cashback_balance']),
-                      icon: Icons.account_balance_wallet_rounded,
-                      color: AppColors.primary,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                // Redeem button
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: () => _showRedeemDialog(
-                      context,
-                      ref,
-                      summary['points_balance'] ?? 0,
-                    ),
-                    icon: const Icon(Icons.redeem),
-                    label: Text(l10n.profileLoyaltyRedeemPoints),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                // Points transactions
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    l10n.profileLoyaltyPointsHistory,
-                    style: AppTypography.heading4,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                pointsAsync.when(
-                  loading: () => const Center(child: MassLoadingM(size: 48)),
-                  error: (e, s) => const SizedBox.shrink(),
-                  data: (data) {
-                    final txns = (data['transactions'] as List?) ?? [];
-                    return Column(
-                      children: txns
-                          .map<Widget>(
-                            (t) => _TransactionTile(
-                              type: (t['type'] ?? '').toString(),
-                              desc: (t['description'] ?? '').toString(),
-                              points: (t['points'] as num?)?.toInt() ?? 0,
-                              date: _safeDate(context, t['created_at']),
-                            ),
-                          )
-                          .toList(),
-                    );
-                  },
-                ),
-                const SizedBox(height: 24),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    l10n.profileLoyaltyCashbackHistory,
-                    style: AppTypography.heading4,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                cashbackAsync.when(
-                  loading: () => const Center(child: MassLoadingM(size: 48)),
-                  error: (e, s) => const SizedBox.shrink(),
-                  data: (list) => Column(
-                    children: list
-                        .map<Widget>(
-                          (t) => _CashbackTile(item: t as Map<String, dynamic>),
-                        )
-                        .toList(),
-                  ),
-                ),
-                const SizedBox(height: 80),
-              ],
-            ),
+        body: summaryAsync.when(
+          loading: () => const Center(child: MassLoadingM(size: 72)),
+          error: (e, s) => _Retry(
+            text: l10n.profileLoadFailed,
+            onTap: () => _refresh(ref),
           ),
-        ),
-      ),
-    );
-  }
-
-  void _showRedeemDialog(BuildContext context, WidgetRef ref, int points) {
-    final l10n = AppLocalizations.of(context)!;
-    final controller = TextEditingController();
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.profileLoyaltyRedeemPoints),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              l10n.profileLoyaltyYouHavePoints('$points'),
-              style: AppTypography.body2,
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: controller,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                labelText: l10n.profileLoyaltyRedeemAmountLabel,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(l10n.cancel),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              final pts = int.tryParse(controller.text) ?? 0;
-              if (pts > 0 && pts <= points) {
-                try {
-                  await ref
-                      .read(loyaltyRemoteDataSourceProvider)
-                      .redeemPoints(pts);
-                  ref.invalidate(loyaltySummaryProvider);
-                  ref.invalidate(_loyaltyPointsProvider);
-                  if (ctx.mounted) {
-                    Navigator.pop(ctx);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(l10n.profileLoyaltyRedeemSuccess)),
-                    );
-                  }
-                } catch (e) {
-                  if (ctx.mounted) Navigator.pop(ctx);
-                }
-              }
+          data: (summary) => RefreshIndicator(
+            color: AppColors.primary,
+            onRefresh: () async {
+              _refresh(ref);
+              await ref.read(loyaltySummaryProvider.future);
             },
-            child: Text(l10n.profileLoyaltyRedeem),
+            child: _Body(summary: summary),
           ),
-        ],
+        ),
       ),
     );
   }
 }
 
-// Additional providers scoped to this page. autoDispose so every visit reads
-// fresh balances — points come back after a cancelled trip (and change after a
-// completed one) while the page isn't open.
-final loyaltySummaryProvider = FutureProvider.autoDispose<Map<String, dynamic>>(
-  (ref) async {
-    return ref.watch(loyaltyRemoteDataSourceProvider).getSummary();
-  },
-);
+class _Body extends ConsumerWidget {
+  const _Body({required this.summary});
 
-final _loyaltyPointsProvider = FutureProvider.autoDispose<Map<String, dynamic>>(
-  (ref) async {
-    return ref.watch(loyaltyRemoteDataSourceProvider).getPoints();
-  },
-);
+  final LoyaltySummary summary;
 
-final _cashbackProvider = FutureProvider.autoDispose<List<dynamic>>((
-  ref,
-) async {
-  return ref.watch(loyaltyRemoteDataSourceProvider).getCashbackHistory();
-});
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final history = ref.watch(pointsHistoryProvider);
+    final entries = history.value?.items ?? const <PointsEntry>[];
+    final hasMore = history.value?.hasMore ?? false;
 
-// ─── Widgets ─────────────────────────────────────────────────────────────────
+    final header = <Widget>[
+      if (!summary.pointsEnabled) ...[
+        _Banner(
+          key: const Key('pointsDisabledBanner'),
+          icon: Icons.info_outline_rounded,
+          text: l10n.pointsDisabled,
+        ),
+        const SizedBox(height: 12),
+      ],
+      _BalanceCard(summary: summary),
+      if (summary.expiringPoints > 0 && summary.expiringAt != null) ...[
+        const SizedBox(height: 12),
+        _Banner(
+          key: const Key('pointsExpiring'),
+          icon: Icons.schedule_rounded,
+          text: l10n.pointsExpiring(
+            fmtPoints(summary.expiringPoints),
+            fmtThaiDate(context, summary.expiringAt!),
+          ),
+        ),
+      ],
+      const SizedBox(height: 16),
+      Row(
+        children: [
+          _Shortcut(
+            key: const Key('pointsGoRewards'),
+            icon: Icons.redeem_rounded,
+            label: l10n.pointsActionRedeem,
+            onTap: () => context.push('/rewards'),
+          ),
+          const SizedBox(width: 10),
+          _Shortcut(
+            key: const Key('pointsGoVouchers'),
+            icon: Icons.confirmation_number_outlined,
+            label: l10n.pointsActionVouchers,
+            onTap: () => context.push('/vouchers'),
+          ),
+          const SizedBox(width: 10),
+          _Shortcut(
+            key: const Key('pointsGoReferral'),
+            icon: Icons.group_add_outlined,
+            label: l10n.pointsActionInvite,
+            onTap: () => context.push('/referral'),
+          ),
+        ],
+      ),
+      if (summary.earnPer100Ride > 0) ...[
+        const SizedBox(height: 16),
+        Text(
+          l10n.pointsEarnRule(
+            fmtPoints(summary.earnPer100Ride),
+            fmtBaht(summary.earnMinOrder),
+          ),
+          key: const Key('pointsEarnRule'),
+          style: AppTypography.body3.copyWith(color: AppColors.textSecondary),
+        ),
+      ],
+      const SizedBox(height: 24),
+      Text(l10n.pointsHistory, style: AppTypography.heading5),
+      const SizedBox(height: 8),
+      if (history.isLoading && entries.isEmpty)
+        const Padding(
+          padding: EdgeInsets.all(24),
+          child: Center(child: MassLoadingM(size: 48)),
+        )
+      else if (history.hasError && entries.isEmpty)
+        _Retry(
+          text: l10n.profileLoadFailed,
+          onTap: () => ref.invalidate(pointsHistoryProvider),
+        )
+      else if (entries.isEmpty)
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 24),
+          child: Center(
+            child: Text(
+              l10n.pointsHistoryEmpty,
+              style: AppTypography.body2.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ),
+        ),
+    ];
 
-class _TierCard extends StatelessWidget {
-  final Map<String, dynamic> summary;
-  const _TierCard({required this.summary});
+    return NotificationListener<ScrollNotification>(
+      onNotification: (n) {
+        if (n.metrics.extentAfter < 400) {
+          ref.read(pointsHistoryProvider.notifier).loadMore();
+        }
+        return false;
+      },
+      child: ListView.builder(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+        itemCount: header.length + entries.length + (hasMore ? 1 : 0),
+        itemBuilder: (context, i) {
+          if (i < header.length) return header[i];
+          final j = i - header.length;
+          if (j == entries.length) {
+            return const Padding(
+              padding: EdgeInsets.all(16),
+              child: Center(child: MassLoadingM(size: 40)),
+            );
+          }
+          return _EntryRow(entry: entries[j]);
+        },
+      ),
+    );
+  }
+}
+
+class _BalanceCard extends StatelessWidget {
+  const _BalanceCard({required this.summary});
+
+  final LoyaltySummary summary;
 
   @override
   Widget build(BuildContext context) {
-    final tier = summary['tier'] ?? 'Bronze';
-    final toNext = summary['points_to_next_tier'] ?? 1000;
-    final points = summary['points_balance'] ?? 0;
-    final nextTier = summary['next_tier'] ?? 'Silver';
-    final progress = (points / (points + toNext)).clamp(0.0, 1.0);
-    final cashbackPct = ((summary['cashback_rate'] ?? 0.0) * 100)
-        .toStringAsFixed(0);
     final l10n = AppLocalizations.of(context)!;
-
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(24),
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -276,71 +201,28 @@ class _TierCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'MASS REWARDS',
-                    style: AppTypography.support1.copyWith(
-                      color: Colors.white60,
-                      letterSpacing: 2,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '${summary['tier_icon'] ?? ''} $tier',
-                    style: AppTypography.heading3.copyWith(color: Colors.white),
-                  ),
-                ],
+              Text(
+                fmtPoints(summary.totalPoints),
+                key: const Key('pointsBalance'),
+                style: AppTypography.heading1.copyWith(
+                  color: Colors.white,
+                  fontSize: 40,
+                ),
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white24,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  l10n.profileLoyaltyCashbackRate(cashbackPct),
-                  style: AppTypography.caption4.copyWith(color: Colors.white),
-                ),
+              const SizedBox(width: 8),
+              Text(
+                l10n.pointsUnit,
+                style: AppTypography.heading5.copyWith(color: Colors.white),
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 4),
           Text(
-            l10n.profileLoyaltyPoints('$points'),
-            style: AppTypography.heading2.copyWith(color: Colors.white),
-          ),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                l10n.profileLoyaltyNextTier('$nextTier'),
-                style: AppTypography.caption5.copyWith(color: Colors.white60),
-              ),
-              Text(
-                l10n.profileLoyaltyPointsToGo('$toNext'),
-                style: AppTypography.caption5.copyWith(color: Colors.white70),
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: LinearProgressIndicator(
-              value: progress.toDouble(),
-              backgroundColor: Colors.white24,
-              valueColor: const AlwaysStoppedAnimation<Color>(
-                AppColors.accentRedVibrant,
-              ),
-              minHeight: 6,
-            ),
+            l10n.pointsWorth(fmtBaht(summary.balanceBaht)),
+            style: AppTypography.body2.copyWith(color: Colors.white70),
           ),
         ],
       ),
@@ -348,177 +230,174 @@ class _TierCard extends StatelessWidget {
   }
 }
 
-class _StatCard extends StatelessWidget {
-  final String label;
-  final String value;
-  final IconData icon;
-  final Color color;
-  const _StatCard({
-    required this.label,
-    required this.value,
+/// A history row: Thai label by type, the description, date, ± points.
+class _EntryRow extends StatelessWidget {
+  const _EntryRow({required this.entry});
+
+  final PointsEntry entry;
+
+  static String label(AppLocalizations l10n, PointsEntry e) =>
+      switch (e.type) {
+        'EARN' when e.orderType == 'REFERRAL' => l10n.pointsTypeReferral,
+        'EARN' => l10n.pointsTypeEarn,
+        // Points spent on a voucher have no order; on a ride they do.
+        'REDEEM' when e.orderType == null => l10n.pointsTypeVoucher,
+        'REDEEM' => l10n.pointsTypeRedeem,
+        'REFUND' => l10n.pointsTypeRefund,
+        'EXPIRE' => l10n.pointsTypeExpire,
+        'ADJUST' => l10n.pointsTypeAdjust,
+        _ => e.type,
+      };
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final positive = entry.points > 0;
+    final color = positive
+        ? AppColors.semanticSuccessFgHigh
+        : (entry.type == 'EXPIRE'
+              ? AppColors.textSecondary
+              : AppColors.semanticErrorFgHigh);
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      decoration: const BoxDecoration(
+        border: Border(bottom: BorderSide(color: Color(0xFFEFEFF2))),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label(l10n, entry), style: AppTypography.label2),
+                if (entry.description.isNotEmpty)
+                  Text(
+                    entry.description,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.caption4.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                if (entry.createdAt != null)
+                  Text(
+                    fmtThaiDate(context, entry.createdAt!),
+                    style: AppTypography.caption5.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          Text(
+            '${positive ? '+' : '−'}${fmtPoints(entry.points.abs())}',
+            style: AppTypography.heading5.copyWith(color: color),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Shortcut extends StatelessWidget {
+  const _Shortcut({
+    super.key,
     required this.icon,
-    required this.color,
+    required this.label,
+    required this.onTap,
   });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(
-          color: Colors.white,
+      child: Material(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFFE5E2E1), width: 0.5),
+          onTap: onTap,
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 6),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: const Color(0xFFE5E2E1), width: 0.5),
+            ),
+            child: Column(
+              children: [
+                Icon(icon, color: AppColors.primary),
+                const SizedBox(height: 6),
+                Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  style: AppTypography.label3,
+                ),
+              ],
+            ),
+          ),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(icon, color: color, size: 28),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              style: AppTypography.support1.copyWith(
-                color: AppColors.textSecondary,
+      ),
+    );
+  }
+}
+
+class _Banner extends StatelessWidget {
+  const _Banner({super.key, required this.icon, required this.text});
+
+  final IconData icon;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFF4E0),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, size: 18, color: const Color(0xFFB45309)),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              text,
+              style: AppTypography.label3.copyWith(
+                color: const Color(0xFF92400E),
               ),
             ),
-            Text(value, style: AppTypography.heading3.copyWith(color: color)),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Retry extends StatelessWidget {
+  const _Retry({required this.text, required this.onTap});
+
+  final String text;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(text, style: AppTypography.body2),
+            const SizedBox(height: 8),
+            TextButton(
+              onPressed: onTap,
+              child: Text(AppLocalizations.of(context)!.retry),
+            ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _TransactionTile extends StatelessWidget {
-  final String type;
-  final String desc;
-  final int points;
-  final String date;
-  const _TransactionTile({
-    required this.type,
-    required this.desc,
-    required this.points,
-    required this.date,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final isEarn = type == 'EARN';
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE5E2E1), width: 0.5),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: isEarn
-                  ? AppColors.foundationGreen100
-                  : AppColors.foundationRed100,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(
-              isEarn ? Icons.add_circle_outline : Icons.remove_circle_outline,
-              color: isEarn ? AppColors.primary : AppColors.error,
-              size: 20,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  desc,
-                  style: AppTypography.caption3.copyWith(
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                Text(
-                  date,
-                  style: AppTypography.caption5.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Text(
-            '${isEarn ? "+" : ""}$points',
-            style: AppTypography.heading4.copyWith(
-              color: isEarn ? AppColors.primary : AppColors.error,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _CashbackTile extends StatelessWidget {
-  final Map<String, dynamic> item;
-  const _CashbackTile({required this.item});
-
-  @override
-  Widget build(BuildContext context) {
-    final isEarn = item['type'] == 'EARN';
-    final amount = _safeAmount(item['amount']);
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE5E2E1), width: 0.5),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: isEarn
-                  ? AppColors.foundationMint100
-                  : AppColors.foundationRed100,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(
-              Icons.account_balance_wallet_outlined,
-              color: isEarn ? AppColors.primary : AppColors.error,
-              size: 20,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  (item['description'] ?? '').toString(),
-                  style: AppTypography.caption3,
-                ),
-                Text(
-                  _safeDate(context, item['created_at']),
-                  style: AppTypography.caption5.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Text(
-            '${isEarn ? "+" : ""}฿$amount',
-            style: AppTypography.heading4.copyWith(
-              color: isEarn ? AppColors.primary : AppColors.error,
-            ),
-          ),
-        ],
       ),
     );
   }

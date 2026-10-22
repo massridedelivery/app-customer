@@ -1,12 +1,11 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
-import 'package:customer_app/core/utils/app_dates.dart';
 import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/features/profile/data/datasources/referral_remote_data_source.dart';
 import 'package:customer_app/features/profile/data/welcome_promo_store.dart';
 import 'package:customer_app/features/profile/domain/models/referral_info.dart';
+import 'package:customer_app/features/profile/presentation/widgets/loyalty_format.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -27,8 +26,8 @@ final referralInfoProvider = FutureProvider.autoDispose<ReferralInfo>((
   return info;
 });
 
-/// "แนะนำเพื่อน": share your code, see how many friends signed up / ordered,
-/// and (as a new customer) enter a friend's code for a welcome discount.
+/// "ชวนเพื่อน": share your code, see how many friends used it and what each
+/// earned you. Friends type the code in the promo box on their first ride.
 class ReferralScreen extends ConsumerStatefulWidget {
   const ReferralScreen({super.key});
 
@@ -79,7 +78,7 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
                 child: Padding(
                   padding: const EdgeInsets.all(32),
                   child: Text(
-                    l10n.referralErrDisabled,
+                    l10n.referralNotOpen,
                     textAlign: TextAlign.center,
                     style: AppTypography.body2.copyWith(
                       color: AppColors.textSecondary,
@@ -101,14 +100,13 @@ class _ReferralBody extends StatelessWidget {
 
   final ReferralInfo info;
 
-  String _baht(double v) =>
-      v == v.roundToDouble() ? v.toStringAsFixed(0) : v.toStringAsFixed(2);
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final friendValue = _baht(info.friendRewardValue);
+    final friendValue = fmtBaht(info.friendRewardValue);
     final code = info.code ?? '';
+    final shareText =
+        info.shareMessage ?? l10n.referralShareText(code, friendValue);
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.all(20),
@@ -130,7 +128,7 @@ class _ReferralBody extends StatelessWidget {
             icon: Icons.card_giftcard_rounded,
             text: l10n.referralUseWelcomeCode(
               info.referredByWelcomeCode!,
-              _baht(info.referredByWelcomeValue),
+              fmtBaht(info.referredByWelcomeValue),
             ),
           ),
           const SizedBox(height: 16),
@@ -156,17 +154,12 @@ class _ReferralBody extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               Text(
-                l10n.profileReferralHeadline,
-                style: AppTypography.heading3.copyWith(color: Colors.white),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                l10n.referralRewardSummary(
+                l10n.referralHeadlineV2(
                   friendValue,
-                  info.referrerRewardPoints,
+                  fmtPoints(info.referrerRewardPoints),
                 ),
-                style: AppTypography.body2.copyWith(color: Colors.white),
+                key: const Key('referralHeadline'),
+                style: AppTypography.heading4.copyWith(color: Colors.white),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -187,9 +180,9 @@ class _ReferralBody extends StatelessWidget {
               SelectableText(
                 code,
                 key: const Key('referralCode'),
-                style: AppTypography.heading2.copyWith(
+                style: AppTypography.heading1.copyWith(
                   color: AppColors.primary,
-                  letterSpacing: 3,
+                  letterSpacing: 4,
                 ),
               ),
               if (info.codeFull) ...[
@@ -208,15 +201,20 @@ class _ReferralBody extends StatelessWidget {
                 children: [
                   Expanded(
                     child: OutlinedButton.icon(
+                      key: const Key('referralCopy'),
                       onPressed: code.isEmpty
                           ? null
                           : () {
                               Clipboard.setData(ClipboardData(text: code));
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(l10n.profileReferralCodeCopied),
-                                ),
-                              );
+                              ScaffoldMessenger.of(context)
+                                ..hideCurrentSnackBar()
+                                ..showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      l10n.profileReferralCodeCopied,
+                                    ),
+                                  ),
+                                );
                             },
                       icon: const Icon(Icons.copy_rounded, size: 18),
                       label: Text(l10n.profileReferralCopy),
@@ -238,9 +236,7 @@ class _ReferralBody extends StatelessWidget {
                       onPressed: code.isEmpty
                           ? null
                           : () => SharePlus.instance.share(
-                              ShareParams(
-                                text: l10n.referralShareText(code, friendValue),
-                              ),
+                              ShareParams(text: shareText),
                             ),
                       icon: const Icon(Icons.share_rounded, size: 18),
                       label: Text(l10n.profileReferralShare),
@@ -260,68 +256,63 @@ class _ReferralBody extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 20),
+        // How it works: share → friend's first ride → your points.
+        _Card(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(l10n.referralStepsTitle, style: AppTypography.heading5),
+              const SizedBox(height: 12),
+              _Step(n: 1, text: l10n.referralStep1),
+              _Step(n: 2, text: l10n.referralStep2),
+              _Step(n: 3, text: l10n.referralStep3, last: true),
+            ],
+          ),
+        ),
+        const SizedBox(height: 20),
         // Results.
         Row(
           children: [
             _Stat(
               label: l10n.referralStatInvited,
-              value: '${info.stats.totalReferrals}',
+              value: fmtPoints(info.stats.totalReferrals),
             ),
             const SizedBox(width: 10),
             _Stat(
               label: l10n.referralStatCompleted,
-              value: '${info.stats.completedCount}',
+              value: fmtPoints(info.stats.completedCount),
             ),
             const SizedBox(width: 10),
             _Stat(
               label: l10n.referralStatPoints,
-              value: '${info.stats.totalRewardPoints}',
+              value: fmtPoints(info.stats.totalRewardPoints),
             ),
           ],
         ),
-        if (info.stats.pendingCount > 0) ...[
-          const SizedBox(height: 10),
-          Text(
-            l10n.referralStatPending(
-              info.stats.pendingCount,
-              info.stats.pendingRewardPoints,
-            ),
-            key: const Key('referralPending'),
-            textAlign: TextAlign.center,
-            style: AppTypography.caption4.copyWith(
-              color: AppColors.textSecondary,
-            ),
+        const SizedBox(height: 8),
+        Text(
+          l10n.referralStatsLine(
+            fmtPoints(info.stats.totalReferrals),
+            fmtPoints(info.stats.completedCount),
+            fmtPoints(info.stats.totalRewardPoints),
           ),
-        ],
-        // Entering a friend's code: new customers only, until apply_before.
-        if (info.canApplyCode && !info.wasReferred) ...[
-          const SizedBox(height: 20),
+          key: const Key('referralStatsLine'),
+          textAlign: TextAlign.center,
+          style: AppTypography.caption4.copyWith(
+            color: AppColors.textSecondary,
+          ),
+        ),
+        if (info.friends.isNotEmpty) ...[
+          const SizedBox(height: 24),
+          Text(l10n.referralFriendsTitle, style: AppTypography.heading5),
+          const SizedBox(height: 8),
           _Card(
-            key: const Key('referralApplyCard'),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(l10n.profileReferralHaveCode, style: AppTypography.heading5),
-                const SizedBox(height: 4),
-                Text(
-                  l10n.referralApplySubtitle(friendValue),
-                  style: AppTypography.body2.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-                if (info.applyBefore != null) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    l10n.referralApplyBefore(
-                      AppDates.of(context).dateTime(info.applyBefore!.toLocal()),
-                    ),
-                    style: AppTypography.caption5.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
+                for (var i = 0; i < info.friends.length; i++) ...[
+                  if (i > 0) const Divider(height: 20),
+                  _FriendRow(friend: info.friends[i]),
                 ],
-                const SizedBox(height: 12),
-                const _ApplyReferralField(),
               ],
             ),
           ),
@@ -331,8 +322,105 @@ class _ReferralBody extends StatelessWidget {
   }
 }
 
+/// One numbered step of "how it works".
+class _Step extends StatelessWidget {
+  const _Step({required this.n, required this.text, this.last = false});
+
+  final int n;
+  final String text;
+  final bool last;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: last ? 0 : 12),
+      child: Row(
+        children: [
+          Container(
+            width: 28,
+            height: 28,
+            alignment: Alignment.center,
+            decoration: const BoxDecoration(
+              color: Color(0xFFFDF1F3),
+              shape: BoxShape.circle,
+            ),
+            child: Text(
+              '$n',
+              style: AppTypography.label2.copyWith(color: AppColors.primary),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(child: Text(text, style: AppTypography.body2)),
+        ],
+      ),
+    );
+  }
+}
+
+/// A friend on the list: masked name and where their referral stands.
+class _FriendRow extends StatelessWidget {
+  const _FriendRow({required this.friend});
+
+  final ReferralFriend friend;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final (IconData icon, Color color, String status) = switch (friend.status) {
+      'REWARDED' => (
+        Icons.check_circle_rounded,
+        AppColors.semanticSuccessFgHigh,
+        l10n.referralFriendRewarded(fmtPoints(friend.points)),
+      ),
+      'CANCELLED' => (
+        Icons.cancel_outlined,
+        AppColors.textSecondary,
+        l10n.referralFriendCancelled,
+      ),
+      _ => (
+        Icons.hourglass_top_rounded,
+        const Color(0xFFE08A00),
+        l10n.referralFriendPending,
+      ),
+    };
+    final date = friend.status == 'REWARDED'
+        ? friend.rewardedAt
+        : friend.createdAt;
+    return Row(
+      key: Key('referralFriend-${friend.status}'),
+      children: [
+        Icon(icon, color: color, size: 22),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                friend.name,
+                style: AppTypography.label2.copyWith(
+                  color: friend.status == 'CANCELLED'
+                      ? AppColors.textSecondary
+                      : AppColors.textPrimary,
+                ),
+              ),
+              if (date != null)
+                Text(
+                  fmtThaiDate(context, date),
+                  style: AppTypography.caption5.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+            ],
+          ),
+        ),
+        Text(status, style: AppTypography.label3.copyWith(color: color)),
+      ],
+    );
+  }
+}
+
 class _Card extends StatelessWidget {
-  const _Card({super.key, required this.child});
+  const _Card({required this.child});
 
   final Widget child;
 
@@ -417,153 +505,5 @@ class _Stat extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-/// Thai/English message for a `POST /referral/apply` error `code`.
-String referralApplyError(AppLocalizations l10n, String? code) {
-  switch (code) {
-    case 'referral_invalid_code':
-      return l10n.referralErrInvalidCode;
-    case 'referral_self':
-      return l10n.referralErrSelf;
-    case 'referral_already_used':
-      return l10n.referralErrAlreadyUsed;
-    case 'referral_not_new_customer':
-      return l10n.referralErrNotNewCustomer;
-    case 'referral_window_closed':
-      return l10n.referralErrWindowClosed;
-    case 'referral_code_full':
-      return l10n.referralErrCodeFull;
-    case 'referral_expired':
-      return l10n.referralErrExpired;
-    case 'referral_disabled':
-      return l10n.referralErrDisabled;
-    default:
-      return l10n.profileReferralApplyInvalid;
-  }
-}
-
-class _ApplyReferralField extends ConsumerStatefulWidget {
-  const _ApplyReferralField();
-
-  @override
-  ConsumerState<_ApplyReferralField> createState() =>
-      _ApplyReferralFieldState();
-}
-
-class _ApplyReferralFieldState extends ConsumerState<_ApplyReferralField> {
-  final _ctrl = TextEditingController();
-  bool _loading = false;
-
-  @override
-  void dispose() {
-    _ctrl.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    return Row(
-      children: [
-        Expanded(
-          child: TextField(
-            key: const Key('referralApplyInput'),
-            controller: _ctrl,
-            textCapitalization: TextCapitalization.characters,
-            style: AppTypography.body1,
-            decoration: InputDecoration(
-              hintText: l10n.profileReferralCodeHint,
-              hintStyle: AppTypography.body1.copyWith(
-                color: AppColors.textSecondary,
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 14,
-                vertical: 12,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(width: 10),
-        FilledButton(
-          key: const Key('referralApplyButton'),
-          onPressed: _loading ? null : _apply,
-          style: FilledButton.styleFrom(
-            backgroundColor: AppColors.primary,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            textStyle: AppTypography.label2,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
-          child: _loading
-              ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Colors.white,
-                  ),
-                )
-              : Text(l10n.profileReferralApply),
-        ),
-      ],
-    );
-  }
-
-  Future<void> _apply() async {
-    final code = _ctrl.text.trim();
-    if (code.isEmpty) return;
-    setState(() => _loading = true);
-    final messenger = ScaffoldMessenger.of(context);
-    final l10n = AppLocalizations.of(context)!;
-    try {
-      final res = await ref
-          .read(referralRemoteDataSourceProvider)
-          .applyCode(code);
-      final promo = res['welcome_promo'];
-      final promoCode = promo is Map ? promo['code']?.toString() : null;
-      final value = promo is Map ? promo['discount_value'] : null;
-      if (promoCode != null && promoCode.isNotEmpty) {
-        // Pre-filled on the first ride / parcel order.
-        await ref.read(welcomePromoStoreProvider).save(promoCode);
-      }
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(
-            promoCode != null
-                ? l10n.referralApplySuccessPromo(
-                    promoCode,
-                    value is num ? value.toStringAsFixed(0) : '$value',
-                  )
-                : l10n.profileReferralApplySuccess,
-          ),
-        ),
-      );
-      _ctrl.clear();
-      ref.invalidate(referralInfoProvider);
-    } on DioException catch (e) {
-      final data = e.response?.data;
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(
-            referralApplyError(
-              l10n,
-              data is Map ? data['code']?.toString() : null,
-            ),
-          ),
-        ),
-      );
-    } catch (_) {
-      messenger.showSnackBar(
-        SnackBar(content: Text(l10n.profileReferralApplyInvalid)),
-      );
-    } finally {
-      if (mounted) setState(() => _loading = false);
-    }
   }
 }

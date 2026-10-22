@@ -1,3 +1,4 @@
+import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/error/api_error.dart';
 import 'package:customer_app/core/managers/providers.dart';
 import 'package:customer_app/features/ride_booking/data/datasources/ride_booking_remote_datasource.dart';
@@ -359,8 +360,23 @@ void main() {
       // The payment method stays, even with nothing left to pay.
       expect(find.byKey(const Key('ridePaymentRow')), findsOneWidget);
       expect(find.text('เงินสด'), findsOneWidget);
+      // S1 summary: fare, each discount on its own line in red, total.
+      expect(find.text('ค่าโดยสาร'), findsOneWidget);
+      expect(find.text('฿180'), findsWidgets);
+      expect(find.byKey(const Key('rideSummaryCode')), findsOneWidget);
+      expect(find.byKey(const Key('rideSummaryPoints')), findsOneWidget);
+      final codeOff = tester.widget<Text>(
+        find.descendant(
+          of: find.byKey(const Key('rideSummaryCode')),
+          matching: find.text('−฿50'),
+        ),
+      );
+      expect(codeOff.style?.color, AppColors.primary);
       expect(
-        find.text('ค่าโดยสาร ฿180 · ส่วนลด −฿180'),
+        find.descendant(
+          of: find.byKey(const Key('rideSummaryPoints')),
+          matching: find.text('−฿130'),
+        ),
         findsOneWidget,
       );
       expect(

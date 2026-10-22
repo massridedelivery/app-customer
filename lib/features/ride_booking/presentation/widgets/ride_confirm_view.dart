@@ -70,7 +70,9 @@ class RideConfirmView extends ConsumerWidget {
         ? 0.0
         : (selected.grossFare ?? selected.totalFare + selected.discount);
     final payable = selected?.payable ?? 0;
-    final off = gross - payable;
+    final codeOff = selected?.discount ?? 0;
+    final pointsUsed = selected?.points?.usedPoints ?? 0;
+    final pointsOff = selected?.points?.discount ?? 0;
 
     Widget sectionLabel(String text) => Padding(
       padding: const EdgeInsets.fromLTRB(4, 16, 4, 8),
@@ -85,8 +87,8 @@ class RideConfirmView extends ConsumerWidget {
 
     return Material(
       key: const Key('rideConfirmView'),
-      // Light grey page so the white cards stand apart (design D1).
-      color: const Color(0xFFF2F2F5),
+      // White page; the sections float on soft shadows (ticket style).
+      color: Colors.white,
       child: SafeArea(
         child: Stack(
           children: [
@@ -167,7 +169,8 @@ class RideConfirmView extends ConsumerWidget {
                                   ),
                                 ],
                               ),
-                              const Divider(height: 20),
+                              // Ticket perforation between vehicle and route.
+                              const _TicketDivider(cardPadding: 12),
                               _Stop(
                                 color: AppColors.foundationGreen500,
                                 label: pickupLabel ?? l10n.currentLocation,
@@ -256,10 +259,9 @@ class RideConfirmView extends ConsumerWidget {
                                 onRemove: onPromoRemove,
                               ),
                             if (showPoints) ...[
-                              const Divider(
-                                height: 1,
-                                indent: 16,
-                                endIndent: 16,
+                              const Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 16),
+                                child: _DashedLine(),
                               ),
                               RidePointsRow(
                                 quote: points,
@@ -278,34 +280,90 @@ class RideConfirmView extends ConsumerWidget {
                 // Sticky total: fare · discount, what's left, request.
                 Container(
                   key: const Key('rideTotalBar'),
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                  padding: const EdgeInsets.fromLTRB(18, 14, 18, 16),
+                  // Rounded top, lifted off the page by an upward shadow.
                   decoration: const BoxDecoration(
                     color: Colors.white,
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(22),
+                    ),
                     boxShadow: [
                       BoxShadow(
-                        color: Color(0x0F14141E),
-                        blurRadius: 14,
-                        offset: Offset(0, -4),
+                        color: Color(0x1214141E),
+                        blurRadius: 24,
+                        offset: Offset(0, -10),
                       ),
                     ],
                   ),
+                  // S1: fare, then each discount on its own line (icon by
+                  // type, amount in red), a dashed rule, the total.
                   child: Column(
                     children: [
+                      _SummaryLine(
+                        label: Text(
+                          l10n.rideFareLabel,
+                          style: AppTypography.body3.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                        amount: '฿${fmtBaht(gross)}',
+                        amountColor: AppColors.textSecondary,
+                      ),
+                      if (codeOff > 0)
+                        _SummaryLine(
+                          key: const Key('rideSummaryCode'),
+                          icon: Container(
+                            width: 22,
+                            height: 22,
+                            decoration: BoxDecoration(
+                              color: _kSuccessBg,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: const Icon(
+                              Icons.local_offer_outlined,
+                              size: 13,
+                              color: _kSuccessFg,
+                            ),
+                          ),
+                          label: Text.rich(
+                            TextSpan(
+                              text: '${selected?.promo?.label ?? l10n.ridePromoRow} ',
+                              children: [
+                                TextSpan(
+                                  text: code ?? '',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            style: AppTypography.body3,
+                          ),
+                          amount: '−฿${fmtBaht(codeOff)}',
+                        ),
+                      if (pointsUsed > 0)
+                        _SummaryLine(
+                          key: const Key('rideSummaryPoints'),
+                          icon: const Text('🪙', style: TextStyle(fontSize: 16)),
+                          label: Text(
+                            l10n.ridePointsLine(fmtPoints(pointsUsed)),
+                            style: AppTypography.body3,
+                          ),
+                          amount: '−฿${fmtBaht(pointsOff)}',
+                        ),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 10),
+                        child: _DashedLine(),
+                      ),
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.baseline,
                         textBaseline: TextBaseline.alphabetic,
                         children: [
                           Expanded(
                             child: Text(
-                              off > 0
-                                  ? l10n.rideFareDiscountLine(
-                                      fmtBaht(gross),
-                                      fmtBaht(off),
-                                    )
-                                  : l10n.rideFareLine(fmtBaht(gross)),
-                              key: const Key('rideTotalBreakdown'),
-                              style: AppTypography.body3.copyWith(
-                                color: AppColors.textSecondary,
+                              l10n.rideToPay,
+                              style: AppTypography.label1.copyWith(
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                           ),
@@ -318,7 +376,7 @@ class RideConfirmView extends ConsumerWidget {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 12),
                       SizedBox(
                         width: double.infinity,
                         height: 56,
@@ -428,13 +486,105 @@ class _Card extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // A section floating slightly off the white page.
     return Container(
       padding: padding,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x1414141E),
+            blurRadius: 20,
+            offset: Offset(0, 6),
+          ),
+        ],
       ),
       child: child,
+    );
+  }
+}
+
+/// A thin grey dashed rule.
+class _DashedLine extends StatelessWidget {
+  const _DashedLine();
+
+  @override
+  Widget build(BuildContext context) {
+    return const SizedBox(
+      height: 1,
+      width: double.infinity,
+      child: CustomPaint(painter: _DashPainter()),
+    );
+  }
+}
+
+class _DashPainter extends CustomPainter {
+  const _DashPainter();
+
+  static const _dash = 5.0;
+  static const _gap = 4.0;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = const Color(0xFFD9D9DF)
+      ..strokeWidth = 1;
+    for (var x = 0.0; x < size.width; x += _dash + _gap) {
+      final end = (x + _dash).clamp(0.0, size.width);
+      canvas.drawLine(Offset(x, 0.5), Offset(end, 0.5), paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(_DashPainter oldDelegate) => false;
+}
+
+/// A ticket's perforation: the dashed rule with a half-circle notch cut into
+/// each edge of the card ([cardPadding] = the card's horizontal padding).
+class _TicketDivider extends StatelessWidget {
+  const _TicketDivider({required this.cardPadding});
+
+  final double cardPadding;
+
+  @override
+  Widget build(BuildContext context) {
+    const notch = 16.0;
+    const notchColor = Color(0xFFF1F1F4);
+    return SizedBox(
+      height: 28,
+      child: Stack(
+        clipBehavior: Clip.none,
+        alignment: Alignment.center,
+        children: [
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 6),
+            child: _DashedLine(),
+          ),
+          Positioned(
+            left: -cardPadding - notch / 2,
+            child: Container(
+              width: notch,
+              height: notch,
+              decoration: const BoxDecoration(
+                color: notchColor,
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+          Positioned(
+            right: -cardPadding - notch / 2,
+            child: Container(
+              width: notch,
+              height: notch,
+              decoration: const BoxDecoration(
+                color: notchColor,
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -632,3 +782,43 @@ class _Stop extends StatelessWidget {
     );
   }
 }
+
+/// One line of the total bar: an optional type icon, the label, and the
+/// amount — discounts in red so each one reads as money off.
+class _SummaryLine extends StatelessWidget {
+  const _SummaryLine({
+    super.key,
+    this.icon,
+    required this.label,
+    required this.amount,
+    this.amountColor = AppColors.primary,
+  });
+
+  final Widget? icon;
+  final Widget label;
+  final String amount;
+  final Color amountColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 3),
+      child: Row(
+        children: [
+          if (icon != null) ...[icon!, const SizedBox(width: 8)],
+          Expanded(child: label),
+          Text(
+            amount,
+            style: AppTypography.label2.copyWith(
+              color: amountColor,
+              fontWeight: amountColor == AppColors.primary
+                  ? FontWeight.bold
+                  : null,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+

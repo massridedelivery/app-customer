@@ -34,6 +34,10 @@ Future<void> _pump(
   bool outOfServiceArea = false,
   VoidCallback? onRequest,
 }) async {
+  // A phone-sized screen, so the step-2 total bar doesn't cover the rows.
+  tester.view.physicalSize = const Size(1080, 2400);
+  tester.view.devicePixelRatio = 2;
+  addTearDown(tester.view.reset);
   await tester.pumpWidget(
     ProviderScope(
       overrides: [

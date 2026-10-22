@@ -3346,12 +3346,8 @@ class AppLocalizationsTh extends AppLocalizations {
   String get rideChooseCoupon => 'เลือกคูปอง';
 
   @override
-  String rideFareLine(String fare) {
-    return 'ค่าโดยสาร ฿$fare';
-  }
+  String get rideFareLabel => 'ค่าโดยสาร';
 
   @override
-  String rideFareDiscountLine(String fare, String off) {
-    return 'ค่าโดยสาร ฿$fare · ส่วนลด −฿$off';
-  }
+  String get rideToPay => 'ยอดชำระ';
 }

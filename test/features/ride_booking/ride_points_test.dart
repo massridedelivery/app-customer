@@ -343,7 +343,7 @@ void main() {
       expect(toggled, isTrue);
     });
 
-    testWidgets('paid in full by points: summary, ฿0, no payment picker', (
+    testWidgets('paid in full by points: ฿0 total, payment method kept', (
       tester,
     ) async {
       await pump(
@@ -356,18 +356,18 @@ void main() {
         usePoints: true,
       );
       expect(find.text('ใช้ 130 คะแนน −฿130'), findsOneWidget);
-      expect(find.byKey(const Key('ridePriceSummary')), findsOneWidget);
-      Finder inSummary(String text) => find.descendant(
-        of: find.byKey(const Key('ridePriceSummary')),
-        matching: find.text(text),
+      // The payment method stays, even with nothing left to pay.
+      expect(find.byKey(const Key('ridePaymentRow')), findsOneWidget);
+      expect(find.text('เงินสด'), findsOneWidget);
+      expect(
+        find.text('ค่าโดยสาร ฿180 · ส่วนลด −฿180'),
+        findsOneWidget,
       );
-      expect(inSummary('฿180'), findsOneWidget);
-      expect(inSummary('โค้ดเพื่อน (K7QM2X)'), findsOneWidget);
-      expect(inSummary('−฿50'), findsOneWidget);
-      expect(inSummary('−฿130'), findsOneWidget);
-      expect(inSummary('฿0'), findsOneWidget);
-      expect(find.byKey(const Key('ridePaidByPoints')), findsOneWidget);
-      expect(find.byKey(const Key('ridePaidByPointsNote')), findsOneWidget);
+      expect(
+        tester.widget<Text>(find.byKey(const Key('rideTotalAmount'))).data,
+        '฿0',
+      );
+      expect(find.text('เรียกรถ · ฿0'), findsOneWidget);
     });
 
     testWidgets('unavailable reasons grey the switch out', (tester) async {

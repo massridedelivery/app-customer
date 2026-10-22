@@ -3251,7 +3251,7 @@ class AppLocalizationsTh extends AppLocalizations {
   }
 
   @override
-  String get ridePointsUse => 'ใช้คะแนน';
+  String get ridePointsUse => 'ใช้คะแนนทั้งหมด';
 
   @override
   String ridePointsAvailable(String balance, String max) {
@@ -3278,22 +3278,9 @@ class AppLocalizationsTh extends AppLocalizations {
   String get ridePointsGuest => 'เข้าสู่ระบบเพื่อใช้คะแนน';
 
   @override
-  String get rideFare => 'ค่าโดยสาร';
-
-  @override
   String ridePointsLine(String points) {
     return 'ใช้ $points คะแนน';
   }
-
-  @override
-  String get rideAmountToPay => 'ยอดชำระ';
-
-  @override
-  String get ridePaidByPoints => 'ชำระด้วยคะแนนทั้งหมด';
-
-  @override
-  String get ridePaidByPointsNote =>
-      'หากมีค่าทางด่วนหรือค่ารอเพิ่มระหว่างทาง ชำระกับคนขับ';
 
   @override
   String get ridePromoDroppedOnBooking =>
@@ -3344,5 +3331,27 @@ class AppLocalizationsTh extends AppLocalizations {
   @override
   String rideRequestPrice(String price) {
     return 'เรียกรถ · ฿$price';
+  }
+
+  @override
+  String get ridePaymentSection => 'การชำระเงิน';
+
+  @override
+  String get rideDiscountSection => 'ส่วนลด';
+
+  @override
+  String get ridePaymentExtrasNote => 'ค่าทางด่วน / ค่ารอ ชำระด้วยวิธีนี้';
+
+  @override
+  String get rideChooseCoupon => 'เลือกคูปอง';
+
+  @override
+  String rideFareLine(String fare) {
+    return 'ค่าโดยสาร ฿$fare';
+  }
+
+  @override
+  String rideFareDiscountLine(String fare, String off) {
+    return 'ค่าโดยสาร ฿$fare · ส่วนลด −฿$off';
   }
 }

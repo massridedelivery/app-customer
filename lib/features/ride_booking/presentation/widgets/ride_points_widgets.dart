@@ -2,7 +2,6 @@ import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/features/profile/presentation/widgets/loyalty_format.dart';
 import 'package:customer_app/features/ride_booking/domain/models/ride_quote.dart';
-import 'package:customer_app/features/ride_booking/domain/models/vehicle_estimation.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
@@ -98,93 +97,6 @@ class RidePointsRow extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-/// Fare, the code's discount, the points used, and what's left to pay —
-/// shown once something comes off the fare.
-class RidePriceSummary extends StatelessWidget {
-  const RidePriceSummary({
-    super.key,
-    required this.estimation,
-    required this.code,
-    this.color = const Color(0xFFF7F7F9),
-    this.margin = const EdgeInsets.fromLTRB(16, 8, 16, 0),
-  });
-
-  final VehicleEstimation estimation;
-  final String? code;
-  final Color color;
-  final EdgeInsetsGeometry margin;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final e = estimation;
-    final gross = e.grossFare ?? e.totalFare + e.discount;
-    final promo = e.promo;
-    final points = e.points;
-    final pointsUsed = points?.usedPoints ?? 0;
-    final promoLabel = promo?.label ?? l10n.couponDiscount;
-    Widget line(String label, String value, {bool bold = false}) => Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              label,
-              style: (bold ? AppTypography.label1 : AppTypography.body3)
-                  .copyWith(
-                    color: bold
-                        ? AppColors.textPrimary
-                        : AppColors.textSecondary,
-                  ),
-            ),
-          ),
-          Text(
-            value,
-            style: (bold ? AppTypography.heading5 : AppTypography.body3)
-                .copyWith(color: AppColors.textPrimary),
-          ),
-        ],
-      ),
-    );
-    return Container(
-      key: const Key('ridePriceSummary'),
-      margin: margin,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        children: [
-          line(l10n.rideFare, '฿${fmtBaht(gross)}'),
-          if (e.discount > 0)
-            line(
-              code == null ? promoLabel : '$promoLabel ($code)',
-              '−฿${fmtBaht(e.discount)}',
-            ),
-          if (pointsUsed > 0)
-            line(
-              l10n.ridePointsLine(fmtPoints(pointsUsed)),
-              '−฿${fmtBaht(points!.discount)}',
-            ),
-          const Divider(height: 12),
-          line(l10n.rideAmountToPay, '฿${fmtBaht(e.payable)}', bold: true),
-          if (e.payable <= 0) ...[
-            const SizedBox(height: 4),
-            Text(
-              l10n.ridePaidByPointsNote,
-              key: const Key('ridePaidByPointsNote'),
-              style: AppTypography.caption5.copyWith(
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ],
-        ],
       ),
     );
   }

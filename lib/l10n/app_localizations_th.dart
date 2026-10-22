@@ -3020,4 +3020,233 @@ class AppLocalizationsTh extends AppLocalizations {
   @override
   String get marketingOptInFailed =>
       'บันทึกการตั้งค่าไม่สำเร็จ ลองใหม่อีกครั้ง';
+
+  @override
+  String referralHeadlineV2(String baht, String points) {
+    return 'เพื่อนได้ ฿$baht · คุณได้ $points คะแนน';
+  }
+
+  @override
+  String get referralStepsTitle => 'วิธีรับคะแนน';
+
+  @override
+  String get referralStep1 => 'แชร์โค้ดให้เพื่อน';
+
+  @override
+  String get referralStep2 => 'เพื่อนใช้โค้ดตอนเรียกรถครั้งแรก';
+
+  @override
+  String get referralStep3 => 'คุณได้คะแนนเมื่อเพื่อนเดินทางเสร็จ';
+
+  @override
+  String referralStatsLine(String invited, String completed, String points) {
+    return 'ชวนแล้ว $invited · สำเร็จ $completed · ได้ $points คะแนน';
+  }
+
+  @override
+  String get referralFriendsTitle => 'เพื่อนที่ชวน';
+
+  @override
+  String get referralFriendPending => 'รอเดินทางครั้งแรก';
+
+  @override
+  String referralFriendRewarded(String points) {
+    return 'ได้ $points คะแนน';
+  }
+
+  @override
+  String get referralFriendCancelled => 'ยกเลิก';
+
+  @override
+  String get referralNotOpen => 'ขณะนี้ยังไม่เปิดโปรแกรมชวนเพื่อน';
+
+  @override
+  String get referralHaveFriendCode => 'มีโค้ดจากเพื่อนไหม?';
+
+  @override
+  String referralHaveFriendCodeSub(String baht) {
+    return 'ใส่ในช่องโค้ดส่วนลดตอนเรียกรถครั้งแรก ลด ฿$baht';
+  }
+
+  @override
+  String get pointsTitle => 'คะแนนของฉัน';
+
+  @override
+  String get pointsUnit => 'คะแนน';
+
+  @override
+  String pointsWorth(String baht) {
+    return 'มูลค่า ≈ ฿$baht';
+  }
+
+  @override
+  String pointsExpiring(String points, String date) {
+    return '$points คะแนนจะหมดอายุ $date';
+  }
+
+  @override
+  String get pointsActionRedeem => 'แลกคะแนน';
+
+  @override
+  String get pointsActionVouchers => 'คูปองของฉัน';
+
+  @override
+  String get pointsActionInvite => 'ชวนเพื่อน';
+
+  @override
+  String pointsEarnRule(String points, String min) {
+    return 'รับ $points คะแนนทุก ฿100 ที่จ่าย (ขั้นต่ำ ฿$min)';
+  }
+
+  @override
+  String get pointsDisabled => 'ระบบคะแนนปิดใช้งานชั่วคราว';
+
+  @override
+  String get pointsHistory => 'ประวัติคะแนน';
+
+  @override
+  String get pointsHistoryEmpty => 'ยังไม่มีประวัติคะแนน';
+
+  @override
+  String get pointsTypeEarn => 'ได้รับ';
+
+  @override
+  String get pointsTypeReferral => 'ชวนเพื่อนสำเร็จ';
+
+  @override
+  String get pointsTypeRedeem => 'ใช้คะแนน';
+
+  @override
+  String get pointsTypeVoucher => 'แลกคูปอง';
+
+  @override
+  String get pointsTypeRefund => 'คืนคะแนน';
+
+  @override
+  String get pointsTypeExpire => 'หมดอายุ';
+
+  @override
+  String get pointsTypeAdjust => 'ปรับโดยเจ้าหน้าที่';
+
+  @override
+  String get rewardsTitle => 'แลกคะแนน';
+
+  @override
+  String rewardsYouHave(String points) {
+    return 'คุณมี $points คะแนน';
+  }
+
+  @override
+  String rewardsCost(String points) {
+    return '$points คะแนน';
+  }
+
+  @override
+  String rewardsStockLeft(String count) {
+    return 'เหลือ $count';
+  }
+
+  @override
+  String rewardsEndsAt(String date) {
+    return 'หมดเขต $date';
+  }
+
+  @override
+  String get rewardsRedeem => 'แลก';
+
+  @override
+  String rewardsShort(String points) {
+    return 'ขาดอีก $points คะแนน';
+  }
+
+  @override
+  String get rewardsOutOfStock => 'แลกหมดแล้ว';
+
+  @override
+  String get rewardsLimitReached => 'แลกครบสิทธิ์แล้ว';
+
+  @override
+  String rewardsNotStarted(String date) {
+    return 'เร็วๆ นี้ · เริ่ม $date';
+  }
+
+  @override
+  String get rewardsComingSoon => 'เร็วๆ นี้';
+
+  @override
+  String get rewardsEnded => 'หมดเขตแล้ว';
+
+  @override
+  String get rewardsEmpty => 'ยังไม่มีรางวัลให้แลก';
+
+  @override
+  String get rewardsTerms => 'เงื่อนไข';
+
+  @override
+  String rewardsConfirm(String cost, String item) {
+    return 'ใช้ $cost คะแนน แลก $item?';
+  }
+
+  @override
+  String rewardsConfirmLeft(String points) {
+    return 'คะแนนคงเหลือ $points';
+  }
+
+  @override
+  String get rewardsConfirmButton => 'ยืนยัน';
+
+  @override
+  String get rewardsSuccessTitle => 'แลกสำเร็จ';
+
+  @override
+  String rewardsValidUntil(String date) {
+    return 'ใช้ได้ถึง $date';
+  }
+
+  @override
+  String get rewardsUseNow => 'ใช้เลย';
+
+  @override
+  String get rewardsSeeVouchers => 'ดูคูปองของฉัน';
+
+  @override
+  String get vouchersTabActive => 'ใช้ได้';
+
+  @override
+  String get vouchersTabUsed => 'ใช้แล้ว';
+
+  @override
+  String get vouchersTabExpired => 'หมดอายุ';
+
+  @override
+  String vouchersUsedAt(String date, String service) {
+    return 'ใช้เมื่อ $date · $service';
+  }
+
+  @override
+  String get vouchersEmpty => 'ยังไม่มีคูปอง';
+
+  @override
+  String get vouchersGoRedeem => 'ไปแลกคะแนน';
+
+  @override
+  String get vouchersChooseService => 'ใช้คูปองกับบริการไหน?';
+
+  @override
+  String get vouchersCodeCopiedHint =>
+      'คัดลอกโค้ดแล้ว ใส่ในช่องโค้ดส่วนลดได้เลย';
+
+  @override
+  String get serviceRide => 'เรียกรถ';
+
+  @override
+  String get serviceFood => 'อาหาร';
+
+  @override
+  String get serviceMessenger => 'ส่งของ';
+
+  @override
+  String homeReferralBanner(String points) {
+    return 'ชวนเพื่อน รับ $points คะแนน';
+  }
 }

@@ -13,6 +13,7 @@ import 'package:customer_app/features/home/data/repositories/service_area_reposi
 import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
 import 'package:customer_app/features/home/presentation/states/home_state.dart';
 import 'package:customer_app/features/active_orders/presentation/controllers/active_orders_controller.dart';
+import 'package:customer_app/features/home/presentation/widgets/home_loyalty_widgets.dart';
 import 'package:customer_app/features/home/presentation/widgets/home_promo_banner.dart';
 import 'package:customer_app/features/active_orders/presentation/widgets/active_orders_banner.dart';
 import 'package:app_settings/app_settings.dart';
@@ -217,6 +218,9 @@ class _ServiceSelectionScreenState
                                   child: _buildServiceGrid(context, promos),
                                 ),
                               ),
+                              // Referral: "มีโค้ดจากเพื่อนไหม?" (new customers) and
+                              // "ชวนเพื่อน รับ N คะแนน"; nothing for guests.
+                              const HomeReferralCards(),
                               // Real promotions — hides itself when there are none —
                               // sits tight under the grid (no extra gap).
                               const HomePromoBanner(),
@@ -397,6 +401,8 @@ class _ServiceSelectionScreenState
           ),
         ),
         const SizedBox(width: 16),
+        // "🪙 500" → คะแนนของฉัน (signed in, points switched on).
+        const HomePointsChip(),
         // Heart → the customer's saved (favorited) restaurants.
         _buildCircularButton(
           Icons.favorite_border_sharp,

@@ -95,3 +95,73 @@ String? _statusMessage(int? status, AppLocalizations l10n) {
   if (status >= 400) return l10n.errBadRequest;
   return null;
 }
+
+/// A backend error in the shared shape
+/// `{"code": "POINTS_INSUFFICIENT", "error": "<Thai>", "message": "<Thai>", …extra}`.
+///
+/// [message] is the server's own `error` (else `message`) text, shown as is —
+/// never translated or rewritten; screens branch on [code]. Errors without a
+/// body (timeouts, no connection) get the app's own localized message and a
+/// null [code], with [isNetwork] set so the caller can offer a retry.
+class ApiError implements Exception {
+  const ApiError({
+    required this.message,
+    this.code,
+    this.statusCode,
+    this.extra = const {},
+    this.isNetwork = false,
+  });
+
+  final String message;
+  final String? code;
+  final int? statusCode;
+
+  /// The rest of the error body, e.g. `balance`, `max_usable_points`.
+  final Map<String, dynamic> extra;
+  final bool isNetwork;
+
+  /// An int field from [extra] (`balance`, `max_usable_points`, …).
+  int? intExtra(String key) {
+    final v = extra[key];
+    return v is num ? v.toInt() : int.tryParse('${v ?? ''}');
+  }
+
+  factory ApiError.from(Object? error, {String? fallback}) {
+    if (error is ApiError) return error;
+    if (error is DioException) {
+      final data = error.response?.data;
+      final status = error.response?.statusCode;
+      if (data is Map) {
+        final body = Map<String, dynamic>.from(data);
+        final text = [body['error'], body['message']]
+            .whereType<String>()
+            .map((s) => s.trim())
+            .firstWhere((s) => s.isNotEmpty, orElse: () => '');
+        if (text.isNotEmpty) {
+          return ApiError(
+            message: text,
+            code: body['code']?.toString(),
+            statusCode: status,
+            extra: body,
+          );
+        }
+      }
+      final network = switch (error.type) {
+        DioExceptionType.connectionTimeout ||
+        DioExceptionType.sendTimeout ||
+        DioExceptionType.receiveTimeout ||
+        DioExceptionType.connectionError => true,
+        _ => false,
+      };
+      return ApiError(
+        message: apiErrorMessage(error, fallback: fallback),
+        statusCode: status,
+        isNetwork: network,
+      );
+    }
+    return ApiError(message: apiErrorMessage(error, fallback: fallback));
+  }
+
+  @override
+  String toString() => message;
+}

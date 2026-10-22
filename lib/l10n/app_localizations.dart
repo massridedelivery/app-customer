@@ -5652,6 +5652,390 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Couldn\'t save the setting. Please try again.'**
   String get marketingOptInFailed;
+
+  /// No description provided for @referralHeadlineV2.
+  ///
+  /// In en, this message translates to:
+  /// **'Friend gets ฿{baht} · You get {points} points'**
+  String referralHeadlineV2(String baht, String points);
+
+  /// No description provided for @referralStepsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How it works'**
+  String get referralStepsTitle;
+
+  /// No description provided for @referralStep1.
+  ///
+  /// In en, this message translates to:
+  /// **'Share your code with a friend'**
+  String get referralStep1;
+
+  /// No description provided for @referralStep2.
+  ///
+  /// In en, this message translates to:
+  /// **'They use it on their first ride'**
+  String get referralStep2;
+
+  /// No description provided for @referralStep3.
+  ///
+  /// In en, this message translates to:
+  /// **'You get points when their trip is done'**
+  String get referralStep3;
+
+  /// No description provided for @referralStatsLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Invited {invited} · Done {completed} · Earned {points} points'**
+  String referralStatsLine(String invited, String completed, String points);
+
+  /// No description provided for @referralFriendsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your friends'**
+  String get referralFriendsTitle;
+
+  /// No description provided for @referralFriendPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for first trip'**
+  String get referralFriendPending;
+
+  /// No description provided for @referralFriendRewarded.
+  ///
+  /// In en, this message translates to:
+  /// **'+{points} points'**
+  String referralFriendRewarded(String points);
+
+  /// No description provided for @referralFriendCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get referralFriendCancelled;
+
+  /// No description provided for @referralNotOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'The referral programme isn\'t open right now'**
+  String get referralNotOpen;
+
+  /// No description provided for @referralHaveFriendCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Got a code from a friend?'**
+  String get referralHaveFriendCode;
+
+  /// No description provided for @referralHaveFriendCodeSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter it in the promo box on your first ride for ฿{baht} off'**
+  String referralHaveFriendCodeSub(String baht);
+
+  /// No description provided for @pointsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My points'**
+  String get pointsTitle;
+
+  /// No description provided for @pointsUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'points'**
+  String get pointsUnit;
+
+  /// No description provided for @pointsWorth.
+  ///
+  /// In en, this message translates to:
+  /// **'Worth ≈ ฿{baht}'**
+  String pointsWorth(String baht);
+
+  /// No description provided for @pointsExpiring.
+  ///
+  /// In en, this message translates to:
+  /// **'{points} points expire on {date}'**
+  String pointsExpiring(String points, String date);
+
+  /// No description provided for @pointsActionRedeem.
+  ///
+  /// In en, this message translates to:
+  /// **'Redeem'**
+  String get pointsActionRedeem;
+
+  /// No description provided for @pointsActionVouchers.
+  ///
+  /// In en, this message translates to:
+  /// **'My vouchers'**
+  String get pointsActionVouchers;
+
+  /// No description provided for @pointsActionInvite.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite friends'**
+  String get pointsActionInvite;
+
+  /// No description provided for @pointsEarnRule.
+  ///
+  /// In en, this message translates to:
+  /// **'Earn {points} points for every ฿100 paid (min ฿{min})'**
+  String pointsEarnRule(String points, String min);
+
+  /// No description provided for @pointsDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Points are temporarily unavailable'**
+  String get pointsDisabled;
+
+  /// No description provided for @pointsHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Points history'**
+  String get pointsHistory;
+
+  /// No description provided for @pointsHistoryEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No points activity yet'**
+  String get pointsHistoryEmpty;
+
+  /// No description provided for @pointsTypeEarn.
+  ///
+  /// In en, this message translates to:
+  /// **'Earned'**
+  String get pointsTypeEarn;
+
+  /// No description provided for @pointsTypeReferral.
+  ///
+  /// In en, this message translates to:
+  /// **'Friend referral'**
+  String get pointsTypeReferral;
+
+  /// No description provided for @pointsTypeRedeem.
+  ///
+  /// In en, this message translates to:
+  /// **'Points used'**
+  String get pointsTypeRedeem;
+
+  /// No description provided for @pointsTypeVoucher.
+  ///
+  /// In en, this message translates to:
+  /// **'Voucher redeemed'**
+  String get pointsTypeVoucher;
+
+  /// No description provided for @pointsTypeRefund.
+  ///
+  /// In en, this message translates to:
+  /// **'Points refunded'**
+  String get pointsTypeRefund;
+
+  /// No description provided for @pointsTypeExpire.
+  ///
+  /// In en, this message translates to:
+  /// **'Expired'**
+  String get pointsTypeExpire;
+
+  /// No description provided for @pointsTypeAdjust.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjusted by staff'**
+  String get pointsTypeAdjust;
+
+  /// No description provided for @rewardsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Redeem points'**
+  String get rewardsTitle;
+
+  /// No description provided for @rewardsYouHave.
+  ///
+  /// In en, this message translates to:
+  /// **'You have {points} points'**
+  String rewardsYouHave(String points);
+
+  /// No description provided for @rewardsCost.
+  ///
+  /// In en, this message translates to:
+  /// **'{points} pts'**
+  String rewardsCost(String points);
+
+  /// No description provided for @rewardsStockLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} left'**
+  String rewardsStockLeft(String count);
+
+  /// No description provided for @rewardsEndsAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Ends {date}'**
+  String rewardsEndsAt(String date);
+
+  /// No description provided for @rewardsRedeem.
+  ///
+  /// In en, this message translates to:
+  /// **'Redeem'**
+  String get rewardsRedeem;
+
+  /// No description provided for @rewardsShort.
+  ///
+  /// In en, this message translates to:
+  /// **'{points} more points needed'**
+  String rewardsShort(String points);
+
+  /// No description provided for @rewardsOutOfStock.
+  ///
+  /// In en, this message translates to:
+  /// **'Sold out'**
+  String get rewardsOutOfStock;
+
+  /// No description provided for @rewardsLimitReached.
+  ///
+  /// In en, this message translates to:
+  /// **'Limit reached'**
+  String get rewardsLimitReached;
+
+  /// No description provided for @rewardsNotStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming soon · starts {date}'**
+  String rewardsNotStarted(String date);
+
+  /// No description provided for @rewardsComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming soon'**
+  String get rewardsComingSoon;
+
+  /// No description provided for @rewardsEnded.
+  ///
+  /// In en, this message translates to:
+  /// **'Ended'**
+  String get rewardsEnded;
+
+  /// No description provided for @rewardsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No rewards to redeem yet'**
+  String get rewardsEmpty;
+
+  /// No description provided for @rewardsTerms.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms'**
+  String get rewardsTerms;
+
+  /// No description provided for @rewardsConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Use {cost} points for {item}?'**
+  String rewardsConfirm(String cost, String item);
+
+  /// No description provided for @rewardsConfirmLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'Points left: {points}'**
+  String rewardsConfirmLeft(String points);
+
+  /// No description provided for @rewardsConfirmButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get rewardsConfirmButton;
+
+  /// No description provided for @rewardsSuccessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Redeemed!'**
+  String get rewardsSuccessTitle;
+
+  /// No description provided for @rewardsValidUntil.
+  ///
+  /// In en, this message translates to:
+  /// **'Valid until {date}'**
+  String rewardsValidUntil(String date);
+
+  /// No description provided for @rewardsUseNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Use now'**
+  String get rewardsUseNow;
+
+  /// No description provided for @rewardsSeeVouchers.
+  ///
+  /// In en, this message translates to:
+  /// **'See my vouchers'**
+  String get rewardsSeeVouchers;
+
+  /// No description provided for @vouchersTabActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Available'**
+  String get vouchersTabActive;
+
+  /// No description provided for @vouchersTabUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Used'**
+  String get vouchersTabUsed;
+
+  /// No description provided for @vouchersTabExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Expired'**
+  String get vouchersTabExpired;
+
+  /// No description provided for @vouchersUsedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Used {date} · {service}'**
+  String vouchersUsedAt(String date, String service);
+
+  /// No description provided for @vouchersEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No vouchers yet'**
+  String get vouchersEmpty;
+
+  /// No description provided for @vouchersGoRedeem.
+  ///
+  /// In en, this message translates to:
+  /// **'Redeem points'**
+  String get vouchersGoRedeem;
+
+  /// No description provided for @vouchersChooseService.
+  ///
+  /// In en, this message translates to:
+  /// **'Use this voucher for…'**
+  String get vouchersChooseService;
+
+  /// No description provided for @vouchersCodeCopiedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Code copied — paste it in the promo box'**
+  String get vouchersCodeCopiedHint;
+
+  /// No description provided for @serviceRide.
+  ///
+  /// In en, this message translates to:
+  /// **'Ride'**
+  String get serviceRide;
+
+  /// No description provided for @serviceFood.
+  ///
+  /// In en, this message translates to:
+  /// **'Food'**
+  String get serviceFood;
+
+  /// No description provided for @serviceMessenger.
+  ///
+  /// In en, this message translates to:
+  /// **'Parcel'**
+  String get serviceMessenger;
+
+  /// No description provided for @homeReferralBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite friends, get {points} points'**
+  String homeReferralBanner(String points);
 }
 
 class _AppLocalizationsDelegate

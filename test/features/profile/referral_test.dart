@@ -41,6 +41,44 @@ Map<String, dynamic> _json({
   'referred_by': referredBy,
 };
 
+// The current GET /api/customer/loyalty/referral shape.
+Map<String, dynamic> _newJson() => {
+  'enabled': true,
+  'referral_code': {
+    'code': 'K7QM2X',
+    'max_uses': 50,
+    'current_uses': 3,
+    'is_active': true,
+  },
+  'referrer_points': 100,
+  'referee_discount_baht': 50,
+  'share_message': 'ใช้โค้ด K7QM2X ลด ฿50 เรียกรถครั้งแรกกับ Mass Move',
+  'stats': {'invited': 3, 'completed': 1, 'points_earned': 100},
+  'friends': [
+    {
+      'name': 'สมชาย ใ.',
+      'status': 'REWARDED',
+      'points': 100,
+      'created_at': '2026-10-20T08:00:00Z',
+      'rewarded_at': '2026-10-21T10:00:00Z',
+    },
+    {
+      'name': 'Nok K.',
+      'status': 'PENDING',
+      'points': 100,
+      'created_at': '2026-10-22T07:00:00Z',
+      'rewarded_at': null,
+    },
+    {
+      'name': 'Joe P.',
+      'status': 'CANCELLED',
+      'points': 100,
+      'created_at': '2026-10-19T07:00:00Z',
+      'rewarded_at': null,
+    },
+  ],
+};
+
 Future<void> _pump(WidgetTester tester, ReferralInfo info) async {
   // A phone-sized tall viewport so the whole (lazy) list is built.
   tester.view.physicalSize = const Size(1080, 3200);
@@ -87,34 +125,47 @@ void main() {
     expect(info.referredByWelcomeCode, 'FRIEND50');
   });
 
-  testWidgets('shows the code, numbers from the API and pending friends', (
-    tester,
-  ) async {
+  testWidgets('shows the code and the numbers from the API', (tester) async {
     await _pump(tester, ReferralInfo.fromJson(_json()));
     expect(find.text('AB12CD34'), findsOneWidget);
+    expect(find.text('เพื่อนได้ ฿50 · คุณได้ 500 คะแนน'), findsOneWidget);
+    expect(find.text('1,500'), findsOneWidget);
     expect(
-      find.text('เพื่อนได้ส่วนลด ฿50 · คุณรับ 500 แต้มเมื่อเพื่อนใช้บริการครั้งแรก'),
+      find.text('ชวนแล้ว 4 · สำเร็จ 3 · ได้ 1,500 คะแนน'),
       findsOneWidget,
     );
-    expect(find.text('1500'), findsOneWidget);
-    expect(find.text('รอเพื่อนใช้บริการ 1 คน (500 แต้ม)'), findsOneWidget);
-    // Not a new customer → no apply card.
-    expect(find.byKey(const Key('referralApplyCard')), findsNothing);
+    expect(find.text('แชร์โค้ดให้เพื่อน'), findsOneWidget);
     expect(find.byKey(const Key('referralCodeFull')), findsNothing);
     expect(find.byKey(const Key('referralReferredBy')), findsNothing);
   });
 
-  testWidgets('a new customer can enter a code (with its deadline)', (
-    tester,
-  ) async {
-    await _pump(tester, ReferralInfo.fromJson(_json(canApply: true)));
-    expect(find.byKey(const Key('referralApplyCard')), findsOneWidget);
-    expect(find.textContaining('กรอกได้ถึง'), findsOneWidget);
+  test('parses the new contract (referrer_points, friends, share_message)', () {
+    final info = ReferralInfo.fromJson(_newJson());
+    expect(info.code, 'K7QM2X');
+    expect(info.referrerRewardPoints, 100);
+    expect(info.friendRewardValue, 50);
+    expect(info.shareMessage, startsWith('ใช้โค้ด K7QM2X'));
+    expect(info.stats.totalReferrals, 3);
+    expect(info.stats.completedCount, 1);
+    expect(info.stats.totalRewardPoints, 100);
+    expect(info.friends.map((f) => f.status), [
+      'REWARDED',
+      'PENDING',
+      'CANCELLED',
+    ]);
+    expect(info.friends.first.rewardedAt, isNotNull);
   });
 
-  testWidgets('already referred → no apply card, reminder while PENDING', (
-    tester,
-  ) async {
+  testWidgets('friends list shows each status', (tester) async {
+    await _pump(tester, ReferralInfo.fromJson(_newJson()));
+    expect(find.text('เพื่อนได้ ฿50 · คุณได้ 100 คะแนน'), findsOneWidget);
+    expect(find.text('สมชาย ใ.'), findsOneWidget);
+    expect(find.text('ได้ 100 คะแนน'), findsOneWidget);
+    expect(find.text('รอเดินทางครั้งแรก'), findsOneWidget);
+    expect(find.byKey(const Key('referralFriend-CANCELLED')), findsOneWidget);
+  });
+
+  testWidgets('already referred → reminder while PENDING', (tester) async {
     await _pump(
       tester,
       ReferralInfo.fromJson(
@@ -128,7 +179,6 @@ void main() {
         ),
       ),
     );
-    expect(find.byKey(const Key('referralApplyCard')), findsNothing);
     expect(find.text('คุณสมัครด้วยรหัส 3F2AK7QX'), findsOneWidget);
     expect(
       find.text('อย่าลืมใช้โค้ด FRIEND50 ในออเดอร์แรก ลด ฿50'),
@@ -148,19 +198,8 @@ void main() {
 
   testWidgets('programme switched off', (tester) async {
     await _pump(tester, ReferralInfo.fromJson(_json(enabled: false)));
-    expect(find.text('ขณะนี้ยังไม่เปิดให้ใช้รหัสแนะนำ'), findsOneWidget);
+    expect(find.text('ขณะนี้ยังไม่เปิดโปรแกรมชวนเพื่อน'), findsOneWidget);
     expect(find.text('AB12CD34'), findsNothing);
-  });
-
-  test('apply error codes map to messages', () async {
-    final l10n = await AppLocalizations.delegate.load(const Locale('th'));
-    expect(referralApplyError(l10n, 'referral_self'), 'ใช้รหัสของตัวเองไม่ได้');
-    expect(
-      referralApplyError(l10n, 'referral_window_closed'),
-      'เลยเวลากรอกรหัสแนะนำแล้ว',
-    );
-    expect(referralApplyError(l10n, 'referral_code_full'), 'รหัสนี้ถูกใช้ครบจำนวนแล้ว');
-    expect(referralApplyError(l10n, 'something_new'), l10n.profileReferralApplyInvalid);
   });
 
   test('welcome code is cleared only when that code was used', () async {

@@ -18,7 +18,7 @@ import 'package:customer_app/l10n/app_localizations.dart';
 // Added imports for LiveRideController
 import 'package:customer_app/features/active_orders/data/repositories/active_orders_repository_impl.dart';
 import 'package:customer_app/features/live_ride/presentation/controllers/live_ride_controller.dart';
-import 'package:customer_app/features/profile/presentation/screens/loyalty_screen.dart';
+import 'package:customer_app/features/profile/presentation/controllers/loyalty_providers.dart';
 import 'package:customer_app/features/profile/presentation/screens/promo_list_screen.dart';
 import 'package:customer_app/features/ride_booking/presentation/providers/discover_promos_provider.dart';
 import 'package:customer_app/features/profile/data/repositories/profile_repository_impl.dart';

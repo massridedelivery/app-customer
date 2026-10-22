@@ -1,3 +1,4 @@
+import 'package:customer_app/features/profile/presentation/controllers/loyalty_providers.dart';
 import 'package:customer_app/features/profile/data/welcome_promo_store.dart';
 import 'dart:async';
 
@@ -36,6 +37,14 @@ class MessengerBookingController extends _$MessengerBookingController {
     });
     ref.onDispose(() => _estimateDebounce?.cancel());
     Future.microtask(loadVehicleTypes);
+    // A voucher picked with "ใช้เลย" goes in the promo box (after build: a
+    // provider can't change another while building).
+    Future.microtask(() {
+      final voucher = ref
+          .read(pendingPromoCodeProvider.notifier)
+          .take('MESSENGER');
+      if (voucher != null) setPromoCode(voucher);
+    });
     // A referred newcomer's welcome code is pre-filled on their first parcel.
     return MessengerBookingState(
       isLoadingVehicles: true,

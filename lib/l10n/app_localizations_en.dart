@@ -3291,7 +3291,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get ridePointsUse => 'Use points';
+  String get ridePointsUse => 'Use all points';
 
   @override
   String ridePointsAvailable(String balance, String max) {
@@ -3318,22 +3318,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ridePointsGuest => 'Log in to use points';
 
   @override
-  String get rideFare => 'Fare';
-
-  @override
   String ridePointsLine(String points) {
     return '$points points';
   }
-
-  @override
-  String get rideAmountToPay => 'To pay';
-
-  @override
-  String get ridePaidByPoints => 'Paid in full with points';
-
-  @override
-  String get ridePaidByPointsNote =>
-      'Any tolls or waiting fees on the way are paid to the driver';
 
   @override
   String get ridePromoDroppedOnBooking =>
@@ -3385,5 +3372,27 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String rideRequestPrice(String price) {
     return 'Request ride · ฿$price';
+  }
+
+  @override
+  String get ridePaymentSection => 'Payment';
+
+  @override
+  String get rideDiscountSection => 'Discounts';
+
+  @override
+  String get ridePaymentExtrasNote => 'Tolls / waiting fees are paid this way';
+
+  @override
+  String get rideChooseCoupon => 'Choose a coupon';
+
+  @override
+  String rideFareLine(String fare) {
+    return 'Fare ฿$fare';
+  }
+
+  @override
+  String rideFareDiscountLine(String fare, String off) {
+    return 'Fare ฿$fare · Discount −฿$off';
   }
 }

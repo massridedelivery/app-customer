@@ -6040,7 +6040,7 @@ abstract class AppLocalizations {
   /// No description provided for @ridePointsUse.
   ///
   /// In en, this message translates to:
-  /// **'Use points'**
+  /// **'Use all points'**
   String get ridePointsUse;
 
   /// No description provided for @ridePointsAvailable.
@@ -6079,35 +6079,11 @@ abstract class AppLocalizations {
   /// **'Log in to use points'**
   String get ridePointsGuest;
 
-  /// No description provided for @rideFare.
-  ///
-  /// In en, this message translates to:
-  /// **'Fare'**
-  String get rideFare;
-
   /// No description provided for @ridePointsLine.
   ///
   /// In en, this message translates to:
   /// **'{points} points'**
   String ridePointsLine(String points);
-
-  /// No description provided for @rideAmountToPay.
-  ///
-  /// In en, this message translates to:
-  /// **'To pay'**
-  String get rideAmountToPay;
-
-  /// No description provided for @ridePaidByPoints.
-  ///
-  /// In en, this message translates to:
-  /// **'Paid in full with points'**
-  String get ridePaidByPoints;
-
-  /// No description provided for @ridePaidByPointsNote.
-  ///
-  /// In en, this message translates to:
-  /// **'Any tolls or waiting fees on the way are paid to the driver'**
-  String get ridePaidByPointsNote;
 
   /// No description provided for @ridePromoDroppedOnBooking.
   ///
@@ -6192,6 +6168,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Request ride · ฿{price}'**
   String rideRequestPrice(String price);
+
+  /// No description provided for @ridePaymentSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment'**
+  String get ridePaymentSection;
+
+  /// No description provided for @rideDiscountSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Discounts'**
+  String get rideDiscountSection;
+
+  /// No description provided for @ridePaymentExtrasNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Tolls / waiting fees are paid this way'**
+  String get ridePaymentExtrasNote;
+
+  /// No description provided for @rideChooseCoupon.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a coupon'**
+  String get rideChooseCoupon;
+
+  /// No description provided for @rideFareLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Fare ฿{fare}'**
+  String rideFareLine(String fare);
+
+  /// No description provided for @rideFareDiscountLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Fare ฿{fare} · Discount −฿{off}'**
+  String rideFareDiscountLine(String fare, String off);
 }
 
 class _AppLocalizationsDelegate

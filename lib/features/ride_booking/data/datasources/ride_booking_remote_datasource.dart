@@ -14,6 +14,8 @@ abstract class RideBookingRemoteDataSource {
     required double dropoffLng,
     String? promoCode,
     String? vehicleTypeId,
+    bool? usePoints,
+    int? pointsToUse,
   });
 
   Future<Map<String, dynamic>> validatePromo(String code, double subtotal);
@@ -30,6 +32,8 @@ abstract class RideBookingRemoteDataSource {
     required String paymentMethod,
     String? vehicleTypeId,
     String? promoCode,
+    bool? usePoints,
+    int? pointsToUse,
   });
 }
 
@@ -52,6 +56,8 @@ class RideBookingRemoteDataSourceImpl implements RideBookingRemoteDataSource {
     required double dropoffLng,
     String? promoCode,
     String? vehicleTypeId,
+    bool? usePoints,
+    int? pointsToUse,
   }) async {
     final response = await _apiService.dio.post(
       '/api/customer/jobs/estimate',
@@ -62,6 +68,10 @@ class RideBookingRemoteDataSourceImpl implements RideBookingRemoteDataSource {
         'dropoff_lng': dropoffLng,
         'promo_code': ?promoCode,
         'vehicle_type_id': ?vehicleTypeId,
+        // Points: use_points alone = as many as allowed; points_to_use = an
+        // exact amount (BE §3.1).
+        'use_points': ?usePoints,
+        'points_to_use': ?pointsToUse,
       },
     );
     return response.data as Map<String, dynamic>;
@@ -102,6 +112,8 @@ class RideBookingRemoteDataSourceImpl implements RideBookingRemoteDataSource {
     required String paymentMethod,
     String? vehicleTypeId,
     String? promoCode,
+    bool? usePoints,
+    int? pointsToUse,
   }) async {
     final response = await _apiService.dio.post(
       '/api/customer/jobs',
@@ -115,6 +127,9 @@ class RideBookingRemoteDataSourceImpl implements RideBookingRemoteDataSource {
         'payment_method': paymentMethod,
         'vehicle_type_id': vehicleTypeId,
         'promo_code': ?promoCode,
+        // The same points choice as the last estimate.
+        'use_points': ?usePoints,
+        'points_to_use': ?pointsToUse,
       },
       // Retry-safe create (SCRUM-50): a replay after a 503/timeout returns the
       // original job instead of double-booking.

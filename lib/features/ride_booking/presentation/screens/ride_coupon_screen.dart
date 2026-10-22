@@ -1,3 +1,5 @@
+import 'package:customer_app/features/ride_booking/domain/models/ride_promo.dart';
+import 'package:customer_app/core/error/api_error.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/utils/auth_gate.dart';
@@ -83,6 +85,9 @@ class _RideCouponScreenState extends ConsumerState<RideCouponScreen> {
         });
       }
     } catch (e) {
+      if (e is ApiError && e.code == 'REFERRAL_LOGIN_REQUIRED') {
+        if (mounted) ensureLoggedIn(context, ref);
+      }
       // The list may be stale (e.g. "promotion fully redeemed" just now):
       // reload it so a code that can't be used any more drops out.
       ref.invalidate(discoverPromosProvider);
@@ -179,18 +184,39 @@ class _RideCouponScreenState extends ConsumerState<RideCouponScreen> {
         message: friendlyError(err, fallback: _l10n.rideCouponLoadFailed),
         onRetry: () => ref.invalidate(discoverPromosProvider),
       ),
-      data: (promos) => _CouponList(
-        onRefresh: () => ref.refresh(discoverPromosProvider.future),
-        cards: [
-          for (final promo in promos)
-            CouponCard(
-              data: CouponCardData.fromRidePromo(promo),
-              isSelected: appliedPromoCode == promo.code,
-              onApply: () => _applyPromo(promo.code),
-              onCancel: _cancelPromo,
-            ),
-        ],
-      ),
+      data: (promos) {
+        CouponCard card(RidePromo promo) => CouponCard(
+          data: CouponCardData.fromRidePromo(promo),
+          isSelected: appliedPromoCode == promo.code,
+          onApply: () => _applyPromo(promo.code),
+          onCancel: _cancelPromo,
+        );
+        // The customer's own point-reward coupons first, under their own
+        // heading; then the regular promotions.
+        final vouchers = promos.where((p) => p.isVoucher).toList();
+        return _CouponList(
+          onRefresh: () => ref.refresh(discoverPromosProvider.future),
+          leading: [
+            if (vouchers.isNotEmpty) ...[
+              Padding(
+                padding: const EdgeInsets.only(top: 16, bottom: 12),
+                child: Text(
+                  _l10n.couponYourVouchers,
+                  key: const Key('rideCouponVouchers'),
+                  style: AppTypography.label1.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              for (final v in vouchers) card(v),
+            ],
+          ],
+          cards: [
+            for (final promo in promos)
+              if (!promo.isVoucher) card(promo),
+          ],
+        );
+      },
     );
   }
 
@@ -229,8 +255,13 @@ class _RideCouponScreenState extends ConsumerState<RideCouponScreen> {
 /// "คูปองส่วนลดที่มี" header + cards (or an empty message), pull-to-refresh.
 class _CouponList extends StatelessWidget {
   final List<Widget> cards;
+  final List<Widget> leading;
   final Future<Object?> Function() onRefresh;
-  const _CouponList({required this.cards, required this.onRefresh});
+  const _CouponList({
+    required this.cards,
+    required this.onRefresh,
+    this.leading = const [],
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -241,6 +272,7 @@ class _CouponList extends StatelessWidget {
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 36),
         children: [
+          ...leading,
           Padding(
             padding: const EdgeInsets.only(top: 16, bottom: 12),
             child: Text(

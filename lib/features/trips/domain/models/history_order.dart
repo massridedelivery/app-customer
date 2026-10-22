@@ -126,6 +126,8 @@ abstract class HistoryRideDetails with _$HistoryRideDetails {
     @JsonKey(name: 'customer_info') HistoryCustomerInfo? customerInfo,
     @JsonKey(name: 'destination_city') String? destinationCity,
     required double discount,
+    @JsonKey(name: 'points_used') int? pointsUsed,
+    @JsonKey(name: 'points_discount') double? pointsDiscount,
     @JsonKey(name: 'dispatcher_notified_at') String? dispatcherNotifiedAt,
     @JsonKey(name: 'distance_category') String? distanceCategory,
     @JsonKey(name: 'distance_km') double? distanceKm,

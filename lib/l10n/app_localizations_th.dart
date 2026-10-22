@@ -3249,4 +3249,94 @@ class AppLocalizationsTh extends AppLocalizations {
   String homeReferralBanner(String points) {
     return 'ชวนเพื่อน รับ $points คะแนน';
   }
+
+  @override
+  String get ridePointsUse => 'ใช้คะแนน';
+
+  @override
+  String ridePointsAvailable(String balance, String max) {
+    return 'มี $balance คะแนน · ใช้ได้สูงสุด $max คะแนน';
+  }
+
+  @override
+  String ridePointsUsing(String points, String baht) {
+    return 'ใช้ $points คะแนน −฿$baht';
+  }
+
+  @override
+  String get ridePointsEdit => 'แก้จำนวน';
+
+  @override
+  String get ridePointsNoPoints => 'ยังไม่มีคะแนน';
+
+  @override
+  String ridePointsBelowMin(String min) {
+    return 'ต้องมีอย่างน้อย $min คะแนน';
+  }
+
+  @override
+  String get ridePointsNothingToPay => 'ไม่มียอดให้ใช้คะแนน';
+
+  @override
+  String get ridePointsGuest => 'เข้าสู่ระบบเพื่อใช้คะแนน';
+
+  @override
+  String ridePointsAdjusted(String points) {
+    return 'ปรับเป็น $points คะแนน';
+  }
+
+  @override
+  String get ridePointsSheetTitle => 'ใช้คะแนนเท่าไร?';
+
+  @override
+  String ridePointsSheetDiscount(String baht) {
+    return 'ลด ฿$baht';
+  }
+
+  @override
+  String get ridePointsUseAll => 'ใช้ทั้งหมด';
+
+  @override
+  String get rideFare => 'ค่าโดยสาร';
+
+  @override
+  String ridePointsLine(String points) {
+    return 'ใช้ $points คะแนน';
+  }
+
+  @override
+  String get rideAmountToPay => 'ยอดชำระ';
+
+  @override
+  String get ridePaidByPoints => 'ชำระด้วยคะแนนทั้งหมด';
+
+  @override
+  String get ridePaidByPointsNote =>
+      'หากมีค่าทางด่วนหรือค่ารอเพิ่มระหว่างทาง ชำระกับคนขับ';
+
+  @override
+  String get ridePromoDroppedOnBooking =>
+      'โค้ด/คูปองใช้ไม่ได้ งานนี้ไม่มีส่วนลด';
+
+  @override
+  String get ridePriceUpdated => 'ราคาอัปเดตแล้ว กรุณาตรวจสอบอีกครั้ง';
+
+  @override
+  String get promoNotFoundOrInvalid => 'ไม่พบโค้ดนี้หรือใช้ไม่ได้';
+
+  @override
+  String get couponYourVouchers => 'คูปองของคุณ';
+
+  @override
+  String pointsEarnedOnTrip(String points) {
+    return 'ได้รับ +$points คะแนน';
+  }
+
+  @override
+  String pointsRefundedOnCancel(String points) {
+    return 'คืน $points คะแนนแล้ว';
+  }
+
+  @override
+  String get voucherRefundedOnCancel => 'คืนคูปองแล้ว';
 }

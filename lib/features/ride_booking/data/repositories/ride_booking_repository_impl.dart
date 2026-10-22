@@ -4,6 +4,7 @@ import 'package:customer_app/core/utils/promo_rejection.dart';
 import 'package:customer_app/features/ride_booking/data/datasources/ride_booking_remote_datasource.dart';
 import 'package:customer_app/features/ride_booking/domain/models/fare_estimation_response.dart';
 import 'package:customer_app/features/ride_booking/domain/models/ride_promo.dart';
+import 'package:customer_app/features/ride_booking/domain/models/ride_quote.dart';
 import 'package:customer_app/features/ride_booking/domain/repositories/ride_booking_repository.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:dio/dio.dart';
@@ -41,6 +42,8 @@ class RideBookingRepositoryImpl implements RideBookingRepository {
     required double dropoffLng,
     String? promoCode,
     String? vehicleTypeId,
+    bool? usePoints,
+    int? pointsToUse,
   }) async {
     try {
       final response = await _dataSource.estimateFare(
@@ -49,6 +52,8 @@ class RideBookingRepositoryImpl implements RideBookingRepository {
         dropoffLat: dropoffLat,
         dropoffLng: dropoffLng,
         promoCode: promoCode,
+        usePoints: usePoints,
+        pointsToUse: pointsToUse,
         vehicleTypeId: vehicleTypeId,
       );
 
@@ -59,13 +64,11 @@ class RideBookingRepositoryImpl implements RideBookingRepository {
       debugPrint(
         'estimateFare failed: ${e.response?.statusCode} ${e.response?.data}',
       );
-      throw Exception(
-        apiErrorMessage(e, fallback: _l10n().rideFareEstimateFailed),
-      );
+      // ApiError keeps the code (POINTS_*) and extras (max_usable_points) the
+      // booking screen acts on; its text is the server's own.
+      throw _apiError(e, _l10n().rideFareEstimateFailed);
     } catch (e) {
-      throw Exception(
-        apiErrorMessage(e, fallback: _l10n().rideFareEstimateFailed),
-      );
+      throw _apiError(e, _l10n().rideFareEstimateFailed);
     }
   }
 
@@ -80,7 +83,28 @@ class RideBookingRepositoryImpl implements RideBookingRepository {
               item is Map &&
               item['code']?.toString().toUpperCase() == upperCode);
       if (!isApplied) {
-        throw Exception(promoRejectionMessage(response, upperCode));
+        // A friend's code / voucher refusal carries a stable error_code and
+        // a Thai reason, shown as is (REFERRAL_LOGIN_REQUIRED → log in).
+        final rejected = response['rejected'];
+        if (rejected is List) {
+          for (final item in rejected.whereType<Map>()) {
+            final errorCode = item['error_code']?.toString();
+            if (errorCode == null || errorCode.isEmpty) continue;
+            throw ApiError(
+              code: errorCode,
+              message:
+                  item['reason']?.toString() ?? _l10n().promoNotFoundOrInvalid,
+            );
+          }
+        }
+        // An ordinary promo: a known reason in the app's words, else
+        // "ไม่พบโค้ดนี้หรือใช้ไม่ได้".
+        final message = promoRejectionMessage(response, upperCode);
+        throw ApiError(
+          message: message == kPromoRejectedFallback
+              ? _l10n().promoNotFoundOrInvalid
+              : message,
+        );
       }
       // Prefer the server-computed total; fall back to summing applied lines.
       final total = (response['total_discount'] as num?)?.toDouble();
@@ -127,7 +151,7 @@ class RideBookingRepositoryImpl implements RideBookingRepository {
   }
 
   @override
-  Future<String> createJob({
+  Future<RideBooking> createJob({
     required double pickupLat,
     required double pickupLng,
     required String pickupAddress,
@@ -137,6 +161,8 @@ class RideBookingRepositoryImpl implements RideBookingRepository {
     required String paymentMethod,
     String? vehicleTypeId,
     String? promoCode,
+    bool? usePoints,
+    int? pointsToUse,
   }) async {
     try {
       final response = await _dataSource.createJob(
@@ -149,19 +175,29 @@ class RideBookingRepositoryImpl implements RideBookingRepository {
         paymentMethod: paymentMethod,
         vehicleTypeId: vehicleTypeId,
         promoCode: promoCode,
+        usePoints: usePoints,
+        pointsToUse: pointsToUse,
       );
-      return response['id'] as String;
+      return RideBooking.fromJson(response);
     } on DioException catch (e) {
       debugPrint(
         'createJob failed: ${e.response?.statusCode} ${e.response?.data}',
       );
-      throw Exception(
-        apiErrorMessage(e, fallback: _l10n().rideRequestFailed),
-      );
+      throw _apiError(e, _l10n().rideRequestFailed);
     } catch (e) {
-      throw Exception(
-        apiErrorMessage(e, fallback: _l10n().rideRequestFailed),
-      );
+      throw _apiError(e, _l10n().rideRequestFailed);
     }
+  }
+
+  /// A coded backend refusal keeps its own (Thai) text; anything else gets
+  /// the usual friendly message (out-of-area, timeouts, …).
+  ApiError _apiError(Object e, String fallback) {
+    final err = ApiError.from(e, fallback: fallback);
+    if (err.code != null) return err;
+    return ApiError(
+      message: apiErrorMessage(e, fallback: fallback),
+      statusCode: err.statusCode,
+      isNetwork: err.isNetwork,
+    );
   }
 }

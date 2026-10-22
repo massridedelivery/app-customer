@@ -62,6 +62,8 @@ abstract class DriverProfileModel with _$DriverProfileModel {
     @JsonKey(name: 'booking_type') required String bookingType,
     // dev102: the backend's total due (0 once paid) — see rideAmountDue.
     @JsonKey(name: 'amount_due') double? amountDue,
+    @JsonKey(name: 'points_used') @Default(0) int pointsUsed,
+    @JsonKey(name: 'points_discount') @Default(0.0) double pointsDiscount,
     @JsonKey(name: 'payment_status') @Default('') String paymentStatus,
   }) = _DriverProfileModel;
 
@@ -133,6 +135,8 @@ abstract class DriverProfileModel with _$DriverProfileModel {
       distanceCategory: '',
       bookingType: job.bookingType,
       amountDue: job.amountDue,
+      pointsUsed: job.pointsUsed,
+      pointsDiscount: job.pointsDiscount,
       paymentStatus: job.paymentStatus,
     );
   }
@@ -150,6 +154,7 @@ extension DriverProfilePayable on DriverProfileModel {
     discount: discount,
     tollFee: tollFee,
     waitingFee: waitingFee,
+    pointsDiscount: pointsDiscount,
   );
 }
 

@@ -1,3 +1,6 @@
+import 'package:customer_app/features/profile/presentation/widgets/loyalty_format.dart';
+import 'package:customer_app/features/ride_booking/domain/models/ride_quote.dart';
+import 'package:customer_app/features/ride_booking/presentation/widgets/ride_points_widgets.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/utils/vehicle_name_th.dart';
@@ -39,6 +42,12 @@ class VehicleSelectionSheet extends ConsumerWidget {
   /// "pick another pickup" action) and the request button stays disabled.
   final bool outOfServiceArea;
 
+  /// The "ใช้คะแนน" switch / "แก้จำนวน" / a guest's "log in to use points".
+  /// Null hides the points row.
+  final ValueChanged<bool>? onPointsToggle;
+  final VoidCallback? onPointsEdit;
+  final VoidCallback? onPointsLogin;
+
   const VehicleSelectionSheet({
     super.key,
     required this.scrollController,
@@ -51,6 +60,9 @@ class VehicleSelectionSheet extends ConsumerWidget {
     this.onPickLocation,
     this.onRetryEstimate,
     this.outOfServiceArea = false,
+    this.onPointsToggle,
+    this.onPointsEdit,
+    this.onPointsLogin,
   });
 
   @override
@@ -64,6 +76,24 @@ class VehicleSelectionSheet extends ConsumerWidget {
     // No auto-select: the user must explicitly pick a vehicle before the
     // "request ride" button becomes enabled.
     final hasVehicleSelected = bookingState.vehicleTypeId != null;
+    final pricedVehicle = estimations.isEmpty
+        ? null
+        : estimations.firstWhere(
+            (e) => e.vehicleTypeId == bookingState.vehicleTypeId,
+            orElse: () => estimations.first,
+          );
+    final pointsQuote = pricedVehicle?.points;
+    final showPoints =
+        onPointsToggle != null &&
+        pointsQuote != null &&
+        !pointsQuote.hidden &&
+        !bookingState.pointsDisabled &&
+        !outOfServiceArea;
+    final paidByPoints =
+        hasVehicleSelected &&
+        pricedVehicle != null &&
+        pricedVehicle.amountToPay != null &&
+        pricedVehicle.payable <= 0;
     VehicleEstimation? selectedEstimation;
     for (final e in estimations) {
       if (e.vehicleTypeId == bookingState.vehicleTypeId) {
@@ -192,6 +222,34 @@ class VehicleSelectionSheet extends ConsumerWidget {
           IntrinsicHeight(
             child: Row(
               children: [
+                if (paidByPoints)
+                  // Nothing to collect: no payment method to choose (and never
+                  // a QR / card screen) — the booking goes as CASH.
+                  Expanded(
+                    child: Padding(
+                      key: const Key('ridePaidByPoints'),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 16,
+                        horizontal: 16,
+                      ),
+                      child: Row(
+                        children: [
+                          const Text('🪙', style: TextStyle(fontSize: 18)),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              l10n.ridePaidByPoints,
+                              style: AppTypography.label3.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: _kSuccessFg,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                else
                 Expanded(
                   child: InkWell(
                     onTap: () => _showPaymentPicker(
@@ -335,8 +393,30 @@ class VehicleSelectionSheet extends ConsumerWidget {
             _CouponSummary(
               code: bookingState.appliedPromoCode!,
               discount: (selectedEstimation ?? estimations.first).discount,
+              promo: (selectedEstimation ?? estimations.first).promo,
               reason: bookingState.promoRejectReason,
               onRemove: onPromoRemove,
+            ),
+
+          // 🪙 ใช้คะแนน (hidden while points are switched off).
+          if (showPoints)
+            RidePointsRow(
+              quote: pointsQuote,
+              on: bookingState.usePoints,
+              onToggle: onPointsToggle!,
+              onEdit: onPointsEdit ?? () {},
+              onLogin: onPointsLogin ?? () {},
+            ),
+
+          // Fare − code − points = to pay, once something comes off.
+          if (hasVehicleSelected &&
+              selectedEstimation != null &&
+              !bookingAsync.isLoading &&
+              (selectedEstimation.discount > 0 ||
+                  (selectedEstimation.points?.usedPoints ?? 0) > 0))
+            RidePriceSummary(
+              estimation: selectedEstimation,
+              code: bookingState.appliedPromoCode,
             ),
 
           // Request button. Disabled until a vehicle is picked — and the label
@@ -374,7 +454,7 @@ class VehicleSelectionSheet extends ConsumerWidget {
                             languageCode:
                                 Localizations.localeOf(context).languageCode,
                           ),
-                          selectedEstimation.totalFare.toStringAsFixed(0),
+                          fmtBaht(selectedEstimation.payable),
                         )
                       : l10n.selectVehicleFirst,
                   style: AppTypography.heading4.copyWith(
@@ -485,12 +565,14 @@ class _EmptyEstimate extends StatelessWidget {
 class _CouponSummary extends StatelessWidget {
   final String code;
   final double discount;
+  final RidePromoQuote? promo;
   final String? reason;
   final VoidCallback? onRemove;
 
   const _CouponSummary({
     required this.code,
     required this.discount,
+    this.promo,
     this.reason,
     this.onRemove,
   });
@@ -500,6 +582,10 @@ class _CouponSummary extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final applied = discount > 0;
     final fg = applied ? _kSuccessFg : AppColors.textSecondary;
+    // A friend's code / voucher is named by its kind ("โค้ดเพื่อน −฿50");
+    // its refusal comes with a Thai reason from the estimate itself.
+    final label = promo?.label;
+    final why = promo?.errorCode != null ? promo?.error : reason;
     final style = AppTypography.label2.copyWith(
       color: fg,
       fontWeight: FontWeight.bold,
@@ -522,9 +608,9 @@ class _CouponSummary extends StatelessWidget {
           Expanded(
             child: Text(
               applied
-                  ? '${l10n.couponDiscount} $code'
-                  : reason != null
-                  ? l10n.couponNotAppliedReason(code, reason!)
+                  ? (label ?? '${l10n.couponDiscount} $code')
+                  : why != null
+                  ? l10n.couponNotAppliedReason(code, why)
                   : l10n.couponNotAppliedToFare(code),
               style: style,
             ),

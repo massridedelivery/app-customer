@@ -75,11 +75,15 @@ class PointsEntry {
     required this.points,
     this.description = '',
     this.orderType,
+    this.orderId,
     this.createdAt,
     this.expiresAt,
   });
 
   final String id;
+
+  /// The order (job) this row is for, when any.
+  final String? orderId;
 
   /// EARN | REDEEM | REFUND | EXPIRE | ADJUST.
   final String type;
@@ -97,6 +101,7 @@ class PointsEntry {
     points: _int(json['points']),
     description: _str(json['description']) ?? '',
     orderType: _str(json['order_type'])?.toUpperCase(),
+    orderId: _str(json['order_id']),
     createdAt: _date(json['created_at']),
     expiresAt: _date(json['expires_at']),
   );

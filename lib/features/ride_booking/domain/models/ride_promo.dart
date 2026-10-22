@@ -10,6 +10,9 @@ class RidePromo {
   final String validUntil;
   final String appliesTo;
 
+  /// PROMO, or VOUCHER for the customer's own point-reward coupon (RW-…).
+  final String kind;
+
   RidePromo({
     required this.id,
     required this.code,
@@ -21,7 +24,10 @@ class RidePromo {
     required this.minSpend,
     required this.validUntil,
     required this.appliesTo,
+    this.kind = 'PROMO',
   });
+
+  bool get isVoucher => kind == 'VOUCHER';
 
   factory RidePromo.fromJson(Map<String, dynamic> json) {
     return RidePromo(
@@ -33,8 +39,10 @@ class RidePromo {
       discountValue: (json['discount_value'] as num?)?.toDouble() ?? 0.0,
       maxDiscount: json['max_discount'] != null ? (json['max_discount'] as num?)?.toDouble() : null,
       minSpend: (json['min_spend'] as num?)?.toDouble() ?? 0.0,
-      validUntil: json['valid_until']?.toString() ?? '',
+      validUntil:
+          (json['expires_at'] ?? json['valid_until'])?.toString() ?? '',
       appliesTo: json['applies_to']?.toString() ?? 'RIDE',
+      kind: (json['kind']?.toString() ?? 'PROMO').toUpperCase(),
     );
   }
 }

@@ -6036,6 +6036,150 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Invite friends, get {points} points'**
   String homeReferralBanner(String points);
+
+  /// No description provided for @ridePointsUse.
+  ///
+  /// In en, this message translates to:
+  /// **'Use points'**
+  String get ridePointsUse;
+
+  /// No description provided for @ridePointsAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'{balance} points · up to {max} usable'**
+  String ridePointsAvailable(String balance, String max);
+
+  /// No description provided for @ridePointsUsing.
+  ///
+  /// In en, this message translates to:
+  /// **'Using {points} points −฿{baht}'**
+  String ridePointsUsing(String points, String baht);
+
+  /// No description provided for @ridePointsEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get ridePointsEdit;
+
+  /// No description provided for @ridePointsNoPoints.
+  ///
+  /// In en, this message translates to:
+  /// **'No points yet'**
+  String get ridePointsNoPoints;
+
+  /// No description provided for @ridePointsBelowMin.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs at least {min} points'**
+  String ridePointsBelowMin(String min);
+
+  /// No description provided for @ridePointsNothingToPay.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing left to pay with points'**
+  String get ridePointsNothingToPay;
+
+  /// No description provided for @ridePointsGuest.
+  ///
+  /// In en, this message translates to:
+  /// **'Log in to use points'**
+  String get ridePointsGuest;
+
+  /// No description provided for @ridePointsAdjusted.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjusted to {points} points'**
+  String ridePointsAdjusted(String points);
+
+  /// No description provided for @ridePointsSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How many points?'**
+  String get ridePointsSheetTitle;
+
+  /// No description provided for @ridePointsSheetDiscount.
+  ///
+  /// In en, this message translates to:
+  /// **'฿{baht} off'**
+  String ridePointsSheetDiscount(String baht);
+
+  /// No description provided for @ridePointsUseAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Use all'**
+  String get ridePointsUseAll;
+
+  /// No description provided for @rideFare.
+  ///
+  /// In en, this message translates to:
+  /// **'Fare'**
+  String get rideFare;
+
+  /// No description provided for @ridePointsLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{points} points'**
+  String ridePointsLine(String points);
+
+  /// No description provided for @rideAmountToPay.
+  ///
+  /// In en, this message translates to:
+  /// **'To pay'**
+  String get rideAmountToPay;
+
+  /// No description provided for @ridePaidByPoints.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid in full with points'**
+  String get ridePaidByPoints;
+
+  /// No description provided for @ridePaidByPointsNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Any tolls or waiting fees on the way are paid to the driver'**
+  String get ridePaidByPointsNote;
+
+  /// No description provided for @ridePromoDroppedOnBooking.
+  ///
+  /// In en, this message translates to:
+  /// **'The code/voucher couldn\'t be used — no discount on this ride'**
+  String get ridePromoDroppedOnBooking;
+
+  /// No description provided for @ridePriceUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'The price was updated — please check it again'**
+  String get ridePriceUpdated;
+
+  /// No description provided for @promoNotFoundOrInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Code not found or can\'t be used'**
+  String get promoNotFoundOrInvalid;
+
+  /// No description provided for @couponYourVouchers.
+  ///
+  /// In en, this message translates to:
+  /// **'Your vouchers'**
+  String get couponYourVouchers;
+
+  /// No description provided for @pointsEarnedOnTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'+{points} points earned'**
+  String pointsEarnedOnTrip(String points);
+
+  /// No description provided for @pointsRefundedOnCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'{points} points refunded'**
+  String pointsRefundedOnCancel(String points);
+
+  /// No description provided for @voucherRefundedOnCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Voucher returned'**
+  String get voucherRefundedOnCancel;
 }
 
 class _AppLocalizationsDelegate

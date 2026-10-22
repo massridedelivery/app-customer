@@ -6,8 +6,9 @@ double ridePayable({
   double discount = 0,
   double tollFee = 0,
   double waitingFee = 0,
+  double pointsDiscount = 0,
 }) {
-  final total = fare - discount + tollFee + waitingFee;
+  final total = fare - discount - pointsDiscount + tollFee + waitingFee;
   return total < 0 ? 0 : total;
 }
 
@@ -22,6 +23,7 @@ double rideAmountDue({
   double discount = 0,
   double tollFee = 0,
   double waitingFee = 0,
+  double pointsDiscount = 0,
 }) {
   if (amountDue != null && paymentStatus.toUpperCase() != 'PAID') {
     return amountDue < 0 ? 0 : amountDue;
@@ -31,5 +33,6 @@ double rideAmountDue({
     discount: discount,
     tollFee: tollFee,
     waitingFee: waitingFee,
+    pointsDiscount: pointsDiscount,
   );
 }

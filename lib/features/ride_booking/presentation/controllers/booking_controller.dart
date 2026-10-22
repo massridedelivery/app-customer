@@ -108,7 +108,11 @@ class BookingController extends _$BookingController {
     if (asked > pts.maxUsablePoints || pts.errorCode != null) {
       final max = pts.maxUsablePoints;
       state = AsyncValue.data(
-        current.copyWith(pointsToUse: max, pointsAdjustedTo: max),
+        current.copyWith(
+          pointsToUse: max,
+          pointsAdjustedTo: max,
+          pointsAdjustMessage: pts.error,
+        ),
       );
       await estimateFare(
         pickup,
@@ -171,7 +175,11 @@ class BookingController extends _$BookingController {
     final current = state.value;
     if (current == null) return;
     state = AsyncValue.data(
-      current.copyWith(pointsAdjustedTo: null, promoDroppedOnBooking: false),
+      current.copyWith(
+        pointsAdjustedTo: null,
+        pointsAdjustMessage: null,
+        promoDroppedOnBooking: false,
+      ),
     );
   }
 

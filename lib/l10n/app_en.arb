@@ -663,7 +663,7 @@
   "profilePdpaSubmitRequest": "Submit request",
   "profilePdpaDeletionReceived": "Request received. Our team will process it within 30 days.",
   "profilePdpaDeletionFailed": "Can't submit your request right now",
-  "profileReferralTitle": "Refer a friend",
+  "profileReferralTitle": "Invite friends",
   "profileReferralHeadline": "Invite friends to MASS",
   "profileReferralSubtitle": "Get 100 points every time a friend signs up and rides",
   "profileReferralFriendsInvited": "Friends invited",

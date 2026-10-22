@@ -1,3 +1,5 @@
+import 'package:customer_app/features/profile/presentation/widgets/loyalty_format.dart';
+import 'package:customer_app/features/ride_booking/presentation/widgets/ride_points_widgets.dart';
 import 'package:customer_app/features/profile/data/welcome_promo_store.dart';
 import 'package:customer_app/features/profile/presentation/controllers/loyalty_providers.dart';
 import 'dart:async';
@@ -60,6 +62,11 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        ref.read(bookingControllerProvider.notifier).resetPointsChoice();
+      }
+    });
     _startNearbyPolling();
     // Pause while backgrounded (no point spending calls); refresh + resume the
     // instant we return so the count is current when the user looks again.
@@ -390,6 +397,30 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
       });
     });
 
+    // One-off notices: an amount brought down to the new maximum, and a
+    // booking that went through without the code's discount.
+    ref.listen(bookingControllerProvider, (previous, next) {
+      final st = next.value;
+      if (st == null) return;
+      final adjusted = st.pointsAdjustedTo;
+      final dropped = st.promoDroppedOnBooking;
+      if (adjusted == null && !dropped) return;
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(
+            content: Text(
+              dropped
+                  ? l10n.ridePromoDroppedOnBooking
+                  : l10n.ridePointsAdjusted(fmtPoints(adjusted!)),
+            ),
+          ),
+        );
+      Future.microtask(
+        () => ref.read(bookingControllerProvider.notifier).clearNotices(),
+      );
+    });
+
     // Listen for errors and show SnackBar (error is shown without replacing UI)
     ref.listen(bookingControllerProvider, (previous, next) {
       // The out-of-area notice is shown in the sheet itself.
@@ -534,10 +565,51 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                         .read(bookingControllerProvider.notifier)
                         .estimateFare(pickup, dropoff),
               onVehicleSelected: (id) {
-                ref
-                    .read(bookingControllerProvider.notifier)
-                    .setVehicleType(id);
+                final notifier = ref.read(bookingControllerProvider.notifier);
+                notifier.setVehicleType(id);
+                // An exact points amount this vehicle can't take: price again
+                // so it comes down to this vehicle's maximum.
+                final st = ref.read(bookingControllerProvider).value;
+                final asked = st?.pointsToUse;
+                if (st == null || !st.usePoints || asked == null) return;
+                VehicleEstimation? picked;
+                for (final e in st.estimations) {
+                  if (e.vehicleTypeId == id) picked = e;
+                }
+                final pts = picked?.points;
+                if (pickup != null &&
+                    dropoff != null &&
+                    pts != null &&
+                    (pts.errorCode != null || asked > pts.maxUsablePoints)) {
+                  notifier.estimateFare(
+                    pickup,
+                    dropoff,
+                    promoCode: st.appliedPromoCode,
+                  );
+                }
               },
+              onPointsToggle: pickup == null || dropoff == null
+                  ? null
+                  : (on) => ref
+                        .read(bookingControllerProvider.notifier)
+                        .setUsePoints(on, pickup, dropoff),
+              onPointsEdit: () async {
+                final st = ref.read(bookingControllerProvider).value;
+                if (st == null || pickup == null || dropoff == null) return;
+                VehicleEstimation? sel;
+                for (final e in st.estimations) {
+                  if (e.vehicleTypeId == st.vehicleTypeId) sel = e;
+                }
+                sel ??= st.estimations.isEmpty ? null : st.estimations.first;
+                final quote = sel?.points;
+                if (quote == null) return;
+                final n = await showPointsAmountSheet(context, quote: quote);
+                if (n == null || !mounted) return;
+                await ref
+                    .read(bookingControllerProvider.notifier)
+                    .setPointsToUse(n, pickup, dropoff);
+              },
+              onPointsLogin: () => ensureLoggedIn(context, ref),
               onPromoTap: () async {
                 // Await the result: non-empty string = promo applied, '' = cancelled, null = dismissed
                 final result = await Navigator.push<String>(
@@ -575,7 +647,8 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                 // Booking is account-based — a guest must log in first.
                 if (!ensureLoggedIn(context, ref)) return;
 
-                await ref
+                final messenger = ScaffoldMessenger.of(context);
+                final outcome = await ref
                     .read(bookingControllerProvider.notifier)
                     .dispatchRide(
                       pickup: pickup,
@@ -587,6 +660,15 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                       dropoffAddress:
                           dropoffAddress ?? l10n.rideDropoffUnspecified,
                     );
+                if (outcome == DispatchOutcome.priceChanged) {
+                  // The open screen went stale and the re-price changed the
+                  // fare: show it before booking.
+                  messenger
+                    ..hideCurrentSnackBar()
+                    ..showSnackBar(
+                      SnackBar(content: Text(l10n.ridePriceUpdated)),
+                    );
+                }
               },
             ),
           ),

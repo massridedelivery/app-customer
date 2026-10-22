@@ -1,3 +1,4 @@
+import 'package:customer_app/features/ride_booking/domain/models/ride_quote.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'vehicle_estimation.freezed.dart';
@@ -33,7 +34,22 @@ sealed class VehicleEstimation with _$VehicleEstimation {
     // Number of available drivers near the pickup for this type (SCRUM-64).
     // Nullable so "field not sent" (null) is distinguishable from "0 drivers".
     @JsonKey(name: 'drivers_nearby') int? driversNearby,
+    // After the code AND points (BE §3.1); null on older payloads / guests.
+    @JsonKey(name: 'amount_to_pay') double? amountToPay,
+    @JsonKey(name: 'promo') Map<String, dynamic>? promoJson,
+    @JsonKey(name: 'points') Map<String, dynamic>? pointsJson,
   }) = _VehicleEstimation;
+
+  const VehicleEstimation._();
+
+  /// What the code in the promo box did here (null when none was sent).
+  RidePromoQuote? get promo => RidePromoQuote.fromJson(promoJson);
+
+  /// Paying with points on this vehicle.
+  RidePointsQuote? get points => RidePointsQuote.fromJson(pointsJson);
+
+  /// What the customer pays — shown on the card and the request button.
+  double get payable => amountToPay ?? totalFare;
 
   factory VehicleEstimation.fromJson(Map<String, dynamic> json) =>
       _$VehicleEstimationFromJson(json);

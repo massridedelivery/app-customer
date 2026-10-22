@@ -1,4 +1,5 @@
 import 'package:customer_app/features/ride_booking/domain/models/fare_estimation_response.dart';
+import 'package:customer_app/features/ride_booking/domain/models/ride_quote.dart';
 import 'package:customer_app/features/ride_booking/domain/models/ride_promo.dart';
 
 abstract class RideBookingRepository {
@@ -9,6 +10,8 @@ abstract class RideBookingRepository {
     required double dropoffLng,
     String? promoCode,
     String? vehicleTypeId,
+    bool? usePoints,
+    int? pointsToUse,
   });
 
   /// Validates a promo against [subtotal] and returns the total discount
@@ -17,7 +20,7 @@ abstract class RideBookingRepository {
 
   Future<List<RidePromo>> getDiscoverPromos();
 
-  Future<String> createJob({
+  Future<RideBooking> createJob({
     required double pickupLat,
     required double pickupLng,
     required String pickupAddress,
@@ -27,5 +30,7 @@ abstract class RideBookingRepository {
     required String paymentMethod,
     String? vehicleTypeId,
     String? promoCode,
+    bool? usePoints,
+    int? pointsToUse,
   });
 }

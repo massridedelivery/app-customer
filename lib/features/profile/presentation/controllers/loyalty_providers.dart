@@ -32,6 +32,23 @@ final vouchersProvider = FutureProvider.autoDispose
           : const [];
     });
 
+/// Points earned on order [orderId] (a finished trip), from the points
+/// history; 0 when none (not earned yet, below the minimum, …).
+final pointsEarnedForOrderProvider = FutureProvider.autoDispose
+    .family<int, String>((ref, orderId) async {
+      final json = await ref
+          .watch(loyaltyRemoteDataSourceProvider)
+          .getPoints(limit: 100);
+      final raw = json['transactions'] ?? json['items'] ?? const [];
+      if (raw is! List) return 0;
+      var earned = 0;
+      for (final m in raw.whereType<Map>()) {
+        final e = PointsEntry.fromJson(Map<String, dynamic>.from(m));
+        if (e.type == 'EARN' && e.orderId == orderId) earned += e.points;
+      }
+      return earned;
+    });
+
 /// After a redeem: every screen showing points or vouchers reads again.
 void refreshLoyalty(WidgetRef ref) {
   ref.invalidate(loyaltySummaryProvider);

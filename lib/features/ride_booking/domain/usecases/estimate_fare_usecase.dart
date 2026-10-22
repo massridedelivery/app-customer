@@ -8,5 +8,7 @@ abstract class EstimateFareUseCase {
     required double dropoffLng,
     String? promoCode,
     String? vehicleTypeId,
+    bool? usePoints,
+    int? pointsToUse,
   });
 }

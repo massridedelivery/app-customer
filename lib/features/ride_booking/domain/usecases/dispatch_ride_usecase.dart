@@ -1,5 +1,6 @@
+import 'package:customer_app/features/ride_booking/domain/models/ride_quote.dart';
 abstract class DispatchRideUseCase {
-  Future<String> call({
+  Future<RideBooking> call({
     required double pickupLat,
     required double pickupLng,
     required String pickupAddress,
@@ -9,5 +10,7 @@ abstract class DispatchRideUseCase {
     required String paymentMethod,
     String? vehicleTypeId,
     String? promoCode,
+    bool? usePoints,
+    int? pointsToUse,
   });
 }

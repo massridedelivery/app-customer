@@ -25,6 +25,8 @@ class EstimateFareUseCaseImpl implements EstimateFareUseCase {
     required double dropoffLng,
     String? promoCode,
     String? vehicleTypeId,
+    bool? usePoints,
+    int? pointsToUse,
   }) {
     return _repository.estimateFare(
       pickupLat: pickupLat,
@@ -32,6 +34,8 @@ class EstimateFareUseCaseImpl implements EstimateFareUseCase {
       dropoffLat: dropoffLat,
       dropoffLng: dropoffLng,
       promoCode: promoCode,
+      usePoints: usePoints,
+      pointsToUse: pointsToUse,
       vehicleTypeId: vehicleTypeId,
     );
   }

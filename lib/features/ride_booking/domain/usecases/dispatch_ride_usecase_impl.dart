@@ -1,3 +1,4 @@
+import 'package:customer_app/features/ride_booking/domain/models/ride_quote.dart';
 import 'package:customer_app/features/ride_booking/domain/repositories/ride_booking_repository.dart';
 import 'package:customer_app/features/ride_booking/data/repositories/ride_booking_repository_impl.dart';
 import 'package:customer_app/features/ride_booking/domain/usecases/dispatch_ride_usecase.dart';
@@ -17,7 +18,7 @@ class DispatchRideUseCaseImpl implements DispatchRideUseCase {
   DispatchRideUseCaseImpl(this._repository);
 
   @override
-  Future<String> call({
+  Future<RideBooking> call({
     required double pickupLat,
     required double pickupLng,
     required String pickupAddress,
@@ -27,6 +28,8 @@ class DispatchRideUseCaseImpl implements DispatchRideUseCase {
     required String paymentMethod,
     String? vehicleTypeId,
     String? promoCode,
+    bool? usePoints,
+    int? pointsToUse,
   }) {
     return _repository.createJob(
       pickupLat: pickupLat,
@@ -38,6 +41,8 @@ class DispatchRideUseCaseImpl implements DispatchRideUseCase {
       paymentMethod: paymentMethod,
       vehicleTypeId: vehicleTypeId,
       promoCode: promoCode,
+      usePoints: usePoints,
+      pointsToUse: pointsToUse,
     );
   }
 }

@@ -32,6 +32,9 @@ abstract class CustomerJobsActiveModel with _$CustomerJobsActiveModel {
     @JsonKey(name: 'amount_due') double? amountDue,
     @JsonKey(name: 'collect_at') String? collectAt,
     @JsonKey(name: 'discount') @Default(0.0) double discount,
+    // Points paid with at booking (refunded if the ride is cancelled).
+    @JsonKey(name: 'points_used') @Default(0) int pointsUsed,
+    @JsonKey(name: 'points_discount') @Default(0.0) double pointsDiscount,
     @JsonKey(name: 'created_at') DateTime? createdAt,
     @JsonKey(name: 'updated_at') DateTime? updatedAt,
     @JsonKey(name: 'driver_info') DriverJobInfoModel? driverJobInfo,

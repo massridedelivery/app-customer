@@ -1,3 +1,5 @@
+import 'package:customer_app/features/profile/presentation/controllers/loyalty_providers.dart';
+import 'package:customer_app/features/profile/presentation/widgets/loyalty_format.dart';
 import 'package:customer_app/core/utils/app_dates.dart';
 import 'package:customer_app/core/utils/ride_payable.dart';
 import 'package:customer_app/core/constants/map_defaults.dart';
@@ -625,6 +627,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
         discount: ride.discount,
         tollFee: ride.tollFee ?? 0,
         waitingFee: ride.waitingFee ?? 0,
+        pointsDiscount: ride.pointsDiscount ?? 0,
       );
 
       breakdownRows = [
@@ -635,6 +638,11 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
           _buildPaymentBreakdownRow(_l10n.tripWaitingFee, ride.waitingFee!),
         if (ride.discount > 0)
           _buildPaymentBreakdownRow(_l10n.liveDiscount, -ride.discount),
+        if ((ride.pointsUsed ?? 0) > 0)
+          _buildPaymentBreakdownRow(
+            _l10n.ridePointsLine(fmtPoints(ride.pointsUsed!)),
+            -(ride.pointsDiscount ?? 0),
+          ),
       ];
     } else if (state.foodDetails != null) {
       final food = state.foodDetails!;
@@ -690,6 +698,8 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
               ),
             ],
           ),
+          if (state.rideDetails?.status.toUpperCase() == 'COMPLETED')
+            _EarnedPoints(orderId: state.rideDetails!.id),
         ],
       ),
     );
@@ -1089,6 +1099,32 @@ class _StarRow extends StatelessWidget {
           ),
         );
       }),
+    );
+  }
+}
+
+/// "ได้รับ +N คะแนน" under a finished ride, from the points history.
+class _EarnedPoints extends ConsumerWidget {
+  const _EarnedPoints({required this.orderId});
+
+  final String orderId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final earned = ref.watch(pointsEarnedForOrderProvider(orderId)).value ?? 0;
+    if (earned <= 0) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Align(
+        alignment: Alignment.centerRight,
+        child: Text(
+          AppLocalizations.of(context)!.pointsEarnedOnTrip(fmtPoints(earned)),
+          key: const Key('tripPointsEarned'),
+          style: AppTypography.label2.copyWith(
+            color: AppColors.semanticSuccessFgHigh,
+          ),
+        ),
+      ),
     );
   }
 }

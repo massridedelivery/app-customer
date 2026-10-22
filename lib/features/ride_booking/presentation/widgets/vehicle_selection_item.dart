@@ -1,3 +1,4 @@
+import 'package:customer_app/features/profile/presentation/widgets/loyalty_format.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/utils/vehicle_name_th.dart';
@@ -188,7 +189,8 @@ class VehicleSelectionItem extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                '฿${estimation.totalFare.toStringAsFixed(0)}',
+                                // After the code and points (amount_to_pay).
+                                '฿${fmtBaht(estimation.payable)}',
                                 style: AppTypography.heading5.copyWith(
                                   fontWeight: FontWeight.bold,
                                   color: isSelected
@@ -200,10 +202,11 @@ class VehicleSelectionItem extends StatelessWidget {
                               // Struck-through "before" price: with a coupon it's
                               // the pre-discount fare (gross_fare); with only a
                               // surge it's the un-surged base fare.
-                              if (estimation.discount > 0 ||
+                              if (estimation.payable < estimation.totalFare ||
+                                  estimation.discount > 0 ||
                                   estimation.surgeMultiplier > 1.0)
                                 Text(
-                                  '฿${(estimation.discount > 0 ? (estimation.grossFare ?? estimation.totalFare + estimation.discount) : estimation.baseFare).toStringAsFixed(0)}',
+                                  '฿${(estimation.payable < estimation.totalFare || estimation.discount > 0 ? (estimation.grossFare ?? estimation.totalFare + estimation.discount) : estimation.baseFare).toStringAsFixed(0)}',
                                   style: AppTypography.caption4.copyWith(
                                     color: Colors.grey,
                                     decoration: TextDecoration.lineThrough,

@@ -1,3 +1,4 @@
+import 'package:customer_app/features/profile/presentation/widgets/loyalty_format.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/features/live_ride/domain/models/driver_profile_model.dart';
@@ -88,6 +89,8 @@ class _PaymentSummaryScreenState extends ConsumerState<PaymentSummaryScreen> {
     final canTip = method != 'CASH' && method != 'COD';
     final fare = profile?.fare ?? 0;
     final discount = profile?.discount ?? 0;
+    final pointsUsed = profile?.pointsUsed ?? 0;
+    final pointsDiscount = profile?.pointsDiscount ?? 0;
     final tollFee = profile?.tollFee ?? 0;
     final waitingFee = profile?.waitingFee ?? 0;
     final tip = (canTip ? (_selectedTip ?? 0) : 0).toDouble();
@@ -134,6 +137,14 @@ class _PaymentSummaryScreenState extends ConsumerState<PaymentSummaryScreen> {
                     _amountRow(
                       l10n.liveDiscount,
                       '-${_formatBaht(discount)}',
+                      valueColor: AppColors.primary,
+                    ),
+                  ],
+                  if (pointsUsed > 0) ...[
+                    const SizedBox(height: 12),
+                    _amountRow(
+                      l10n.ridePointsLine(fmtPoints(pointsUsed)),
+                      '-${_formatBaht(pointsDiscount)}',
                       valueColor: AppColors.primary,
                     ),
                   ],

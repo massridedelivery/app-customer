@@ -1,3 +1,5 @@
+import 'package:customer_app/features/profile/presentation/controllers/loyalty_providers.dart';
+import 'package:customer_app/features/profile/presentation/widgets/loyalty_format.dart';
 import 'package:customer_app/core/utils/app_dates.dart';
 import 'package:customer_app/core/utils/ride_payable.dart';
 import 'package:customer_app/features/live_ride/domain/models/driver_profile_model.dart';
@@ -542,9 +544,31 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
       if (confirmed != true) return;
     }
 
+    // What the cancel gives back (the backend refunds it by itself).
+    final pointsUsed = st.driverProfile?.pointsUsed ?? 0;
+    final code = ref.read(bookingControllerProvider).value?.appliedPromoCode;
+    final usedVoucher = code?.toUpperCase().startsWith('RW-') ?? false;
     final success = await ref
         .read(liveRideControllerProvider.notifier)
         .cancelRide();
+    if (success && (pointsUsed > 0 || usedVoucher)) {
+      ref.invalidate(loyaltySummaryProvider);
+      ref.invalidate(vouchersProvider);
+      if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              [
+                if (pointsUsed > 0)
+                  l10n.pointsRefundedOnCancel(fmtPoints(pointsUsed)),
+                if (usedVoucher) l10n.voucherRefundedOnCancel,
+              ].join(' · '),
+            ),
+          ),
+        );
+      }
+    }
     if (!success && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

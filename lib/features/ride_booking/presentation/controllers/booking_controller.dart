@@ -1,4 +1,7 @@
+import 'package:customer_app/core/error/api_error.dart';
 import 'package:customer_app/features/profile/data/welcome_promo_store.dart';
+import 'package:customer_app/features/profile/presentation/controllers/loyalty_providers.dart';
+import 'package:customer_app/features/ride_booking/domain/models/ride_quote.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:customer_app/features/ride_booking/domain/models/vehicle_estimation.dart';
@@ -8,6 +11,8 @@ import 'package:customer_app/features/ride_booking/domain/usecases/validate_prom
 import 'package:customer_app/features/ride_booking/domain/usecases/dispatch_ride_usecase_impl.dart';
 
 part 'booking_controller.g.dart';
+
+enum DispatchOutcome { booked, priceChanged, failed }
 
 @riverpod
 class BookingController extends _$BookingController {
@@ -36,7 +41,7 @@ class BookingController extends _$BookingController {
     // state.value returns null and we would lose the existing booking data.
     final previousState = state.value ?? const BookingState();
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() async {
+    final next = await AsyncValue.guard(() async {
       final useCase = ref.read(estimateFareUseCaseProvider);
       final response = await useCase(
         pickupLat: pickup.latitude,
@@ -45,6 +50,8 @@ class BookingController extends _$BookingController {
         dropoffLng: dropoff.longitude,
         promoCode: promoCode,
         vehicleTypeId: vehicleTypeId,
+        usePoints: previousState.usePoints ? true : null,
+        pointsToUse: previousState.usePoints ? previousState.pointsToUse : null,
       );
 
       return previousState.copyWith(
@@ -61,8 +68,111 @@ class BookingController extends _$BookingController {
         // Clear the stashed coupon discount when the promo is removed.
         promoDiscount: promoCode == null ? 0.0 : previousState.promoDiscount,
         error: null,
+        estimatedAt: DateTime.now(),
       );
     });
+    state = next;
+
+    // An exact points amount that can't work fails the estimate (the error
+    // is shown from the AsyncError): fall back to "as many as allowed", or
+    // drop points when they're switched off / need a login, and price again.
+    final error = next.error;
+    if (error is ApiError && (error.code?.startsWith('POINTS_') ?? false)) {
+      final off =
+          error.code == 'POINTS_DISABLED' ||
+          error.code == 'POINTS_LOGIN_REQUIRED';
+      state = AsyncValue.data(
+        previousState.copyWith(
+          usePoints: off ? false : previousState.usePoints,
+          pointsToUse: null,
+          pointsDisabled:
+              error.code == 'POINTS_DISABLED' || previousState.pointsDisabled,
+        ),
+      );
+      await estimateFare(
+        pickup,
+        dropoff,
+        promoCode: promoCode,
+        vehicleTypeId: vehicleTypeId,
+      );
+      return;
+    }
+
+    // The amount chosen earlier is more than this trip allows now (another
+    // vehicle, destination or code): bring it down to the new maximum.
+    final current = state.value;
+    final asked = current?.pointsToUse;
+    if (current == null || !current.usePoints || asked == null) return;
+    final pts = _selected(current)?.points;
+    if (pts == null || pts.hidden) return;
+    if (asked > pts.maxUsablePoints || pts.errorCode != null) {
+      final max = pts.maxUsablePoints;
+      state = AsyncValue.data(
+        current.copyWith(pointsToUse: max, pointsAdjustedTo: max),
+      );
+      await estimateFare(
+        pickup,
+        dropoff,
+        promoCode: promoCode,
+        vehicleTypeId: vehicleTypeId,
+      );
+    }
+  }
+
+  /// The selected vehicle's estimation (the first one before a pick).
+  VehicleEstimation? _selected(BookingState s) {
+    if (s.estimations.isEmpty) return null;
+    return s.estimations.firstWhere(
+      (e) => e.vehicleTypeId == s.vehicleTypeId,
+      orElse: () => s.estimations.first,
+    );
+  }
+
+  /// The "ใช้คะแนน" switch: on = as many points as allowed, off = none.
+  Future<void> setUsePoints(
+    bool on,
+    LatLng pickup,
+    LatLng dropoff,
+  ) async {
+    final current = state.value ?? const BookingState();
+    state = AsyncValue.data(
+      current.copyWith(usePoints: on, pointsToUse: null),
+    );
+    await estimateFare(pickup, dropoff, promoCode: current.appliedPromoCode);
+  }
+
+  /// "แก้จำนวน": use exactly [points].
+  Future<void> setPointsToUse(
+    int points,
+    LatLng pickup,
+    LatLng dropoff,
+  ) async {
+    final current = state.value ?? const BookingState();
+    state = AsyncValue.data(
+      current.copyWith(usePoints: true, pointsToUse: points),
+    );
+    await estimateFare(pickup, dropoff, promoCode: current.appliedPromoCode);
+  }
+
+  /// Points start off every time the booking screen opens — the choice is
+  /// never carried over from an earlier booking.
+  void resetPointsChoice() {
+    final current = state.value;
+    if (current == null || (!current.usePoints && current.pointsToUse == null)) {
+      return;
+    }
+    state = AsyncValue.data(
+      current.copyWith(usePoints: false, pointsToUse: null),
+    );
+  }
+
+  /// The screen showed "ปรับเป็น N คะแนน" / the dropped-code notice.
+  void clearNotices() {
+    final current = state.value;
+    if (current == null) return;
+    state = AsyncValue.data(
+      current.copyWith(pointsAdjustedTo: null, promoDroppedOnBooking: false),
+    );
   }
 
   /// Re-fetch the estimate WITHOUT flipping to AsyncLoading, updating the
@@ -88,6 +198,8 @@ class BookingController extends _$BookingController {
         dropoffLat: dropoff.latitude,
         dropoffLng: dropoff.longitude,
         promoCode: promoCode,
+        usePoints: current.usePoints ? true : null,
+        pointsToUse: current.usePoints ? current.pointsToUse : null,
       );
       final latest = state.value;
       // A dispatch / fresh estimate may have landed during the await.
@@ -100,6 +212,7 @@ class BookingController extends _$BookingController {
           durationMin: response.durationMin.toDouble(),
           encodedPolyline: response.waypoint,
           surgeMultiplier: response.surgeMultiplier,
+          estimatedAt: DateTime.now(),
         ),
       );
     } catch (_) {
@@ -160,42 +273,109 @@ class BookingController extends _$BookingController {
     return e.grossFare ?? e.totalFare + e.discount;
   }
 
-  Future<bool> dispatchRide({
+  /// An estimate older than this is priced again before booking, so the
+  /// booking never carries a code / points that stopped applying meanwhile.
+  static const staleAfter = Duration(minutes: 2);
+
+  /// Books the selected vehicle with the same code and points as the last
+  /// estimate. Returns false without booking when the price had to be
+  /// refreshed and changed (the customer confirms the new one), or when the
+  /// backend refused the code / points (the error shows; the estimate is
+  /// redone without what was refused).
+  Future<DispatchOutcome> dispatchRide({
     required LatLng pickup,
     required LatLng dropoff,
     required String pickupAddress,
     required String dropoffAddress,
   }) async {
-    final currentState = state.value ?? const BookingState();
+    var currentState = state.value ?? const BookingState();
+    final estimatedAt = currentState.estimatedAt;
+    if (estimatedAt != null &&
+        DateTime.now().difference(estimatedAt) > staleAfter) {
+      final before = _selected(currentState)?.payable;
+      await estimateFare(
+        pickup,
+        dropoff,
+        promoCode: currentState.appliedPromoCode,
+      );
+      final refreshed = state.value;
+      if (refreshed == null) return DispatchOutcome.failed;
+      if (_selected(refreshed)?.payable != before) {
+        return DispatchOutcome.priceChanged;
+      }
+      currentState = refreshed;
+    }
+
+    final selected = _selected(currentState);
+    // Fully paid with points: nothing to collect, so never a QR / card flow.
+    final paymentMethod = (selected != null && selected.payable <= 0)
+        ? 'CASH'
+        : currentState.paymentMethod;
     state = const AsyncValue.loading();
 
-    String? jobId;
+    RideBooking? booking;
     state = await AsyncValue.guard(() async {
       final useCase = ref.read(dispatchRideUseCaseProvider);
-      jobId = await useCase(
+      booking = await useCase(
         pickupLat: pickup.latitude,
         pickupLng: pickup.longitude,
         pickupAddress: pickupAddress,
         dropoffLat: dropoff.latitude,
         dropoffLng: dropoff.longitude,
         dropoffAddress: dropoffAddress,
-        paymentMethod: currentState.paymentMethod,
+        paymentMethod: paymentMethod,
         vehicleTypeId: currentState.vehicleTypeId,
         promoCode: currentState.appliedPromoCode,
+        usePoints: currentState.usePoints ? true : null,
+        pointsToUse: currentState.usePoints ? currentState.pointsToUse : null,
       );
+      final code = currentState.appliedPromoCode;
       return currentState.copyWith(
         isLoading: false,
-        activeJobId: jobId,
+        activeJobId: booking!.id,
         error: null,
+        promoDroppedOnBooking:
+            code != null && booking!.promo?.applied == false,
       );
     });
 
-    if (jobId != null) {
-      // The welcome code is single-use: stop pre-filling it once a ride is
-      // booked with it.
-      await ref.read(welcomePromoStoreProvider).consume(currentState.appliedPromoCode);
+    final error = state.error;
+    if (error is ApiError) {
+      final code = error.code ?? '';
+      if (code.startsWith('REFERRAL_')) {
+        // A friend's code they may not use refuses the booking: drop the code
+        // and price again; they book again themselves.
+        state = AsyncValue.data(currentState.copyWith(appliedPromoCode: null));
+        await estimateFare(pickup, dropoff);
+      } else if (code.startsWith('POINTS_')) {
+        // Points changed under us (another device, a new limit, switched
+        // off): price again with the maximum now allowed, or without points.
+        final off = code == 'POINTS_DISABLED';
+        state = AsyncValue.data(
+          currentState.copyWith(
+            usePoints: off ? false : currentState.usePoints,
+            pointsToUse: null,
+            pointsDisabled: off || currentState.pointsDisabled,
+          ),
+        );
+        await estimateFare(
+          pickup,
+          dropoff,
+          promoCode: currentState.appliedPromoCode,
+        );
+      }
+      return DispatchOutcome.failed;
     }
-    return jobId != null;
+
+    final booked = booking;
+    if (booked == null) return DispatchOutcome.failed;
+    // The welcome code is single-use: stop pre-filling it once a ride is
+    // booked with it.
+    await ref
+        .read(welcomePromoStoreProvider)
+        .consume(currentState.appliedPromoCode);
+    if (booked.pointsUsed > 0) ref.invalidate(loyaltySummaryProvider);
+    return DispatchOutcome.booked;
   }
 
   void setPaymentMethod(String method) {

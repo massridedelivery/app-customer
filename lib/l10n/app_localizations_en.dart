@@ -3289,4 +3289,95 @@ class AppLocalizationsEn extends AppLocalizations {
   String homeReferralBanner(String points) {
     return 'Invite friends, get $points points';
   }
+
+  @override
+  String get ridePointsUse => 'Use points';
+
+  @override
+  String ridePointsAvailable(String balance, String max) {
+    return '$balance points · up to $max usable';
+  }
+
+  @override
+  String ridePointsUsing(String points, String baht) {
+    return 'Using $points points −฿$baht';
+  }
+
+  @override
+  String get ridePointsEdit => 'Edit';
+
+  @override
+  String get ridePointsNoPoints => 'No points yet';
+
+  @override
+  String ridePointsBelowMin(String min) {
+    return 'Needs at least $min points';
+  }
+
+  @override
+  String get ridePointsNothingToPay => 'Nothing left to pay with points';
+
+  @override
+  String get ridePointsGuest => 'Log in to use points';
+
+  @override
+  String ridePointsAdjusted(String points) {
+    return 'Adjusted to $points points';
+  }
+
+  @override
+  String get ridePointsSheetTitle => 'How many points?';
+
+  @override
+  String ridePointsSheetDiscount(String baht) {
+    return '฿$baht off';
+  }
+
+  @override
+  String get ridePointsUseAll => 'Use all';
+
+  @override
+  String get rideFare => 'Fare';
+
+  @override
+  String ridePointsLine(String points) {
+    return '$points points';
+  }
+
+  @override
+  String get rideAmountToPay => 'To pay';
+
+  @override
+  String get ridePaidByPoints => 'Paid in full with points';
+
+  @override
+  String get ridePaidByPointsNote =>
+      'Any tolls or waiting fees on the way are paid to the driver';
+
+  @override
+  String get ridePromoDroppedOnBooking =>
+      'The code/voucher couldn\'t be used — no discount on this ride';
+
+  @override
+  String get ridePriceUpdated =>
+      'The price was updated — please check it again';
+
+  @override
+  String get promoNotFoundOrInvalid => 'Code not found or can\'t be used';
+
+  @override
+  String get couponYourVouchers => 'Your vouchers';
+
+  @override
+  String pointsEarnedOnTrip(String points) {
+    return '+$points points earned';
+  }
+
+  @override
+  String pointsRefundedOnCancel(String points) {
+    return '$points points refunded';
+  }
+
+  @override
+  String get voucherRefundedOnCancel => 'Voucher returned';
 }

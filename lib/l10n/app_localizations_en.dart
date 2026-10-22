@@ -3304,9 +3304,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get ridePointsEdit => 'Edit';
-
-  @override
   String get ridePointsNoPoints => 'No points yet';
 
   @override
@@ -3319,22 +3316,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ridePointsGuest => 'Log in to use points';
-
-  @override
-  String ridePointsAdjusted(String points) {
-    return 'Adjusted to $points points';
-  }
-
-  @override
-  String get ridePointsSheetTitle => 'How many points?';
-
-  @override
-  String ridePointsSheetDiscount(String baht) {
-    return '฿$baht off';
-  }
-
-  @override
-  String get ridePointsUseAll => 'Use all';
 
   @override
   String get rideFare => 'Fare';
@@ -3380,4 +3361,29 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get voucherRefundedOnCancel => 'Voucher returned';
+
+  @override
+  String rideNext(String price) {
+    return 'Next · ฿$price';
+  }
+
+  @override
+  String get rideConfirmTitle => 'Confirm your ride';
+
+  @override
+  String get rideConfirmStep => 'Step 2 of 2 · Payment';
+
+  @override
+  String get ridePaymentMethodRow => 'Payment method';
+
+  @override
+  String get ridePromoRow => 'Promo code';
+
+  @override
+  String get rideChange => 'Change';
+
+  @override
+  String rideRequestPrice(String price) {
+    return 'Request ride · ฿$price';
+  }
 }

@@ -1,6 +1,7 @@
 import 'package:customer_app/features/ride_booking/domain/models/vehicle_estimation.dart';
 import 'package:customer_app/features/ride_booking/presentation/controllers/booking_controller.dart';
 import 'package:customer_app/features/ride_booking/presentation/states/booking_state.dart';
+import 'package:customer_app/features/ride_booking/presentation/widgets/ride_confirm_view.dart';
 import 'package:customer_app/features/ride_booking/presentation/widgets/vehicle_selection_sheet.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -44,17 +45,24 @@ Future<void> _pump(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         locale: const Locale('th'),
+        // The vehicle list is step 1; the code lives on step 2.
         home: Scaffold(
-          body: VehicleSelectionSheet(
-            scrollController: ScrollController(),
-            estimations: state.estimations,
-            onRequest: onRequest ?? () {},
-            outOfServiceArea: outOfServiceArea,
-            onPickLocation: () {},
-            onPromoTap: () {},
-            onVehicleSelected: (_) {},
-            onPromoRemove: onPromoRemove,
-          ),
+          body: outOfServiceArea
+              ? VehicleSelectionSheet(
+                  scrollController: ScrollController(),
+                  estimations: state.estimations,
+                  onNext: onRequest ?? () {},
+                  outOfServiceArea: true,
+                  onPickLocation: () {},
+                  onVehicleSelected: (_) {},
+                )
+              : RideConfirmView(
+                  onBack: () {},
+                  onRequest: onRequest ?? () {},
+                  onPromoTap: () {},
+                  onPromoRemove: onPromoRemove,
+                  onPointsLogin: () {},
+                ),
         ),
       ),
     ),

@@ -3264,9 +3264,6 @@ class AppLocalizationsTh extends AppLocalizations {
   }
 
   @override
-  String get ridePointsEdit => 'แก้จำนวน';
-
-  @override
   String get ridePointsNoPoints => 'ยังไม่มีคะแนน';
 
   @override
@@ -3279,22 +3276,6 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get ridePointsGuest => 'เข้าสู่ระบบเพื่อใช้คะแนน';
-
-  @override
-  String ridePointsAdjusted(String points) {
-    return 'ปรับเป็น $points คะแนน';
-  }
-
-  @override
-  String get ridePointsSheetTitle => 'ใช้คะแนนเท่าไร?';
-
-  @override
-  String ridePointsSheetDiscount(String baht) {
-    return 'ลด ฿$baht';
-  }
-
-  @override
-  String get ridePointsUseAll => 'ใช้ทั้งหมด';
 
   @override
   String get rideFare => 'ค่าโดยสาร';
@@ -3339,4 +3320,29 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get voucherRefundedOnCancel => 'คืนคูปองแล้ว';
+
+  @override
+  String rideNext(String price) {
+    return 'ถัดไป · ฿$price';
+  }
+
+  @override
+  String get rideConfirmTitle => 'ยืนยันการเดินทาง';
+
+  @override
+  String get rideConfirmStep => 'ขั้นที่ 2 จาก 2 · ชำระเงิน';
+
+  @override
+  String get ridePaymentMethodRow => 'วิธีชำระเงิน';
+
+  @override
+  String get ridePromoRow => 'โค้ดส่วนลด';
+
+  @override
+  String get rideChange => 'เปลี่ยน';
+
+  @override
+  String rideRequestPrice(String price) {
+    return 'เรียกรถ · ฿$price';
+  }
 }

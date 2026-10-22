@@ -51,7 +51,6 @@ class BookingController extends _$BookingController {
         promoCode: promoCode,
         vehicleTypeId: vehicleTypeId,
         usePoints: previousState.usePoints ? true : null,
-        pointsToUse: previousState.usePoints ? previousState.pointsToUse : null,
       );
 
       return previousState.copyWith(
@@ -73,9 +72,9 @@ class BookingController extends _$BookingController {
     });
     state = next;
 
-    // An exact points amount that can't work fails the estimate (the error
-    // is shown from the AsyncError): fall back to "as many as allowed", or
-    // drop points when they're switched off / need a login, and price again.
+    // Points that can't be used fail the estimate (the error is shown from
+    // the AsyncError): drop points when they're switched off / need a login,
+    // and price again.
     final error = next.error;
     if (error is ApiError && (error.code?.startsWith('POINTS_') ?? false)) {
       final off =
@@ -84,7 +83,6 @@ class BookingController extends _$BookingController {
       state = AsyncValue.data(
         previousState.copyWith(
           usePoints: off ? false : previousState.usePoints,
-          pointsToUse: null,
           pointsDisabled:
               error.code == 'POINTS_DISABLED' || previousState.pointsDisabled,
         ),
@@ -96,30 +94,6 @@ class BookingController extends _$BookingController {
         vehicleTypeId: vehicleTypeId,
       );
       return;
-    }
-
-    // The amount chosen earlier is more than this trip allows now (another
-    // vehicle, destination or code): bring it down to the new maximum.
-    final current = state.value;
-    final asked = current?.pointsToUse;
-    if (current == null || !current.usePoints || asked == null) return;
-    final pts = _selected(current)?.points;
-    if (pts == null || pts.hidden) return;
-    if (asked > pts.maxUsablePoints || pts.errorCode != null) {
-      final max = pts.maxUsablePoints;
-      state = AsyncValue.data(
-        current.copyWith(
-          pointsToUse: max,
-          pointsAdjustedTo: max,
-          pointsAdjustMessage: pts.error,
-        ),
-      );
-      await estimateFare(
-        pickup,
-        dropoff,
-        promoCode: promoCode,
-        vehicleTypeId: vehicleTypeId,
-      );
     }
   }
 
@@ -139,22 +113,7 @@ class BookingController extends _$BookingController {
     LatLng dropoff,
   ) async {
     final current = state.value ?? const BookingState();
-    state = AsyncValue.data(
-      current.copyWith(usePoints: on, pointsToUse: null),
-    );
-    await estimateFare(pickup, dropoff, promoCode: current.appliedPromoCode);
-  }
-
-  /// "แก้จำนวน": use exactly [points].
-  Future<void> setPointsToUse(
-    int points,
-    LatLng pickup,
-    LatLng dropoff,
-  ) async {
-    final current = state.value ?? const BookingState();
-    state = AsyncValue.data(
-      current.copyWith(usePoints: true, pointsToUse: points),
-    );
+    state = AsyncValue.data(current.copyWith(usePoints: on));
     await estimateFare(pickup, dropoff, promoCode: current.appliedPromoCode);
   }
 
@@ -162,25 +121,15 @@ class BookingController extends _$BookingController {
   /// never carried over from an earlier booking.
   void resetPointsChoice() {
     final current = state.value;
-    if (current == null || (!current.usePoints && current.pointsToUse == null)) {
-      return;
-    }
-    state = AsyncValue.data(
-      current.copyWith(usePoints: false, pointsToUse: null),
-    );
+    if (current == null || !current.usePoints) return;
+    state = AsyncValue.data(current.copyWith(usePoints: false));
   }
 
-  /// The screen showed "ปรับเป็น N คะแนน" / the dropped-code notice.
+  /// The screen showed the dropped-code notice.
   void clearNotices() {
     final current = state.value;
     if (current == null) return;
-    state = AsyncValue.data(
-      current.copyWith(
-        pointsAdjustedTo: null,
-        pointsAdjustMessage: null,
-        promoDroppedOnBooking: false,
-      ),
-    );
+    state = AsyncValue.data(current.copyWith(promoDroppedOnBooking: false));
   }
 
   /// Re-fetch the estimate WITHOUT flipping to AsyncLoading, updating the
@@ -207,7 +156,6 @@ class BookingController extends _$BookingController {
         dropoffLng: dropoff.longitude,
         promoCode: promoCode,
         usePoints: current.usePoints ? true : null,
-        pointsToUse: current.usePoints ? current.pointsToUse : null,
       );
       final latest = state.value;
       // A dispatch / fresh estimate may have landed during the await.
@@ -335,7 +283,6 @@ class BookingController extends _$BookingController {
         vehicleTypeId: currentState.vehicleTypeId,
         promoCode: currentState.appliedPromoCode,
         usePoints: currentState.usePoints ? true : null,
-        pointsToUse: currentState.usePoints ? currentState.pointsToUse : null,
       );
       final code = currentState.appliedPromoCode;
       return currentState.copyWith(
@@ -357,12 +304,11 @@ class BookingController extends _$BookingController {
         await estimateFare(pickup, dropoff);
       } else if (code.startsWith('POINTS_')) {
         // Points changed under us (another device, a new limit, switched
-        // off): price again with the maximum now allowed, or without points.
+        // off): price again with all that's allowed now, or without points.
         final off = code == 'POINTS_DISABLED';
         state = AsyncValue.data(
           currentState.copyWith(
             usePoints: off ? false : currentState.usePoints,
-            pointsToUse: null,
             pointsDisabled: off || currentState.pointsDisabled,
           ),
         );

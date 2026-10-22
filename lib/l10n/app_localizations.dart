@@ -6055,12 +6055,6 @@ abstract class AppLocalizations {
   /// **'Using {points} points −฿{baht}'**
   String ridePointsUsing(String points, String baht);
 
-  /// No description provided for @ridePointsEdit.
-  ///
-  /// In en, this message translates to:
-  /// **'Edit'**
-  String get ridePointsEdit;
-
   /// No description provided for @ridePointsNoPoints.
   ///
   /// In en, this message translates to:
@@ -6084,30 +6078,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Log in to use points'**
   String get ridePointsGuest;
-
-  /// No description provided for @ridePointsAdjusted.
-  ///
-  /// In en, this message translates to:
-  /// **'Adjusted to {points} points'**
-  String ridePointsAdjusted(String points);
-
-  /// No description provided for @ridePointsSheetTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'How many points?'**
-  String get ridePointsSheetTitle;
-
-  /// No description provided for @ridePointsSheetDiscount.
-  ///
-  /// In en, this message translates to:
-  /// **'฿{baht} off'**
-  String ridePointsSheetDiscount(String baht);
-
-  /// No description provided for @ridePointsUseAll.
-  ///
-  /// In en, this message translates to:
-  /// **'Use all'**
-  String get ridePointsUseAll;
 
   /// No description provided for @rideFare.
   ///
@@ -6180,6 +6150,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Voucher returned'**
   String get voucherRefundedOnCancel;
+
+  /// No description provided for @rideNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next · ฿{price}'**
+  String rideNext(String price);
+
+  /// No description provided for @rideConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm your ride'**
+  String get rideConfirmTitle;
+
+  /// No description provided for @rideConfirmStep.
+  ///
+  /// In en, this message translates to:
+  /// **'Step 2 of 2 · Payment'**
+  String get rideConfirmStep;
+
+  /// No description provided for @ridePaymentMethodRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment method'**
+  String get ridePaymentMethodRow;
+
+  /// No description provided for @ridePromoRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Promo code'**
+  String get ridePromoRow;
+
+  /// No description provided for @rideChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get rideChange;
+
+  /// No description provided for @rideRequestPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Request ride · ฿{price}'**
+  String rideRequestPrice(String price);
 }
 
 class _AppLocalizationsDelegate

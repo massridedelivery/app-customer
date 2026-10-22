@@ -1,9 +1,6 @@
 import 'package:customer_app/features/profile/presentation/widgets/loyalty_format.dart';
-import 'package:customer_app/features/ride_booking/domain/models/ride_quote.dart';
-import 'package:customer_app/features/ride_booking/presentation/widgets/ride_points_widgets.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
-import 'package:customer_app/core/utils/vehicle_name_th.dart';
 import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/features/ride_booking/domain/models/vehicle_estimation.dart';
 import 'package:customer_app/features/ride_booking/presentation/controllers/booking_controller.dart';
@@ -13,21 +10,15 @@ import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-// Success accent for the applied-coupon state, sourced from the design system.
-const Color _kSuccessFg = AppColors.semanticSuccessFgHigh;
-const Color _kSuccessBg = AppColors.semanticSuccessBgLow;
-
 class VehicleSelectionSheet extends ConsumerWidget {
   // Provided by the parent DraggableScrollableSheet; the list scrolls with it,
   // so dragging the list resizes/snaps the sheet.
   final ScrollController scrollController;
   final List<VehicleEstimation> estimations;
   final Function(String id) onVehicleSelected;
-  final VoidCallback onRequest;
-  final VoidCallback onPromoTap;
 
-  /// Removes the applied code (✕ on the coupon button). Null hides it.
-  final VoidCallback? onPromoRemove;
+  /// "ถัดไป": on to step 2 (payment, code, points, the request button).
+  final VoidCallback onNext;
 
   /// Pickup or dropoff is still unset, so no estimate can be requested.
   final bool isMissingLocation;
@@ -42,27 +33,16 @@ class VehicleSelectionSheet extends ConsumerWidget {
   /// "pick another pickup" action) and the request button stays disabled.
   final bool outOfServiceArea;
 
-  /// The "ใช้คะแนน" switch / "แก้จำนวน" / a guest's "log in to use points".
-  /// Null hides the points row.
-  final ValueChanged<bool>? onPointsToggle;
-  final VoidCallback? onPointsEdit;
-  final VoidCallback? onPointsLogin;
-
   const VehicleSelectionSheet({
     super.key,
     required this.scrollController,
     required this.estimations,
-    required this.onRequest,
-    required this.onPromoTap,
-    this.onPromoRemove,
+    required this.onNext,
     required this.onVehicleSelected,
     this.isMissingLocation = false,
     this.onPickLocation,
     this.onRetryEstimate,
     this.outOfServiceArea = false,
-    this.onPointsToggle,
-    this.onPointsEdit,
-    this.onPointsLogin,
   });
 
   @override
@@ -76,24 +56,6 @@ class VehicleSelectionSheet extends ConsumerWidget {
     // No auto-select: the user must explicitly pick a vehicle before the
     // "request ride" button becomes enabled.
     final hasVehicleSelected = bookingState.vehicleTypeId != null;
-    final pricedVehicle = estimations.isEmpty
-        ? null
-        : estimations.firstWhere(
-            (e) => e.vehicleTypeId == bookingState.vehicleTypeId,
-            orElse: () => estimations.first,
-          );
-    final pointsQuote = pricedVehicle?.points;
-    final showPoints =
-        onPointsToggle != null &&
-        pointsQuote != null &&
-        !pointsQuote.hidden &&
-        !bookingState.pointsDisabled &&
-        !outOfServiceArea;
-    final paidByPoints =
-        hasVehicleSelected &&
-        pricedVehicle != null &&
-        pricedVehicle.amountToPay != null &&
-        pricedVehicle.payable <= 0;
     VehicleEstimation? selectedEstimation;
     for (final e in estimations) {
       if (e.vehicleTypeId == bookingState.vehicleTypeId) {
@@ -218,210 +180,8 @@ class VehicleSelectionSheet extends ConsumerWidget {
             color: AppColors.semanticGrayNeutralBorderLightgray,
           ),
 
-          // Payment and Promo section
-          IntrinsicHeight(
-            child: Row(
-              children: [
-                if (paidByPoints)
-                  // Nothing to collect: no payment method to choose (and never
-                  // a QR / card screen) — the booking goes as CASH.
-                  Expanded(
-                    child: Padding(
-                      key: const Key('ridePaidByPoints'),
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 16,
-                        horizontal: 16,
-                      ),
-                      child: Row(
-                        children: [
-                          const Text('🪙', style: TextStyle(fontSize: 18)),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              l10n.ridePaidByPoints,
-                              style: AppTypography.label3.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: _kSuccessFg,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  )
-                else
-                Expanded(
-                  child: InkWell(
-                    onTap: () => _showPaymentPicker(
-                      context,
-                      notifier,
-                      bookingState.paymentMethod,
-                      l10n,
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 16,
-                        horizontal: 16,
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            bookingState.paymentMethod == 'PROMPTPAY'
-                                ? Icons.qr_code_2_rounded
-                                : Icons.monetization_on,
-                            color: AppColors.primary,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            _paymentLabel(bookingState.paymentMethod, l10n),
-                            style: AppTypography.label2.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const Spacer(),
-                          const Icon(
-                            Icons.chevron_right,
-                            size: 16,
-                            color: Colors.grey,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                const Padding(
-                  padding: EdgeInsets.only(top: 14, bottom: 14),
-                  child: VerticalDivider(
-                    width: 1,
-                    thickness: 1,
-                    color: AppColors.semanticGrayNeutralBorderLightgray,
-                  ),
-                ),
-                // Coupon button, with an applied-coupon success state.
-                Expanded(
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 250),
-                    curve: Curves.easeInOut,
-                    decoration: BoxDecoration(
-                      color: bookingState.appliedPromoCode != null
-                          ? _kSuccessBg
-                          : Colors.transparent,
-                    ),
-                    child: InkWell(
-                      onTap: onPromoTap,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 16,
-                          horizontal: 16,
-                        ),
-                        child: Row(
-                          children: [
-                            AnimatedSwitcher(
-                              duration: const Duration(milliseconds: 250),
-                              child: Icon(
-                                bookingState.appliedPromoCode != null
-                                    ? Icons.check_circle
-                                    : Icons.confirmation_number_outlined,
-                                key: ValueKey(
-                                  bookingState.appliedPromoCode != null,
-                                ),
-                                color: bookingState.appliedPromoCode != null
-                                    ? _kSuccessFg
-                                    : AppColors.primary,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                bookingState.appliedPromoCode ??
-                                    l10n.promoLabel,
-                                style: AppTypography.label2.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: bookingState.appliedPromoCode != null
-                                      ? _kSuccessFg
-                                      : AppColors.semanticGrayNeutralFgHigh,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            if (bookingState.appliedPromoCode != null &&
-                                onPromoRemove != null)
-                              // Tapping the rest of the button still opens the
-                              // coupon list to switch codes.
-                              Semantics(
-                                button: true,
-                                label: l10n.couponRemove,
-                                child: InkResponse(
-                                  key: const Key('ridePromoRemove'),
-                                  onTap: onPromoRemove,
-                                  radius: 20,
-                                  child: const Padding(
-                                    padding: EdgeInsets.all(4),
-                                    child: Icon(
-                                      Icons.close_rounded,
-                                      size: 18,
-                                      color: _kSuccessFg,
-                                    ),
-                                  ),
-                                ),
-                              )
-                            else
-                              Icon(
-                                Icons.chevron_right,
-                                size: 16,
-                                color: bookingState.appliedPromoCode != null
-                                    ? _kSuccessFg
-                                    : AppColors.semanticGrayNeutralFgLowOnWhite,
-                              ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Coupon summary. The amount is what the fare estimate actually took
-          // off (the selected vehicle's `discount`), not the validate call's
-          // figure — otherwise the chip promised a discount the price didn't
-          // show. A code the estimate didn't apply gets a neutral note instead.
-          if (bookingState.appliedPromoCode != null &&
-              !bookingAsync.isLoading &&
-              estimations.isNotEmpty)
-            _CouponSummary(
-              code: bookingState.appliedPromoCode!,
-              discount: (selectedEstimation ?? estimations.first).discount,
-              promo: (selectedEstimation ?? estimations.first).promo,
-              reason: bookingState.promoRejectReason,
-              onRemove: onPromoRemove,
-            ),
-
-          // 🪙 ใช้คะแนน (hidden while points are switched off).
-          if (showPoints)
-            RidePointsRow(
-              quote: pointsQuote,
-              on: bookingState.usePoints,
-              onToggle: onPointsToggle!,
-              onEdit: onPointsEdit ?? () {},
-              onLogin: onPointsLogin ?? () {},
-            ),
-
-          // Fare − code − points = to pay, once something comes off.
-          if (hasVehicleSelected &&
-              selectedEstimation != null &&
-              !bookingAsync.isLoading &&
-              (selectedEstimation.discount > 0 ||
-                  (selectedEstimation.points?.usedPoints ?? 0) > 0))
-            RidePriceSummary(
-              estimation: selectedEstimation,
-              code: bookingState.appliedPromoCode,
-            ),
-
-          // Request button. Disabled until a vehicle is picked — and the label
-          // says so, so the greyed-out state isn't a dead end. Once selected it
-          // confirms the exact vehicle and fare.
+          // "ถัดไป · ฿X" to step 2. Disabled until a vehicle is picked — and
+          // the label says so, so the greyed-out state isn't a dead end.
           Padding(
             padding: EdgeInsets.only(
               left: 16,
@@ -433,8 +193,9 @@ class VehicleSelectionSheet extends ConsumerWidget {
               width: double.infinity,
               height: 56,
               child: ElevatedButton(
+                key: const Key('rideNext'),
                 onPressed: hasVehicleSelected && !outOfServiceArea
-                    ? onRequest
+                    ? onNext
                     : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
@@ -447,15 +208,7 @@ class VehicleSelectionSheet extends ConsumerWidget {
                 ),
                 child: Text(
                   hasVehicleSelected && selectedEstimation != null
-                      ? l10n.requestRideWith(
-                          vehicleName(
-                            selectedEstimation.displayName,
-                            vehicleTypeName: selectedEstimation.vehicleTypeName,
-                            languageCode:
-                                Localizations.localeOf(context).languageCode,
-                          ),
-                          fmtBaht(selectedEstimation.payable),
-                        )
+                      ? l10n.rideNext(fmtBaht(selectedEstimation.payable))
                       : l10n.selectVehicleFirst,
                   style: AppTypography.heading4.copyWith(
                     fontWeight: FontWeight.bold,
@@ -469,65 +222,6 @@ class VehicleSelectionSheet extends ConsumerWidget {
           const SizedBox(height: 24),
         ],
       ),
-    );
-  }
-
-  String _paymentLabel(String method, AppLocalizations l10n) {
-    switch (method) {
-      case 'PROMPTPAY':
-        return l10n.promptPay;
-      case 'CASH':
-        return l10n.cashLabel;
-      default:
-        return method;
-    }
-  }
-
-  void _showPaymentPicker(
-    BuildContext context,
-    BookingController notifier,
-    String current,
-    AppLocalizations l10n,
-  ) {
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (ctx) {
-        Widget option(String value, String label, IconData icon) {
-          final selected = current == value;
-          return ListTile(
-            leading: Icon(icon, color: AppColors.primary),
-            title: Text(
-              label,
-              style: AppTypography.label2.copyWith(fontWeight: FontWeight.bold),
-            ),
-            trailing: selected
-                ? const Icon(Icons.check_circle, color: AppColors.primary)
-                : null,
-            onTap: () {
-              notifier.setPaymentMethod(value);
-              Navigator.of(ctx).pop();
-            },
-          );
-        }
-
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(height: 12),
-              Text(l10n.selectPaymentMethod, style: AppTypography.heading4),
-              const SizedBox(height: 8),
-              option('CASH', l10n.cashLabel, Icons.monetization_on),
-              option('PROMPTPAY', l10n.promptPay, Icons.qr_code_2_rounded),
-              const SizedBox(height: 12),
-            ],
-          ),
-        );
-      },
     );
   }
 }
@@ -556,81 +250,6 @@ class _EmptyEstimate extends StatelessWidget {
           OutlinedButton(onPressed: onAction, child: Text(actionLabel!)),
         ],
       ],
-    );
-  }
-}
-
-/// The applied-coupon chip under the vehicle list: green with the amount when
-/// the estimate discounted the fare, a neutral note when it didn't.
-class _CouponSummary extends StatelessWidget {
-  final String code;
-  final double discount;
-  final RidePromoQuote? promo;
-  final String? reason;
-  final VoidCallback? onRemove;
-
-  const _CouponSummary({
-    required this.code,
-    required this.discount,
-    this.promo,
-    this.reason,
-    this.onRemove,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final applied = discount > 0;
-    final fg = applied ? _kSuccessFg : AppColors.textSecondary;
-    // A friend's code / voucher is named by its kind ("โค้ดเพื่อน −฿50");
-    // its refusal comes with a Thai reason from the estimate itself.
-    final label = promo?.label;
-    final why = promo?.errorCode != null ? promo?.error : reason;
-    final style = AppTypography.label2.copyWith(
-      color: fg,
-      fontWeight: FontWeight.bold,
-    );
-    return Container(
-      margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: applied ? _kSuccessBg : AppColors.semanticGrayNeutralBgMidgray,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            applied ? Icons.local_offer_rounded : Icons.info_outline_rounded,
-            size: 16,
-            color: fg,
-          ),
-          const SizedBox(width: 6),
-          Expanded(
-            child: Text(
-              applied
-                  ? (label ?? '${l10n.couponDiscount} $code')
-                  : why != null
-                  ? l10n.couponNotAppliedReason(code, why)
-                  : l10n.couponNotAppliedToFare(code),
-              style: style,
-            ),
-          ),
-          if (applied) Text('-฿${discount.toStringAsFixed(0)}', style: style),
-          // A code that doesn't apply can be dropped right here.
-          if (!applied && onRemove != null)
-            TextButton(
-              key: const Key('ridePromoRemoveLink'),
-              onPressed: onRemove,
-              style: TextButton.styleFrom(
-                foregroundColor: AppColors.primary,
-                minimumSize: const Size(0, 32),
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              child: Text(l10n.couponRemove),
-            ),
-        ],
-      ),
     );
   }
 }

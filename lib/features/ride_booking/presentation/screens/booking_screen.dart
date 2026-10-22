@@ -1,5 +1,4 @@
-import 'package:customer_app/features/profile/presentation/widgets/loyalty_format.dart';
-import 'package:customer_app/features/ride_booking/presentation/widgets/ride_points_widgets.dart';
+import 'package:customer_app/features/ride_booking/presentation/widgets/ride_confirm_view.dart';
 import 'package:customer_app/features/profile/data/welcome_promo_store.dart';
 import 'package:customer_app/features/profile/presentation/controllers/loyalty_providers.dart';
 import 'dart:async';
@@ -44,6 +43,9 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
   // During bookingAsync.isLoading the last known state keeps all widgets mounted,
   // preventing the RenderBox-not-laid-out crash in VehicleSelectionSheet/ListView.
   BookingState _lastKnownState = const BookingState();
+
+  // Step 2 ("ยืนยันการเดินทาง") is open over the vehicle list.
+  bool _confirming = false;
 
   // Keep the per-vehicle "drivers nearby" counts live while the user is picking
   // a vehicle: silently re-estimate every 30s (no spinner). The timer lives with
@@ -97,11 +99,9 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
     if (pickup == null || dropoff == null) return;
     final st = ref.read(bookingControllerProvider).value;
     if (st == null || st.estimations.isEmpty || st.activeJobId != null) return;
-    ref.read(bookingControllerProvider.notifier).refreshEstimate(
-          pickup,
-          dropoff,
-          promoCode: st.appliedPromoCode,
-        );
+    ref
+        .read(bookingControllerProvider.notifier)
+        .refreshEstimate(pickup, dropoff, promoCode: st.appliedPromoCode);
   }
 
   /// Asks the backend whether [pickup] is inside an open zone, so an
@@ -150,7 +150,9 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
             : 1.0;
 
         if (pickup != null) {
-          final pickupScreen = await _mapController!.getScreenCoordinate(pickup);
+          final pickupScreen = await _mapController!.getScreenCoordinate(
+            pickup,
+          );
           if (!mounted) return;
           setState(() {
             _pickupPos = Offset(
@@ -269,18 +271,20 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
     // Keep track of selected vehicle to restore after re-estimate.
     // Do NOT pass vehicleTypeId to estimateFare — the API should
     // always return all vehicle types so the list stays complete.
-    final previousVehicleId =
-        ref.read(bookingControllerProvider).value?.vehicleTypeId;
+    final previousVehicleId = ref
+        .read(bookingControllerProvider)
+        .value
+        ?.vehicleTypeId;
 
-    await ref.read(bookingControllerProvider.notifier).estimateFare(
-      pickup,
-      dropoff,
-      promoCode: promoCode,
-    );
+    await ref
+        .read(bookingControllerProvider.notifier)
+        .estimateFare(pickup, dropoff, promoCode: promoCode);
 
     // Restore the vehicle selection the user had before re-estimate.
     if (previousVehicleId != null) {
-      ref.read(bookingControllerProvider.notifier).setVehicleType(previousVehicleId);
+      ref
+          .read(bookingControllerProvider.notifier)
+          .setVehicleType(previousVehicleId);
     }
 
     // Tell the rider what the fare estimate actually did with the code:
@@ -292,7 +296,9 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
     for (final e in st?.estimations ?? const <VehicleEstimation>[]) {
       if (e.vehicleTypeId == st?.vehicleTypeId) est = e;
     }
-    est ??= (st?.estimations.isNotEmpty ?? false) ? st!.estimations.first : null;
+    est ??= (st?.estimations.isNotEmpty ?? false)
+        ? st!.estimations.first
+        : null;
     final notApplied = promoCode != null && est != null && est.discount <= 0;
     // The estimate only says "฿0"; /promos/validate says why (new users only,
     // minimum spend, fully redeemed…). Fall back to the generic line.
@@ -316,8 +322,9 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                       : l10n.couponNotAppliedToFare(promoCode))
                 : l10n.couponApplied(promoCode),
           ),
-          backgroundColor:
-              notApplied ? AppColors.textSecondary : AppColors.primary,
+          backgroundColor: notApplied
+              ? AppColors.textSecondary
+              : AppColors.primary,
           duration: const Duration(seconds: 3),
         ),
       );
@@ -397,29 +404,13 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
       });
     });
 
-    // One-off notices: an amount brought down to the new maximum, and a
-    // booking that went through without the code's discount.
+    // One-off notice: a booking that went through without the code's
+    // discount.
     ref.listen(bookingControllerProvider, (previous, next) {
-      final st = next.value;
-      if (st == null) return;
-      final adjusted = st.pointsAdjustedTo;
-      final dropped = st.promoDroppedOnBooking;
-      if (adjusted == null && !dropped) return;
+      if (next.value?.promoDroppedOnBooking != true) return;
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
-        ..showSnackBar(
-          SnackBar(
-            content: Text(
-              dropped
-                  ? l10n.ridePromoDroppedOnBooking
-                  : [
-                      // The backend's own reason first, when it gave one.
-                      ?st.pointsAdjustMessage,
-                      l10n.ridePointsAdjusted(fmtPoints(adjusted!)),
-                    ].join(' · '),
-            ),
-          ),
-        );
+        ..showSnackBar(SnackBar(content: Text(l10n.ridePromoDroppedOnBooking)));
       Future.microtask(
         () => ref.read(bookingControllerProvider.notifier).clearNotices(),
       );
@@ -458,227 +449,201 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
       }
     });
 
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      body: Stack(
-        children: [
-          // Map Background
-          BookingMapWidget(
-            onMapCreated: (controller) {
-              _mapController = controller;
-              Future.delayed(const Duration(milliseconds: 350), () {
-                _updateScreenPositions();
-              });
-            },
-            onCameraMove: (position) => _updateScreenPositions(),
-            onCameraIdle: () => _updateScreenPositions(),
-          ),
-
-          // Dynamic Location Overlays
-          if (pickup != null && dropoff != null) ...[
-            if (_pickupPos != null)
-              _buildLocationOverlay(
-                pos: _pickupPos!,
-                label: "1",
-                labelColor: AppColors.foundationGreen500,
-                address: pickupAddress ?? l10n.currentLocation,
-              ),
-            if (_dropoffPos != null)
-              _buildLocationOverlay(
-                pos: _dropoffPos!,
-                label: "2",
-                labelColor: AppColors.foundationRed600,
-                address: dropoffAddress ?? l10n.dropoffPoint,
-              ),
-            // Total-trip duration + distance. Anchored to the route midpoint
-            // (not the dropoff pin): the value covers the whole pickup→dropoff
-            // trip, and pinning it to one endpoint both mislabelled it and let
-            // it collide with the dropoff bubble or run off the screen edge.
-            // Only once there's an estimate: without one (out of area, failed
-            // or still loading) it would read "0 นาที · 0.0 กม.".
-            if (_pickupPos != null &&
-                _dropoffPos != null &&
-                !outOfArea &&
-                (bookingState.distanceKm ?? 0) > 0)
-              _buildRouteMetricTag(bookingState, l10n),
-          ],
-
-          // Top Back Arrow Button
-          Positioned(
-            top: MediaQuery.of(context).padding.top + 12,
-            left: 16,
-            child: InkWell(
-              // Pop back through the stack (place-search → landing → home) so
-              // the user can always reach the home screen. Using context.go
-              // here reset the stack and trapped later back presses.
-              onTap: () {
-                if (context.canPop()) {
-                  context.pop();
-                } else {
-                  context.go('/main');
-                }
+    // Back from step 2 returns to the vehicle list instead of leaving.
+    return PopScope(
+      canPop: !_confirming,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop && _confirming) setState(() => _confirming = false);
+      },
+      child: Scaffold(
+        extendBodyBehindAppBar: true,
+        body: Stack(
+          children: [
+            // Map Background
+            BookingMapWidget(
+              onMapCreated: (controller) {
+                _mapController = controller;
+                Future.delayed(const Duration(milliseconds: 350), () {
+                  _updateScreenPositions();
+                });
               },
-              child: Container(
-                width: 44,
-                height: 44,
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black12,
-                      blurRadius: 8,
-                      offset: Offset(0, 2),
-                    ),
-                  ],
+              onCameraMove: (position) => _updateScreenPositions(),
+              onCameraIdle: () => _updateScreenPositions(),
+            ),
+
+            // Dynamic Location Overlays
+            if (pickup != null && dropoff != null) ...[
+              if (_pickupPos != null)
+                _buildLocationOverlay(
+                  pos: _pickupPos!,
+                  label: "1",
+                  labelColor: AppColors.foundationGreen500,
+                  address: pickupAddress ?? l10n.currentLocation,
                 ),
-                child: const Icon(Icons.arrow_back),
-              ),
-            ),
-          ),
+              if (_dropoffPos != null)
+                _buildLocationOverlay(
+                  pos: _dropoffPos!,
+                  label: "2",
+                  labelColor: AppColors.foundationRed600,
+                  address: dropoffAddress ?? l10n.dropoffPoint,
+                ),
+              // Total-trip duration + distance. Anchored to the route midpoint
+              // (not the dropoff pin): the value covers the whole pickup→dropoff
+              // trip, and pinning it to one endpoint both mislabelled it and let
+              // it collide with the dropoff bubble or run off the screen edge.
+              // Only once there's an estimate: without one (out of area, failed
+              // or still loading) it would read "0 นาที · 0.0 กม.".
+              if (_pickupPos != null &&
+                  _dropoffPos != null &&
+                  !outOfArea &&
+                  (bookingState.distanceKm ?? 0) > 0)
+                _buildRouteMetricTag(bookingState, l10n),
+            ],
 
-          // Loading overlay
-          if (bookingAsync.isLoading)
-            const Positioned.fill(
-              child: ColoredBox(
-                color: Colors.black26,
-                child: Center(child: MassLoadingM(size: 72)),
-              ),
-            ),
-
-          // Bottom Vehicle Selection Sheet — draggable, snapping to ~1 row,
-          // ~3 rows and almost-full-screen.
-          DraggableScrollableSheet(
-            // Tall enough to keep a couple of vehicles in view above the
-            // points row and the price summary.
-            initialChildSize: 0.6,
-            minChildSize: 0.32,
-            maxChildSize: 0.92,
-            snap: true,
-            snapSizes: const [0.32, 0.6, 0.92],
-            builder: (context, scrollController) => VehicleSelectionSheet(
-              scrollController: scrollController,
-              estimations: bookingState.estimations,
-              isMissingLocation: pickup == null || dropoff == null,
-              outOfServiceArea: outOfArea,
-              // Out of area it's the pickup that has to change, so open on it.
-              onPickLocation: () => context.pushReplacement(
-                outOfArea ? '/place-search?focus=pickup' : '/place-search',
-              ),
-              onRetryEstimate: pickup == null || dropoff == null
-                  ? null
-                  : () => ref
-                        .read(bookingControllerProvider.notifier)
-                        .estimateFare(pickup, dropoff),
-              onVehicleSelected: (id) {
-                final notifier = ref.read(bookingControllerProvider.notifier);
-                notifier.setVehicleType(id);
-                // An exact points amount this vehicle can't take: price again
-                // so it comes down to this vehicle's maximum.
-                final st = ref.read(bookingControllerProvider).value;
-                final asked = st?.pointsToUse;
-                if (st == null || !st.usePoints || asked == null) return;
-                VehicleEstimation? picked;
-                for (final e in st.estimations) {
-                  if (e.vehicleTypeId == id) picked = e;
-                }
-                final pts = picked?.points;
-                if (pickup != null &&
-                    dropoff != null &&
-                    pts != null &&
-                    (pts.errorCode != null || asked > pts.maxUsablePoints)) {
-                  notifier.estimateFare(
-                    pickup,
-                    dropoff,
-                    promoCode: st.appliedPromoCode,
-                  );
-                }
-              },
-              onPointsToggle: pickup == null || dropoff == null
-                  ? null
-                  : (on) => ref
-                        .read(bookingControllerProvider.notifier)
-                        .setUsePoints(on, pickup, dropoff),
-              onPointsEdit: () async {
-                final st = ref.read(bookingControllerProvider).value;
-                if (st == null || pickup == null || dropoff == null) return;
-                VehicleEstimation? sel;
-                for (final e in st.estimations) {
-                  if (e.vehicleTypeId == st.vehicleTypeId) sel = e;
-                }
-                sel ??= st.estimations.isEmpty ? null : st.estimations.first;
-                final quote = sel?.points;
-                if (quote == null) return;
-                final n = await showPointsAmountSheet(context, quote: quote);
-                if (n == null || !mounted) return;
-                await ref
-                    .read(bookingControllerProvider.notifier)
-                    .setPointsToUse(n, pickup, dropoff);
-              },
-              onPointsLogin: () => ensureLoggedIn(context, ref),
-              onPromoTap: () async {
-                // Await the result: non-empty string = promo applied, '' = cancelled, null = dismissed
-                final result = await Navigator.push<String>(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const RideCouponScreen(),
+            // Top Back Arrow Button
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 12,
+              left: 16,
+              child: InkWell(
+                // Pop back through the stack (place-search → landing → home) so
+                // the user can always reach the home screen. Using context.go
+                // here reset the stack and trapped later back presses.
+                onTap: () {
+                  if (context.canPop()) {
+                    context.pop();
+                  } else {
+                    context.go('/main');
+                  }
+                },
+                child: Container(
+                  width: 44,
+                  height: 44,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 8,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
                   ),
-                );
-
-                // Only re-estimate if the user explicitly applied or cancelled a promo.
-                // result == null means they just pressed back without action.
-                if (result != null && pickup != null && dropoff != null) {
-                  await _repriceWithPromo(
-                    result.isEmpty ? null : result,
-                    pickup,
-                    dropoff,
-                    l10n,
-                  );
-                }
-              },
-              // Drop the code straight from the sheet (✕ on the coupon button /
-              // "เอาโค้ดออก" on a code that doesn't apply) — no coupon screen.
-              onPromoRemove: pickup == null || dropoff == null
-                  ? null
-                  : () => _repriceWithPromo(null, pickup, dropoff, l10n),
-              onRequest: () async {
-                // Tell the user instead of silently ignoring the tap — e.g.
-                // location is off and no pickup was chosen manually.
-                if (pickup == null || dropoff == null) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(l10n.selectPickupFirst)),
-                  );
-                  return;
-                }
-                // Booking is account-based — a guest must log in first.
-                if (!ensureLoggedIn(context, ref)) return;
-
-                final messenger = ScaffoldMessenger.of(context);
-                final outcome = await ref
-                    .read(bookingControllerProvider.notifier)
-                    .dispatchRide(
-                      pickup: pickup,
-                      dropoff: dropoff,
-                      // Pickup coordinates are set here; a null address only
-                      // means reverse geocoding failed, i.e. the GPS position.
-                      pickupAddress:
-                          pickupAddress ?? l10n.currentLocation,
-                      dropoffAddress:
-                          dropoffAddress ?? l10n.rideDropoffUnspecified,
-                    );
-                if (outcome == DispatchOutcome.priceChanged) {
-                  // The open screen went stale and the re-price changed the
-                  // fare: show it before booking.
-                  messenger
-                    ..hideCurrentSnackBar()
-                    ..showSnackBar(
-                      SnackBar(content: Text(l10n.ridePriceUpdated)),
-                    );
-                }
-              },
+                  child: const Icon(Icons.arrow_back),
+                ),
+              ),
             ),
-          ),
-        ],
+
+            // Loading overlay
+            if (bookingAsync.isLoading)
+              const Positioned.fill(
+                child: ColoredBox(
+                  color: Colors.black26,
+                  child: Center(child: MassLoadingM(size: 72)),
+                ),
+              ),
+
+            // Step 1: the vehicle list — draggable, snapping to ~1 row, ~3 rows
+            // and almost-full-screen. Payment, code and points are step 2.
+            DraggableScrollableSheet(
+              initialChildSize: 0.48,
+              minChildSize: 0.32,
+              maxChildSize: 0.92,
+              snap: true,
+              snapSizes: const [0.32, 0.48, 0.92],
+              builder: (context, scrollController) => VehicleSelectionSheet(
+                scrollController: scrollController,
+                estimations: bookingState.estimations,
+                isMissingLocation: pickup == null || dropoff == null,
+                outOfServiceArea: outOfArea,
+                // Out of area it's the pickup that has to change, so open on it.
+                onPickLocation: () => context.pushReplacement(
+                  outOfArea ? '/place-search?focus=pickup' : '/place-search',
+                ),
+                onRetryEstimate: pickup == null || dropoff == null
+                    ? null
+                    : () => ref
+                          .read(bookingControllerProvider.notifier)
+                          .estimateFare(pickup, dropoff),
+                onVehicleSelected: (id) => ref
+                    .read(bookingControllerProvider.notifier)
+                    .setVehicleType(id),
+                onNext: () => setState(() => _confirming = true),
+              ),
+            ),
+
+            // Step 2 over the map (kept mounted underneath): payment, code,
+            // points, the breakdown and the request button.
+            if (_confirming)
+              Positioned.fill(
+                child: RideConfirmView(
+                  onBack: () => setState(() => _confirming = false),
+                  onPromoTap: () async {
+                    // non-empty = promo applied, '' = cancelled, null = dismissed
+                    final result = await Navigator.push<String>(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const RideCouponScreen(),
+                      ),
+                    );
+                    // Only re-estimate if the user applied or cancelled a code.
+                    if (result != null && pickup != null && dropoff != null) {
+                      await _repriceWithPromo(
+                        result.isEmpty ? null : result,
+                        pickup,
+                        dropoff,
+                        l10n,
+                      );
+                    }
+                  },
+                  // Drop the code right here (✕ / "เอาโค้ดออก").
+                  onPromoRemove: pickup == null || dropoff == null
+                      ? null
+                      : () => _repriceWithPromo(null, pickup, dropoff, l10n),
+                  onPointsToggle: pickup == null || dropoff == null
+                      ? null
+                      : (on) => ref
+                            .read(bookingControllerProvider.notifier)
+                            .setUsePoints(on, pickup, dropoff),
+                  onPointsLogin: () => ensureLoggedIn(context, ref),
+                  onRequest: () async {
+                    // Tell the user instead of silently ignoring the tap — e.g.
+                    // location is off and no pickup was chosen manually.
+                    if (pickup == null || dropoff == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(l10n.selectPickupFirst)),
+                      );
+                      return;
+                    }
+                    // Booking is account-based — a guest must log in first.
+                    if (!ensureLoggedIn(context, ref)) return;
+
+                    final messenger = ScaffoldMessenger.of(context);
+                    final outcome = await ref
+                        .read(bookingControllerProvider.notifier)
+                        .dispatchRide(
+                          pickup: pickup,
+                          dropoff: dropoff,
+                          // A null address only means reverse geocoding failed,
+                          // i.e. the GPS position.
+                          pickupAddress: pickupAddress ?? l10n.currentLocation,
+                          dropoffAddress:
+                              dropoffAddress ?? l10n.rideDropoffUnspecified,
+                        );
+                    if (outcome == DispatchOutcome.priceChanged) {
+                      // The open screen went stale and the re-price changed the
+                      // fare: show it before booking.
+                      messenger
+                        ..hideCurrentSnackBar()
+                        ..showSnackBar(
+                          SnackBar(content: Text(l10n.ridePriceUpdated)),
+                        );
+                    }
+                  },
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }

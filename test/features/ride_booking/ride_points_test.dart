@@ -9,8 +9,7 @@ import 'package:customer_app/features/ride_booking/domain/models/vehicle_estimat
 import 'package:customer_app/features/ride_booking/domain/repositories/ride_booking_repository.dart';
 import 'package:customer_app/features/ride_booking/presentation/controllers/booking_controller.dart';
 import 'package:customer_app/features/ride_booking/presentation/states/booking_state.dart';
-import 'package:customer_app/features/ride_booking/presentation/widgets/ride_points_widgets.dart';
-import 'package:customer_app/features/ride_booking/presentation/widgets/vehicle_selection_sheet.dart';
+import 'package:customer_app/features/ride_booking/presentation/widgets/ride_confirm_view.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -187,27 +186,10 @@ void main() {
       final n = c.read(bookingControllerProvider.notifier);
       await n.estimateFare(_a, _b, promoCode: 'K7QM2X');
       await n.setUsePoints(true, _a, _b);
+      // On = all allowed: use_points only, never an amount.
       expect(repo.estimates.last, (promo: 'K7QM2X', use: true, amount: null));
-      await n.setPointsToUse(65, _a, _b);
-      expect(repo.estimates.last.amount, 65);
       await n.setUsePoints(false, _a, _b);
       expect(repo.estimates.last.use, isNull);
-    });
-
-    test('an amount the backend refuses falls back to the maximum', () async {
-      final repo = _FakeRepo();
-      final c = _container(repo);
-      final n = c.read(bookingControllerProvider.notifier);
-      await n.estimateFare(_a, _b);
-      repo.estimateScript.add(
-        const ApiError(
-          code: 'POINTS_EXCEEDS_LIMIT',
-          message: 'ใช้คะแนนได้สูงสุด 130 คะแนน',
-        ),
-      );
-      await n.setPointsToUse(999, _a, _b);
-      expect(repo.estimates.last, (promo: null, use: true, amount: null));
-      expect(c.read(bookingControllerProvider).value!.usePoints, isTrue);
     });
 
     test('POINTS_DISABLED hides points and prices without them', () async {
@@ -218,25 +200,11 @@ void main() {
       repo.estimateScript.add(
         const ApiError(code: 'POINTS_DISABLED', message: 'ปิด'),
       );
-      await n.setPointsToUse(10, _a, _b);
+      await n.setUsePoints(true, _a, _b);
       final st = c.read(bookingControllerProvider).value!;
       expect(st.pointsDisabled, isTrue);
       expect(st.usePoints, isFalse);
       expect(repo.estimates.last.use, isNull);
-    });
-
-    test('an amount above the new maximum comes down and says so', () async {
-      final repo = _FakeRepo();
-      final c = _container(repo);
-      final n = c.read(bookingControllerProvider.notifier);
-      await n.estimateFare(_a, _b);
-      n.setVehicleType('car');
-      repo.estimateScript.add(
-        _estimation(points: _points(max: 40, errorCode: 'POINTS_EXCEEDS_LIMIT')),
-      );
-      await n.setPointsToUse(100, _a, _b);
-      expect(repo.estimates.last.amount, 40);
-      expect(c.read(bookingControllerProvider).value!.pointsAdjustedTo, 40);
     });
 
     test('a ฿0 ride books as CASH with the same points choice', () async {
@@ -311,7 +279,7 @@ void main() {
     });
   });
 
-  group('sheet', () {
+  group('confirm step', () {
     Future<void> pump(
       WidgetTester tester,
       Map<String, dynamic> estimation, {
@@ -338,14 +306,11 @@ void main() {
             supportedLocales: AppLocalizations.supportedLocales,
             locale: const Locale('th'),
             home: Scaffold(
-              body: VehicleSelectionSheet(
-                scrollController: ScrollController(),
-                estimations: state.estimations,
+              body: RideConfirmView(
+                onBack: () {},
                 onRequest: () {},
                 onPromoTap: () {},
-                onVehicleSelected: (_) {},
                 onPointsToggle: onToggle ?? (_) {},
-                onPointsEdit: () {},
                 onPointsLogin: () {},
               ),
             ),
@@ -419,42 +384,6 @@ void main() {
       );
       expect(find.byKey(const Key('ridePointsRow')), findsNothing);
     });
-  });
-
-  testWidgets('amount sheet: "ใช้ทั้งหมด" and the baht it takes off', (
-    tester,
-  ) async {
-    int? picked;
-    await tester.pumpWidget(
-      MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        locale: const Locale('th'),
-        home: Builder(
-          builder: (context) => Scaffold(
-            body: TextButton(
-              onPressed: () async => picked = await showPointsAmountSheet(
-                context,
-                quote: RidePointsQuote.fromJson(_points(used: 30))!,
-              ),
-              child: const Text('open'),
-            ),
-          ),
-        ),
-      ),
-    );
-    await tester.tap(find.text('open'));
-    await tester.pumpAndSettle();
-    expect(find.text('ลด ฿30'), findsOneWidget);
-    await tester.tap(find.byKey(const Key('ridePointsUseAll')));
-    await tester.pumpAndSettle();
-    expect(find.text('ลด ฿130'), findsOneWidget);
-    await tester.enterText(find.byKey(const Key('ridePointsField')), '65');
-    await tester.pumpAndSettle();
-    expect(find.text('ลด ฿65'), findsOneWidget);
-    await tester.tap(find.byKey(const Key('ridePointsConfirm')));
-    await tester.pumpAndSettle();
-    expect(picked, 65);
   });
 
   group('validate', () {

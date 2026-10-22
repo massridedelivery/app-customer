@@ -3387,12 +3387,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rideChooseCoupon => 'Choose a coupon';
 
   @override
-  String rideFareLine(String fare) {
-    return 'Fare ฿$fare';
-  }
+  String get rideFareLabel => 'Fare';
 
   @override
-  String rideFareDiscountLine(String fare, String off) {
-    return 'Fare ฿$fare · Discount −฿$off';
-  }
+  String get rideToPay => 'To pay';
 }

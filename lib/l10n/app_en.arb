@@ -1153,8 +1153,6 @@
   "rideDiscountSection": "Discounts",
   "ridePaymentExtrasNote": "Tolls / waiting fees are paid this way",
   "rideChooseCoupon": "Choose a coupon",
-  "rideFareLine": "Fare ฿{fare}",
-  "@rideFareLine": {"placeholders": {"fare": {"type": "String"}}},
-  "rideFareDiscountLine": "Fare ฿{fare} · Discount −฿{off}",
-  "@rideFareDiscountLine": {"placeholders": {"fare": {"type": "String"}, "off": {"type": "String"}}}
+  "rideFareLabel": "Fare",
+  "rideToPay": "To pay"
 }

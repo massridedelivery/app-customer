@@ -6193,17 +6193,17 @@ abstract class AppLocalizations {
   /// **'Choose a coupon'**
   String get rideChooseCoupon;
 
-  /// No description provided for @rideFareLine.
+  /// No description provided for @rideFareLabel.
   ///
   /// In en, this message translates to:
-  /// **'Fare ฿{fare}'**
-  String rideFareLine(String fare);
+  /// **'Fare'**
+  String get rideFareLabel;
 
-  /// No description provided for @rideFareDiscountLine.
+  /// No description provided for @rideToPay.
   ///
   /// In en, this message translates to:
-  /// **'Fare ฿{fare} · Discount −฿{off}'**
-  String rideFareDiscountLine(String fare, String off);
+  /// **'To pay'**
+  String get rideToPay;
 }
 
 class _AppLocalizationsDelegate

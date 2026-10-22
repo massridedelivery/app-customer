@@ -1,3 +1,4 @@
+import 'package:customer_app/core/utils/address_formatter.dart';
 import 'package:customer_app/core/constants/app_assets.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_icons.dart';
@@ -224,7 +225,10 @@ class _FoodPlaceSearchScreenState extends ConsumerState<FoodPlaceSearchScreen>
         .read(homeControllerProvider.notifier)
         .setFoodLocation(
           LatLng(place.lat, place.lng),
-          place.address ?? place.name,
+          placeLabel(
+            place.name.trim().isNotEmpty ? place.name : p.mainText,
+            place.address,
+          ),
         );
     if (context.mounted) context.pop();
   }
@@ -280,7 +284,7 @@ class _FoodPlaceSearchScreenState extends ConsumerState<FoodPlaceSearchScreen>
                 .read(homeControllerProvider.notifier)
                 .setFoodLocation(
                   LatLng(p.lat, p.lng),
-                  p.address ?? p.name,
+                  placeLabel(p.name, p.address),
                 );
             context.pop();
           },
@@ -374,7 +378,7 @@ class _FoodPlaceSearchScreenState extends ConsumerState<FoodPlaceSearchScreen>
                 .read(homeControllerProvider.notifier)
                 .setFoodLocation(
                   LatLng(p.lat, p.lng),
-                  p.address ?? p.name,
+                  placeLabel(p.name, p.address),
                 );
             context.pop();
           },

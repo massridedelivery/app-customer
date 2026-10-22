@@ -48,4 +48,24 @@ void main() {
       'Soi Ari 4, Phaya Thai',
     );
   });
+
+  group('placeLabel', () {
+    test('a landmark name comes first, then its address', () {
+      expect(
+        placeLabel('สยามพารากอน', '991 ถ. พระรามที่ 1 แขวงปทุมวัน'),
+        'สยามพารากอน, 991 ถ. พระรามที่ 1 แขวงปทุมวัน',
+      );
+    });
+
+    test('no name: the address (number, road)', () {
+      expect(placeLabel('', '68/100 ถนนรัตนาธิเบศร์'), '68/100 ถนนรัตนาธิเบศร์');
+      expect(placeLabel(null, '68/100 ถนนรัตนาธิเบศร์'), '68/100 ถนนรัตนาธิเบศร์');
+    });
+
+    test('no address: the name; a name the address opens with is not repeated', () {
+      expect(placeLabel('Home', null), 'Home');
+      expect(placeLabel('991', '991 ถ. พระรามที่ 1'), '991 ถ. พระรามที่ 1');
+    });
+  });
 }
+

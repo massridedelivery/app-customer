@@ -1,3 +1,4 @@
+import 'package:customer_app/core/utils/address_formatter.dart';
 import 'package:customer_app/core/constants/app_assets.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_icons.dart';
@@ -194,7 +195,10 @@ class PlaceSearchMainContent extends ConsumerWidget {
         .read(placeSearchControllerProvider.notifier)
         .resolveDetails(p);
     if (place == null) return;
-    onSelectPlace(LatLng(place.lat, place.lng), place.address ?? place.name);
+    // Place details may leave the name blank; the suggestion's main text is
+    // the landmark the customer tapped ("Siam Paragon").
+    final name = place.name.trim().isNotEmpty ? place.name : p.mainText;
+    onSelectPlace(LatLng(place.lat, place.lng), placeLabel(name, place.address));
   }
 }
 
@@ -231,7 +235,8 @@ class PlaceSearchPlaceList extends StatelessWidget {
           subtitle: p.address ?? '',
           icon: icon,
           iconColor: iconColor,
-          onTap: () => onSelectPlace(LatLng(p.lat, p.lng), p.address ?? p.name),
+          onTap: () =>
+              onSelectPlace(LatLng(p.lat, p.lng), placeLabel(p.name, p.address)),
         );
       },
     );

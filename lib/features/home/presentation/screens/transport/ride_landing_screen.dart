@@ -1,3 +1,4 @@
+import 'package:customer_app/core/utils/address_formatter.dart';
 import 'package:customer_app/core/constants/app_assets.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_icons.dart';
@@ -44,7 +45,10 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
   void _openDropoff(Place place) {
     ref
         .read(homeControllerProvider.notifier)
-        .setDropoffLocation(LatLng(place.lat, place.lng), place.name);
+        .setDropoffLocation(
+          LatLng(place.lat, place.lng),
+          placeLabel(place.name, place.address),
+        );
     context.push('/booking');
   }
 
@@ -287,7 +291,7 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
                       .read(homeControllerProvider.notifier)
                       .setDropoffLocation(
                         LatLng(saved[i].lat, saved[i].lng),
-                        saved[i].name,
+                        placeLabel(saved[i].name, saved[i].address),
                       );
                   context.push('/booking');
                 },

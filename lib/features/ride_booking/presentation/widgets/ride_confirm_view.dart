@@ -494,7 +494,10 @@ class _Row extends StatelessWidget {
                 ),
               ),
               if (value != null)
-                Flexible(
+                // Short values ("เปลี่ยน", a code): the title side keeps the
+                // room, so its subtitle stays on one line.
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 140),
                   child: Text(
                     value!,
                     overflow: TextOverflow.ellipsis,

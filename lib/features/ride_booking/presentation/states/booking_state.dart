@@ -23,17 +23,11 @@ abstract class BookingState with _$BookingState {
     String? activeJobId,
     double? surgeMultiplier,
     String? error,
-    // Paying with points: off every time the screen opens. pointsToUse null
-    // with usePoints = "as many as allowed"; a number = that exact amount.
+    // Paying with points: off every time the screen opens; on = all the
+    // points the trip allows (no partial amount).
     @Default(false) bool usePoints,
-    int? pointsToUse,
     // The admin switched points off mid-booking (POINTS_DISABLED): hide the row.
     @Default(false) bool pointsDisabled,
-    // Set when the chosen amount had to come down to a new maximum, so the
-    // screen can say "ปรับเป็น N คะแนน" once.
-    int? pointsAdjustedTo,
-    // The backend's reason for the cut (points.error), shown with it.
-    String? pointsAdjustMessage,
     // A booking went through without the code's discount (it stopped
     // applying in between) — tell the customer once.
     @Default(false) bool promoDroppedOnBooking,

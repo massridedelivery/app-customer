@@ -401,8 +401,6 @@ class _ServiceSelectionScreenState
           ),
         ),
         const SizedBox(width: 16),
-        // "🪙 500" → คะแนนของฉัน (signed in, points switched on).
-        const HomePointsChip(),
         // Heart → the customer's saved (favorited) restaurants.
         _buildCircularButton(
           Icons.favorite_border_sharp,

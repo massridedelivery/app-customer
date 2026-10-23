@@ -16,6 +16,8 @@ import 'package:customer_app/features/profile/data/account_email.dart';
 import 'package:customer_app/features/profile/data/datasources/account_remote_data_source.dart';
 import 'package:customer_app/features/profile/presentation/screens/account_email_screen.dart';
 import 'package:customer_app/features/profile/presentation/controllers/profile_controller.dart';
+import 'package:customer_app/features/profile/presentation/controllers/loyalty_providers.dart';
+import 'package:customer_app/features/profile/presentation/widgets/loyalty_format.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -33,6 +35,7 @@ class ProfileScreen extends ConsumerWidget {
       ref.invalidate(profileControllerProvider);
       ref.invalidate(accountPhoneProvider);
       ref.invalidate(accountEmailProvider);
+      ref.invalidate(loyaltySummaryProvider);
     },
     child: _buildPage(context, ref),
   );
@@ -90,6 +93,9 @@ class ProfileScreen extends ConsumerWidget {
               ),
             ),
           ),
+
+          // ── Points card (moved here from the home header) ───────────────
+          const SliverToBoxAdapter(child: _PointsCard()),
 
           // ── Quick Actions Grid ──────────────────────────────────────────
           SliverToBoxAdapter(
@@ -521,6 +527,92 @@ class _ProfileHeader extends StatelessWidget {
                 ],
               ],
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The customer's points balance as its own red card between the profile card
+/// and the quick actions: tap → คะแนนของฉัน, "แลกคะแนน" → แลกคะแนน. Hidden
+/// while it loads, on error, and while points are switched off, so the page
+/// never shows a placeholder "0".
+class _PointsCard extends ConsumerWidget {
+  const _PointsCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final summary = ref.watch(loyaltySummaryProvider).value;
+    if (summary == null || !summary.pointsEnabled) {
+      return const SizedBox.shrink();
+    }
+    final l10n = AppLocalizations.of(context)!;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+      child: Material(
+        color: AppColors.primary,
+        borderRadius: BorderRadius.circular(20),
+        child: InkWell(
+          key: const Key('profilePointsCard'),
+          onTap: () => context.push('/loyalty'),
+          borderRadius: BorderRadius.circular(20),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 16, 16),
+            child: Row(
+              children: [
+                const Text('🪙', style: TextStyle(fontSize: 32)),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.pointsTitle,
+                        style: AppTypography.body2.copyWith(
+                          color: Colors.white,
+                        ),
+                      ),
+                      Text.rich(
+                        TextSpan(
+                          children: [
+                            TextSpan(
+                              text: fmtPoints(summary.totalPoints),
+                              style: AppTypography.heading3.copyWith(
+                                color: Colors.white,
+                              ),
+                            ),
+                            TextSpan(
+                              text: ' ${l10n.pointsUnit}',
+                              style: AppTypography.body2.copyWith(
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                FilledButton(
+                  key: const Key('profilePointsRedeem'),
+                  onPressed: () => context.push('/rewards'),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: AppColors.primary,
+                    minimumSize: const Size(0, 44),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    shape: const StadiumBorder(),
+                  ),
+                  child: Text(
+                    l10n.pointsActionRedeem,
+                    style: AppTypography.label2.copyWith(
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

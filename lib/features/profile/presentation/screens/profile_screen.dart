@@ -16,6 +16,8 @@ import 'package:customer_app/features/profile/data/account_email.dart';
 import 'package:customer_app/features/profile/data/datasources/account_remote_data_source.dart';
 import 'package:customer_app/features/profile/presentation/screens/account_email_screen.dart';
 import 'package:customer_app/features/profile/presentation/controllers/profile_controller.dart';
+import 'package:customer_app/features/profile/presentation/controllers/loyalty_providers.dart';
+import 'package:customer_app/features/profile/presentation/widgets/loyalty_format.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -33,6 +35,7 @@ class ProfileScreen extends ConsumerWidget {
       ref.invalidate(profileControllerProvider);
       ref.invalidate(accountPhoneProvider);
       ref.invalidate(accountEmailProvider);
+      ref.invalidate(loyaltySummaryProvider);
     },
     child: _buildPage(context, ref),
   );
@@ -509,6 +512,8 @@ class _ProfileHeader extends StatelessWidget {
                 ],
                 ),
               ),
+              // "🪙 คะแนนของฉัน  500 ›" — moved here from the home header.
+              const _ProfilePointsRow(),
               if (loyalty != null) ...[
                 if (_showLoyaltySummary) ...[
                   const SizedBox(height: 24),
@@ -524,6 +529,61 @@ class _ProfileHeader extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// The customer's points balance under the name in the profile card →
+/// คะแนนของฉัน. Hidden while it loads, on error, and while points are switched
+/// off, so the card never shows a placeholder "0".
+class _ProfilePointsRow extends ConsumerWidget {
+  const _ProfilePointsRow();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final summary = ref.watch(loyaltySummaryProvider).value;
+    if (summary == null || !summary.pointsEnabled) {
+      return const SizedBox.shrink();
+    }
+    final l10n = AppLocalizations.of(context)!;
+    return Column(
+      children: [
+        const SizedBox(height: 12),
+        const Divider(color: AppColors.foundationGrayscale100, height: 1),
+        InkWell(
+          key: const Key('profilePointsRow'),
+          onTap: () => context.push('/loyalty'),
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(4, 12, 0, 0),
+            child: Row(
+              children: [
+                const Text('🪙', style: TextStyle(fontSize: 20)),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    l10n.pointsTitle,
+                    style: AppTypography.body2.copyWith(
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ),
+                Text(
+                  fmtPoints(summary.totalPoints),
+                  style: AppTypography.heading5.copyWith(
+                    color: AppColors.primary,
+                  ),
+                ),
+                const Icon(
+                  Icons.navigate_next_rounded,
+                  color: AppColors.foundationGrayscale400,
+                  size: 28,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

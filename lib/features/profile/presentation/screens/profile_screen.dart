@@ -94,6 +94,9 @@ class ProfileScreen extends ConsumerWidget {
             ),
           ),
 
+          // ── Points card (moved here from the home header) ───────────────
+          const SliverToBoxAdapter(child: _PointsCard()),
+
           // ── Quick Actions Grid ──────────────────────────────────────────
           SliverToBoxAdapter(
             child: Padding(
@@ -512,8 +515,6 @@ class _ProfileHeader extends StatelessWidget {
                 ],
                 ),
               ),
-              // "🪙 คะแนนของฉัน  500 ›" — moved here from the home header.
-              const _ProfilePointsRow(),
               if (loyalty != null) ...[
                 if (_showLoyaltySummary) ...[
                   const SizedBox(height: 24),
@@ -533,11 +534,12 @@ class _ProfileHeader extends StatelessWidget {
   }
 }
 
-/// The customer's points balance under the name in the profile card →
-/// คะแนนของฉัน. Hidden while it loads, on error, and while points are switched
-/// off, so the card never shows a placeholder "0".
-class _ProfilePointsRow extends ConsumerWidget {
-  const _ProfilePointsRow();
+/// The customer's points balance as its own red card between the profile card
+/// and the quick actions: tap → คะแนนของฉัน, "แลกคะแนน" → แลกคะแนน. Hidden
+/// while it loads, on error, and while points are switched off, so the page
+/// never shows a placeholder "0".
+class _PointsCard extends ConsumerWidget {
+  const _PointsCard();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -546,44 +548,74 @@ class _ProfilePointsRow extends ConsumerWidget {
       return const SizedBox.shrink();
     }
     final l10n = AppLocalizations.of(context)!;
-    return Column(
-      children: [
-        const SizedBox(height: 12),
-        const Divider(color: AppColors.foundationGrayscale100, height: 1),
-        InkWell(
-          key: const Key('profilePointsRow'),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+      child: Material(
+        color: AppColors.primary,
+        borderRadius: BorderRadius.circular(20),
+        child: InkWell(
+          key: const Key('profilePointsCard'),
           onTap: () => context.push('/loyalty'),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(20),
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(4, 12, 0, 0),
+            padding: const EdgeInsets.fromLTRB(20, 16, 16, 16),
             child: Row(
               children: [
-                const Text('🪙', style: TextStyle(fontSize: 20)),
-                const SizedBox(width: 10),
+                const Text('🪙', style: TextStyle(fontSize: 32)),
+                const SizedBox(width: 14),
                 Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.pointsTitle,
+                        style: AppTypography.body2.copyWith(
+                          color: Colors.white,
+                        ),
+                      ),
+                      Text.rich(
+                        TextSpan(
+                          children: [
+                            TextSpan(
+                              text: fmtPoints(summary.totalPoints),
+                              style: AppTypography.heading3.copyWith(
+                                color: Colors.white,
+                              ),
+                            ),
+                            TextSpan(
+                              text: ' ${l10n.pointsUnit}',
+                              style: AppTypography.body2.copyWith(
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                FilledButton(
+                  key: const Key('profilePointsRedeem'),
+                  onPressed: () => context.push('/rewards'),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: AppColors.primary,
+                    minimumSize: const Size(0, 44),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    shape: const StadiumBorder(),
+                  ),
                   child: Text(
-                    l10n.pointsTitle,
-                    style: AppTypography.body2.copyWith(
-                      color: AppColors.textPrimary,
+                    l10n.pointsActionRedeem,
+                    style: AppTypography.label2.copyWith(
+                      color: AppColors.primary,
                     ),
                   ),
-                ),
-                Text(
-                  fmtPoints(summary.totalPoints),
-                  style: AppTypography.heading5.copyWith(
-                    color: AppColors.primary,
-                  ),
-                ),
-                const Icon(
-                  Icons.navigate_next_rounded,
-                  color: AppColors.foundationGrayscale400,
-                  size: 28,
                 ),
               ],
             ),
           ),
         ),
-      ],
+      ),
     );
   }
 }

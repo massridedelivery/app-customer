@@ -1,54 +1,12 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
-import 'package:customer_app/core/widgets/refetch_on_resume.dart';
 import 'package:customer_app/features/auth/presentation/controllers/auth_controller.dart';
-import 'package:customer_app/features/profile/presentation/controllers/loyalty_providers.dart';
 import 'package:customer_app/features/profile/presentation/screens/referral_screen.dart';
 import 'package:customer_app/features/profile/presentation/widgets/loyalty_format.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-
-/// "🪙 500" in the home header → คะแนนของฉัน. Signed-in customers only, and
-/// hidden while points are switched off.
-class HomePointsChip extends ConsumerWidget {
-  const HomePointsChip({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final signedIn = ref.watch(
-      authControllerProvider.select((s) => s.isAuthenticated),
-    );
-    if (!signedIn) return const SizedBox.shrink();
-    final summary = ref.watch(loyaltySummaryProvider).value;
-    if (summary == null || !summary.pointsEnabled) {
-      return const SizedBox.shrink();
-    }
-    return RefetchOnResume(
-      onResume: () => ref.invalidate(loyaltySummaryProvider),
-      child: Padding(
-        padding: const EdgeInsets.only(right: 8),
-        child: InkWell(
-          key: const Key('homePointsChip'),
-          onTap: () => context.push('/loyalty'),
-          borderRadius: BorderRadius.circular(20),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text(
-              '🪙 ${fmtPoints(summary.totalPoints)}',
-              style: AppTypography.label2.copyWith(color: Colors.white),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 /// Home cards for the referral programme: "มีโค้ดจากเพื่อนไหม?" for a new
 /// customer who may still use one, and "ชวนเพื่อน รับ N คะแนน" → ชวนเพื่อน.

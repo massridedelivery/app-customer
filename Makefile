@@ -178,7 +178,8 @@ upload_play_prod:
 deploy_both_prod: bump ipa_prod build_aab_prod upload_testflight_prod upload_play_prod
 
 # ─── ⚠️  ชั่วคราว: prod flavor → dev API ─────────────────────────────────────
-# backend prod (driver-api.nutchaphut.dev) ยังไม่ขึ้น (Cloudflare ตอบ 502) ชุดนี้จึง build
+# prod host เดิม (driver-api.nutchaphut.dev) ไม่ขึ้น (Cloudflare ตอบ 502) ตอนนี้ prod ย้ายไป
+# driver-api.nueng-hok-paed.com แล้ว (env/prod.json) ชุดนี้เหลือไว้เผื่อยังต้อง build
 # ด้วย flavor prod (applicationId/bundle id จริง ชื่อ "Customer") แต่ชี้ API/WS ไปที่
 # dev ผ่าน env/prod-devapi.json — ดู ENV_SETUP.md → "prod ชี้ dev API (ชั่วคราว)"
 #

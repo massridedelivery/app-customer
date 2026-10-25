@@ -25,8 +25,9 @@ cp env/prod.json.example env/prod.json   # then fill in any prod-only keys
 
 ## prod ชี้ dev API (ชั่วคราว) ⚠️
 
-backend prod (`driver-api.nutchaphut.dev`) ยังไม่ขึ้น — Cloudflare ตอบ **502** ทุก path
-(dev host `driver-api-dev.nutchaphut.dev` ตอบ 200 ปกติ) ระหว่างนี้จึง build ด้วย
+prod host เดิม (`driver-api.nutchaphut.dev`) ไม่ขึ้น — Cloudflare ตอบ **502** ทุก path
+ตอนนี้ prod ย้ายไป `driver-api.nueng-hok-paed.com` แล้ว (`env/prod.json`) — ชุดนี้
+เหลือไว้เผื่อยังต้องการ build prod ที่ชี้ dev host `driver-api-dev.nutchaphut.dev` โดย build ด้วย
 `env/prod-devapi.json` — flavor `prod` เหมือนเดิม (applicationId / bundle id / ชื่อ
 "Customer" จริง) แต่ `API_BASE_URL` / `WS_BASE_URL` ชี้ dev
 

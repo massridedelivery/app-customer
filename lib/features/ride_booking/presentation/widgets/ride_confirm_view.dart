@@ -10,6 +10,7 @@ import 'package:customer_app/features/ride_booking/presentation/controllers/book
 import 'package:customer_app/features/ride_booking/presentation/states/booking_state.dart';
 import 'package:customer_app/features/ride_booking/presentation/widgets/ride_points_widgets.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
+import 'package:customer_app/core/widgets/points_coin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -344,7 +345,7 @@ class RideConfirmView extends ConsumerWidget {
                       if (pointsUsed > 0)
                         _SummaryLine(
                           key: const Key('rideSummaryPoints'),
-                          icon: const Text('🪙', style: TextStyle(fontSize: 16)),
+                          icon: const PointsCoin(size: 18),
                           label: Text(
                             l10n.ridePointsLine(fmtPoints(pointsUsed)),
                             style: AppTypography.body3,

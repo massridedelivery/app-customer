@@ -1061,6 +1061,7 @@
   "pointsExpiring": "{points} points expire on {date}",
   "@pointsExpiring": {"placeholders": {"points": {"type": "String"}, "date": {"type": "String"}}},
   "pointsActionRedeem": "Redeem",
+  "pointsViewDetail": "View points",
   "pointsActionVouchers": "My vouchers",
   "pointsActionInvite": "Invite friends",
   "pointsEarnRule": "Earn {points} points for every ฿100 paid (min ฿{min})",

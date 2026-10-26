@@ -2,6 +2,7 @@ import 'package:customer_app/features/inbox/presentation/inbox_controller.dart';
 import 'package:customer_app/features/main/presentation/controllers/home_tour_controller.dart';
 import 'package:customer_app/core/widgets/refetch_on_resume.dart';
 import 'package:customer_app/features/profile/presentation/screens/referral_screen.dart';
+import 'package:customer_app/core/constants/app_assets.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/constants/layout.dart';
@@ -534,10 +535,11 @@ class _ProfileHeader extends StatelessWidget {
   }
 }
 
-/// The customer's points balance as its own red card between the profile card
-/// and the quick actions: tap → คะแนนของฉัน, "แลกคะแนน" → แลกคะแนน. Hidden
-/// while it loads, on error, and while points are switched off, so the page
-/// never shows a placeholder "0".
+/// The customer's points balance as a dark-red "MASS POINTS" card (design B4)
+/// between the profile card and the quick actions, with the Mass "M" as a
+/// faint watermark. The whole card opens คะแนนของฉัน. Hidden while it loads,
+/// on error, and while points are switched off, so the page never shows a
+/// placeholder "0".
 class _PointsCard extends ConsumerWidget {
   const _PointsCard();
 
@@ -548,70 +550,107 @@ class _PointsCard extends ConsumerWidget {
       return const SizedBox.shrink();
     }
     final l10n = AppLocalizations.of(context)!;
+    final name = ref.watch(profileControllerProvider).value?.editName ?? '';
+    final worth = l10n.pointsWorth(fmtBaht(summary.balanceBaht));
+    const radius = BorderRadius.all(Radius.circular(20));
+    final faint = AppTypography.caption5.copyWith(
+      color: Colors.white.withValues(alpha: 0.85),
+    );
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
-      child: Material(
-        color: AppColors.primary,
-        borderRadius: BorderRadius.circular(20),
-        child: InkWell(
-          key: const Key('profilePointsCard'),
-          onTap: () => context.push('/loyalty'),
-          borderRadius: BorderRadius.circular(20),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 16, 16),
-            child: Row(
-              children: [
-                const Text('🪙', style: TextStyle(fontSize: 32)),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l10n.pointsTitle,
-                        style: AppTypography.body2.copyWith(
-                          color: Colors.white,
+      child: DecoratedBox(
+        decoration: const BoxDecoration(
+          borderRadius: radius,
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFF8E0B24), Color(0xFFB80E2E), Color(0xFFD5143A)],
+            stops: [0, 0.6, 1],
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Color(0x47280A14),
+              blurRadius: 26,
+              offset: Offset(0, 12),
+            ),
+          ],
+        ),
+        child: Material(
+          type: MaterialType.transparency,
+          child: InkWell(
+            key: const Key('profilePointsCard'),
+            onTap: () => context.push('/loyalty'),
+            borderRadius: radius,
+            child: ClipRRect(
+              borderRadius: radius,
+              child: Stack(
+                children: [
+                  Positioned(
+                    right: -24,
+                    top: 0,
+                    bottom: 0,
+                    child: Image.asset(
+                      AppAssets.pointsMark,
+                      width: 190,
+                      color: Colors.white.withValues(alpha: 0.09),
+                      colorBlendMode: BlendMode.srcIn,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(18, 16, 14, 14),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'MASS POINTS',
+                          style: AppTypography.label3.copyWith(
+                            color: Colors.white.withValues(alpha: 0.9),
+                            letterSpacing: 2,
+                          ),
                         ),
-                      ),
-                      Text.rich(
-                        TextSpan(
+                        const SizedBox(height: 8),
+                        Text.rich(
+                          TextSpan(
+                            children: [
+                              TextSpan(
+                                text: fmtPoints(summary.totalPoints),
+                                style: AppTypography.heading2.copyWith(
+                                  color: Colors.white,
+                                ),
+                              ),
+                              TextSpan(
+                                text: ' ${l10n.pointsUnit}',
+                                style: AppTypography.body2.copyWith(
+                                  color: Colors.white.withValues(alpha: 0.85),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
                           children: [
-                            TextSpan(
-                              text: fmtPoints(summary.totalPoints),
-                              style: AppTypography.heading3.copyWith(
-                                color: Colors.white,
+                            Expanded(
+                              child: Text(
+                                name.isEmpty ? worth : '$name · $worth',
+                                style: faint,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                            TextSpan(
-                              text: ' ${l10n.pointsUnit}',
-                              style: AppTypography.body2.copyWith(
-                                color: Colors.white,
-                              ),
+                            Text(l10n.pointsViewDetail, style: faint),
+                            Icon(
+                              Icons.chevron_right_rounded,
+                              size: 18,
+                              color: Colors.white.withValues(alpha: 0.85),
                             ),
                           ],
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-                FilledButton(
-                  key: const Key('profilePointsRedeem'),
-                  onPressed: () => context.push('/rewards'),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: AppColors.primary,
-                    minimumSize: const Size(0, 44),
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    shape: const StadiumBorder(),
-                  ),
-                  child: Text(
-                    l10n.pointsActionRedeem,
-                    style: AppTypography.label2.copyWith(
-                      color: AppColors.primary,
+                      ],
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

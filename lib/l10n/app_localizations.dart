@@ -5761,6 +5761,12 @@ abstract class AppLocalizations {
   /// **'Redeem'**
   String get pointsActionRedeem;
 
+  /// No description provided for @pointsViewDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'View points'**
+  String get pointsViewDetail;
+
   /// No description provided for @pointsActionVouchers.
   ///
   /// In en, this message translates to:

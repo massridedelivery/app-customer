@@ -3,6 +3,7 @@ import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/features/profile/presentation/widgets/loyalty_format.dart';
 import 'package:customer_app/features/ride_booking/domain/models/ride_quote.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
+import 'package:customer_app/core/widgets/points_coin.dart';
 import 'package:flutter/material.dart';
 
 /// 🪙 ใช้คะแนน — the switch under the promo row: on uses all the points this
@@ -49,7 +50,7 @@ class RidePointsRow extends StatelessWidget {
           children: [
             const Padding(
               padding: EdgeInsets.only(top: 2),
-              child: Text('🪙', style: TextStyle(fontSize: 18)),
+              child: PointsCoin(size: 20),
             ),
             const SizedBox(width: 8),
             Expanded(

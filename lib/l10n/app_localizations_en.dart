@@ -3128,6 +3128,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pointsActionRedeem => 'Redeem';
 
   @override
+  String get pointsViewDetail => 'View points';
+
+  @override
   String get pointsActionVouchers => 'My vouchers';
 
   @override

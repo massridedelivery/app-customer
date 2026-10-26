@@ -112,6 +112,10 @@ class AppAssets {
   static const String ic3dMessenger =
       'assets/images/icons/3d/ic3d_messenger.png';
 
+  // The Mass "M" mark alone (white on transparent), tinted by PointsCoin and
+  // the points card watermark.
+  static const String pointsMark = 'assets/icon/points_m_mark.png';
+
   // Lifestyle photos (ride landing cards + onboarding heroes).
   static const String expRides = 'assets/images/exp_rides.webp';
   static const String expSafety = 'assets/images/exp_safety.webp';

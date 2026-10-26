@@ -3088,6 +3088,9 @@ class AppLocalizationsTh extends AppLocalizations {
   String get pointsActionRedeem => 'แลกคะแนน';
 
   @override
+  String get pointsViewDetail => 'ดูคะแนน';
+
+  @override
   String get pointsActionVouchers => 'คูปองของฉัน';
 
   @override

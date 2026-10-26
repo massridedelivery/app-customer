@@ -8,6 +8,7 @@ import 'package:customer_app/features/auth/presentation/controllers/auth_control
 import 'package:customer_app/features/inbox/data/inbox_repository.dart';
 import 'package:customer_app/features/inbox/presentation/inbox_controller.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
+import 'package:customer_app/core/widgets/points_coin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -212,7 +213,6 @@ class _InboxTile extends StatelessWidget {
     'referral' => (Icons.card_giftcard_rounded, const Color(0xFFE08A00)),
     'ride_landing' => (Icons.directions_car_outlined, const Color(0xFF1D4ED8)),
     'messenger_booking' => (Icons.inventory_2_outlined, const Color(0xFF047857)),
-    'loyalty' => (Icons.star_border_rounded, const Color(0xFFB45309)),
     'restaurant' ||
     'category' ||
     'food_delivery' => (Icons.restaurant_rounded, const Color(0xFFB45309)),
@@ -235,19 +235,22 @@ class _InboxTile extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: unread ? color : const Color(0xFFEFEFF2),
-                  shape: BoxShape.circle,
+              if (item.screen == 'loyalty')
+                const PointsCoin(size: 40)
+              else
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: unread ? color : const Color(0xFFEFEFF2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    icon,
+                    size: 20,
+                    color: unread ? Colors.white : AppColors.textSecondary,
+                  ),
                 ),
-                child: Icon(
-                  icon,
-                  size: 20,
-                  color: unread ? Colors.white : AppColors.textSecondary,
-                ),
-              ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(

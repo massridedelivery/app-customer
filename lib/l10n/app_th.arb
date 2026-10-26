@@ -977,6 +977,7 @@
   "pointsWorth": "มูลค่า ≈ ฿{baht}",
   "pointsExpiring": "{points} คะแนนจะหมดอายุ {date}",
   "pointsActionRedeem": "แลกคะแนน",
+  "pointsViewDetail": "ดูคะแนน",
   "pointsActionVouchers": "คูปองของฉัน",
   "pointsActionInvite": "ชวนเพื่อน",
   "pointsEarnRule": "รับ {points} คะแนนทุก ฿100 ที่จ่าย (ขั้นต่ำ ฿{min})",

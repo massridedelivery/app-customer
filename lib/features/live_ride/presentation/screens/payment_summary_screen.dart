@@ -93,6 +93,7 @@ class _PaymentSummaryScreenState extends ConsumerState<PaymentSummaryScreen> {
     final pointsDiscount = profile?.pointsDiscount ?? 0;
     final tollFee = profile?.tollFee ?? 0;
     final waitingFee = profile?.waitingFee ?? 0;
+    final priorCancelFee = profile?.priorCancelFee ?? 0;
     final tip = (canTip ? (_selectedTip ?? 0) : 0).toDouble();
     final total = (profile?.payable ?? 0) + tip;
 
@@ -146,6 +147,14 @@ class _PaymentSummaryScreenState extends ConsumerState<PaymentSummaryScreen> {
                       l10n.ridePointsLine(fmtPoints(pointsUsed)),
                       '-${_formatBaht(pointsDiscount)}',
                       valueColor: AppColors.primary,
+                    ),
+                  ],
+                  // Carried from an earlier cancellation; inside amount_due.
+                  if (priorCancelFee > 0) ...[
+                    const SizedBox(height: 12),
+                    _amountRow(
+                      l10n.ridePriorCancelFee,
+                      _formatBaht(priorCancelFee),
                     ),
                   ],
                   if (tip > 0) ...[

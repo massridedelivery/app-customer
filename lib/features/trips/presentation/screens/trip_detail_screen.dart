@@ -1,7 +1,6 @@
 import 'package:customer_app/features/profile/presentation/controllers/loyalty_providers.dart';
 import 'package:customer_app/features/profile/presentation/widgets/loyalty_format.dart';
 import 'package:customer_app/core/utils/app_dates.dart';
-import 'package:customer_app/core/utils/ride_payable.dart';
 import 'package:customer_app/core/constants/map_defaults.dart';
 import 'package:customer_app/core/utils/error_text.dart';
 import 'package:customer_app/core/constants/app_assets.dart';
@@ -621,14 +620,9 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
       final ride = state.rideDetails!;
       paymentMethod = ride.paymentMethod;
       serviceName = ride.bookingType ?? _l10n.tripServiceRide;
-      // `fare` is before the coupon — show what the rider actually paid.
-      total = ridePayable(
-        fare: ride.fare,
-        discount: ride.discount,
-        tollFee: ride.tollFee ?? 0,
-        waitingFee: ride.waitingFee ?? 0,
-        pointsDiscount: ride.pointsDiscount ?? 0,
-      );
+      // `fare` is before the coupon — show what the rider actually paid
+      // (carried cancellation fee included).
+      total = ride.payable;
 
       breakdownRows = [
         _buildPaymentBreakdownRow(_l10n.baseFareLabel, ride.fare),
@@ -642,6 +636,11 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
           _buildPaymentBreakdownRow(
             _l10n.ridePointsLine(fmtPoints(ride.pointsUsed!)),
             -(ride.pointsDiscount ?? 0),
+          ),
+        if (ride.carriedCancelFee > 0)
+          _buildPaymentBreakdownRow(
+            _l10n.ridePriorCancelFee,
+            ride.carriedCancelFee,
           ),
       ];
     } else if (state.foodDetails != null) {

@@ -1236,6 +1236,7 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
       _ => (l10n.cashLabel, Icons.payments_outlined),
     };
     final discount = _rideDiscount(liveState);
+    final priorFee = _priorCancelFee(liveState);
     final payable = _ridePayable(liveState);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -1264,6 +1265,10 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
                 ),
               ],
             ),
+            const SizedBox(height: 8),
+          ],
+          if (priorFee > 0) ...[
+            _priorCancelFeeRow(priorFee),
             const SizedBox(height: 8),
           ],
           Row(
@@ -1312,6 +1317,28 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
   double _rideDiscount(dynamic liveState) {
     final DriverProfileModel? profile = liveState.driverProfile;
     return profile?.discount ?? (liveState.discount as double?) ?? 0;
+  }
+
+  /// Unpaid cancellation fee from an earlier ride that this one carries
+  /// (already inside amount_due); 0 when none.
+  double _priorCancelFee(dynamic liveState) {
+    final DriverProfileModel? profile = liveState.driverProfile;
+    return profile?.priorCancelFee ?? 0;
+  }
+
+  Widget _priorCancelFeeRow(double fee) {
+    final l10n = AppLocalizations.of(context)!;
+    final style = AppTypography.caption3.copyWith(
+      color: AppColors.semanticGrayNeutralFgLowOnWhite,
+    );
+    return Row(
+      key: const Key('livePriorCancelFee'),
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Flexible(child: Text(l10n.ridePriorCancelFee, style: style)),
+        Text('+฿${fee.toStringAsFixed(0)}', style: style),
+      ],
+    );
   }
 
   /// What the rider pays (see [ridePayable]); null until the fare is known.
@@ -1400,6 +1427,10 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
                 ),
               ],
             ),
+            const SizedBox(height: 6),
+          ],
+          if (_priorCancelFee(liveState) > 0) ...[
+            _priorCancelFeeRow(_priorCancelFee(liveState)),
             const SizedBox(height: 6),
           ],
           Row(

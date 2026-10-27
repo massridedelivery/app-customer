@@ -2614,7 +2614,7 @@ abstract class AppLocalizations {
   /// No description provided for @liveCancelledWithFee.
   ///
   /// In en, this message translates to:
-  /// **'Ride cancelled • Cancellation fee ฿{fee}'**
+  /// **'Ride cancelled • The ฿{fee} cancellation fee will be added to your next ride'**
   String liveCancelledWithFee(String fee);
 
   /// No description provided for @liveTripNumber.
@@ -2632,7 +2632,7 @@ abstract class AppLocalizations {
   /// No description provided for @liveCancelFeeConfirm.
   ///
   /// In en, this message translates to:
-  /// **'Your driver has accepted. Cancelling now costs a ฿{fee} cancellation fee.\nCancel anyway?'**
+  /// **'Your driver has accepted. Cancelling now costs a ฿{fee} cancellation fee, which will be added to your next ride.\nCancel anyway?'**
   String liveCancelFeeConfirm(String fee);
 
   /// No description provided for @liveCancelMayFeeConfirm.
@@ -6138,6 +6138,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{points} points'**
   String ridePointsLine(String points);
+
+  /// Unpaid fee from an earlier cancelled ride, added to this ride's fare
+  ///
+  /// In en, this message translates to:
+  /// **'Previous cancellation fee'**
+  String get ridePriorCancelFee;
+
+  /// No description provided for @ridePriorCancelFeeNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Already included in the amount to pay'**
+  String get ridePriorCancelFeeNote;
+
+  /// No description provided for @ridePriorCancelFeeIncluded.
+  ///
+  /// In en, this message translates to:
+  /// **'+฿{fee} cancel fee'**
+  String ridePriorCancelFeeIncluded(String fee);
 
   /// No description provided for @ridePromoDroppedOnBooking.
   ///

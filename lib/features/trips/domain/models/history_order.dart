@@ -1,3 +1,4 @@
+import 'package:customer_app/core/utils/ride_payable.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'history_order.freezed.dart';
@@ -108,6 +109,8 @@ abstract class HistoryModifier with _$HistoryModifier {
 
 @freezed
 abstract class HistoryRideDetails with _$HistoryRideDetails {
+  const HistoryRideDetails._();
+
   const factory HistoryRideDetails({
     @JsonKey(name: 'accepted_at') String? acceptedAt,
     @JsonKey(name: 'arrived_at_pickup_at') String? arrivedAtPickupAt,
@@ -128,6 +131,11 @@ abstract class HistoryRideDetails with _$HistoryRideDetails {
     required double discount,
     @JsonKey(name: 'points_used') int? pointsUsed,
     @JsonKey(name: 'points_discount') double? pointsDiscount,
+    // Unpaid cancellation fees from earlier rides this ride carried.
+    @JsonKey(name: 'prior_cancel_fee') double? priorCancelFee,
+    // The backend's total due (0 once PAID) and the payment state.
+    @JsonKey(name: 'amount_due') double? amountDue,
+    @JsonKey(name: 'payment_status') String? paymentStatus,
     @JsonKey(name: 'dispatcher_notified_at') String? dispatcherNotifiedAt,
     @JsonKey(name: 'distance_category') String? distanceCategory,
     @JsonKey(name: 'distance_km') double? distanceKm,
@@ -172,6 +180,27 @@ abstract class HistoryRideDetails with _$HistoryRideDetails {
 
   factory HistoryRideDetails.fromJson(Map<String, dynamic> json) =>
       _$HistoryRideDetailsFromJson(json);
+
+  bool get _cancelled => status.toUpperCase() == 'CANCELLED';
+
+  /// The earlier cancellation fee this ride collected. A cancelled ride hands
+  /// it back to be owed again (it moves to the next ride), so it was never
+  /// paid here — 0 then.
+  double get carriedCancelFee => _cancelled ? 0 : (priorCancelFee ?? 0);
+
+  /// What the rider paid / pays for this ride: the backend's `amount_due`
+  /// while it applies, else fare − discount − points + toll + waiting + the
+  /// carried cancellation fee (see [rideAmountDue]).
+  double get payable => rideAmountDue(
+    amountDue: _cancelled || (amountDue ?? 0) <= 0 ? null : amountDue,
+    paymentStatus: paymentStatus ?? '',
+    fare: fare,
+    discount: discount,
+    tollFee: tollFee ?? 0,
+    waitingFee: waitingFee ?? 0,
+    pointsDiscount: pointsDiscount ?? 0,
+    priorCancelFee: carriedCancelFee,
+  );
 }
 
 @freezed

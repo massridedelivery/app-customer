@@ -74,6 +74,7 @@ class RideConfirmView extends ConsumerWidget {
     final codeOff = selected?.discount ?? 0;
     final pointsUsed = selected?.points?.usedPoints ?? 0;
     final pointsOff = selected?.points?.discount ?? 0;
+    final priorFee = selected?.priorCancelFee ?? 0;
 
     Widget sectionLabel(String text) => Padding(
       padding: const EdgeInsets.fromLTRB(4, 16, 4, 8),
@@ -352,6 +353,44 @@ class RideConfirmView extends ConsumerWidget {
                           ),
                           amount: '−฿${fmtBaht(pointsOff)}',
                         ),
+                      // An unpaid fee from an earlier cancellation, carried
+                      // onto this ride (already inside amount_to_pay).
+                      if (priorFee > 0) ...[
+                        _SummaryLine(
+                          key: const Key('rideSummaryPriorCancelFee'),
+                          icon: Container(
+                            width: 22,
+                            height: 22,
+                            decoration: BoxDecoration(
+                              color: AppColors.foundationGrayscale100,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: const Icon(
+                              Icons.history_rounded,
+                              size: 14,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                          label: Text(
+                            l10n.ridePriorCancelFee,
+                            style: AppTypography.body3,
+                          ),
+                          amount: '+฿${fmtBaht(priorFee)}',
+                          amountColor: AppColors.textPrimary,
+                        ),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 30),
+                            child: Text(
+                              l10n.ridePriorCancelFeeNote,
+                              style: AppTypography.caption5.copyWith(
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                       const Padding(
                         padding: EdgeInsets.symmetric(vertical: 10),
                         child: _DashedLine(),
@@ -822,4 +861,3 @@ class _SummaryLine extends StatelessWidget {
     );
   }
 }
-

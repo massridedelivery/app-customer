@@ -65,6 +65,8 @@ abstract class DriverProfileModel with _$DriverProfileModel {
     @JsonKey(name: 'points_used') @Default(0) int pointsUsed,
     @JsonKey(name: 'points_discount') @Default(0.0) double pointsDiscount,
     @JsonKey(name: 'payment_status') @Default('') String paymentStatus,
+    // Unpaid cancellation fees from earlier rides this ride carries.
+    @JsonKey(name: 'prior_cancel_fee') @Default(0.0) double priorCancelFee,
   }) = _DriverProfileModel;
 
   factory DriverProfileModel.fromActiveJob(CustomerJobsActiveModel job) {
@@ -138,6 +140,7 @@ abstract class DriverProfileModel with _$DriverProfileModel {
       pointsUsed: job.pointsUsed,
       pointsDiscount: job.pointsDiscount,
       paymentStatus: job.paymentStatus,
+      priorCancelFee: job.priorCancelFee,
     );
   }
 
@@ -155,6 +158,7 @@ extension DriverProfilePayable on DriverProfileModel {
     tollFee: tollFee,
     waitingFee: waitingFee,
     pointsDiscount: pointsDiscount,
+    priorCancelFee: priorCancelFee,
   );
 }
 

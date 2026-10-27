@@ -1381,7 +1381,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String liveCancelledWithFee(String fee) {
-    return 'Ride cancelled • Cancellation fee ฿$fee';
+    return 'Ride cancelled • The ฿$fee cancellation fee will be added to your next ride';
   }
 
   @override
@@ -1394,7 +1394,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String liveCancelFeeConfirm(String fee) {
-    return 'Your driver has accepted. Cancelling now costs a ฿$fee cancellation fee.\nCancel anyway?';
+    return 'Your driver has accepted. Cancelling now costs a ฿$fee cancellation fee, which will be added to your next ride.\nCancel anyway?';
   }
 
   @override
@@ -3353,6 +3353,17 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String ridePointsLine(String points) {
     return '$points points';
+  }
+
+  @override
+  String get ridePriorCancelFee => 'Previous cancellation fee';
+
+  @override
+  String get ridePriorCancelFeeNote => 'Already included in the amount to pay';
+
+  @override
+  String ridePriorCancelFeeIncluded(String fee) {
+    return '+฿$fee cancel fee';
   }
 
   @override

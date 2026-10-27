@@ -19,6 +19,8 @@ import 'package:customer_app/features/live_ride/presentation/controllers/live_ri
 import 'package:customer_app/features/ride_booking/presentation/controllers/booking_controller.dart';
 import 'package:customer_app/features/ride_booking/presentation/states/booking_state.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
+import 'package:customer_app/features/live_ride/presentation/states/live_ride_state.dart';
+import 'package:customer_app/core/services/ride_ongoing_notification.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -50,9 +52,9 @@ class LiveRideScreen extends ConsumerStatefulWidget {
 class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
   GoogleMapController? _mapController;
 
-  /// Safety buffer added to the backend ETA before display, so we under-promise
-  /// (the rider tends to arrive a little earlier than shown).
-  static const int _kEtaBufferMinutes = 15;
+  /// Safety buffer added to the backend ETA before display (shared with the
+  /// ride notification so both show the same arrival).
+  static const int _kEtaBufferMinutes = kRideEtaBufferMinutes;
 
   // Prompts the customer to keep searching or change service type when no driver
   // is found within [_findingTimeout] of the "finding" screen.
@@ -98,7 +100,8 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
     final hasDriver = st.driverId?.isNotEmpty ?? false;
     // A driver showed up (or the job moved on) right as the timer fired — nothing
     // to prompt.
-    if (_getUIState(st.jobStatus, hasDriver: hasDriver) != RideUIState.finding) {
+    if (_getUIState(st.jobStatus, hasDriver: hasDriver) !=
+        RideUIState.finding) {
       return;
     }
     _findingPromptOpen = true;
@@ -245,6 +248,8 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
     _manageFindingTimer(uiState);
 
     ref.listen(liveRideControllerProvider, (previous, next) {
+      // Mirror the ride into the Android "ride in progress" notification.
+      ref.read(rideOngoingNotificationProvider).sync(next);
       if ((next.jobStatus == 'CANCELLED' &&
               previous?.jobStatus != 'CANCELLED') ||
           (next.jobStatus == 'COMPLETED' &&
@@ -301,20 +306,20 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
     // the end of a PROMPTPAY ride, surface the QR so the customer pays on their
     // own phone. On PAID the QR screen returns to live; the driver then completes
     // the ride, which routes to the summary above.
-    ref.listen(
-      liveRideControllerProvider.select((s) => s.awaitingPromptPay),
-      (wasAwaiting, isAwaiting) {
-        if (isAwaiting && !(wasAwaiting ?? false)) {
-          final jobId = ref.read(liveRideControllerProvider).jobId;
-          if (jobId != null && context.mounted) {
-            context.push(
-              '/payment/promptpay',
-              extra: {'jobId': jobId, 'onPaidRoute': '/live/$jobId'},
-            );
-          }
+    ref.listen(liveRideControllerProvider.select((s) => s.awaitingPromptPay), (
+      wasAwaiting,
+      isAwaiting,
+    ) {
+      if (isAwaiting && !(wasAwaiting ?? false)) {
+        final jobId = ref.read(liveRideControllerProvider).jobId;
+        if (jobId != null && context.mounted) {
+          context.push(
+            '/payment/promptpay',
+            extra: {'jobId': jobId, 'onPaidRoute': '/live/$jobId'},
+          );
         }
-      },
-    );
+      }
+    });
 
     final pickup = pickupLocation ?? MapDefaults.bangkokCenter;
     // Fall back to the same named default as pickup instead of an arbitrary
@@ -323,44 +328,44 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
 
     // Shared bottom-sheet content, reused by both the fixed finding-mode panel
     // and the draggable confirmed-mode sheet.
-    final sheetInner = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Status card (messenger-style): title + subtitle + icon timeline + id.
-        _card(
-          child: Column(
+    final sheetInner = uiState == RideUIState.finding
+        ? Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildHeaderTitle(uiState, liveState.jobStatus),
-              const SizedBox(height: 16),
-              _buildTimeline(uiState),
-              const SizedBox(height: 12),
-              Text(
-                l10n.liveTripNumber(_getJobIdLabel()), // Job ID
-                style: AppTypography.caption5.copyWith(
-                  color: AppColors.semanticGrayNeutralFgLowOnWhite,
+              // Status card (messenger-style): title + subtitle + icon timeline
+              // + id, while we still look for a driver.
+              _card(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildHeaderTitle(uiState, liveState.jobStatus),
+                    const SizedBox(height: 16),
+                    _buildTimeline(uiState),
+                    const SizedBox(height: 12),
+                    Text(
+                      l10n.liveTripNumber(_getJobIdLabel()), // Job ID
+                      style: AppTypography.caption5.copyWith(
+                        color: AppColors.semanticGrayNeutralFgLowOnWhite,
+                      ),
+                    ),
+                  ],
                 ),
               ),
+              const SizedBox(height: 12),
+              _buildFindingModeContent(
+                pickupAddress,
+                dropoffAddress,
+                bookingState,
+                liveState,
+              ),
             ],
-          ),
-        ),
-        const SizedBox(height: 12),
-        if (uiState == RideUIState.finding)
-          _buildFindingModeContent(
-            pickupAddress,
-            dropoffAddress,
-            bookingState,
-            liveState,
           )
-        else
-          _buildConfirmedModeContent(
+        : _buildConfirmedModeContent(
+            uiState,
             pickupAddress,
             dropoffAddress,
-            bookingState,
             liveState,
-          ),
-      ],
-    );
+          );
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -459,9 +464,7 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
                     ),
                   ),
                 ),
-                if ((uiState == RideUIState.finding ||
-                        uiState == RideUIState.confirming ||
-                        uiState == RideUIState.pickupArrived) &&
+                if (uiState == RideUIState.finding &&
                     liveState.jobStatus != 'CANCELLED')
                   GestureDetector(
                     onTap: liveState.isLoading
@@ -767,105 +770,131 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
     );
   }
 
+  /// Driver assigned (design R1): status + ETA, the driver card with a big
+  /// plate, chat/call, the route, payment + total, and the cancel button while
+  /// the rider has not been picked up.
   Widget _buildConfirmedModeContent(
+    RideUIState uiState,
     String? pickupAddress,
     String? dropoffAddress,
-    dynamic bookingState,
-    dynamic liveState,
+    LiveRideState liveState,
   ) {
+    final l10n = AppLocalizations.of(context)!;
+    final canCancel =
+        uiState != RideUIState.onTrip && liveState.jobStatus != 'CANCELLED';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildEtaBanner(liveState),
+        _buildStatusHeader(uiState, liveState, pickupAddress, dropoffAddress),
+        const SizedBox(height: 14),
         _buildRiderSection(liveState),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         _buildLocationDetailsSection(pickupAddress, dropoffAddress),
-        const SizedBox(height: 16),
-        _buildRideSummarySection(bookingState, liveState),
-        const SizedBox(height: 16),
-        _buildPaymentMethodSection(),
+        const SizedBox(height: 12),
+        _buildPayTotalSection(liveState),
+        if (canCancel) ...[
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            height: 50,
+            child: FilledButton(
+              key: const Key('liveCancelButton'),
+              onPressed: liveState.isLoading
+                  ? null
+                  : () => _cancelRide(liveState),
+              style: FilledButton.styleFrom(
+                backgroundColor: const Color(0xFFFDF1F3),
+                foregroundColor: AppColors.primary,
+                shape: const StadiumBorder(),
+              ),
+              child: liveState.isLoading
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Text(
+                      l10n.liveCancelRide,
+                      style: AppTypography.label1.copyWith(
+                        color: AppColors.primary,
+                      ),
+                    ),
+            ),
+          ),
+        ],
+        const SizedBox(height: 12),
+        Center(
+          child: Text(
+            l10n.liveTripNumber(_getJobIdLabel()),
+            style: AppTypography.caption5.copyWith(
+              color: AppColors.semanticGrayNeutralFgLowOnWhite,
+            ),
+          ),
+        ),
       ],
     );
   }
 
-  /// Live "arrives in ~N min · around HH:MM" banner (Grab / LINE MAN style).
-  /// Driven by a server-computed arrival time pushed on the socket — the client
-  /// counts the minutes down locally, calling no routing API. Copy switches by
-  /// phase: driver → pickup before the ride, driver → destination once
-  /// PICKED_UP. Hidden until the backend sends an ETA.
-  Widget _buildEtaBanner(dynamic liveState) {
-    final DateTime? raw = liveState.etaArriveAt;
-    if (raw == null) return const SizedBox.shrink();
-    // Pad with a safety buffer so we under-promise the arrival.
+  /// Minutes until the driver reaches the current target, padded with the
+  /// safety buffer; null until the backend sends an ETA.
+  int? _etaMinutes(LiveRideState liveState) {
+    final raw = liveState.etaArriveAt;
+    if (raw == null) return null;
     final arriveAt = raw.add(const Duration(minutes: _kEtaBufferMinutes));
     final diff = arriveAt.difference(DateTime.now()).inMinutes;
-    final minutes = diff < 1 ? 1 : diff;
-    final pickedUp =
-        (liveState.jobStatus as String?)?.toUpperCase() == 'PICKED_UP';
-    final title = pickedUp
-        ? AppLocalizations.of(context)!.liveEtaHeadingToDropoff
-        : AppLocalizations.of(context)!.liveEtaDriverComing;
+    return diff < 1 ? 1 : diff;
+  }
 
-    final minLabel = AppLocalizations.of(context)!.minutes;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
-        decoration: BoxDecoration(
-          color: AppColors.foundationGreen500.withValues(alpha: 0.10),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          children: [
-            const Icon(
-              Icons.access_time_rounded,
-              color: AppColors.foundationGreen600,
-              size: 18,
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: AppTypography.caption4.copyWith(
-                      color: AppColors.semanticGrayNeutralFgLowOnWhite,
-                    ),
+  /// "คนขับกำลังมา · ที่อยู่" on the left, "3 นาที" on the right.
+  Widget _buildStatusHeader(
+    RideUIState uiState,
+    LiveRideState liveState,
+    String? pickupAddress,
+    String? dropoffAddress,
+  ) {
+    final l10n = AppLocalizations.of(context)!;
+    final title = switch (uiState) {
+      RideUIState.pickupArrived => l10n.driverArrived,
+      RideUIState.onTrip => l10n.liveHeadingToDestTitle,
+      _ => l10n.liveDriverOnTheWay,
+    };
+    final place = uiState == RideUIState.onTrip
+        ? dropoffAddress
+        : pickupAddress;
+    final minutes = uiState == RideUIState.pickupArrived
+        ? null
+        : _etaMinutes(liveState);
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: AppTypography.heading3),
+              if (place != null && place.isNotEmpty) ...[
+                const SizedBox(height: 2),
+                Text(
+                  place,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypography.caption4.copyWith(
+                    color: AppColors.semanticGrayNeutralFgLowOnWhite,
                   ),
-                  const SizedBox(height: 1),
-                  // Compact single line: "อีก 15 นาที · ถึง ~17:31 น." with the
-                  // minutes emphasised but not oversized.
-                  RichText(
-                    text: TextSpan(
-                      style: AppTypography.label2.copyWith(
-                        color: AppColors.foundationGreen700,
-                      ),
-                      children: [
-                        TextSpan(text: '${AppLocalizations.of(context)!.etaIn} '),
-                        TextSpan(
-                          text: '$minutes',
-                          style: AppTypography.label1.copyWith(
-                            color: AppColors.foundationGreen700,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        TextSpan(text: ' $minLabel'),
-                        TextSpan(
-                          text: '  ·  ${AppLocalizations.of(context)!.etaArriveApprox(AppDates.of(context).time(arriveAt))}',
-                          style: AppTypography.caption4.copyWith(
-                            color: AppColors.semanticGrayNeutralFgLowOnWhite,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+                ),
+              ],
+            ],
+          ),
         ),
-      ),
+        if (minutes != null) ...[
+          const SizedBox(width: 12),
+          Text(
+            '$minutes ${l10n.minutes}',
+            key: const Key('liveEtaMinutes'),
+            style: AppTypography.heading3,
+          ),
+        ],
+      ],
     );
   }
 
@@ -886,117 +915,232 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
     await launchUrl(Uri(scheme: 'tel', path: number));
   }
 
-  Widget _buildRiderSection(dynamic liveState) {
+  Widget _buildRiderSection(LiveRideState liveState) {
+    final l10n = AppLocalizations.of(context)!;
     final avatarUrl = liveState.driverProfile?.driverInfo.avatarUrl;
     final hasAvatar = avatarUrl != null && avatarUrl.isNotEmpty;
+    final type = (liveState.vehicleType ?? '').toLowerCase();
+    final isBike = type.contains('bike') || type.contains('motor');
+    final plate = liveState.vehiclePlate ?? '';
+    // Only join the parts we actually have — no "null · null" before the
+    // vehicle details arrive.
+    final vehicle = [
+      liveState.vehicleColor,
+      liveState.vehicleType,
+    ].whereType<String>().where((s) => s.isNotEmpty).join(' · ');
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade200),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: AppColors.foundationGrayscale200),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              hasAvatar
-                  ? CircleAvatar(
-                      radius: 20,
-                      backgroundImage: NetworkImage(avatarUrl),
-                    )
-                  : const Icon(
-                      Icons.person,
-                      color: AppColors.semanticGrayNeutralFgHigh,
-                      size: 32,
-                    ),
-              const SizedBox(width: 12),
+              CircleAvatar(
+                radius: 28,
+                backgroundColor: const Color(0xFFF1F2F5),
+                backgroundImage: hasAvatar ? NetworkImage(avatarUrl) : null,
+                child: hasAvatar
+                    ? null
+                    : const Icon(
+                        Icons.person,
+                        color: AppColors.semanticGrayNeutralFgLowOnWhite,
+                        size: 30,
+                      ),
+              ),
+              Transform.translate(
+                offset: const Offset(-12, 0),
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFDF1F3),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 2),
+                  ),
+                  child: Icon(
+                    isBike ? Icons.two_wheeler : Icons.directions_car,
+                    color: AppColors.primary,
+                    size: 22,
+                  ),
+                ),
+              ),
               Expanded(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text(
-                      liveState.driverName ??
-                          AppLocalizations.of(context)!.assigningDriver,
-                      style: AppTypography.label2,
-                    ),
-                    const SizedBox(height: 2),
-                    Row(
-                      children: [
-                        Text(
-                          liveState.driverRating?.toStringAsFixed(1) ?? '0.0',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
-                          ),
+                    if (plate.isNotEmpty)
+                      Text(
+                        plate,
+                        key: const Key('livePlate'),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTypography.heading2.copyWith(
+                          fontSize: 24,
+                          letterSpacing: 1,
                         ),
-                        const SizedBox(width: 2),
-                        const Icon(Icons.star, color: Colors.amber, size: 14),
-                        const SizedBox(width: 8),
-                        Text(
-                          // Only join the parts we actually have — avoid showing
-                          // "null • null" before vehicle details arrive.
-                          [liveState.vehicleType, liveState.vehiclePlate]
-                              .whereType<String>()
-                              .where((s) => s.isNotEmpty)
-                              .join(' • '),
-                          style: AppTypography.caption4.copyWith(
-                            color: AppColors.semanticGrayNeutralFgLowOnWhite,
-                          ),
+                      ),
+                    if (vehicle.isNotEmpty)
+                      Text(
+                        vehicle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTypography.caption4.copyWith(
+                          color: AppColors.semanticGrayNeutralFgLowOnWhite,
                         ),
-                      ],
-                    ),
+                      ),
                   ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Flexible(
+                child: Text(
+                  liveState.driverName ?? l10n.assigningDriver,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypography.body2,
+                ),
+              ),
+              if (liveState.driverRating != null) ...[
+                Text(
+                  ' · ${liveState.driverRating!.toStringAsFixed(1)} ',
+                  style: AppTypography.body2,
+                ),
+                const Icon(Icons.star, color: Colors.amber, size: 16),
+              ],
+            ],
+          ),
+          const SizedBox(height: 12),
           Row(
             children: [
               Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () {
-                    if (widget.jobId != null) {
-                      context.push('/chat/${widget.jobId}');
-                    }
-                  },
-                  icon: const Icon(Icons.chat_bubble_outline, size: 18),
-                  label: Text(AppLocalizations.of(context)!.liveChat),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.accentRedDeep,
-                    side: BorderSide(color: Colors.grey.shade200),
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                child: Material(
+                  color: Colors.white,
+                  shape: const StadiumBorder(
+                    side: BorderSide(color: AppColors.foundationGrayscale200),
+                  ),
+                  child: InkWell(
+                    key: const Key('liveChatButton'),
+                    customBorder: const StadiumBorder(),
+                    onTap: () {
+                      if (widget.jobId != null) {
+                        context.push('/chat/${widget.jobId}');
+                      }
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 13,
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.chat_bubble_outline,
+                            size: 20,
+                            color: AppColors.semanticGrayNeutralFgLowOnWhite,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            l10n.liveChatWithDriver,
+                            style: AppTypography.body2.copyWith(
+                              color: AppColors.semanticGrayNeutralFgLowOnWhite,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () =>
+              const SizedBox(width: 10),
+              Material(
+                color: Colors.white,
+                shape: const CircleBorder(
+                  side: BorderSide(color: AppColors.foundationGrayscale200),
+                ),
+                child: InkWell(
+                  key: const Key('liveCallButton'),
+                  customBorder: const CircleBorder(),
+                  onTap: () =>
                       _callDriver(liveState.driverProfile?.driverInfo.phone),
-                  icon: const Icon(Icons.phone_outlined, size: 18),
-                  label: Text(AppLocalizations.of(context)!.liveCall),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.accentRedDeep,
-                    side: BorderSide(color: Colors.grey.shade200),
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                  child: const SizedBox.square(
+                    dimension: 48,
+                    child: Icon(
+                      Icons.phone_outlined,
+                      size: 22,
+                      color: AppColors.semanticGrayNeutralFgHigh,
                     ),
                   ),
                 ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Payment method on the left, what the rider pays on the right, with the
+  /// coupon discount above it when there is one.
+  Widget _buildPayTotalSection(LiveRideState liveState) {
+    final l10n = AppLocalizations.of(context)!;
+    final method =
+        (ref.watch(bookingControllerProvider).value?.paymentMethod ?? 'CASH')
+            .toUpperCase();
+    final (label, icon) = switch (method) {
+      'PROMPTPAY' => (l10n.promptPay, Icons.qr_code_2_rounded),
+      'CARD' => (l10n.livePayCard, Icons.credit_card_rounded),
+      _ => (l10n.cashLabel, Icons.payments_outlined),
+    };
+    final discount = _rideDiscount(liveState);
+    final payable = _ridePayable(liveState);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.foundationGrayscale200),
+      ),
+      child: Column(
+        children: [
+          if (discount > 0) ...[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  l10n.couponDiscount,
+                  style: AppTypography.caption3.copyWith(
+                    color: AppColors.primary,
+                  ),
+                ),
+                Text(
+                  '−฿${discount.toStringAsFixed(0)}',
+                  style: AppTypography.caption3.copyWith(
+                    color: AppColors.primary,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+          ],
+          Row(
+            children: [
+              Icon(icon, size: 22, color: AppColors.foundationGreen600),
+              const SizedBox(width: 10),
+              Expanded(child: Text(label, style: AppTypography.body2)),
+              Text(
+                payable == null ? '฿--' : '฿${payable.toStringAsFixed(0)}',
+                key: const Key('livePayable'),
+                style: AppTypography.heading3,
               ),
             ],
           ),
@@ -1090,7 +1234,11 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
                 Expanded(
                   child: _buildStatColumn(
                     AppLocalizations.of(context)!.etaExpectedArrival,
-                    AppDates.of(context).time((liveState.etaArriveAt as DateTime).add(const Duration(minutes: _kEtaBufferMinutes))),
+                    AppDates.of(context).time(
+                      (liveState.etaArriveAt as DateTime).add(
+                        const Duration(minutes: _kEtaBufferMinutes),
+                      ),
+                    ),
                   ),
                 ),
             ],
@@ -1237,7 +1385,6 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
       ),
     );
   }
-
 }
 
 /// The live map, isolated so the ~2s driver-location socket updates rebuild

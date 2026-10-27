@@ -1425,6 +1425,24 @@ class AppLocalizationsTh extends AppLocalizations {
   String get liveChat => 'แชท';
 
   @override
+  String get liveChatWithDriver => 'แชทหาคนขับ';
+
+  @override
+  String rideNotifComing(String plate) {
+    return '$plate กำลังมา';
+  }
+
+  @override
+  String rideNotifArrived(String plate) {
+    return '$plate ถึงจุดรับแล้ว';
+  }
+
+  @override
+  String rideNotifOnTrip(String plate) {
+    return '$plate กำลังพาคุณไปส่ง';
+  }
+
+  @override
   String get liveCall => 'โทร';
 
   @override

@@ -2719,6 +2719,30 @@ abstract class AppLocalizations {
   /// **'Chat'**
   String get liveChat;
 
+  /// No description provided for @liveChatWithDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat with driver'**
+  String get liveChatWithDriver;
+
+  /// No description provided for @rideNotifComing.
+  ///
+  /// In en, this message translates to:
+  /// **'{plate} is on the way'**
+  String rideNotifComing(String plate);
+
+  /// No description provided for @rideNotifArrived.
+  ///
+  /// In en, this message translates to:
+  /// **'{plate} has arrived'**
+  String rideNotifArrived(String plate);
+
+  /// No description provided for @rideNotifOnTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'{plate} · on the way to your destination'**
+  String rideNotifOnTrip(String plate);
+
   /// No description provided for @liveCall.
   ///
   /// In en, this message translates to:

@@ -127,6 +127,14 @@ class AppAssets {
       'assets/images/icons/ic_location_pin_line.svg';
   static const String icPlus = 'assets/images/icons/ic_plus.svg';
 
+  // Live ride progress steps — Remix Icon fill set (Apache License 2.0,
+  // https://remixicon.com): e-bike-2 / car, user-location, route, flag-2.
+  static const String icStepBike = 'assets/images/icons/ic_step_bike.svg';
+  static const String icStepCar = 'assets/images/icons/ic_step_car.svg';
+  static const String icStepPickup = 'assets/images/icons/ic_step_pickup.svg';
+  static const String icStepRoute = 'assets/images/icons/ic_step_route.svg';
+  static const String icStepFinish = 'assets/images/icons/ic_step_finish.svg';
+
   /// Opened Eye Fill Icon
   static const String openedEyeFillIcon = 'icons/ic_opened_eye_fill';
 

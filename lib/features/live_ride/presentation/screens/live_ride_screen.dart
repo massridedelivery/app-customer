@@ -21,6 +21,8 @@ import 'package:customer_app/features/ride_booking/presentation/states/booking_s
 import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:customer_app/features/live_ride/presentation/states/live_ride_state.dart';
 import 'package:customer_app/core/services/ride_ongoing_notification.dart';
+import 'package:customer_app/core/constants/app_assets.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -922,7 +924,7 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
   }
 
   /// Four-step progress under the R1 header: กำลังมา → ถึงจุดรับ →
-  /// กำลังเดินทาง → ถึงแล้ว, each with its own icon. Done and current steps are
+  /// กำลังเดินทาง → ถึงแล้ว, each with its own icon (Remix Icon fill set). Done and current steps are
   /// green with a white icon, later ones grey outlines; the lines between done
   /// steps are solid green and the line leaving the current step flows (an
   /// indeterminate bar) so the rider sees the ride moving towards the next one.
@@ -946,11 +948,11 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
     final type = (vehicleType ?? '').toLowerCase();
     final icons = [
       type.contains('bike') || type.contains('motor')
-          ? Icons.two_wheeler
-          : Icons.directions_car,
-      Icons.emoji_people,
-      Icons.navigation_rounded,
-      Icons.flag_rounded,
+          ? AppAssets.icStepBike
+          : AppAssets.icStepCar,
+      AppAssets.icStepPickup,
+      AppAssets.icStepRoute,
+      AppAssets.icStepFinish,
     ];
 
     Widget dot(int i) {
@@ -972,10 +974,16 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
                 ]
               : null,
         ),
-        child: Icon(
-          icons[i],
-          size: 16,
-          color: reached ? Colors.white : Colors.grey.shade400,
+        child: Center(
+          child: SvgPicture.asset(
+            icons[i],
+            width: 16,
+            height: 16,
+            colorFilter: ColorFilter.mode(
+              reached ? Colors.white : Colors.grey.shade400,
+              BlendMode.srcIn,
+            ),
+          ),
         ),
       );
     }

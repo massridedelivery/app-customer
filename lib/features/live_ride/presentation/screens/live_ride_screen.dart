@@ -1009,12 +1009,18 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
     return Column(
       key: const Key('liveRideSteps'),
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 18),
-          child: Row(
-            children: [
-              for (var i = 0; i < 4; i++) ...[dot(i), if (i < 3) line(i)],
-            ],
+        // Inset the dots so each one sits at the centre of its label's
+        // quarter-width column below (centres at 1/8, 3/8, 5/8, 7/8).
+        LayoutBuilder(
+          builder: (context, constraints) => Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: constraints.maxWidth / 8 - 15,
+            ),
+            child: Row(
+              children: [
+                for (var i = 0; i < 4; i++) ...[dot(i), if (i < 3) line(i)],
+              ],
+            ),
           ),
         ),
         const SizedBox(height: 6),

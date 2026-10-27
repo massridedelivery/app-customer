@@ -787,7 +787,7 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
       children: [
         _buildStatusHeader(uiState, liveState, pickupAddress, dropoffAddress),
         const SizedBox(height: 14),
-        _buildRideSteps(liveState.jobStatus),
+        _buildRideSteps(liveState.jobStatus, liveState.vehicleType),
         const SizedBox(height: 16),
         _buildRiderSection(liveState),
         const SizedBox(height: 12),
@@ -922,10 +922,11 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
   }
 
   /// Four-step progress under the R1 header: กำลังมา → ถึงจุดรับ →
-  /// กำลังเดินทาง → ถึงแล้ว. Done steps and the lines between them are solid
-  /// green; the line leaving the current step flows (an indeterminate bar) so
-  /// the rider sees the ride moving towards the next one.
-  Widget _buildRideSteps(String? status) {
+  /// กำลังเดินทาง → ถึงแล้ว, each with its own icon. Done and current steps are
+  /// green with a white icon, later ones grey outlines; the lines between done
+  /// steps are solid green and the line leaving the current step flows (an
+  /// indeterminate bar) so the rider sees the ride moving towards the next one.
+  Widget _buildRideSteps(String? status, String? vehicleType) {
     final l10n = AppLocalizations.of(context)!;
     final active = switch (status?.toUpperCase()) {
       'ARRIVED_AT_PICK_UP' => 1,
@@ -942,16 +943,26 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
     const green = AppColors.foundationGreen600;
     final grey = Colors.grey.shade300;
 
+    final type = (vehicleType ?? '').toLowerCase();
+    final icons = [
+      type.contains('bike') || type.contains('motor')
+          ? Icons.two_wheeler
+          : Icons.directions_car,
+      Icons.emoji_people,
+      Icons.navigation_rounded,
+      Icons.flag_rounded,
+    ];
+
     Widget dot(int i) {
-      final done = i < active || active == 3;
+      final reached = i <= active;
       final current = i == active && active != 3;
       return Container(
-        width: 22,
-        height: 22,
+        width: 30,
+        height: 30,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: done || current ? green : Colors.white,
-          border: Border.all(color: done || current ? green : grey, width: 2),
+          color: reached ? green : Colors.white,
+          border: Border.all(color: reached ? green : grey, width: 2),
           boxShadow: current
               ? [
                   BoxShadow(
@@ -961,9 +972,11 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
                 ]
               : null,
         ),
-        child: done
-            ? const Icon(Icons.check_rounded, size: 14, color: Colors.white)
-            : null,
+        child: Icon(
+          icons[i],
+          size: 16,
+          color: reached ? Colors.white : Colors.grey.shade400,
+        ),
       );
     }
 
@@ -989,7 +1002,7 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
       key: const Key('liveRideSteps'),
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 22),
+          padding: const EdgeInsets.symmetric(horizontal: 18),
           child: Row(
             children: [
               for (var i = 0; i < 4; i++) ...[dot(i), if (i < 3) line(i)],

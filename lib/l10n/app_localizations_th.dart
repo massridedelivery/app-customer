@@ -1365,7 +1365,7 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String liveCancelledWithFee(String fee) {
-    return 'ยกเลิกการเดินทางแล้ว • มีค่าบริการยกเลิก ฿$fee';
+    return 'ยกเลิกการเดินทางแล้ว • ค่ายกเลิก ฿$fee จะถูกรวมในการเรียกรถครั้งถัดไปของคุณ';
   }
 
   @override
@@ -1378,7 +1378,7 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String liveCancelFeeConfirm(String fee) {
-    return 'คนขับรับงานแล้ว หากยกเลิกตอนนี้จะมีค่าบริการยกเลิก ฿$fee\nต้องการยกเลิกหรือไม่?';
+    return 'คนขับรับงานแล้ว หากยกเลิกตอนนี้จะมีค่ายกเลิก ฿$fee ซึ่งจะถูกรวมในการเรียกรถครั้งถัดไปของคุณ\nต้องการยกเลิกหรือไม่?';
   }
 
   @override
@@ -3313,6 +3313,18 @@ class AppLocalizationsTh extends AppLocalizations {
   @override
   String ridePointsLine(String points) {
     return 'ใช้ $points คะแนน';
+  }
+
+  @override
+  String get ridePriorCancelFee => 'ค่ายกเลิกงานครั้งก่อน';
+
+  @override
+  String get ridePriorCancelFeeNote =>
+      'ยอดนี้รวมอยู่ในค่าโดยสารที่ต้องชำระแล้ว';
+
+  @override
+  String ridePriorCancelFeeIncluded(String fee) {
+    return '+ค่ายกเลิก ฿$fee';
   }
 
   @override

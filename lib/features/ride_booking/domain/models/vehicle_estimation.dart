@@ -36,6 +36,9 @@ sealed class VehicleEstimation with _$VehicleEstimation {
     @JsonKey(name: 'drivers_nearby') int? driversNearby,
     // After the code AND points (BE §3.1); null on older payloads / guests.
     @JsonKey(name: 'amount_to_pay') double? amountToPay,
+    // Unpaid cancellation fees from earlier rides that booking this one adds
+    // to what the customer pays; already inside amount_to_pay. Absent → 0.
+    @JsonKey(name: 'prior_cancel_fee') @Default(0.0) double priorCancelFee,
     @JsonKey(name: 'promo') Map<String, dynamic>? promoJson,
     @JsonKey(name: 'points') Map<String, dynamic>? pointsJson,
   }) = _VehicleEstimation;
@@ -49,7 +52,12 @@ sealed class VehicleEstimation with _$VehicleEstimation {
   RidePointsQuote? get points => RidePointsQuote.fromJson(pointsJson);
 
   /// What the customer pays — shown on the card and the request button.
-  double get payable => amountToPay ?? totalFare;
+  /// The server's amount_to_pay (carried cancellation fee included).
+  double get payable => amountToPay ?? totalFare + priorCancelFee;
+
+  /// [payable] for the ride alone, without the carried cancellation fee —
+  /// what the fare / discount comparisons on the card are made against.
+  double get ridePayable => payable - priorCancelFee;
 
   factory VehicleEstimation.fromJson(Map<String, dynamic> json) =>
       _$VehicleEstimationFromJson(json);

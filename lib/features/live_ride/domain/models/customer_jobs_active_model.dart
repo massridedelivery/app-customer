@@ -35,6 +35,9 @@ abstract class CustomerJobsActiveModel with _$CustomerJobsActiveModel {
     // Points paid with at booking (refunded if the ride is cancelled).
     @JsonKey(name: 'points_used') @Default(0) int pointsUsed,
     @JsonKey(name: 'points_discount') @Default(0.0) double pointsDiscount,
+    // Unpaid cancellation fees from earlier rides this ride carries; already
+    // inside amount_due.
+    @JsonKey(name: 'prior_cancel_fee') @Default(0.0) double priorCancelFee,
     @JsonKey(name: 'created_at') DateTime? createdAt,
     @JsonKey(name: 'updated_at') DateTime? updatedAt,
     @JsonKey(name: 'driver_info') DriverJobInfoModel? driverJobInfo,

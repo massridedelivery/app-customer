@@ -459,7 +459,9 @@ class _OrderListItem extends ConsumerWidget {
               const SizedBox(width: 8),
               // Right Price
               Text(
-                '฿${order.totalAmount.toStringAsFixed(0)}',
+                // A ride's list total from the backend is its bare fare; show
+                // what the rider paid instead, as on the trip detail.
+                '฿${(order.rideDetails?.payable ?? order.totalAmount).toStringAsFixed(0)}',
                 style: AppTypography.body3.copyWith(
                   fontWeight: isCancelled ? FontWeight.normal : FontWeight.bold,
                   color: isCancelled

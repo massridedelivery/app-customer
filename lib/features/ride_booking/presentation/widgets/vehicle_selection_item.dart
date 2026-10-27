@@ -201,12 +201,14 @@ class VehicleSelectionItem extends StatelessWidget {
 
                               // Struck-through "before" price: with a coupon it's
                               // the pre-discount fare (gross_fare); with only a
-                              // surge it's the un-surged base fare.
-                              if (estimation.payable < estimation.totalFare ||
+                              // surge it's the un-surged base fare. Compared on
+                              // the ride alone, then shown with the carried
+                              // cancellation fee so it lines up with the price.
+                              if (estimation.ridePayable < estimation.totalFare ||
                                   estimation.discount > 0 ||
                                   estimation.surgeMultiplier > 1.0)
                                 Text(
-                                  '฿${(estimation.payable < estimation.totalFare || estimation.discount > 0 ? (estimation.grossFare ?? estimation.totalFare + estimation.discount) : estimation.baseFare).toStringAsFixed(0)}',
+                                  '฿${((estimation.ridePayable < estimation.totalFare || estimation.discount > 0 ? (estimation.grossFare ?? estimation.totalFare + estimation.discount) : estimation.baseFare) + estimation.priorCancelFee).toStringAsFixed(0)}',
                                   style: AppTypography.caption4.copyWith(
                                     color: Colors.grey,
                                     decoration: TextDecoration.lineThrough,
@@ -232,6 +234,22 @@ class VehicleSelectionItem extends StatelessWidget {
                                       fontWeight: FontWeight.bold,
                                       fontSize: 9,
                                     ),
+                                  ),
+                                ),
+                              ],
+
+                              // The price includes a fee carried from an
+                              // earlier cancellation: say so on the card.
+                              if (estimation.priorCancelFee > 0) ...[
+                                const SizedBox(height: 2),
+                                Text(
+                                  l10n.ridePriorCancelFeeIncluded(
+                                    fmtBaht(estimation.priorCancelFee),
+                                  ),
+                                  key: const Key('vehiclePriorCancelFee'),
+                                  style: AppTypography.caption5.copyWith(
+                                    color: AppColors.textSecondary,
+                                    fontSize: 9,
                                   ),
                                 ),
                               ],

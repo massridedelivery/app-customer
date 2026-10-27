@@ -1444,6 +1444,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get liveChatWithDriver => 'Chat with driver';
 
   @override
+  String get rideStepComing => 'On the way';
+
+  @override
+  String get rideStepArrived => 'At pickup';
+
+  @override
+  String get rideStepOnTrip => 'On trip';
+
+  @override
+  String get rideStepDone => 'Arrived';
+
+  @override
   String rideNotifComing(String plate) {
     return '$plate is on the way';
   }

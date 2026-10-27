@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
+import 'package:customer_app/core/services/ride_ongoing_notification.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,7 +17,17 @@ bool get _isMobilePlatform =>
 /// FCM background isolate entrypoint. Notification-type messages are
 /// displayed by the OS; data-only messages need no processing yet.
 @pragma('vm:entry-point')
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {}
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  // A ride that ends while the app is backgrounded must not leave its pinned
+  // "ride in progress" notification behind.
+  final type = message.data['type'];
+  final status = '${message.data['status'] ?? ''}'.toUpperCase();
+  if (type == 'job_cancelled' ||
+      (type == 'job_status' &&
+          (status == 'COMPLETED' || status == 'CANCELLED'))) {
+    await RideOngoingNotification.clearInBackground();
+  }
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

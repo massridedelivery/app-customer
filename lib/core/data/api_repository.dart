@@ -84,24 +84,25 @@ class ApiRepository {
   }
 
   // ─── DEVICES (push notifications) ─────────────────────────────────────────
-  // TODO(backend): endpoints not implemented server-side yet — proposed
-  // contract lives in docs/push-notifications.md. Callers swallow failures so
-  // login/logout keep working until the backend ships.
 
-  /// POST /api/customer/devices — register this device's FCM token.
+  /// POST /api/notifications/register-device — bind this device's FCM token to
+  /// the signed-in customer so ride/order pushes reach it.
   Future<void> registerDeviceToken({
     required String token,
     required String platform,
   }) async {
     await _dio.post(
-      '/api/customer/devices',
-      data: {'token': token, 'platform': platform},
+      '/api/notifications/register-device',
+      data: {'token': token, 'device_type': platform},
     );
   }
 
-  /// DELETE /api/customer/devices — remove the token on logout.
+  /// POST /api/notifications/unregister-device — unbind the token on logout.
   Future<void> unregisterDeviceToken(String token) async {
-    await _dio.delete('/api/customer/devices', data: {'token': token});
+    await _dio.post(
+      '/api/notifications/unregister-device',
+      data: {'token': token},
+    );
   }
 
   /// Sync the user's language (th|en) to the backend so push notifications are
@@ -185,11 +186,7 @@ class ApiRepository {
   }) async {
     final res = await _dio.post(
       '/api/customer/jobs/$id/chat',
-      data: {
-        'text': text,
-        'msg_type': msgType,
-        'file_key': ?fileKey,
-      },
+      data: {'text': text, 'msg_type': msgType, 'file_key': ?fileKey},
     );
     return res.data as Map<String, dynamic>;
   }
@@ -250,11 +247,7 @@ class ApiRepository {
   }) async {
     final res = await _dio.post(
       '/api/customer/orders/$id/chat',
-      data: {
-        'text': text,
-        'msg_type': msgType,
-        'file_key': ?fileKey,
-      },
+      data: {'text': text, 'msg_type': msgType, 'file_key': ?fileKey},
     );
     return res.data as Map<String, dynamic>;
   }

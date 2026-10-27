@@ -1,4 +1,5 @@
 import 'package:customer_app/core/managers/providers.dart';
+import 'package:customer_app/core/services/ride_ongoing_notification.dart';
 import 'package:customer_app/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:customer_app/features/inbox/presentation/inbox_controller.dart';
 import 'package:customer_app/router/app_routes.dart';
@@ -70,8 +71,13 @@ class PushNotificationService {
           requestSoundPermission: false,
         ),
       ),
-      onDidReceiveNotificationResponse: (response) =>
-          _openDeeplink(response.payload),
+      onDidReceiveNotificationResponse: (response) {
+        if (RideOngoingNotification.handles(response)) {
+          _ref.read(rideOngoingNotificationProvider).onAction(response);
+          return;
+        }
+        _openDeeplink(response.payload);
+      },
     );
     await _localNotifications
         .resolvePlatformSpecificImplementation<
@@ -148,7 +154,7 @@ class PushNotificationService {
                 : 'android',
           );
     } catch (e) {
-      // TODO(backend): endpoint not live yet — login must keep working.
+      // Login must keep working even if the backend refuses the token.
       debugPrint('Push: token registration failed (ignored): $e');
     }
   }

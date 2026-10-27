@@ -1,3 +1,4 @@
+import 'package:customer_app/core/services/ride_ongoing_notification.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:customer_app/core/configs/theme.dart';
@@ -24,6 +25,8 @@ class _AppState extends ConsumerState<App> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     // Wires FCM handlers and (when logged in) registers the device token.
     ref.read(pushNotificationServiceProvider).init();
+    // Clears the Android ride notification when the active job goes away.
+    ref.read(rideOngoingNotificationProvider);
   }
 
   @override

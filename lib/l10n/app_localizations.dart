@@ -2725,6 +2725,30 @@ abstract class AppLocalizations {
   /// **'Chat with driver'**
   String get liveChatWithDriver;
 
+  /// No description provided for @rideStepComing.
+  ///
+  /// In en, this message translates to:
+  /// **'On the way'**
+  String get rideStepComing;
+
+  /// No description provided for @rideStepArrived.
+  ///
+  /// In en, this message translates to:
+  /// **'At pickup'**
+  String get rideStepArrived;
+
+  /// No description provided for @rideStepOnTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'On trip'**
+  String get rideStepOnTrip;
+
+  /// No description provided for @rideStepDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Arrived'**
+  String get rideStepDone;
+
   /// No description provided for @rideNotifComing.
   ///
   /// In en, this message translates to:

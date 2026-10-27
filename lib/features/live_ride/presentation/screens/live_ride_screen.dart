@@ -787,6 +787,8 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
       children: [
         _buildStatusHeader(uiState, liveState, pickupAddress, dropoffAddress),
         const SizedBox(height: 14),
+        _buildRideSteps(liveState.jobStatus),
+        const SizedBox(height: 16),
         _buildRiderSection(liveState),
         const SizedBox(height: 12),
         _buildLocationDetailsSection(pickupAddress, dropoffAddress),
@@ -853,15 +855,19 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
     String? dropoffAddress,
   ) {
     final l10n = AppLocalizations.of(context)!;
-    final title = switch (uiState) {
-      RideUIState.pickupArrived => l10n.driverArrived,
-      RideUIState.onTrip => l10n.liveHeadingToDestTitle,
-      _ => l10n.liveDriverOnTheWay,
-    };
+    final completed = liveState.jobStatus?.toUpperCase() == 'COMPLETED';
+    final title = completed
+        ? l10n.rideCompleted
+        : switch (uiState) {
+            RideUIState.pickupArrived => l10n.driverArrived,
+            RideUIState.onTrip => l10n.liveHeadingToDestTitle,
+            _ => l10n.liveDriverOnTheWay,
+          };
     final place = uiState == RideUIState.onTrip
         ? dropoffAddress
         : pickupAddress;
-    final minutes = uiState == RideUIState.pickupArrived
+    // No countdown once the driver is waiting at pickup or the ride is over.
+    final minutes = uiState == RideUIState.pickupArrived || completed
         ? null
         : _etaMinutes(liveState);
     return Row(
@@ -913,6 +919,107 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
       return;
     }
     await launchUrl(Uri(scheme: 'tel', path: number));
+  }
+
+  /// Four-step progress under the R1 header: กำลังมา → ถึงจุดรับ →
+  /// กำลังเดินทาง → ถึงแล้ว. Done steps and the lines between them are solid
+  /// green; the line leaving the current step flows (an indeterminate bar) so
+  /// the rider sees the ride moving towards the next one.
+  Widget _buildRideSteps(String? status) {
+    final l10n = AppLocalizations.of(context)!;
+    final active = switch (status?.toUpperCase()) {
+      'ARRIVED_AT_PICK_UP' => 1,
+      'PICKED_UP' => 2,
+      'COMPLETED' => 3,
+      _ => 0,
+    };
+    final labels = [
+      l10n.rideStepComing,
+      l10n.rideStepArrived,
+      l10n.rideStepOnTrip,
+      l10n.rideStepDone,
+    ];
+    const green = AppColors.foundationGreen600;
+    final grey = Colors.grey.shade300;
+
+    Widget dot(int i) {
+      final done = i < active || active == 3;
+      final current = i == active && active != 3;
+      return Container(
+        width: 22,
+        height: 22,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: done || current ? green : Colors.white,
+          border: Border.all(color: done || current ? green : grey, width: 2),
+          boxShadow: current
+              ? [
+                  BoxShadow(
+                    color: green.withValues(alpha: 0.25),
+                    spreadRadius: 4,
+                  ),
+                ]
+              : null,
+        ),
+        child: done
+            ? const Icon(Icons.check_rounded, size: 14, color: Colors.white)
+            : null,
+      );
+    }
+
+    Widget line(int i) => Expanded(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(2),
+          child: SizedBox(
+            height: 4,
+            child: i == active && active != 3
+                ? LinearProgressIndicator(
+                    backgroundColor: grey,
+                    valueColor: const AlwaysStoppedAnimation(green),
+                  )
+                : ColoredBox(color: i < active ? green : grey),
+          ),
+        ),
+      ),
+    );
+
+    return Column(
+      key: const Key('liveRideSteps'),
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 22),
+          child: Row(
+            children: [
+              for (var i = 0; i < 4; i++) ...[dot(i), if (i < 3) line(i)],
+            ],
+          ),
+        ),
+        const SizedBox(height: 6),
+        Row(
+          children: [
+            for (var i = 0; i < 4; i++)
+              Expanded(
+                child: Text(
+                  labels[i],
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypography.caption5.copyWith(
+                    color: i <= active
+                        ? AppColors.semanticGrayNeutralFgHigh
+                        : AppColors.semanticGrayNeutralFgLowOnWhite,
+                    fontWeight: i == active
+                        ? FontWeight.bold
+                        : FontWeight.normal,
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ],
+    );
   }
 
   Widget _buildRiderSection(LiveRideState liveState) {

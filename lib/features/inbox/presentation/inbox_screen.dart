@@ -9,6 +9,7 @@ import 'package:customer_app/features/inbox/data/inbox_repository.dart';
 import 'package:customer_app/features/inbox/presentation/inbox_controller.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:customer_app/core/widgets/points_coin.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -39,129 +40,137 @@ class _InboxScreenState extends ConsumerState<InboxScreen> {
       authControllerProvider.select((s) => s.isAuthenticated),
     );
     if (!signedIn) {
-      return const Scaffold(body: SafeArea(child: LoginRequiredView()));
+      return const AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle.dark,
+        child: Scaffold(body: SafeArea(child: LoginRequiredView())),
+      );
     }
     final inbox = ref.watch(inboxControllerProvider);
     final unread = ref.watch(inboxUnreadProvider);
     final bottomPad =
         8 + kFloatingNavReserve + MediaQuery.of(context).viewPadding.bottom;
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
-              child: Text(
-                l10n.navInbox,
-                style: AppTypography.heading3.copyWith(
-                  color: AppColors.textPrimary,
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.dark,
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: SafeArea(
+          bottom: false,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
+                child: Text(
+                  l10n.navInbox,
+                  style: AppTypography.heading3.copyWith(
+                    color: AppColors.textPrimary,
+                  ),
                 ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
-              child: Row(
-                children: [
-                  _FilterChip(
-                    label: l10n.inboxAll,
-                    selected: !_unreadOnly,
-                    onTap: () => setState(() => _unreadOnly = false),
-                  ),
-                  const SizedBox(width: 8),
-                  _FilterChip(
-                    label: unread > 0
-                        ? '${l10n.inboxUnread} $unread'
-                        : l10n.inboxUnread,
-                    selected: _unreadOnly,
-                    onTap: () => setState(() => _unreadOnly = true),
-                  ),
-                  const Spacer(),
-                  if (unread > 0)
-                    TextButton(
-                      key: const Key('inboxMarkAllRead'),
-                      onPressed: () => ref
-                          .read(inboxControllerProvider.notifier)
-                          .markAllRead(),
-                      style: TextButton.styleFrom(
-                        foregroundColor: AppColors.primary,
-                      ),
-                      child: Text(l10n.inboxMarkAllRead,
-                          style: AppTypography.label2),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
+                child: Row(
+                  children: [
+                    _FilterChip(
+                      label: l10n.inboxAll,
+                      selected: !_unreadOnly,
+                      onTap: () => setState(() => _unreadOnly = false),
                     ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: inbox.when(
-                loading: () => const Center(child: MassLoadingM(size: 72)),
-                error: (_, _) => _Message(
-                  icon: Icons.cloud_off_outlined,
-                  title: l10n.inboxLoadFailed,
-                  onTap: () =>
-                      ref.read(inboxControllerProvider.notifier).refresh(),
+                    const SizedBox(width: 8),
+                    _FilterChip(
+                      label: unread > 0
+                          ? '${l10n.inboxUnread} $unread'
+                          : l10n.inboxUnread,
+                      selected: _unreadOnly,
+                      onTap: () => setState(() => _unreadOnly = true),
+                    ),
+                    const Spacer(),
+                    if (unread > 0)
+                      TextButton(
+                        key: const Key('inboxMarkAllRead'),
+                        onPressed: () => ref
+                            .read(inboxControllerProvider.notifier)
+                            .markAllRead(),
+                        style: TextButton.styleFrom(
+                          foregroundColor: AppColors.primary,
+                        ),
+                        child: Text(
+                          l10n.inboxMarkAllRead,
+                          style: AppTypography.label2,
+                        ),
+                      ),
+                  ],
                 ),
-                data: (s) {
-                  final items = _unreadOnly
-                      ? s.items.where((i) => !i.isRead).toList()
-                      : s.items;
-                  return RefreshIndicator(
-                    color: AppColors.primary,
-                    onRefresh: () =>
-                        ref.read(inboxControllerProvider.notifier).refresh(),
-                    child: items.isEmpty
-                        ? ListView(
-                            physics: const AlwaysScrollableScrollPhysics(),
-                            children: [
-                              const SizedBox(height: 80),
-                              _unreadOnly && s.items.isNotEmpty
-                                  ? _Message(
-                                      icon: Icons.mark_email_read_outlined,
-                                      title: l10n.inboxAllCaughtUp,
-                                    )
-                                  : _Message(
-                                      icon: Icons.notifications_none_rounded,
-                                      title: l10n.inboxEmpty,
-                                      subtitle: l10n.inboxEmptySub,
-                                    ),
-                            ],
-                          )
-                        : NotificationListener<ScrollNotification>(
-                            // Infinite scroll: fetch the next page near the end.
-                            onNotification: (n) {
-                              if (n.metrics.extentAfter < 400) {
-                                ref
-                                    .read(inboxControllerProvider.notifier)
-                                    .loadMore();
-                              }
-                              return false;
-                            },
-                            child: ListView.builder(
-                              physics: const AlwaysScrollableScrollPhysics(),
-                              padding: EdgeInsets.only(bottom: bottomPad),
-                              itemCount: items.length + (s.hasMore ? 1 : 0),
-                              itemBuilder: (context, i) => i == items.length
-                                  ? const Padding(
-                                      key: Key('inboxLoadingMore'),
-                                      padding: EdgeInsets.all(16),
-                                      child: Center(
-                                        child: MassLoadingM(size: 40),
-                                      ),
-                                    )
-                                  : _InboxTile(
-                                      item: items[i],
-                                      onTap: () => _open(items[i]),
-                                    ),
-                            ),
-                          ),
-                  );
-                },
               ),
-            ),
-          ],
+              Expanded(
+                child: inbox.when(
+                  loading: () => const Center(child: MassLoadingM(size: 72)),
+                  error: (_, _) => _Message(
+                    icon: Icons.cloud_off_outlined,
+                    title: l10n.inboxLoadFailed,
+                    onTap: () =>
+                        ref.read(inboxControllerProvider.notifier).refresh(),
+                  ),
+                  data: (s) {
+                    final items = _unreadOnly
+                        ? s.items.where((i) => !i.isRead).toList()
+                        : s.items;
+                    return RefreshIndicator(
+                      color: AppColors.primary,
+                      onRefresh: () =>
+                          ref.read(inboxControllerProvider.notifier).refresh(),
+                      child: items.isEmpty
+                          ? ListView(
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              children: [
+                                const SizedBox(height: 80),
+                                _unreadOnly && s.items.isNotEmpty
+                                    ? _Message(
+                                        icon: Icons.mark_email_read_outlined,
+                                        title: l10n.inboxAllCaughtUp,
+                                      )
+                                    : _Message(
+                                        icon: Icons.notifications_none_rounded,
+                                        title: l10n.inboxEmpty,
+                                        subtitle: l10n.inboxEmptySub,
+                                      ),
+                              ],
+                            )
+                          : NotificationListener<ScrollNotification>(
+                              // Infinite scroll: fetch the next page near the end.
+                              onNotification: (n) {
+                                if (n.metrics.extentAfter < 400) {
+                                  ref
+                                      .read(inboxControllerProvider.notifier)
+                                      .loadMore();
+                                }
+                                return false;
+                              },
+                              child: ListView.builder(
+                                physics: const AlwaysScrollableScrollPhysics(),
+                                padding: EdgeInsets.only(bottom: bottomPad),
+                                itemCount: items.length + (s.hasMore ? 1 : 0),
+                                itemBuilder: (context, i) => i == items.length
+                                    ? const Padding(
+                                        key: Key('inboxLoadingMore'),
+                                        padding: EdgeInsets.all(16),
+                                        child: Center(
+                                          child: MassLoadingM(size: 40),
+                                        ),
+                                      )
+                                    : _InboxTile(
+                                        item: items[i],
+                                        onTap: () => _open(items[i]),
+                                      ),
+                              ),
+                            ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

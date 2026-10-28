@@ -88,7 +88,7 @@ class _RideLandingScreenState extends ConsumerState<RideLandingScreen> {
         children: [
           Positioned.fill(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.only(bottom: 40),
+              padding: EdgeInsets.only(bottom: 40 + MediaQuery.paddingOf(context).bottom),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

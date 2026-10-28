@@ -434,7 +434,12 @@ class _MenuItemBottomSheetState extends State<MenuItemBottomSheet> {
 
   Widget _buildBottomAction(double totalPrice, bool isValid) {
     return Container(
-      padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 32),
+      padding: EdgeInsets.only(
+        left: 16,
+        right: 16,
+        top: 16,
+        bottom: 16 + MediaQuery.paddingOf(context).bottom,
+      ),
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [

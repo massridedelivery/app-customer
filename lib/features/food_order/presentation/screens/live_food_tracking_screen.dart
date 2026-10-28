@@ -329,10 +329,10 @@ class _LiveFoodTrackingScreenState
                   ),
                   Expanded(
                     child: SingleChildScrollView(
-                      padding: const EdgeInsets.only(
+                      padding: EdgeInsets.only(
                         left: 20,
                         right: 20,
-                        bottom: 30,
+                        bottom: 30 + MediaQuery.paddingOf(context).bottom,
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,

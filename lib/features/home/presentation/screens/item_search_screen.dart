@@ -158,7 +158,7 @@ class _ItemSearchScreenState extends ConsumerState<ItemSearchScreen> {
     }
 
     return ListView(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + MediaQuery.paddingOf(context).bottom),
       children: [
         Text(l10n.homeRestaurants, style: AppTypography.heading4),
         const SizedBox(height: 12),

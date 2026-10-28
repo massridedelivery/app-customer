@@ -2,6 +2,7 @@ import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/features/chat/presentation/controllers/chat_controller.dart';
+import 'package:customer_app/features/chat/presentation/widgets/chat_image_widgets.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -205,6 +206,14 @@ class _MessengerChatScreenState extends ConsumerState<MessengerChatScreen> {
                   final isMe =
                       message.senderId == 'me' ||
                       message.senderRole == 'customer';
+                  if (message.isImage) {
+                    return ChatRoomImageBubble(
+                      room: _room,
+                      message: message,
+                      isMe: isMe,
+                      myColor: AppColors.primary,
+                    );
+                  }
                   return _buildBubble(message.text, isMe: isMe);
                 },
               ),
@@ -230,6 +239,14 @@ class _MessengerChatScreenState extends ConsumerState<MessengerChatScreen> {
             ),
             child: Row(
               children: [
+                ChatAttachButton(
+                  color: AppColors.primary,
+                  onSend: (bytes, caption) {
+                    ref
+                        .read(chatControllerProvider(_room).notifier)
+                        .sendImage(bytes, caption: caption);
+                  },
+                ),
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(

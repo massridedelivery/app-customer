@@ -1536,6 +1536,49 @@ class AppLocalizationsEn extends AppLocalizations {
       'Couldn\'t send your message. Please try again.';
 
   @override
+  String get chatAttachImage => 'Attach photo';
+
+  @override
+  String get chatTakePhoto => 'Take photo';
+
+  @override
+  String get chatChooseFromGallery => 'Choose from library';
+
+  @override
+  String get chatImageCaptionHint => 'Add a caption (optional)';
+
+  @override
+  String get chatSendImage => 'Send photo';
+
+  @override
+  String get chatImageRetry => 'Send again';
+
+  @override
+  String get chatImageDiscard => 'Delete';
+
+  @override
+  String get chatImageFailed => 'Couldn\'t send the photo. Tap to send again';
+
+  @override
+  String get chatImageBlocked =>
+      'You\'ve been blocked, so you can\'t send photos in this chat';
+
+  @override
+  String get chatImageInvalid =>
+      'The file is invalid, too large or failed to upload. Please upload it again';
+
+  @override
+  String get chatImageLoadFailed =>
+      'Couldn\'t load the photo\nTap to try again';
+
+  @override
+  String get chatPhotoPermissionDenied =>
+      'The app doesn\'t have access to the camera or photos';
+
+  @override
+  String get chatOpenSettings => 'Settings';
+
+  @override
   String get liveChatLoadFailed => 'Couldn\'t load messages';
 
   @override

@@ -2893,6 +2893,84 @@ abstract class AppLocalizations {
   /// **'Couldn\'t send your message. Please try again.'**
   String get liveChatSendFailed;
 
+  /// No description provided for @chatAttachImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Attach photo'**
+  String get chatAttachImage;
+
+  /// No description provided for @chatTakePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Take photo'**
+  String get chatTakePhoto;
+
+  /// No description provided for @chatChooseFromGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose from library'**
+  String get chatChooseFromGallery;
+
+  /// No description provided for @chatImageCaptionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a caption (optional)'**
+  String get chatImageCaptionHint;
+
+  /// No description provided for @chatSendImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Send photo'**
+  String get chatSendImage;
+
+  /// No description provided for @chatImageRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Send again'**
+  String get chatImageRetry;
+
+  /// No description provided for @chatImageDiscard.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get chatImageDiscard;
+
+  /// No description provided for @chatImageFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t send the photo. Tap to send again'**
+  String get chatImageFailed;
+
+  /// No description provided for @chatImageBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve been blocked, so you can\'t send photos in this chat'**
+  String get chatImageBlocked;
+
+  /// No description provided for @chatImageInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'The file is invalid, too large or failed to upload. Please upload it again'**
+  String get chatImageInvalid;
+
+  /// No description provided for @chatImageLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load the photo\nTap to try again'**
+  String get chatImageLoadFailed;
+
+  /// No description provided for @chatPhotoPermissionDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'The app doesn\'t have access to the camera or photos'**
+  String get chatPhotoPermissionDenied;
+
+  /// No description provided for @chatOpenSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get chatOpenSettings;
+
   /// No description provided for @liveChatLoadFailed.
   ///
   /// In en, this message translates to:

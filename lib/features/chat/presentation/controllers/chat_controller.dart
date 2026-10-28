@@ -1,7 +1,13 @@
 import 'dart:async';
+import 'dart:typed_data';
+
 import 'package:customer_app/core/managers/providers.dart';
 import 'package:customer_app/core/services/socket_service.dart';
+import 'package:customer_app/features/chat/data/chat_image_processor.dart';
+import 'package:customer_app/features/chat/data/chat_media_repository.dart';
+import 'package:customer_app/features/chat/domain/chat_room_ids.dart';
 import 'package:customer_app/features/chat/domain/models/chat_message.dart';
+import 'package:dio/dio.dart';
 import 'package:customer_app/features/chat/presentation/states/chat_state.dart';
 import 'package:customer_app/features/messenger/data/repositories/messenger_repository_impl.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -44,10 +50,19 @@ class ChatController extends _$ChatController {
     if (type == null) return;
 
     if (type == 'chat_message') {
-      final roomId = message['room_id']?.toString();
-      if (roomId == room.id) {
-        final newMessage = ChatMessage.fromJson(message);
-        _addMessageFromSocket(newMessage);
+      // `{type, room_id: "job:{id}", data: {id, content, msg_type, media_url,
+      // sender_type, created_at}}` — the room id carries the vertical prefix.
+      final data = message['data'];
+      final payload = data is Map
+          ? Map<String, dynamic>.from(data)
+          : Map<String, dynamic>.from(message);
+      final roomId = (message['room_id'] ?? payload['room_id'])?.toString();
+      if (roomId != null && bareChatRoomId(roomId) == room.id) {
+        try {
+          _addMessageFromSocket(ChatMessage.fromJson(payload));
+        } catch (_) {
+          // A frame we can't read: the next history fetch has it.
+        }
       }
     } else {
       // Fallback/Legacy nested structure
@@ -80,10 +95,50 @@ class ChatController extends _$ChatController {
     final exists = state.messages.any((m) => m.id == newMessage.id);
     if (exists) return;
 
+    // Our own photo coming back: swap the temporary bubble for it, keeping
+    // the photo in memory under the server id.
+    if (newMessage.isImage &&
+        (newMessage.senderRole == 'customer' || newMessage.senderId == 'me')) {
+      final echoKey =
+          newMessage.fileKey ?? chatFileKeyFromUrl(newMessage.mediaUrl);
+      bool pendingWith(ChatMessage m, {bool byKey = true}) {
+        if (!m.id.startsWith('opt-') || !m.isImage) return false;
+        final up = state.imageUploads[m.id];
+        if (up == null || up.status == ChatImageUploadStatus.failed) {
+          return false;
+        }
+        return byKey ? up.fileKey != null && up.fileKey == echoKey : true;
+      }
+
+      var optIndex = state.messages.indexWhere((m) => pendingWith(m));
+      if (optIndex == -1) {
+        optIndex = state.messages.indexWhere(
+          (m) => pendingWith(m, byKey: false) && m.text == newMessage.text,
+        );
+      }
+      if (optIndex != -1) {
+        final tempId = state.messages[optIndex].id;
+        final updatedList = List<ChatMessage>.from(state.messages);
+        updatedList[optIndex] = newMessage;
+        final uploads = Map<String, ChatImageUpload>.from(state.imageUploads);
+        final upload = uploads.remove(tempId);
+        if (upload != null) {
+          uploads[newMessage.id] = upload.copyWith(
+            status: ChatImageUploadStatus.sent,
+            progress: 1,
+          );
+        }
+        state = state.copyWith(messages: updatedList, imageUploads: uploads);
+        return;
+      }
+    }
+
     // Check if it matches an optimistic message by text
-    if (newMessage.senderRole == 'customer' || newMessage.senderId == 'me') {
+    if (!newMessage.isImage &&
+        (newMessage.senderRole == 'customer' || newMessage.senderId == 'me')) {
       final optIndex = state.messages.indexWhere(
-        (m) => m.id.startsWith('opt-') && m.text == newMessage.text,
+        (m) =>
+            m.id.startsWith('opt-') && !m.isImage && m.text == newMessage.text,
       );
       if (optIndex != -1) {
         final updatedList = List<ChatMessage>.from(state.messages);
@@ -122,9 +177,14 @@ class ChatController extends _$ChatController {
           .toList()
           .reversed
           .toList();
+      // A reload (e.g. to re-sign expired photo links) keeps photos still
+      // being sent from here, which the server doesn't have yet.
+      final unsent = state.messages.where(
+        (m) => m.id.startsWith('opt-') && state.imageUploads.containsKey(m.id),
+      );
       state = state.copyWith(
         isLoading: false,
-        messages: messages,
+        messages: [...messages, ...unsent],
         hasReachedEnd: list.length < 50,
       );
     } catch (e) {
@@ -200,6 +260,185 @@ class ChatController extends _$ChatController {
         messages: state.messages.where((m) => m.id != tempId).toList(),
         error: e.toString(),
       );
+    }
+  }
+
+  /// Sends a photo: shows it at once with a progress ring, then scales it
+  /// down / strips EXIF, uploads it, confirms it and posts an `image`
+  /// message with the optional [caption]. A failure leaves the bubble with a
+  /// retry ([retryImage]).
+  Future<void> sendImage(Uint8List bytes, {String caption = ''}) async {
+    final tempId = 'opt-img-${DateTime.now().microsecondsSinceEpoch}';
+    state = state.copyWith(
+      messages: [
+        ...state.messages,
+        ChatMessage(
+          id: tempId,
+          roomId: room.id,
+          senderId: 'me',
+          senderRole: 'customer',
+          msgType: 'image',
+          text: caption.trim(),
+          sentAt: DateTime.now(),
+        ),
+      ],
+      imageUploads: {
+        ...state.imageUploads,
+        tempId: ChatImageUpload(bytes: bytes),
+      },
+    );
+    await _deliverImage(tempId);
+  }
+
+  /// Sends a failed photo again: only the message when the upload already
+  /// went through, otherwise the whole upload (its link may have expired).
+  Future<void> retryImage(String tempId) async {
+    final upload = state.imageUploads[tempId];
+    if (upload == null || upload.inFlight) return;
+    _updateUpload(
+      tempId,
+      (u) => u.copyWith(
+        status: u.fileKey == null
+            ? ChatImageUploadStatus.uploading
+            : ChatImageUploadStatus.sending,
+        clearError: true,
+      ),
+    );
+    await _deliverImage(tempId);
+  }
+
+  /// Drops a photo that failed to send.
+  void discardImage(String tempId) {
+    final uploads = Map<String, ChatImageUpload>.from(state.imageUploads)
+      ..remove(tempId);
+    state = state.copyWith(
+      messages: state.messages.where((m) => m.id != tempId).toList(),
+      imageUploads: uploads,
+    );
+  }
+
+  void _updateUpload(
+    String id,
+    ChatImageUpload Function(ChatImageUpload) update,
+  ) {
+    final current = state.imageUploads[id];
+    if (current == null) return;
+    state = state.copyWith(
+      imageUploads: {...state.imageUploads, id: update(current)},
+    );
+  }
+
+  Future<void> _deliverImage(String tempId) async {
+    try {
+      var upload = state.imageUploads[tempId];
+      if (upload == null) return;
+      var fileKey = upload.fileKey;
+      if (fileKey == null) {
+        if (!upload.prepared) {
+          final Uint8List prepared;
+          try {
+            prepared = await prepareChatImageInBackground(upload.bytes);
+          } on FormatException catch (e) {
+            throw ChatImageException(ChatImageError.invalid, e);
+          }
+          _updateUpload(
+            tempId,
+            (u) => u.copyWith(bytes: prepared, prepared: true, progress: 0.1),
+          );
+          upload = state.imageUploads[tempId]!;
+        }
+        fileKey = await ref
+            .read(chatMediaRepositoryProvider)
+            .uploadChatImage(
+              upload.bytes,
+              roomId: room.id,
+              onProgress: (p) => _updateUpload(
+                tempId,
+                (u) => u.copyWith(progress: 0.1 + p * 0.8),
+              ),
+            );
+        _updateUpload(
+          tempId,
+          (u) => u.copyWith(
+            fileKey: fileKey,
+            status: ChatImageUploadStatus.sending,
+            progress: 0.9,
+          ),
+        );
+      }
+
+      final caption = state.messages
+          .firstWhere(
+            (m) => m.id == tempId,
+            orElse: () => ChatMessage(
+              id: tempId,
+              senderId: 'me',
+              senderRole: 'customer',
+              msgType: 'image',
+              text: '',
+              sentAt: DateTime.now(),
+            ),
+          )
+          .text;
+      try {
+        await _postMessage(text: caption, msgType: 'image', fileKey: fileKey);
+      } on DioException catch (e) {
+        throw ChatImageException.fromDio(e);
+      }
+      // Sent; the WebSocket echo (deduped on its id) replaces the bubble.
+      _updateUpload(
+        tempId,
+        (u) => u.copyWith(status: ChatImageUploadStatus.sent, progress: 1),
+      );
+    } on ChatImageException catch (e) {
+      _updateUpload(
+        tempId,
+        (u) => u.copyWith(status: ChatImageUploadStatus.failed, error: e.error),
+      );
+    } catch (_) {
+      _updateUpload(
+        tempId,
+        (u) => u.copyWith(
+          status: ChatImageUploadStatus.failed,
+          error: ChatImageError.failed,
+        ),
+      );
+    }
+  }
+
+  Future<void> _postMessage({
+    required String text,
+    required String msgType,
+    String? fileKey,
+  }) async {
+    switch (room.kind) {
+      case ChatKind.ride:
+        await ref
+            .read(apiRepositoryProvider)
+            .sendJobChatMessage(
+              room.id,
+              text: text,
+              msgType: msgType,
+              fileKey: fileKey,
+            );
+      case ChatKind.food:
+        await ref
+            .read(apiRepositoryProvider)
+            .sendOrderChatMessage(
+              room.id,
+              text: text,
+              msgType: msgType,
+              fileKey: fileKey,
+            );
+      case ChatKind.messenger:
+        await ref
+            .read(messengerRepositoryProvider)
+            .sendChatMessage(
+              room.id,
+              text: text,
+              msgType: msgType,
+              fileKey: fileKey,
+            );
     }
   }
 }

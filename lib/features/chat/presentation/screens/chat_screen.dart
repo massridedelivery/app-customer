@@ -3,6 +3,7 @@ import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/features/chat/domain/models/chat_message.dart';
 import 'package:customer_app/features/chat/presentation/controllers/chat_controller.dart';
+import 'package:customer_app/features/chat/presentation/widgets/chat_image_widgets.dart';
 import 'package:customer_app/features/live_ride/presentation/controllers/live_ride_controller.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -220,6 +221,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   final isMe =
                       message.senderId == 'me' ||
                       message.senderRole == 'customer';
+                  if (message.isImage) {
+                    return ChatRoomImageBubble(
+                      room: (id: widget.jobId, kind: ChatKind.ride),
+                      message: message,
+                      isMe: isMe,
+                    );
+                  }
                   return _buildMessageBubble(message, isMe: isMe);
                 },
               ),
@@ -245,6 +253,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             ),
             child: Row(
               children: [
+                ChatAttachButton(
+                  onSend: (bytes, caption) {
+                    ref
+                        .read(chatControllerProvider((id: widget.jobId, kind: ChatKind.ride)).notifier)
+                        .sendImage(bytes, caption: caption);
+                  },
+                ),
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(

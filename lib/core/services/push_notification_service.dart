@@ -1,5 +1,6 @@
 import 'package:customer_app/core/managers/providers.dart';
 import 'package:customer_app/core/services/ride_ongoing_notification.dart';
+import 'package:customer_app/features/call/presentation/call_controller.dart';
 import 'package:customer_app/features/chat/domain/chat_room_ids.dart';
 import 'package:customer_app/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:customer_app/features/inbox/presentation/inbox_controller.dart';
@@ -161,6 +162,9 @@ class PushNotificationService {
   }
 
   void _showForegroundNotification(RemoteMessage message) {
+    // A driver's call while the app is open: the socket usually brought it
+    // already, and the controller ignores the copy.
+    if (_handleCallPush(message.data)) return;
     // A campaign push also lands in the inbox: reload it so the tab badge
     // counts it straight away.
     if (_ref.read(authControllerProvider).isAuthenticated) {
@@ -202,8 +206,29 @@ class PushNotificationService {
     );
   }
 
-  void _handleMessageTap(RemoteMessage message) =>
-      _openDeeplink(_targetPath(message.data));
+  void _handleMessageTap(RemoteMessage message) {
+    if (_handleCallPush(message.data)) return;
+    _openDeeplink(_targetPath(message.data));
+  }
+
+  /// `call_incoming` (rings, if it still does) and `call_ended`. Returns
+  /// whether the push was about a call.
+  bool _handleCallPush(Map<String, dynamic> data) {
+    final calls = _ref.read(callControllerProvider.notifier);
+    switch (data['type']) {
+      case 'call_incoming':
+        calls.onIncomingPush(data);
+        return true;
+      case 'call_ended':
+        final callId = data['call_id'];
+        if (callId is String) {
+          final reason = data['end_reason'];
+          calls.onRemoteEnded(callId, reason is String ? reason : null);
+        }
+        return true;
+    }
+    return false;
+  }
 
   /// The tap target from a push payload: the explicit `deeplink` path, or the
   /// `route` some notifications send instead (e.g. the stuck-ride auto-cancel

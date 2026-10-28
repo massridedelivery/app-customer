@@ -6,6 +6,7 @@ import 'package:customer_app/core/managers/providers.dart';
 import 'package:customer_app/core/services/push_notification_service.dart';
 import 'package:customer_app/core/services/socket_service.dart';
 import 'package:customer_app/core/widgets/connectivity_banner.dart';
+import 'package:customer_app/features/call/presentation/call_controller.dart';
 import 'package:customer_app/router/app_routes.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
@@ -52,7 +53,9 @@ class _AppState extends ConsumerState<App> with WidgetsBindingObserver {
         if (ref.read(tokenStorageProvider).hasToken) socket.ensureConnected();
       case AppLifecycleState.paused:
       case AppLifecycleState.detached:
-        socket.suspend();
+        // A call carries its WebRTC handshake on the socket and keeps running
+        // in the background (CallKit / the call's foreground service).
+        if (ref.read(callControllerProvider) == null) socket.suspend();
       case AppLifecycleState.inactive:
       case AppLifecycleState.hidden:
         break;

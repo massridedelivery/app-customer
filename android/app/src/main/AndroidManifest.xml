@@ -13,11 +13,31 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <!-- Android 13+ runtime permission for push notifications. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- In-app calls with the driver (flutter_callkit_incoming + WebRTC):
+         the microphone, a full-screen incoming call on a locked phone, and
+         the foreground service that keeps a call going in the background. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_PHONE_CALL" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
+    <!-- Calls are audio only. The plugin also asks for the camera (video
+         calls); declaring CAMERA would make the camera intent that chat
+         photos use throw until it is granted. -->
+    <uses-permission android:name="android.permission.CAMERA" tools:node="remove" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CAMERA"
+        tools:node="remove" />
 
     <application
         android:label="@string/app_name"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+        <!-- Audio-only calls: no camera foreground service type. -->
+        <service
+            android:name="com.hiennv.flutter_callkit_incoming.CallkitNotificationService"
+            android:foregroundServiceType="phoneCall|microphone"
+            tools:replace="android:foregroundServiceType" />
         <activity
             android:name=".MainActivity"
             android:exported="true"

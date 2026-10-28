@@ -1,9 +1,12 @@
+import 'package:customer_app/features/call/domain/call_models.dart';
+import 'package:customer_app/features/call/presentation/order_call_button.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/features/food_order/presentation/controllers/live_food_tracking_controller.dart';
 import 'package:customer_app/features/chat/presentation/controllers/chat_controller.dart';
 import 'package:customer_app/features/chat/presentation/widgets/chat_image_widgets.dart';
+import 'package:customer_app/features/chat/presentation/widgets/chat_system_note.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -94,6 +97,17 @@ class _FoodChatScreenState extends ConsumerState<FoodChatScreen> {
     return Scaffold(
       backgroundColor: AppColors.white,
       appBar: AppBar(
+        actions: [
+          ChatHeaderCallButton(
+            kind: CallKind.food,
+            jobId: widget.orderId,
+            status: ref.watch(
+              liveFoodTrackingControllerProvider.select(
+                (s) => s.order?.id == widget.orderId ? s.order?.status : null,
+              ),
+            ),
+          ),
+        ],
         backgroundColor: AppColors.foundationGreen500,
         elevation: 0,
         leading: IconButton(
@@ -139,7 +153,6 @@ class _FoodChatScreenState extends ConsumerState<FoodChatScreen> {
             ),
           ],
         ),
-        actions: const [],
       ),
       body: Column(
         children: [
@@ -212,6 +225,9 @@ class _FoodChatScreenState extends ConsumerState<FoodChatScreen> {
                   final isMe =
                       message.senderId == 'me' ||
                       message.senderRole == 'customer';
+                  if (message.isSystem) {
+                    return ChatSystemNote(text: message.text);
+                  }
                   if (message.isImage) {
                     return ChatRoomImageBubble(
                       room: (id: widget.orderId, kind: ChatKind.food),

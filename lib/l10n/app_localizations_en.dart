@@ -3478,4 +3478,90 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rideToPay => 'To pay';
+
+  @override
+  String get callButton => 'Call';
+
+  @override
+  String get callStatusCalling => 'Calling…';
+
+  @override
+  String get callStatusIncoming => 'Incoming call';
+
+  @override
+  String get callStatusConnecting => 'Connecting…';
+
+  @override
+  String get callAccept => 'Accept';
+
+  @override
+  String get callDecline => 'Decline';
+
+  @override
+  String get callHangUp => 'End';
+
+  @override
+  String get callMute => 'Mute';
+
+  @override
+  String get callSpeaker => 'Speaker';
+
+  @override
+  String get callEndedHangup => 'Call ended';
+
+  @override
+  String get callEndedMissed => 'No answer';
+
+  @override
+  String get callEndedDeclined => 'Call declined';
+
+  @override
+  String get callEndedCancelled => 'Call cancelled';
+
+  @override
+  String get callEndedFailed => 'Call failed';
+
+  @override
+  String get callEndedLost => 'Call dropped';
+
+  @override
+  String get callPeerDriver => 'Driver';
+
+  @override
+  String get callPeerRider => 'Rider';
+
+  @override
+  String get callErrorBusy => 'The rider is busy. Please try again.';
+
+  @override
+  String get callErrorNotAllowed => 'This order can no longer be called.';
+
+  @override
+  String get callErrorBlocked => 'You can\'t call this rider.';
+
+  @override
+  String get callErrorDisabled => 'In-app calling isn\'t available right now.';
+
+  @override
+  String get callErrorNotFound => 'Order not found.';
+
+  @override
+  String get callErrorFailed => 'Couldn\'t place the call. Please try again.';
+
+  @override
+  String get callErrorMicrophone =>
+      'Allow the microphone to call the rider in the app.';
+
+  @override
+  String get callFullScreenTitle => 'Don\'t miss rider calls';
+
+  @override
+  String get callFullScreenBody =>
+      'Allow Mass Move to show incoming calls full screen so you can answer the rider even when your phone is locked.';
+
+  @override
+  String get callFullScreenAllow => 'Allow';
+
+  @override
+  String get callFullScreenLater => 'Later';
 }

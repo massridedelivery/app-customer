@@ -6,6 +6,7 @@ import 'package:customer_app/features/auth/data/models/send_otp_response.dart';
 import 'package:customer_app/features/auth/domain/entities/phone_login_response.dart';
 import 'package:customer_app/features/auth/domain/usecases/phone_login_usecase_impl.dart';
 import 'package:customer_app/features/auth/presentation/states/auth_state.dart';
+import 'package:customer_app/features/call/data/voip_token_registrar.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/widgets.dart' show Locale;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -167,6 +168,9 @@ class AuthController extends _$AuthController {
     try {
       // Drop this device's push token while the session token is still valid.
       await ref.read(pushNotificationServiceProvider).unregisterOnLogout();
+    } catch (_) {}
+    try {
+      await ref.read(voipTokenRegistrarProvider).unregisterOnLogout();
     } catch (_) {}
     try {
       if (ref.read(tokenStorageProvider).hasToken) {

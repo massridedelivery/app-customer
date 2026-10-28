@@ -1,3 +1,5 @@
+import 'package:customer_app/features/call/domain/call_models.dart';
+import 'package:customer_app/features/call/presentation/order_call_button.dart';
 import 'package:customer_app/features/profile/presentation/controllers/loyalty_providers.dart';
 import 'package:customer_app/features/profile/presentation/widgets/loyalty_format.dart';
 import 'package:customer_app/core/utils/app_dates.dart';
@@ -27,7 +29,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 enum RideUIState { finding, confirming, pickupArrived, onTrip }
 
@@ -906,23 +907,6 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
     );
   }
 
-  /// Opens the phone dialer with the driver's number (free, uses the mobile
-  /// network). No masked/VoIP layer yet — the rider sees the real number.
-  Future<void> _callDriver(String? phone) async {
-    final number = (phone ?? '').trim();
-    if (number.isEmpty) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context)!.liveNoDriverPhone),
-          ),
-        );
-      }
-      return;
-    }
-    await launchUrl(Uri(scheme: 'tel', path: number));
-  }
-
   /// Four-step progress under the R1 header: กำลังมา → ถึงจุดรับ →
   /// กำลังเดินทาง → ถึงแล้ว, each with its own icon (Remix Icon fill set). Done and current steps are
   /// green with a white icon, later ones grey outlines; the lines between done
@@ -1154,7 +1138,11 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
             ],
           ),
           const SizedBox(height: 12),
-          Row(
+          OrderCallButton(
+            kind: CallKind.ride,
+            jobId: liveState.jobId ?? widget.jobId ?? '',
+            status: liveState.jobStatus,
+            builder: (context, onCall) => Row(
             children: [
               Expanded(
                 child: Material(
@@ -1195,28 +1183,31 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
                   ),
                 ),
               ),
-              const SizedBox(width: 10),
-              Material(
-                color: Colors.white,
-                shape: const CircleBorder(
-                  side: BorderSide(color: AppColors.foundationGrayscale200),
-                ),
-                child: InkWell(
-                  key: const Key('liveCallButton'),
-                  customBorder: const CircleBorder(),
-                  onTap: () =>
-                      _callDriver(liveState.driverProfile?.driverInfo.phone),
-                  child: const SizedBox.square(
-                    dimension: 48,
-                    child: Icon(
-                      Icons.phone_outlined,
-                      size: 22,
-                      color: AppColors.semanticGrayNeutralFgHigh,
+              // In-app call (WebRTC): nobody sees a phone number.
+              if (onCall != null) ...[
+                const SizedBox(width: 10),
+                Material(
+                  color: Colors.white,
+                  shape: const CircleBorder(
+                    side: BorderSide(color: AppColors.foundationGrayscale200),
+                  ),
+                  child: InkWell(
+                    key: const Key('liveCallButton'),
+                    customBorder: const CircleBorder(),
+                    onTap: onCall,
+                    child: const SizedBox.square(
+                      dimension: 48,
+                      child: Icon(
+                        Icons.phone_outlined,
+                        size: 22,
+                        color: AppColors.semanticGrayNeutralFgHigh,
+                      ),
                     ),
                   ),
                 ),
-              ),
+              ],
             ],
+          ),
           ),
         ],
       ),

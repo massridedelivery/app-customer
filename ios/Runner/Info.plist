@@ -69,8 +69,6 @@
 						<string>flutter</string>
 						<key>UISceneDelegateClassName</key>
 						<string>$(PRODUCT_MODULE_NAME).SceneDelegate</string>
-						<key>UISceneStoryboardFile</key>
-						<string>Main</string>
 					</dict>
 				</array>
 			</dict>
@@ -79,14 +77,21 @@
 		<true/>
 		<key>UILaunchStoryboardName</key>
 		<string>LaunchScreen</string>
-		<key>UIMainStoryboardFile</key>
-		<string>Main</string>
 		<key>UISupportedInterfaceOrientations</key>
 		<array>
 			<string>UIInterfaceOrientationPortrait</string>
 		</array>
 		<key>NSPhotoLibraryUsageDescription</key>
 		<string>ใช้เพื่อเลือกรูปโปรไฟล์ และส่งรูปในแชทกับไรเดอร์</string>
+		<key>NSMicrophoneUsageDescription</key>
+		<string>ใช้ไมโครโฟนเพื่อโทรคุยกับไรเดอร์ในแอป</string>
+		<!-- In-app calls: CallKit rings for a driver's call (PushKit VoIP) and
+		     the call's audio keeps going with the app in the background. -->
+		<key>UIBackgroundModes</key>
+		<array>
+			<string>audio</string>
+			<string>voip</string>
+		</array>
 		<key>NSCameraUsageDescription</key>
 		<string>ใช้เพื่อถ่ายรูปโปรไฟล์ และถ่ายรูปส่งในแชทกับไรเดอร์</string>
 		<key>UIStatusBarHidden</key>

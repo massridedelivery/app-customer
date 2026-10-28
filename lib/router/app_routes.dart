@@ -71,6 +71,7 @@ import 'package:customer_app/features/auth/presentation/screens/account_blocked_
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:customer_app/features/call/presentation/call_screen.dart';
 import 'package:customer_app/features/live_ride/domain/models/driver_profile_model.dart';
 
 class RouterNotifier extends ChangeNotifier {
@@ -225,12 +226,15 @@ final routerProvider = Provider<GoRouter>((ref) {
           // Customer can hold a ride + messenger orders at once (SCRUM-45);
           // don't hijack the messenger surfaces back to the live ride.
           final isMessengerPath = currentPath.startsWith('/messenger');
+          // A call with the driver sits on top of the ride, never under it.
+          final isCallPath = currentPath == '/call';
 
           if (!isLivePath &&
               !isRatingPath &&
               !isChatPath &&
               !isFoodOrderPath &&
-              !isMessengerPath) {
+              !isMessengerPath &&
+              !isCallPath) {
             return '/live/$activeJobId';
           }
         }
@@ -502,6 +506,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           return LiveRideScreen(jobId: jobId);
         },
       ),
+      GoRoute(path: '/call', builder: (context, state) => const CallScreen()),
       GoRoute(
         path: '/chat/:id',
         // Chat pushes link /chat/{job|order|messenger}:{id}: send each to its

@@ -27,6 +27,10 @@ abstract class ChatMessage with _$ChatMessage {
 
   bool get isImage => msgType == 'image';
 
+  /// A line from the server, not either party (e.g. "📞 โทร 1:24 นาที"
+  /// after a call).
+  bool get isSystem => msgType == 'system';
+
   static Map<String, dynamic> _preprocessJson(Map<String, dynamic> json) {
     final Map<String, dynamic> mappedJson = Map<String, dynamic>.from(json);
 

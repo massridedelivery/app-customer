@@ -15,6 +15,7 @@ import 'package:customer_app/features/messenger/presentation/controllers/messeng
 import 'package:customer_app/features/trips/domain/models/history_order.dart';
 import 'package:customer_app/features/trips/presentation/controllers/trips_controller.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -96,9 +97,12 @@ class _TripsScreenState extends ConsumerState<TripsScreen> {
     // History needs an account — a guest sees the login gate in place of the
     // list (App Store 5.1.1) before any token-backed fetch runs.
     if (!ref.watch(authControllerProvider).isAuthenticated) {
-      return const Scaffold(
-        backgroundColor: AppColors.semanticGrayNeutralBgWhite,
-        body: SafeArea(child: LoginRequiredView()),
+      return const AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle.dark,
+        child: Scaffold(
+          backgroundColor: AppColors.semanticGrayNeutralBgWhite,
+          body: SafeArea(child: LoginRequiredView()),
+        ),
       );
     }
     return Scaffold(

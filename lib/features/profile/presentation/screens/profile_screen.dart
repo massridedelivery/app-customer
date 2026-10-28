@@ -20,6 +20,7 @@ import 'package:customer_app/features/profile/presentation/controllers/profile_c
 import 'package:customer_app/features/profile/presentation/controllers/loyalty_providers.dart';
 import 'package:customer_app/features/profile/presentation/widgets/loyalty_format.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -63,9 +64,12 @@ class ProfileScreen extends ConsumerWidget {
     // Guests can open this tab but it needs an account — show the login gate
     // in place of the profile content (App Store 5.1.1) before any token fetch.
     if (!ref.watch(authControllerProvider).isAuthenticated) {
-      return const Scaffold(
-        backgroundColor: AppColors.semanticGrayNeutralBgWhite,
-        body: SafeArea(child: LoginRequiredView()),
+      return const AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle.dark,
+        child: Scaffold(
+          backgroundColor: AppColors.semanticGrayNeutralBgWhite,
+          body: SafeArea(child: LoginRequiredView()),
+        ),
       );
     }
 
@@ -75,213 +79,245 @@ class ProfileScreen extends ConsumerWidget {
     final supportPhone =
         ref.watch(supportPhoneProvider).asData?.value ?? kSupportPhoneFallback;
 
-    return Scaffold(
-      backgroundColor: AppColors.semanticGrayNeutralBgWhite,
-      body: CustomScrollView(
-        physics: const BouncingScrollPhysics(),
-        slivers: [
-          // ── Header / Hero ──────────────────────────────────────────────
-          SliverToBoxAdapter(
-            child: profileAsync.when(
-              loading: () => const _ProfileHeaderShimmer(),
-              error: (e, s) =>
-                  _ProfileHeader(name: '', phone: '', loyalty: null),
-              data: (p) => _ProfileHeader(
-                name: p.editName,
-                phone: p.phone,
-                avatarUrl: p.editAvatarUrl,
-                loyalty: null,
-              ),
-            ),
-          ),
-
-          // ── Points card (moved here from the home header) ───────────────
-          const SliverToBoxAdapter(child: _PointsCard()),
-
-          // ── Quick Actions Grid ──────────────────────────────────────────
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-              child: _QuickActionsGrid(l10n: l10n),
-            ),
-          ),
-
-          // ── Settings & Support ──────────────────────────────────────────
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _SectionHeader(title: l10n.accountSettings),
-                  const SizedBox(height: 8),
-                  _MenuCard(
-                    items: [
-                      _MenuTile(
-                        icon: Icons.person_outline_rounded,
-                        title: l10n.personalInfo,
-                        onTap: () => context.push('/edit-profile'),
-                      ),
-                      if (ref.watch(accountPhoneProvider).asData?.value
-                          case final phone?)
-                        _MenuTile(
-                          key: const Key('profilePhoneRow'),
-                          icon: Icons.phone_iphone_rounded,
-                          title: l10n.profilePhone,
-                          trailing: _PhoneRowTrailing(phone: phone),
-                          onTap: () async {
-                            await context.push('/account-phone');
-                            ref.invalidate(accountPhoneProvider);
-                          },
-                        ),
-                      // Hidden while email login is off (503) or unknown.
-                      if (ref.watch(accountEmailProvider).asData?.value
-                          case final email?)
-                        _MenuTile(
-                          key: const Key('profileEmailRow'),
-                          icon: Icons.mail_outline_rounded,
-                          title: l10n.profileEmail,
-                          trailing: _EmailRowTrailing(email: email),
-                          onTap: () async {
-                            await context.push('/account-email');
-                            ref.invalidate(accountEmailProvider);
-                          },
-                        ),
-                      _MenuTile(
-                        icon: Icons.language_rounded,
-                        title: l10n.changeLanguage,
-                        trailing: Text(
-                          ref.watch(localeControllerProvider).languageCode ==
-                                  'th'
-                              ? 'ไทย'
-                              : 'EN',
-                          style: AppTypography.body3.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                        onTap: () => _showLangSelector(context, ref, l10n),
-                      ),
-                      _MenuTile(
-                        key: const Key('profileMarketingOptIn'),
-                        icon: Icons.campaign_outlined,
-                        title: l10n.marketingOptIn,
-                        subtitle: l10n.marketingOptInSub,
-                        trailing: Switch.adaptive(
-                          value: ref.watch(marketingOptInProvider),
-                          activeTrackColor: AppColors.primary,
-                          onChanged: (v) => _setMarketingOptIn(context, ref, v),
-                        ),
-                        onTap: () => _setMarketingOptIn(
-                          context,
-                          ref,
-                          !ref.read(marketingOptInProvider),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  _SectionHeader(title: l10n.safetyPrivacy),
-                  const SizedBox(height: 8),
-                  _MenuCard(
-                    items: [
-                      _MenuTile(
-                        icon: Icons.sos_rounded,
-                        title: l10n.sosEmergency,
-                        iconColor: AppColors.error,
-                        onTap: () => context.push('/sos'),
-                      ),
-                      _MenuTile(
-                        icon: Icons.privacy_tip_outlined,
-                        title: l10n.privacyPdpa,
-                        onTap: () => context.push('/privacy'),
-                      ),
-                      _MenuTile(
-                        icon: Icons.shield_outlined,
-                        title: l10n.profilePrivacyPolicy,
-                        onTap: () => _openPrivacyPolicy(),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  _SectionHeader(title: l10n.profileHelp),
-                  const SizedBox(height: 8),
-                  _MenuCard(
-                    items: [
-                      _MenuTile(
-                        key: const Key('profileHomeTourRow'),
-                        icon: Icons.tips_and_updates_outlined,
-                        title: l10n.profileHomeTour,
-                        onTap: () =>
-                            ref.read(homeTourReplayProvider.notifier).request(),
-                      ),
-                      _MenuTile(
-                        icon: Icons.headset_mic_outlined,
-                        title: l10n.profileContactSupport,
-                        trailing: Text(
-                          supportPhone,
-                          style: AppTypography.body3.copyWith(
-                            color: AppColors.primary,
-                          ),
-                        ),
-                        onTap: () => _callSupport(supportPhone),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  _SectionHeader(title: l10n.profileManageAccount),
-                  const SizedBox(height: 8),
-                  _MenuCard(
-                    items: [
-                      _MenuTile(
-                        icon: Icons.delete_forever_rounded,
-                        title: l10n.profileDeleteAccount,
-                        iconColor: AppColors.error,
-                        onTap: () => _confirmDeleteAccount(context, ref),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 32),
-                  SizedBox(
-                    width: double.infinity,
-                    child: TextButton(
-                      onPressed: () =>
-                          ref.read(authControllerProvider.notifier).logout(),
-                      style: TextButton.styleFrom(
-                        foregroundColor: AppColors.error,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                      ),
-                      child: Text(
-                        l10n.logout,
-                        style: AppTypography.label2.copyWith(
-                          color: AppColors.error,
-                        ),
-                      ),
+    // A white page under the home tab's red header: dark status bar icons,
+    // and a white strip behind them so the list doesn't scroll into the clock.
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.dark,
+      child: Scaffold(
+        backgroundColor: AppColors.semanticGrayNeutralBgWhite,
+        body: Stack(
+          children: [
+            CustomScrollView(
+              physics: const BouncingScrollPhysics(),
+              slivers: [
+                // ── Header / Hero ──────────────────────────────────────────────
+                SliverToBoxAdapter(
+                  child: profileAsync.when(
+                    loading: () => const _ProfileHeaderShimmer(),
+                    error: (e, s) =>
+                        _ProfileHeader(name: '', phone: '', loyalty: null),
+                    data: (p) => _ProfileHeader(
+                      name: p.editName,
+                      phone: p.phone,
+                      avatarUrl: p.editAvatarUrl,
+                      loyalty: null,
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  // App version (moved here from the login screen).
-                  Center(
-                    child: Text(
-                      ref.watch(appVersionProvider).maybeWhen(
-                            data: (v) => l10n.profileVersion(v),
-                            orElse: () => '',
+                ),
+
+                // ── Points card (moved here from the home header) ───────────────
+                const SliverToBoxAdapter(child: _PointsCard()),
+
+                // ── Quick Actions Grid ──────────────────────────────────────────
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 8,
+                    ),
+                    child: _QuickActionsGrid(l10n: l10n),
+                  ),
+                ),
+
+                // ── Settings & Support ──────────────────────────────────────────
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _SectionHeader(title: l10n.accountSettings),
+                        const SizedBox(height: 8),
+                        _MenuCard(
+                          items: [
+                            _MenuTile(
+                              icon: Icons.person_outline_rounded,
+                              title: l10n.personalInfo,
+                              onTap: () => context.push('/edit-profile'),
+                            ),
+                            if (ref.watch(accountPhoneProvider).asData?.value
+                                case final phone?)
+                              _MenuTile(
+                                key: const Key('profilePhoneRow'),
+                                icon: Icons.phone_iphone_rounded,
+                                title: l10n.profilePhone,
+                                trailing: _PhoneRowTrailing(phone: phone),
+                                onTap: () async {
+                                  await context.push('/account-phone');
+                                  ref.invalidate(accountPhoneProvider);
+                                },
+                              ),
+                            // Hidden while email login is off (503) or unknown.
+                            if (ref.watch(accountEmailProvider).asData?.value
+                                case final email?)
+                              _MenuTile(
+                                key: const Key('profileEmailRow'),
+                                icon: Icons.mail_outline_rounded,
+                                title: l10n.profileEmail,
+                                trailing: _EmailRowTrailing(email: email),
+                                onTap: () async {
+                                  await context.push('/account-email');
+                                  ref.invalidate(accountEmailProvider);
+                                },
+                              ),
+                            _MenuTile(
+                              icon: Icons.language_rounded,
+                              title: l10n.changeLanguage,
+                              trailing: Text(
+                                ref
+                                            .watch(localeControllerProvider)
+                                            .languageCode ==
+                                        'th'
+                                    ? 'ไทย'
+                                    : 'EN',
+                                style: AppTypography.body3.copyWith(
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                              onTap: () =>
+                                  _showLangSelector(context, ref, l10n),
+                            ),
+                            _MenuTile(
+                              key: const Key('profileMarketingOptIn'),
+                              icon: Icons.campaign_outlined,
+                              title: l10n.marketingOptIn,
+                              subtitle: l10n.marketingOptInSub,
+                              trailing: Switch.adaptive(
+                                value: ref.watch(marketingOptInProvider),
+                                activeTrackColor: AppColors.primary,
+                                onChanged: (v) =>
+                                    _setMarketingOptIn(context, ref, v),
+                              ),
+                              onTap: () => _setMarketingOptIn(
+                                context,
+                                ref,
+                                !ref.read(marketingOptInProvider),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 24),
+                        _SectionHeader(title: l10n.safetyPrivacy),
+                        const SizedBox(height: 8),
+                        _MenuCard(
+                          items: [
+                            _MenuTile(
+                              icon: Icons.sos_rounded,
+                              title: l10n.sosEmergency,
+                              iconColor: AppColors.error,
+                              onTap: () => context.push('/sos'),
+                            ),
+                            _MenuTile(
+                              icon: Icons.privacy_tip_outlined,
+                              title: l10n.privacyPdpa,
+                              onTap: () => context.push('/privacy'),
+                            ),
+                            _MenuTile(
+                              icon: Icons.shield_outlined,
+                              title: l10n.profilePrivacyPolicy,
+                              onTap: () => _openPrivacyPolicy(),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 24),
+                        _SectionHeader(title: l10n.profileHelp),
+                        const SizedBox(height: 8),
+                        _MenuCard(
+                          items: [
+                            _MenuTile(
+                              key: const Key('profileHomeTourRow'),
+                              icon: Icons.tips_and_updates_outlined,
+                              title: l10n.profileHomeTour,
+                              onTap: () => ref
+                                  .read(homeTourReplayProvider.notifier)
+                                  .request(),
+                            ),
+                            _MenuTile(
+                              icon: Icons.headset_mic_outlined,
+                              title: l10n.profileContactSupport,
+                              trailing: Text(
+                                supportPhone,
+                                style: AppTypography.body3.copyWith(
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                              onTap: () => _callSupport(supportPhone),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 24),
+                        _SectionHeader(title: l10n.profileManageAccount),
+                        const SizedBox(height: 8),
+                        _MenuCard(
+                          items: [
+                            _MenuTile(
+                              icon: Icons.delete_forever_rounded,
+                              title: l10n.profileDeleteAccount,
+                              iconColor: AppColors.error,
+                              onTap: () => _confirmDeleteAccount(context, ref),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 32),
+                        SizedBox(
+                          width: double.infinity,
+                          child: TextButton(
+                            onPressed: () => ref
+                                .read(authControllerProvider.notifier)
+                                .logout(),
+                            style: TextButton.styleFrom(
+                              foregroundColor: AppColors.error,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                            ),
+                            child: Text(
+                              l10n.logout,
+                              style: AppTypography.label2.copyWith(
+                                color: AppColors.error,
+                              ),
+                            ),
                           ),
-                      style: AppTypography.body3.copyWith(
-                        color: AppColors.textSecondary.withValues(alpha: 0.6),
-                      ),
+                        ),
+                        const SizedBox(height: 12),
+                        // App version (moved here from the login screen).
+                        Center(
+                          child: Text(
+                            ref
+                                .watch(appVersionProvider)
+                                .maybeWhen(
+                                  data: (v) => l10n.profileVersion(v),
+                                  orElse: () => '',
+                                ),
+                            style: AppTypography.body3.copyWith(
+                              color: AppColors.textSecondary.withValues(
+                                alpha: 0.6,
+                              ),
+                            ),
+                          ),
+                        ),
+                        // Clear the floating bottom nav so the logout button is fully
+                        // tappable above it (was a too-short fixed 80).
+                        SizedBox(
+                          height:
+                              kFloatingNavReserve +
+                              MediaQuery.of(context).viewPadding.bottom,
+                        ),
+                      ],
                     ),
                   ),
-                  // Clear the floating bottom nav so the logout button is fully
-                  // tappable above it (was a too-short fixed 80).
-                  SizedBox(
-                    height: kFloatingNavReserve +
-                        MediaQuery.of(context).viewPadding.bottom,
-                  ),
-                ],
+                ),
+              ],
+            ),
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              height: MediaQuery.paddingOf(context).top,
+              child: const ColoredBox(
+                color: AppColors.semanticGrayNeutralBgWhite,
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

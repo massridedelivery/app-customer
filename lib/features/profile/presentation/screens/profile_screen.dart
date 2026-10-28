@@ -394,7 +394,7 @@ class ProfileScreen extends ConsumerWidget {
               Navigator.pop(ctx);
             },
           ),
-          const SizedBox(height: 32),
+          SizedBox(height: 16 + MediaQuery.paddingOf(ctx).bottom),
         ],
       ),
     );

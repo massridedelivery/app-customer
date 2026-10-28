@@ -133,7 +133,7 @@ class _PromoListScreenState extends ConsumerState<PromoListScreen> {
                   onRefresh: () => ref.refresh(promoListProvider.future),
                   child: ListView.builder(
                     physics: const AlwaysScrollableScrollPhysics(),
-                    padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+                    padding: EdgeInsets.fromLTRB(20, 8, 20, 20 + MediaQuery.paddingOf(context).bottom),
                     itemCount: visible.length,
                     itemBuilder: (context, index) {
                       final promo = visible[index];

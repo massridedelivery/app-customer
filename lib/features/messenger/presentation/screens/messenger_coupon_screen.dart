@@ -107,7 +107,7 @@ class _MessengerCouponScreenState extends ConsumerState<MessengerCouponScreen> {
                 // shared ticket CouponCard with an apply/cancel toggle, and a
                 // selected highlight for the currently-applied code.
                 return ListView.builder(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                  padding: EdgeInsets.fromLTRB(16, 0, 16, 16 + MediaQuery.paddingOf(context).bottom),
                   itemCount: promos.length + 2,
                   itemBuilder: (context, index) {
                     if (index == 0) {

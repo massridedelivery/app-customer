@@ -160,7 +160,7 @@ class _Body extends ConsumerWidget {
       },
       child: ListView.builder(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+        padding: EdgeInsets.fromLTRB(20, 8, 20, 32 + MediaQuery.paddingOf(context).bottom),
         itemCount: header.length + entries.length + (hasMore ? 1 : 0),
         itemBuilder: (context, i) {
           if (i < header.length) return header[i];

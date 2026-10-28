@@ -74,7 +74,7 @@ class FoodReceiptScreen extends ConsumerWidget {
 
   Widget _buildReceiptBody(BuildContext context, FoodOrderModel order) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + MediaQuery.paddingOf(context).bottom),
       child: Column(
         children: [
           // Success banner

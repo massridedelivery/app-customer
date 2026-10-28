@@ -126,7 +126,7 @@ class CheckoutDeliveryAddress extends ConsumerWidget {
       ),
       builder: (context) => Padding(
         padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
+          bottom: MediaQuery.of(context).viewInsets.bottom + MediaQuery.paddingOf(context).bottom,
           left: 16,
           right: 16,
           top: 20,

@@ -270,7 +270,7 @@ class _CouponList extends StatelessWidget {
       color: AppColors.primary,
       child: ListView(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 36),
+        padding: EdgeInsets.fromLTRB(16, 0, 16, 36 + MediaQuery.paddingOf(context).bottom),
         children: [
           ...leading,
           Padding(

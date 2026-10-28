@@ -407,7 +407,7 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
                   decoration: _sheetDecoration,
                   child: ListView(
                     controller: scrollController,
-                    padding: const EdgeInsets.only(bottom: 30),
+                    padding: EdgeInsets.only(bottom: 30 + MediaQuery.paddingOf(context).bottom),
                     children: [
                       _buildGrabHandle(),
                       Padding(

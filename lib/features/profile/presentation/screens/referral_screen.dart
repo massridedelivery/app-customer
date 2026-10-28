@@ -109,7 +109,7 @@ class _ReferralBody extends StatelessWidget {
         info.shareMessage ?? l10n.referralShareText(code, friendValue);
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.fromLTRB(20, 20, 20, 20 + MediaQuery.paddingOf(context).bottom),
       children: [
         if (info.referredByCode != null) ...[
           Text(

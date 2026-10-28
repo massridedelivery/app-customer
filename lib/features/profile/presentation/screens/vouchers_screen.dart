@@ -112,7 +112,7 @@ class _VoucherList extends ConsumerWidget {
               )
             : ListView.separated(
                 physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+                padding: EdgeInsets.fromLTRB(16, 16, 16, 32 + MediaQuery.paddingOf(context).bottom),
                 itemCount: items.length,
                 separatorBuilder: (_, _) => const SizedBox(height: 12),
                 itemBuilder: (context, i) => VoucherCard(voucher: items[i]),
@@ -262,7 +262,7 @@ class RedeemSuccessScreen extends ConsumerWidget {
         surfaceTintColor: Colors.transparent,
       ),
       body: ListView(
-        padding: const EdgeInsets.all(24),
+        padding: EdgeInsets.fromLTRB(24, 24, 24, 24 + MediaQuery.paddingOf(context).bottom),
         children: [
           const Icon(
             Icons.check_circle_rounded,

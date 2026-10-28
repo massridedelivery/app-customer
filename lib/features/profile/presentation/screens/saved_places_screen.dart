@@ -49,7 +49,8 @@ class _SavedPlacesScreenState extends ConsumerState<SavedPlacesScreen> {
                 data: (places) => places.isEmpty
                     ? const _EmptyPlaces()
                     : ListView.separated(
-                        padding: const EdgeInsets.all(20),
+                        // Room for the add button floating over the end.
+                        padding: EdgeInsets.fromLTRB(20, 20, 20, 96 + MediaQuery.paddingOf(context).bottom),
                         itemCount: places.length,
                         separatorBuilder: (c, i) => const SizedBox(height: 12),
                         itemBuilder: (c, i) {

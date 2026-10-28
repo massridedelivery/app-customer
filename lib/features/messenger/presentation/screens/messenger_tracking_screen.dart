@@ -220,7 +220,7 @@ class _MessengerTrackingScreenState
                       decoration: _sheetDecoration,
                       child: ListView(
                         controller: scrollController,
-                        padding: const EdgeInsets.only(bottom: 24),
+                        padding: EdgeInsets.only(bottom: 24 + MediaQuery.paddingOf(context).bottom),
                         children: [
                           _grabHandle(),
                           Padding(

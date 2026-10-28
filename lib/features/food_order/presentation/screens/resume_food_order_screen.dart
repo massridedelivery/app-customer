@@ -144,7 +144,7 @@ class _ResumeFoodOrderScreenState extends ConsumerState<ResumeFoodOrderScreen> {
                     ref.read(activeOrdersControllerProvider.notifier).refresh(),
                 color: AppColors.primary,
                 child: ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + MediaQuery.paddingOf(context).bottom),
                   itemCount: orders.length,
                   itemBuilder: (context, index) {
                     final order = orders[index];

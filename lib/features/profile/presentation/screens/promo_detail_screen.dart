@@ -106,7 +106,7 @@ class PromoDetailScreen extends ConsumerWidget {
             SliverToBoxAdapter(child: _buildFloatingHeader(context, promo)),
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+                padding: EdgeInsets.fromLTRB(20, 20, 20, 20 + MediaQuery.paddingOf(context).bottom),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

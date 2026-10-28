@@ -8,6 +8,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:customer_app/app.dart';
 import 'package:customer_app/core/managers/providers.dart';
+import 'package:customer_app/features/call/data/call_background.dart';
+import 'package:customer_app/features/call/data/voip_token_registrar.dart';
+import 'package:customer_app/features/call/presentation/call_controller.dart';
 
 bool get _isMobilePlatform =>
     !kIsWeb &&
@@ -15,9 +18,11 @@ bool get _isMobilePlatform =>
         defaultTargetPlatform == TargetPlatform.iOS);
 
 /// FCM background isolate entrypoint. Notification-type messages are
-/// displayed by the OS; data-only messages need no processing yet.
+/// displayed by the OS; the data-only ones handled here are a driver's call
+/// (Android: the full-screen incoming call) and the end of a ride.
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  if (await handleCallPushInBackground(message.data)) return;
   // A ride that ends while the app is backgrounded must not leave its pinned
   // "ride in progress" notification behind.
   final type = message.data['type'];
@@ -45,10 +50,15 @@ void main() async {
 
   final prefs = await SharedPreferences.getInstance();
 
-  runApp(
-    ProviderScope(
-      overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
-      child: const App(),
-    ),
+  final container = ProviderContainer(
+    overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
   );
+  // Calls are wired before any widget: an iPhone woken by a driver's call
+  // runs this with no screen, and the call is answered on the lock screen.
+  if (_isMobilePlatform) {
+    container.read(callControllerProvider.notifier).start();
+    container.read(voipTokenRegistrarProvider).start();
+  }
+
+  runApp(UncontrolledProviderScope(container: container, child: const App()));
 }

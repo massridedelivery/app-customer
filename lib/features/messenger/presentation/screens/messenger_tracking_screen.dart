@@ -1,3 +1,5 @@
+import 'package:customer_app/features/call/domain/call_models.dart';
+import 'package:customer_app/features/call/presentation/order_call_button.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:customer_app/core/utils/app_dates.dart';
 import 'package:customer_app/core/constants/app_assets.dart';
@@ -479,30 +481,73 @@ class _MessengerTrackingScreenState
           const SizedBox(height: 12),
           _buildFareCard(order),
           // Chat opens once a driver accepts — before that there is no
-          // counterparty (SCRUM-41 chat notes).
-          if (order.hasDriver && !order.isTerminal) ...[
-            const SizedBox(height: 16),
-            ElevatedButton.icon(
-              onPressed: () => context.push('/messenger/chat/${order.id}'),
-              icon: const Icon(
-                Icons.chat_bubble_outline_rounded,
-                size: 18,
-                color: Colors.white,
-              ),
-              label: Text(
-                _l10n.msgrChatWithDriver,
-                style: AppTypography.heading6.copyWith(color: Colors.white),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                elevation: 0,
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+          // counterparty (SCRUM-41 chat notes). The in-app call also runs
+          // until 24h after delivery.
+          OrderCallButton(
+            kind: CallKind.messenger,
+            jobId: order.id,
+            status: order.status,
+            doneAt: DateTime.tryParse(order.deliveredAt),
+            builder: (context, onCall) {
+              final chat = order.hasDriver && !order.isTerminal;
+              if (!chat && onCall == null) return const SizedBox.shrink();
+              return Padding(
+                padding: const EdgeInsets.only(top: 16),
+                child: Row(
+                  children: [
+                    if (chat)
+                      Expanded(
+                        flex: 2,
+                        child: ElevatedButton.icon(
+                          onPressed: () =>
+                              context.push('/messenger/chat/${order.id}'),
+                          icon: const Icon(
+                            Icons.chat_bubble_outline_rounded,
+                            size: 18,
+                            color: Colors.white,
+                          ),
+                          label: Text(
+                            _l10n.msgrChatWithDriver,
+                            style: AppTypography.heading6.copyWith(
+                              color: Colors.white,
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            elevation: 0,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ),
+                    if (chat && onCall != null) const SizedBox(width: 12),
+                    if (onCall != null)
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          key: const Key('messengerCallButton'),
+                          onPressed: onCall,
+                          icon: const Icon(Icons.call_outlined, size: 18),
+                          label: Text(
+                            _l10n.callButton,
+                            style: AppTypography.heading6,
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AppColors.primary,
+                            side: const BorderSide(color: AppColors.primary),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
-              ),
-            ),
-          ],
+              );
+            },
+          ),
           // Delivered → the payment summary, then the review (mirrors the ride
           // flow: live_ride → payment_summary → rating). Once reviewed, show a
           // read-only state instead so the customer can't review again

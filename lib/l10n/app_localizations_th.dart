@@ -3436,4 +3436,90 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get rideToPay => 'ยอดชำระ';
+
+  @override
+  String get callButton => 'โทร';
+
+  @override
+  String get callStatusCalling => 'กำลังโทรหา…';
+
+  @override
+  String get callStatusIncoming => 'สายเรียกเข้า';
+
+  @override
+  String get callStatusConnecting => 'กำลังเชื่อมต่อ…';
+
+  @override
+  String get callAccept => 'รับสาย';
+
+  @override
+  String get callDecline => 'ปฏิเสธ';
+
+  @override
+  String get callHangUp => 'วางสาย';
+
+  @override
+  String get callMute => 'ปิดเสียง';
+
+  @override
+  String get callSpeaker => 'ลำโพง';
+
+  @override
+  String get callEndedHangup => 'วางสายแล้ว';
+
+  @override
+  String get callEndedMissed => 'ไม่มีผู้รับสาย';
+
+  @override
+  String get callEndedDeclined => 'ปลายสายไม่รับสาย';
+
+  @override
+  String get callEndedCancelled => 'ยกเลิกการโทรแล้ว';
+
+  @override
+  String get callEndedFailed => 'โทรไม่สำเร็จ';
+
+  @override
+  String get callEndedLost => 'สายหลุด';
+
+  @override
+  String get callPeerDriver => 'คนขับ';
+
+  @override
+  String get callPeerRider => 'ไรเดอร์';
+
+  @override
+  String get callErrorBusy => 'ไรเดอร์ไม่ว่าง ลองใหม่อีกครั้ง';
+
+  @override
+  String get callErrorNotAllowed => 'ออเดอร์นี้โทรหาไรเดอร์ไม่ได้แล้ว';
+
+  @override
+  String get callErrorBlocked => 'ไม่สามารถโทรได้';
+
+  @override
+  String get callErrorDisabled => 'ตอนนี้ยังโทรในแอปไม่ได้';
+
+  @override
+  String get callErrorNotFound => 'ไม่พบออเดอร์นี้';
+
+  @override
+  String get callErrorFailed => 'โทรไม่สำเร็จ ลองใหม่อีกครั้ง';
+
+  @override
+  String get callErrorMicrophone =>
+      'ต้องอนุญาตให้ใช้ไมโครโฟนก่อน จึงจะโทรคุยกับไรเดอร์ในแอปได้';
+
+  @override
+  String get callFullScreenTitle => 'ไม่พลาดสายจากไรเดอร์';
+
+  @override
+  String get callFullScreenBody =>
+      'อนุญาตให้ Mass Move แสดงสายเรียกเข้าเต็มหน้าจอ เพื่อให้รับสายจากไรเดอร์ได้แม้ล็อกหน้าจออยู่';
+
+  @override
+  String get callFullScreenAllow => 'อนุญาต';
+
+  @override
+  String get callFullScreenLater => 'ไว้ทีหลัง';
 }

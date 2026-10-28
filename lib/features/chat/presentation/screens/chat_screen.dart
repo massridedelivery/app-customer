@@ -1,9 +1,12 @@
+import 'package:customer_app/features/call/domain/call_models.dart';
+import 'package:customer_app/features/call/presentation/order_call_button.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/features/chat/domain/models/chat_message.dart';
 import 'package:customer_app/features/chat/presentation/controllers/chat_controller.dart';
 import 'package:customer_app/features/chat/presentation/widgets/chat_image_widgets.dart';
+import 'package:customer_app/features/chat/presentation/widgets/chat_system_note.dart';
 import 'package:customer_app/features/live_ride/presentation/controllers/live_ride_controller.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -119,6 +122,17 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     return Scaffold(
       backgroundColor: AppColors.white,
       appBar: AppBar(
+        actions: [
+          ChatHeaderCallButton(
+            kind: CallKind.ride,
+            jobId: widget.jobId,
+            status: ref.watch(
+              liveRideControllerProvider.select(
+                (s) => s.jobId == widget.jobId ? s.jobStatus : null,
+              ),
+            ),
+          ),
+        ],
         backgroundColor: AppColors.aberGreen,
         elevation: 0,
         leading: IconButton(
@@ -221,6 +235,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   final isMe =
                       message.senderId == 'me' ||
                       message.senderRole == 'customer';
+                  if (message.isSystem) {
+                    return ChatSystemNote(text: message.text);
+                  }
                   if (message.isImage) {
                     return ChatRoomImageBubble(
                       room: (id: widget.jobId, kind: ChatKind.ride),

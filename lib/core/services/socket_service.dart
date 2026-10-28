@@ -47,6 +47,8 @@ class SocketService {
   bool _isConnected = false;
   bool _isConnecting = false;
 
+  bool get isConnected => _isConnected;
+
   /// Set while the app is backgrounded — see [suspend]. Blocks both new
   /// connects and reconnect scheduling until [ensureConnected] clears it.
   bool _isSuspended = false;
@@ -247,6 +249,18 @@ class SocketService {
     } else {
       debugPrint('SocketService: Cannot send message, not connected.');
     }
+  }
+
+  /// Sends [frame] as it is, for frames that don't use the `{type, data}`
+  /// envelope (a call's `call_signal` puts its fields at the top level).
+  /// Returns whether it went out.
+  bool sendFrame(Map<String, dynamic> frame) {
+    if (!_isConnected || _channel == null) {
+      debugPrint('SocketService: Cannot send frame, not connected.');
+      return false;
+    }
+    _channel!.sink.add(jsonEncode(frame));
+    return true;
   }
 
   /// Whether nothing has arrived from the server for longer than [_staleAfter].

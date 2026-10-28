@@ -6354,6 +6354,174 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'To pay'**
   String get rideToPay;
+
+  /// No description provided for @callButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Call'**
+  String get callButton;
+
+  /// No description provided for @callStatusCalling.
+  ///
+  /// In en, this message translates to:
+  /// **'Calling…'**
+  String get callStatusCalling;
+
+  /// No description provided for @callStatusIncoming.
+  ///
+  /// In en, this message translates to:
+  /// **'Incoming call'**
+  String get callStatusIncoming;
+
+  /// No description provided for @callStatusConnecting.
+  ///
+  /// In en, this message translates to:
+  /// **'Connecting…'**
+  String get callStatusConnecting;
+
+  /// No description provided for @callAccept.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept'**
+  String get callAccept;
+
+  /// No description provided for @callDecline.
+  ///
+  /// In en, this message translates to:
+  /// **'Decline'**
+  String get callDecline;
+
+  /// No description provided for @callHangUp.
+  ///
+  /// In en, this message translates to:
+  /// **'End'**
+  String get callHangUp;
+
+  /// No description provided for @callMute.
+  ///
+  /// In en, this message translates to:
+  /// **'Mute'**
+  String get callMute;
+
+  /// No description provided for @callSpeaker.
+  ///
+  /// In en, this message translates to:
+  /// **'Speaker'**
+  String get callSpeaker;
+
+  /// No description provided for @callEndedHangup.
+  ///
+  /// In en, this message translates to:
+  /// **'Call ended'**
+  String get callEndedHangup;
+
+  /// No description provided for @callEndedMissed.
+  ///
+  /// In en, this message translates to:
+  /// **'No answer'**
+  String get callEndedMissed;
+
+  /// No description provided for @callEndedDeclined.
+  ///
+  /// In en, this message translates to:
+  /// **'Call declined'**
+  String get callEndedDeclined;
+
+  /// No description provided for @callEndedCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Call cancelled'**
+  String get callEndedCancelled;
+
+  /// No description provided for @callEndedFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Call failed'**
+  String get callEndedFailed;
+
+  /// No description provided for @callEndedLost.
+  ///
+  /// In en, this message translates to:
+  /// **'Call dropped'**
+  String get callEndedLost;
+
+  /// No description provided for @callPeerDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver'**
+  String get callPeerDriver;
+
+  /// No description provided for @callPeerRider.
+  ///
+  /// In en, this message translates to:
+  /// **'Rider'**
+  String get callPeerRider;
+
+  /// No description provided for @callErrorBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'The rider is busy. Please try again.'**
+  String get callErrorBusy;
+
+  /// No description provided for @callErrorNotAllowed.
+  ///
+  /// In en, this message translates to:
+  /// **'This order can no longer be called.'**
+  String get callErrorNotAllowed;
+
+  /// No description provided for @callErrorBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'You can\'t call this rider.'**
+  String get callErrorBlocked;
+
+  /// No description provided for @callErrorDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'In-app calling isn\'t available right now.'**
+  String get callErrorDisabled;
+
+  /// No description provided for @callErrorNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Order not found.'**
+  String get callErrorNotFound;
+
+  /// No description provided for @callErrorFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t place the call. Please try again.'**
+  String get callErrorFailed;
+
+  /// No description provided for @callErrorMicrophone.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow the microphone to call the rider in the app.'**
+  String get callErrorMicrophone;
+
+  /// No description provided for @callFullScreenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t miss rider calls'**
+  String get callFullScreenTitle;
+
+  /// No description provided for @callFullScreenBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow Mass Move to show incoming calls full screen so you can answer the rider even when your phone is locked.'**
+  String get callFullScreenBody;
+
+  /// No description provided for @callFullScreenAllow.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow'**
+  String get callFullScreenAllow;
+
+  /// No description provided for @callFullScreenLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Later'**
+  String get callFullScreenLater;
 }
 
 class _AppLocalizationsDelegate

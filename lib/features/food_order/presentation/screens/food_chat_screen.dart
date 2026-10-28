@@ -3,6 +3,7 @@ import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/features/food_order/presentation/controllers/live_food_tracking_controller.dart';
 import 'package:customer_app/features/chat/presentation/controllers/chat_controller.dart';
+import 'package:customer_app/features/chat/presentation/widgets/chat_image_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -211,6 +212,14 @@ class _FoodChatScreenState extends ConsumerState<FoodChatScreen> {
                   final isMe =
                       message.senderId == 'me' ||
                       message.senderRole == 'customer';
+                  if (message.isImage) {
+                    return ChatRoomImageBubble(
+                      room: (id: widget.orderId, kind: ChatKind.food),
+                      message: message,
+                      isMe: isMe,
+                      myColor: AppColors.foundationGreen500,
+                    );
+                  }
                   return _buildBubble(message.text, isMe: isMe);
                 },
               ),
@@ -236,6 +245,14 @@ class _FoodChatScreenState extends ConsumerState<FoodChatScreen> {
             ),
             child: Row(
               children: [
+                ChatAttachButton(
+                  color: AppColors.foundationGreen500,
+                  onSend: (bytes, caption) {
+                    ref
+                        .read(chatControllerProvider((id: widget.orderId, kind: ChatKind.food)).notifier)
+                        .sendImage(bytes, caption: caption);
+                  },
+                ),
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(

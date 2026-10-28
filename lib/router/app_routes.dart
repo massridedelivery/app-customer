@@ -25,6 +25,7 @@ import 'package:customer_app/features/home/presentation/screens/transport/messen
 import 'package:customer_app/features/home/presentation/screens/transport/pickup_selection_screen.dart';
 import 'package:customer_app/features/home/presentation/screens/transport/place_search_screen.dart';
 import 'package:customer_app/features/home/presentation/screens/transport/ride_landing_screen.dart';
+import 'package:customer_app/features/chat/domain/chat_room_ids.dart';
 import 'package:customer_app/features/chat/presentation/screens/chat_screen.dart';
 import 'package:customer_app/features/live_ride/presentation/screens/live_ride_screen.dart';
 import 'package:customer_app/features/live_ride/presentation/screens/payment_summary_screen.dart';
@@ -503,6 +504,13 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/chat/:id',
+        // Chat pushes link /chat/{job|order|messenger}:{id}: send each to its
+        // vertical's chat screen with the bare id.
+        redirect: (context, state) {
+          final room = state.pathParameters['id']!;
+          final target = chatRouteForRoom(room);
+          return target == state.uri.path ? null : target;
+        },
         builder: (context, state) {
           final jobId = state.pathParameters['id']!;
           return ChatScreen(jobId: jobId);

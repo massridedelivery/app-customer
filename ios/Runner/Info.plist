@@ -86,9 +86,9 @@
 			<string>UIInterfaceOrientationPortrait</string>
 		</array>
 		<key>NSPhotoLibraryUsageDescription</key>
-		<string>ใช้เพื่อเลือกรูปโปรไฟล์ของคุณ</string>
+		<string>ใช้เพื่อเลือกรูปโปรไฟล์ และส่งรูปในแชทกับไรเดอร์</string>
 		<key>NSCameraUsageDescription</key>
-		<string>ใช้เพื่อถ่ายรูปโปรไฟล์ของคุณ</string>
+		<string>ใช้เพื่อถ่ายรูปโปรไฟล์ และถ่ายรูปส่งในแชทกับไรเดอร์</string>
 		<key>UIStatusBarHidden</key>
 		<false/>
 	</dict>

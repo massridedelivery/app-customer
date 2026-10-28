@@ -308,6 +308,8 @@ class MessengerRepositoryImpl implements IMessengerRepository {
         },
       );
     } on DioException catch (e) {
+      // A photo's failure is told by status (403 blocked, 400 bad file).
+      if (msgType == 'image') rethrow;
       _throwFrom(e, 'Failed to send message');
     } catch (e) {
       throw Exception(e.toString());

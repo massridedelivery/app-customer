@@ -1518,6 +1518,47 @@ class AppLocalizationsTh extends AppLocalizations {
   String get liveChatSendFailed => 'ส่งข้อความไม่สำเร็จ กรุณาลองใหม่';
 
   @override
+  String get chatAttachImage => 'แนบรูป';
+
+  @override
+  String get chatTakePhoto => 'ถ่ายรูป';
+
+  @override
+  String get chatChooseFromGallery => 'เลือกจากคลังภาพ';
+
+  @override
+  String get chatImageCaptionHint => 'เพิ่มคำบรรยาย (ไม่บังคับ)';
+
+  @override
+  String get chatSendImage => 'ส่งรูป';
+
+  @override
+  String get chatImageRetry => 'ส่งใหม่';
+
+  @override
+  String get chatImageDiscard => 'ลบ';
+
+  @override
+  String get chatImageFailed => 'ส่งรูปไม่สำเร็จ แตะเพื่อส่งใหม่';
+
+  @override
+  String get chatImageBlocked => 'คุณถูกบล็อก จึงส่งรูปในแชทนี้ไม่ได้';
+
+  @override
+  String get chatImageInvalid =>
+      'ไฟล์ไม่ถูกต้อง ใหญ่เกินไป หรืออัปโหลดไม่สำเร็จ กรุณาอัปโหลดใหม่';
+
+  @override
+  String get chatImageLoadFailed => 'โหลดรูปไม่สำเร็จ\nแตะเพื่อลองใหม่';
+
+  @override
+  String get chatPhotoPermissionDenied =>
+      'แอปยังไม่ได้รับสิทธิ์ใช้กล้องหรือคลังภาพ';
+
+  @override
+  String get chatOpenSettings => 'ตั้งค่า';
+
+  @override
   String get liveChatLoadFailed => 'โหลดข้อความไม่สำเร็จ';
 
   @override

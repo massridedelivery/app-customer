@@ -1,5 +1,6 @@
 import 'package:customer_app/core/managers/providers.dart';
 import 'package:customer_app/core/services/ride_ongoing_notification.dart';
+import 'package:customer_app/features/chat/domain/chat_room_ids.dart';
 import 'package:customer_app/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:customer_app/features/inbox/presentation/inbox_controller.dart';
 import 'package:customer_app/router/app_routes.dart';
@@ -209,6 +210,12 @@ class PushNotificationService {
   /// sends `type=job_cancelled`, `route=/`, SCRUM-111). A bare "/" means home,
   /// which is "/main" in this app's router.
   String? _targetPath(Map<String, dynamic> data) {
+    // A chat push (e.g. "ไรเดอร์ส่งรูปภาพ") names its room as
+    // job:/order:/messenger:{id}; open that order's chat.
+    final room = data['room_id'];
+    if (data['type'] == 'chat_message' && room is String && room.isNotEmpty) {
+      return chatRouteForRoom(room);
+    }
     final raw = (data['deeplink'] ?? data['route']) as String?;
     if (raw == null || raw.isEmpty) return null;
     return raw == '/' ? '/main' : raw;

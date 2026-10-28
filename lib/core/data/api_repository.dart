@@ -225,20 +225,20 @@ class ApiRepository {
     return res.data as Map<String, dynamic>;
   }
 
-  /// GET /api/customer/orders/{id}/chat
+  /// GET /api/food/customer/orders/{id}/chat
   Future<List<dynamic>> getOrderChat(
     String id, {
     int limit = 50,
     String? before,
   }) async {
     final res = await _dio.get(
-      '/api/customer/orders/$id/chat',
+      '/api/food/customer/orders/$id/chat',
       queryParameters: {'limit': limit, 'before': ?before},
     );
     return res.data as List<dynamic>;
   }
 
-  /// POST /api/customer/orders/{id}/chat
+  /// POST /api/food/customer/orders/{id}/chat
   Future<Map<String, dynamic>> sendOrderChatMessage(
     String id, {
     required String text,
@@ -246,7 +246,7 @@ class ApiRepository {
     String? fileKey,
   }) async {
     final res = await _dio.post(
-      '/api/customer/orders/$id/chat',
+      '/api/food/customer/orders/$id/chat',
       data: {'text': text, 'msg_type': msgType, 'file_key': ?fileKey},
     );
     return res.data as Map<String, dynamic>;

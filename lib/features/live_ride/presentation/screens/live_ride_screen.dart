@@ -68,13 +68,32 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
   @override
   void initState() {
     super.initState();
-    if (widget.jobId != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        ref.read(liveRideControllerProvider.notifier).initializeWithJob({
-          'id': widget.jobId,
-        });
-      });
+    final jobId = widget.jobId;
+    if (jobId != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _openJob(jobId));
     }
+  }
+
+  /// Shows [jobId] only while it is under way. An old notification (or the
+  /// pinned ride notification left behind) can open a ride long over: that
+  /// goes to its trip details, or home when it isn't the customer's.
+  Future<void> _openJob(String jobId) async {
+    final opening = await ref
+        .read(liveRideControllerProvider.notifier)
+        .openJob(jobId);
+    if (!mounted) return;
+    if (opening == LiveJobOpening.live || opening == LiveJobOpening.ending) {
+      return;
+    }
+    final activeJobId = ref.read(authControllerProvider).activeJobId;
+    if (activeJobId == null || activeJobId == jobId) {
+      ref.read(authControllerProvider.notifier).clearActiveJob();
+      // It may be what opened this: the pinned notification of that ride.
+      unawaited(ref.read(rideOngoingNotificationProvider).clear());
+    }
+    context.go(
+      opening == LiveJobOpening.ended ? '/trip/$jobId?type=RIDE' : '/main',
+    );
   }
 
   @override

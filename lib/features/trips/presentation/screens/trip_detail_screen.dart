@@ -239,7 +239,9 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
               Icons.arrow_back,
               color: AppColors.semanticGrayNeutralFgHigh,
             ),
-            onPressed: () => context.pop(),
+            // Opened straight from a notification there is nothing under it.
+            onPressed: () =>
+                context.canPop() ? context.pop() : context.go('/main'),
           ),
         ),
       ),

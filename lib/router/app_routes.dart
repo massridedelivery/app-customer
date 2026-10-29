@@ -478,6 +478,23 @@ final routerProvider = Provider<GoRouter>((ref) {
           return MessengerTrackingScreen(orderId: orderId);
         },
       ),
+      // Paths the backend's pushes use (notification/service.go Link*) that
+      // this app names differently.
+      GoRoute(
+        path: '/messenger-order/tracking/:id',
+        redirect: (context, state) =>
+            '/messenger/tracking/${state.pathParameters['id']}',
+      ),
+      GoRoute(
+        path: '/ride/receipt/:id',
+        redirect: (context, state) =>
+            '/trip/${state.pathParameters['id']}?type=RIDE',
+      ),
+      // A food or messenger order's: the push doesn't say which.
+      GoRoute(
+        path: '/order/receipt/:id',
+        redirect: (context, state) => '/main?tab=1&status=completed',
+      ),
       GoRoute(
         path: '/messenger/chat/:id',
         builder: (context, state) {

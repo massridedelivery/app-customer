@@ -1090,20 +1090,45 @@ class _PhoneRowTrailing extends StatelessWidget {
   }
 }
 
-/// Copies this device's FCM token, so support can send it a test push from
-/// the Firebase console.
+/// Shows what this device holds for push (the APNs token iOS issued, the FCM
+/// token) and copies the FCM token, so support can send it a test push from
+/// the Firebase console and tell an app fault from a server one.
 Future<void> _copyPushToken(BuildContext context, WidgetRef ref) async {
   final l10n = AppLocalizations.of(context)!;
-  final messenger = ScaffoldMessenger.of(context);
-  final token = await ref.read(pushNotificationServiceProvider).currentToken();
-  if (token != null) await Clipboard.setData(ClipboardData(text: token));
-  messenger.showSnackBar(
-    SnackBar(
-      content: Text(
-        token != null
-            ? l10n.profilePushTokenCopied
-            : l10n.profilePushTokenMissing,
+  final d = await ref.read(pushNotificationServiceProvider).diagnose();
+  if (!context.mounted) return;
+  String show(String? t) => t == null
+      ? l10n.profilePushDiagNone
+      : '${t.substring(0, t.length < 12 ? t.length : 12)}… (${t.length})';
+  await showDialog<void>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: Text(l10n.profilePushDiagTitle),
+      content: SelectableText(
+        [
+          if (Theme.of(ctx).platform == TargetPlatform.iOS)
+            'APNs: ${show(d.apns)}',
+          'FCM: ${show(d.fcm)}',
+          if (d.error != null) d.error!,
+        ].join('\n'),
       ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(ctx).pop(),
+          child: Text(MaterialLocalizations.of(ctx).closeButtonLabel),
+        ),
+        if (d.fcm != null)
+          TextButton(
+            onPressed: () {
+              Clipboard.setData(ClipboardData(text: d.fcm!));
+              Navigator.of(ctx).pop();
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(l10n.profilePushTokenCopied)),
+              );
+            },
+            child: Text(l10n.profilePushDiagCopy),
+          ),
+      ],
     ),
   );
 }

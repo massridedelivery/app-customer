@@ -3117,6 +3117,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get inboxLoadFailed => 'Couldn\'t load messages. Tap to retry.';
 
   @override
+  String get inboxPushOffTitle => 'Notifications are off';
+
+  @override
+  String get inboxPushOffBody =>
+      'Turn them on to know right away when your driver arrives or messages you.';
+
+  @override
+  String get inboxPushOffAction => 'Open Settings';
+
+  @override
   String get errServiceAreaUnavailable =>
       'Service isn\'t available in this area yet';
 

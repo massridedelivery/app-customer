@@ -93,7 +93,14 @@ class ApiRepository {
   }) async {
     await _dio.post(
       '/api/notifications/register-device',
-      data: {'token': token, 'device_type': platform},
+      // `platform` is the documented name; `device_type` is kept for
+      // backends that still read it.
+      data: {
+        'token': token,
+        'platform': platform,
+        'device_type': platform,
+        'app': 'customer',
+      },
     );
   }
 

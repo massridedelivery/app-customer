@@ -7,12 +7,50 @@ import 'package:customer_app/features/inbox/presentation/inbox_controller.dart';
 import 'package:customer_app/router/app_routes.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart' show AppLifecycleListener;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final pushNotificationServiceProvider = Provider<PushNotificationService>(
   (ref) => PushNotificationService(ref),
 );
+
+/// The customer turned notifications off for the app (iOS, Android 13+). The
+/// token is still registered; the inbox shows how to turn them back on.
+final pushPermissionDeniedProvider =
+    NotifierProvider<PushPermissionDenied, bool>(PushPermissionDenied.new);
+
+class PushPermissionDenied extends Notifier<bool> {
+  @override
+  bool build() => false;
+
+  void set(bool denied) => state = denied;
+}
+
+/// Removes a chat's delivered notifications (the FCM ones and ours) — called
+/// when that chat opens. A chat push is keyed on its `room_id`: the iOS
+/// `thread-id` and the Android notification tag (id 0).
+final chatNotificationsProvider = Provider<ChatNotifications>(
+  (ref) => ChatNotifications(),
+);
+
+class ChatNotifications {
+  static const _ios = MethodChannel('massmove/notifications');
+
+  Future<void> clear(String roomId) async {
+    if (kIsWeb || roomId.isEmpty) return;
+    try {
+      if (defaultTargetPlatform == TargetPlatform.iOS) {
+        await _ios.invokeMethod<void>('removeDelivered', roomId);
+      } else if (defaultTargetPlatform == TargetPlatform.android) {
+        await FlutterLocalNotificationsPlugin().cancel(id: 0, tag: roomId);
+      }
+    } catch (e) {
+      debugPrint('Push: clearing chat notifications failed (ignored): $e');
+    }
+  }
+}
 
 /// Receives FCM messages and routes notification taps through the same
 /// deeplink paths the router already supports (see docs/deeplinks.md).
@@ -50,17 +88,33 @@ class PushNotificationService {
           defaultTargetPlatform == TargetPlatform.iOS);
 
   bool _initialized = false;
+  AppLifecycleListener? _lifecycle;
+
+  Future<void> _refreshPermission() async {
+    if (!_ref.read(authControllerProvider).isAuthenticated) return;
+    try {
+      final settings = await _messaging.getNotificationSettings();
+      _ref
+          .read(pushPermissionDeniedProvider.notifier)
+          .set(settings.authorizationStatus == AuthorizationStatus.denied);
+    } catch (_) {}
+  }
 
   Future<void> init() async {
     if (!_isSupportedPlatform || _initialized) return;
     _initialized = true;
 
-    // iOS shows foreground notifications natively with these options;
-    // Android needs the local-notifications plugin (below).
+    // Back from Settings, where notifications may have been turned on.
+    _lifecycle = AppLifecycleListener(onResume: _refreshPermission);
+    _ref.onDispose(() => _lifecycle?.dispose());
+
+    // While the app is open both platforms show pushes through the
+    // local-notifications plugin (below), so a chat already on screen can be
+    // left out; iOS's own foreground presentation would show every one.
     await _messaging.setForegroundNotificationPresentationOptions(
-      alert: true,
-      badge: true,
-      sound: true,
+      alert: false,
+      badge: false,
+      sound: false,
     );
 
     await _localNotifications.initialize(
@@ -113,7 +167,7 @@ class PushNotificationService {
   Future<void> unregisterOnLogout() async {
     if (!_isSupportedPlatform) return;
     try {
-      final token = await _messaging.getToken();
+      final token = await _fcmToken();
       if (token != null) {
         await _ref.read(apiRepositoryProvider).unregisterDeviceToken(token);
       }
@@ -128,21 +182,56 @@ class PushNotificationService {
     }
   }
 
+  /// Runs after every login and at start when signed in. The backend drops
+  /// all of a user's devices on each login, so this must follow it.
   Future<void> _requestPermissionAndRegister() async {
     try {
-      final settings = await _messaging.requestPermission();
-      if (settings.authorizationStatus == AuthorizationStatus.denied) {
-        return;
-      }
-      final token = await _messaging.getToken();
+      final settings = await _messaging.requestPermission(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+      // Denied: the token is still valid (and the choice can change in
+      // Settings), so register it anyway.
+      _ref
+          .read(pushPermissionDeniedProvider.notifier)
+          .set(settings.authorizationStatus == AuthorizationStatus.denied);
+    } catch (e) {
+      debugPrint('Push: permission request failed (ignored): $e');
+    }
+    try {
+      final token = await _fcmToken();
       if (token != null) {
         // Handy for sending test messages from the Firebase console.
         debugPrint('Push: FCM token: $token');
         await _registerToken(token);
+      } else {
+        debugPrint('Push: no FCM token, device not registered');
       }
     } catch (e) {
-      debugPrint('Push: permission/registration failed (ignored): $e');
+      debugPrint('Push: registration failed (ignored): $e');
     }
+  }
+
+  /// The FCM registration token — never the APNs one. On iOS FCM can only
+  /// mint it once APNs has handed the app its device token, which arrives a
+  /// moment after launch; asked earlier, getToken() throws "APNS token has not
+  /// been set yet" and the device never registers.
+  Future<String?> _fcmToken() async {
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      String? apns;
+      for (var i = 0; i < 10 && apns == null; i++) {
+        apns = await _messaging.getAPNSToken();
+        if (apns == null) {
+          await Future<void>.delayed(const Duration(seconds: 1));
+        }
+      }
+      if (apns == null) {
+        debugPrint('Push: APNs token never arrived (no aps-environment?)');
+        return null;
+      }
+    }
+    return _messaging.getToken();
   }
 
   Future<void> _registerToken(String token) async {
@@ -175,7 +264,9 @@ class PushNotificationService {
 
     final deeplink = _targetPath(message.data);
     // Skip the banner when the user is already on the target screen — the
-    // WebSocket-driven UI is the source of truth there.
+    // WebSocket-driven UI is the source of truth there. Every chat message is
+    // pushed, even with the socket up, so this is what keeps the open chat
+    // quiet.
     if (deeplink != null) {
       try {
         if (_ref.read(routerProvider).state.uri.toString() == deeplink) {
@@ -186,11 +277,13 @@ class PushNotificationService {
       }
     }
 
-    // iOS presents foreground notifications itself (options set in init()).
-    if (defaultTargetPlatform != TargetPlatform.android) return;
-
+    // A chat's notifications share its room id (as the backend's do), so
+    // opening the chat clears them all — see [ChatNotifications].
+    final room = message.data['type'] == 'chat_message'
+        ? message.data['room_id'] as String?
+        : null;
     _localNotifications.show(
-      id: notification.hashCode,
+      id: room != null ? 0 : notification.hashCode,
       title: notification.title,
       body: notification.body,
       notificationDetails: NotificationDetails(
@@ -200,6 +293,15 @@ class PushNotificationService {
           channelDescription: _channel.description,
           importance: Importance.high,
           priority: Priority.high,
+          tag: room,
+        ),
+        iOS: DarwinNotificationDetails(
+          presentAlert: true,
+          presentBanner: true,
+          presentList: true,
+          presentSound: true,
+          presentBadge: true,
+          threadIdentifier: room,
         ),
       ),
       payload: deeplink,

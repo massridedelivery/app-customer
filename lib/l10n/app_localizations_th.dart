@@ -1883,6 +1883,12 @@ class AppLocalizationsTh extends AppLocalizations {
   }
 
   @override
+  String get profilePushTokenCopied => 'คัดลอก push token แล้ว';
+
+  @override
+  String get profilePushTokenMissing => 'ยังไม่มี push token บนเครื่องนี้';
+
+  @override
   String get profileDeleteAccountConfirm =>
       'การลบบัญชีจะลบข้อมูลทั้งหมดของคุณอย่างถาวรและไม่สามารถย้อนกลับได้ ต้องการลบบัญชีใช่หรือไม่?';
 

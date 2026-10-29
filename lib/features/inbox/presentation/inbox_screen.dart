@@ -1,4 +1,6 @@
+import 'package:app_settings/app_settings.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
+import 'package:customer_app/core/services/push_notification_service.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/constants/layout.dart';
 import 'package:customer_app/core/utils/app_dates.dart';
@@ -103,6 +105,7 @@ class _InboxScreenState extends ConsumerState<InboxScreen> {
                   ],
                 ),
               ),
+              if (ref.watch(pushPermissionDeniedProvider)) const _PushOffHint(),
               Expanded(
                 child: inbox.when(
                   loading: () => const Center(child: MassLoadingM(size: 72)),
@@ -372,6 +375,62 @@ class _Message extends StatelessWidget {
             ],
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Notifications are turned off for the app: what they'd bring, and the way
+/// back on.
+class _PushOffHint extends StatelessWidget {
+  const _PushOffHint();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Container(
+      key: const Key('inboxPushOffHint'),
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+      padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.notifications_off_outlined,
+            color: AppColors.primary,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.inboxPushOffTitle,
+                  style: AppTypography.label2.copyWith(
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  l10n.inboxPushOffBody,
+                  style: AppTypography.body3.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          TextButton(
+            // The app's own Settings page (its Notifications row is there);
+            // the notification-settings link landed on the Settings root.
+            onPressed: () => AppSettings.openAppSettings(),
+            style: TextButton.styleFrom(foregroundColor: AppColors.primary),
+            child: Text(l10n.inboxPushOffAction, style: AppTypography.label2),
+          ),
+        ],
       ),
     );
   }

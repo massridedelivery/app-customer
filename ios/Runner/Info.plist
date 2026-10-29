@@ -85,11 +85,13 @@
 		<string>ใช้เพื่อเลือกรูปโปรไฟล์ และส่งรูปในแชทกับไรเดอร์</string>
 		<key>NSMicrophoneUsageDescription</key>
 		<string>ใช้ไมโครโฟนเพื่อโทรคุยกับไรเดอร์ในแอป</string>
-		<!-- In-app calls: CallKit rings for a driver's call (PushKit VoIP) and
+		<!-- remote-notification: FCM pushes reach a backgrounded app.
+		     In-app calls: CallKit rings for a driver's call (PushKit VoIP) and
 		     the call's audio keeps going with the app in the background. -->
 		<key>UIBackgroundModes</key>
 		<array>
 			<string>audio</string>
+			<string>remote-notification</string>
 			<string>voip</string>
 		</array>
 		<key>NSCameraUsageDescription</key>

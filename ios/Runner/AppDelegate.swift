@@ -4,6 +4,7 @@ import Flutter
 import GoogleMaps
 import PushKit
 import UIKit
+import UserNotifications
 import WebRTC
 import flutter_callkit_incoming
 
@@ -23,9 +24,16 @@ import flutter_callkit_incoming
     let mapsKey = Bundle.main.object(forInfoDictionaryKey: "GOOGLE_MAPS_API_KEY") as? String ?? ""
     GMSServices.provideAPIKey(mapsKey)
 
+    // Before the plugins register: firebase_messaging takes over as the
+    // notification center's delegate and hands what isn't an FCM push (the
+    // app's own foreground notifications) to this one, which passes it to
+    // flutter_local_notifications.
+    UNUserNotificationCenter.current().delegate = self as? UNUserNotificationCenterDelegate
+
     flutterEngine.run()
     GeneratedPluginRegistrant.register(with: flutterEngine)
     registerProximityChannel()
+    registerNotificationsChannel()
 
     // CallKit owns the audio session during a call: WebRTC's audio starts
     // when CallKit activates the session (didActivateAudioSession).
@@ -122,6 +130,30 @@ import flutter_callkit_incoming
   func didDeactivateAudioSession(_ audioSession: AVAudioSession) {
     RTCAudioSession.sharedInstance().audioSessionDidDeactivate(audioSession)
     RTCAudioSession.sharedInstance().isAudioEnabled = false
+  }
+
+  // MARK: - Notifications
+
+  /// Opening a chat clears its delivered notifications: the backend's (FCM,
+  /// `thread-id` = room id) and the app's own (same thread).
+  private func registerNotificationsChannel() {
+    let channel = FlutterMethodChannel(
+      name: "massmove/notifications", binaryMessenger: flutterEngine.binaryMessenger)
+    channel.setMethodCallHandler { call, result in
+      guard call.method == "removeDelivered", let room = call.arguments as? String else {
+        result(FlutterMethodNotImplemented)
+        return
+      }
+      let center = UNUserNotificationCenter.current()
+      center.getDeliveredNotifications { delivered in
+        let ids = delivered.filter {
+          $0.request.content.threadIdentifier == room
+            || ($0.request.content.userInfo["room_id"] as? String) == room
+        }.map { $0.request.identifier }
+        center.removeDeliveredNotifications(withIdentifiers: ids)
+        DispatchQueue.main.async { result(nil) }
+      }
+    }
   }
 
   // MARK: - Proximity

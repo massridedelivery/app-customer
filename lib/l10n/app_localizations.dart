@@ -5749,6 +5749,24 @@ abstract class AppLocalizations {
   /// **'Couldn\'t load messages. Tap to retry.'**
   String get inboxLoadFailed;
 
+  /// No description provided for @inboxPushOffTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications are off'**
+  String get inboxPushOffTitle;
+
+  /// No description provided for @inboxPushOffBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn them on to know right away when your driver arrives or messages you.'**
+  String get inboxPushOffBody;
+
+  /// No description provided for @inboxPushOffAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Settings'**
+  String get inboxPushOffAction;
+
   /// No description provided for @errServiceAreaUnavailable.
   ///
   /// In en, this message translates to:

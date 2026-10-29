@@ -3076,6 +3076,16 @@ class AppLocalizationsTh extends AppLocalizations {
   String get inboxLoadFailed => 'โหลดข้อความไม่สำเร็จ แตะเพื่อลองใหม่';
 
   @override
+  String get inboxPushOffTitle => 'การแจ้งเตือนปิดอยู่';
+
+  @override
+  String get inboxPushOffBody =>
+      'เปิดการแจ้งเตือนเพื่อรู้ทันทีเมื่อคนขับมาถึงหรือส่งข้อความหาคุณ';
+
+  @override
+  String get inboxPushOffAction => 'เปิดในการตั้งค่า';
+
+  @override
   String get errServiceAreaUnavailable => 'ยังไม่เปิดให้บริการในพื้นที่นี้';
 
   @override

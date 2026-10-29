@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:customer_app/core/managers/providers.dart';
+import 'package:customer_app/core/services/push_notification_service.dart';
 import 'package:customer_app/core/services/socket_service.dart';
 import 'package:customer_app/features/chat/data/chat_image_processor.dart';
 import 'package:customer_app/features/chat/data/chat_media_repository.dart';
@@ -31,8 +32,19 @@ class ChatController extends _$ChatController {
   ChatState build(ChatRoom room) {
     _initSocket();
     Future.microtask(fetchChatHistory);
+    // The chat is open: its notifications have been read.
+    Future.microtask(
+      () => ref.read(chatNotificationsProvider).clear(_backendRoomId(room)),
+    );
     return const ChatState();
   }
+
+  /// The backend's id for [room]: `job:` / `order:` / `messenger:` + id.
+  static String _backendRoomId(ChatRoom room) => switch (room.kind) {
+    ChatKind.ride => 'job:${room.id}',
+    ChatKind.food => 'order:${room.id}',
+    ChatKind.messenger => 'messenger:${room.id}',
+  };
 
   void _initSocket() {
     final socket = ref.read(socketServiceProvider);

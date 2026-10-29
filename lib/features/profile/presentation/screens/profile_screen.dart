@@ -7,6 +7,7 @@ import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/constants/layout.dart';
 import 'package:customer_app/core/providers/app_version_provider.dart';
+import 'package:customer_app/core/services/push_notification_service.dart';
 import 'package:customer_app/core/widgets/coming_soon_dialog.dart';
 import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/core/localization/locale_controller.dart';
@@ -279,17 +280,22 @@ class ProfileScreen extends ConsumerWidget {
                         ),
                         const SizedBox(height: 12),
                         // App version (moved here from the login screen).
-                        Center(
-                          child: Text(
-                            ref
-                                .watch(appVersionProvider)
-                                .maybeWhen(
-                                  data: (v) => l10n.profileVersion(v),
-                                  orElse: () => '',
+                        // Long-press copies the push token, for a test send
+                        // from the Firebase console.
+                        GestureDetector(
+                          onLongPress: () => _copyPushToken(context, ref),
+                          child: Center(
+                            child: Text(
+                              ref
+                                  .watch(appVersionProvider)
+                                  .maybeWhen(
+                                    data: (v) => l10n.profileVersion(v),
+                                    orElse: () => '',
+                                  ),
+                              style: AppTypography.body3.copyWith(
+                                color: AppColors.textSecondary.withValues(
+                                  alpha: 0.6,
                                 ),
-                            style: AppTypography.body3.copyWith(
-                              color: AppColors.textSecondary.withValues(
-                                alpha: 0.6,
                               ),
                             ),
                           ),
@@ -1082,4 +1088,22 @@ class _PhoneRowTrailing extends StatelessWidget {
       ],
     );
   }
+}
+
+/// Copies this device's FCM token, so support can send it a test push from
+/// the Firebase console.
+Future<void> _copyPushToken(BuildContext context, WidgetRef ref) async {
+  final l10n = AppLocalizations.of(context)!;
+  final messenger = ScaffoldMessenger.of(context);
+  final token = await ref.read(pushNotificationServiceProvider).currentToken();
+  if (token != null) await Clipboard.setData(ClipboardData(text: token));
+  messenger.showSnackBar(
+    SnackBar(
+      content: Text(
+        token != null
+            ? l10n.profilePushTokenCopied
+            : l10n.profilePushTokenMissing,
+      ),
+    ),
+  );
 }

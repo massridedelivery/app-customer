@@ -3571,6 +3571,18 @@ abstract class AppLocalizations {
   /// **'Version {version}'**
   String profileVersion(String version);
 
+  /// No description provided for @profilePushTokenCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Push token copied'**
+  String get profilePushTokenCopied;
+
+  /// No description provided for @profilePushTokenMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'This device has no push token yet'**
+  String get profilePushTokenMissing;
+
   /// No description provided for @profileDeleteAccountConfirm.
   ///
   /// In en, this message translates to:

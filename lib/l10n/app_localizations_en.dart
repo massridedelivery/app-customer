@@ -1904,6 +1904,12 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get profilePushTokenCopied => 'Push token copied';
+
+  @override
+  String get profilePushTokenMissing => 'This device has no push token yet';
+
+  @override
   String get profileDeleteAccountConfirm =>
       'Deleting your account permanently removes all your data and can\'t be undone. Delete your account?';
 

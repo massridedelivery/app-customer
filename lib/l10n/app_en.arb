@@ -659,6 +659,8 @@
   "profileManageAccount": "Manage account",
   "profileDeleteAccount": "Delete account",
   "profileVersion": "Version {version}",
+  "profilePushTokenCopied": "Push token copied",
+  "profilePushTokenMissing": "This device has no push token yet",
   "@profileVersion": {"placeholders": {"version": {"type": "String"}}},
   "profileDeleteAccountConfirm": "Deleting your account permanently removes all your data and can't be undone. Delete your account?",
   "profileAccountDeleted": "Your account has been deleted",

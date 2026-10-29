@@ -213,6 +213,17 @@ class PushNotificationService {
     }
   }
 
+  /// This device's FCM token, for a test send from the Firebase console
+  /// (long-press the version on the account tab).
+  Future<String?> currentToken() async {
+    if (!_isSupportedPlatform) return null;
+    try {
+      return await _fcmToken();
+    } catch (_) {
+      return null;
+    }
+  }
+
   /// The FCM registration token — never the APNs one. On iOS FCM can only
   /// mint it once APNs has handed the app its device token, which arrives a
   /// moment after launch; asked earlier, getToken() throws "APNS token has not

@@ -615,6 +615,7 @@
   "profilePushDiagTitle": "สถานะการแจ้งเตือน",
   "profilePushDiagNone": "ไม่มี",
   "profilePushDiagCopy": "คัดลอก FCM token",
+  "profilePushDiagCopyApns": "คัดลอก APNs token",
   "profileDeleteAccountConfirm": "การลบบัญชีจะลบข้อมูลทั้งหมดของคุณอย่างถาวรและไม่สามารถย้อนกลับได้ ต้องการลบบัญชีใช่หรือไม่?",
   "profileAccountDeleted": "ลบบัญชีเรียบร้อยแล้ว",
   "profileDeleteAccountFailed": "ลบบัญชีไม่สำเร็จ กรุณาลองใหม่",

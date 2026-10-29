@@ -3595,6 +3595,12 @@ abstract class AppLocalizations {
   /// **'Copy FCM token'**
   String get profilePushDiagCopy;
 
+  /// No description provided for @profilePushDiagCopyApns.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy APNs token'**
+  String get profilePushDiagCopyApns;
+
   /// No description provided for @profileDeleteAccountConfirm.
   ///
   /// In en, this message translates to:

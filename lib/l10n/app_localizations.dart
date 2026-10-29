@@ -3577,11 +3577,23 @@ abstract class AppLocalizations {
   /// **'Push token copied'**
   String get profilePushTokenCopied;
 
-  /// No description provided for @profilePushTokenMissing.
+  /// No description provided for @profilePushDiagTitle.
   ///
   /// In en, this message translates to:
-  /// **'This device has no push token yet'**
-  String get profilePushTokenMissing;
+  /// **'Notification status'**
+  String get profilePushDiagTitle;
+
+  /// No description provided for @profilePushDiagNone.
+  ///
+  /// In en, this message translates to:
+  /// **'none'**
+  String get profilePushDiagNone;
+
+  /// No description provided for @profilePushDiagCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy FCM token'**
+  String get profilePushDiagCopy;
 
   /// No description provided for @profileDeleteAccountConfirm.
   ///

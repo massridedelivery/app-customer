@@ -213,14 +213,20 @@ class PushNotificationService {
     }
   }
 
-  /// This device's FCM token, for a test send from the Firebase console
-  /// (long-press the version on the account tab).
-  Future<String?> currentToken() async {
-    if (!_isSupportedPlatform) return null;
+  /// What this device holds, for support (long-press the version on the
+  /// account tab): the APNs token iOS gave the app (64 hex characters, iOS
+  /// only — null means no APNs token at all, so every push to the FCM token
+  /// fails) and the FCM token to paste into the Firebase console's test send.
+  Future<({String? apns, String? fcm, String? error})> diagnose() async {
+    if (!_isSupportedPlatform) return (apns: null, fcm: null, error: null);
+    String? apns;
     try {
-      return await _fcmToken();
-    } catch (_) {
-      return null;
+      if (defaultTargetPlatform == TargetPlatform.iOS) {
+        apns = await _messaging.getAPNSToken();
+      }
+      return (apns: apns, fcm: await _fcmToken(), error: null);
+    } catch (e) {
+      return (apns: apns, fcm: null, error: e.toString());
     }
   }
 
@@ -241,6 +247,7 @@ class PushNotificationService {
         debugPrint('Push: APNs token never arrived (no aps-environment?)');
         return null;
       }
+      debugPrint('Push: APNs token: ${apns.length} hex chars');
     }
     return _messaging.getToken();
   }

@@ -1907,7 +1907,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profilePushTokenCopied => 'Push token copied';
 
   @override
-  String get profilePushTokenMissing => 'This device has no push token yet';
+  String get profilePushDiagTitle => 'Notification status';
+
+  @override
+  String get profilePushDiagNone => 'none';
+
+  @override
+  String get profilePushDiagCopy => 'Copy FCM token';
 
   @override
   String get profileDeleteAccountConfirm =>

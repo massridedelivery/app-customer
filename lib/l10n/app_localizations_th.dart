@@ -1886,7 +1886,13 @@ class AppLocalizationsTh extends AppLocalizations {
   String get profilePushTokenCopied => 'คัดลอก push token แล้ว';
 
   @override
-  String get profilePushTokenMissing => 'ยังไม่มี push token บนเครื่องนี้';
+  String get profilePushDiagTitle => 'สถานะการแจ้งเตือน';
+
+  @override
+  String get profilePushDiagNone => 'ไม่มี';
+
+  @override
+  String get profilePushDiagCopy => 'คัดลอก FCM token';
 
   @override
   String get profileDeleteAccountConfirm =>

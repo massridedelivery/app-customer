@@ -1091,8 +1091,9 @@ class _PhoneRowTrailing extends StatelessWidget {
 }
 
 /// Shows what this device holds for push (the APNs token iOS issued, the FCM
-/// token) and copies the FCM token, so support can send it a test push from
-/// the Firebase console and tell an app fault from a server one.
+/// token) and copies either: the FCM token for a test push from the Firebase
+/// console, the APNs token for one sent straight to Apple, which answers with
+/// the reason it refuses a push where FCM doesn't.
 Future<void> _copyPushToken(BuildContext context, WidgetRef ref) async {
   final l10n = AppLocalizations.of(context)!;
   final d = await ref.read(pushNotificationServiceProvider).diagnose();
@@ -1100,6 +1101,16 @@ Future<void> _copyPushToken(BuildContext context, WidgetRef ref) async {
   String show(String? t) => t == null
       ? l10n.profilePushDiagNone
       : '${t.substring(0, t.length < 12 ? t.length : 12)}… (${t.length})';
+  Widget copy(BuildContext ctx, String token, String label) => TextButton(
+    onPressed: () {
+      Clipboard.setData(ClipboardData(text: token));
+      Navigator.of(ctx).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.profilePushTokenCopied)),
+      );
+    },
+    child: Text(label),
+  );
   await showDialog<void>(
     context: context,
     builder: (ctx) => AlertDialog(
@@ -1117,17 +1128,8 @@ Future<void> _copyPushToken(BuildContext context, WidgetRef ref) async {
           onPressed: () => Navigator.of(ctx).pop(),
           child: Text(MaterialLocalizations.of(ctx).closeButtonLabel),
         ),
-        if (d.fcm != null)
-          TextButton(
-            onPressed: () {
-              Clipboard.setData(ClipboardData(text: d.fcm!));
-              Navigator.of(ctx).pop();
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(l10n.profilePushTokenCopied)),
-              );
-            },
-            child: Text(l10n.profilePushDiagCopy),
-          ),
+        if (d.apns != null) copy(ctx, d.apns!, l10n.profilePushDiagCopyApns),
+        if (d.fcm != null) copy(ctx, d.fcm!, l10n.profilePushDiagCopy),
       ],
     ),
   );

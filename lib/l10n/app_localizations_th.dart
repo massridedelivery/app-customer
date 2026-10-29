@@ -1895,6 +1895,9 @@ class AppLocalizationsTh extends AppLocalizations {
   String get profilePushDiagCopy => 'คัดลอก FCM token';
 
   @override
+  String get profilePushDiagCopyApns => 'คัดลอก APNs token';
+
+  @override
   String get profileDeleteAccountConfirm =>
       'การลบบัญชีจะลบข้อมูลทั้งหมดของคุณอย่างถาวรและไม่สามารถย้อนกลับได้ ต้องการลบบัญชีใช่หรือไม่?';
 

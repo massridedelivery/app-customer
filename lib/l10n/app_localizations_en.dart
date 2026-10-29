@@ -1916,6 +1916,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profilePushDiagCopy => 'Copy FCM token';
 
   @override
+  String get profilePushDiagCopyApns => 'Copy APNs token';
+
+  @override
   String get profileDeleteAccountConfirm =>
       'Deleting your account permanently removes all your data and can\'t be undone. Delete your account?';
 

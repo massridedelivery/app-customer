@@ -70,7 +70,12 @@ class MessengerTrackingController extends _$MessengerTrackingController {
   }
 
   void startTracking(String orderId) {
-    state = state.copyWith(orderId: orderId, isLoading: true, error: null);
+    // Another order than the one held (an old notification, say): start
+    // clean. A held order left in place also read as "just delivered" when
+    // the opened one was long done, and jumped to its payment summary.
+    state = state.orderId == orderId
+        ? state.copyWith(isLoading: true, error: null)
+        : MessengerTrackingState(orderId: orderId, isLoading: true);
     _loadOrder(orderId);
 
     _pollingTimer?.cancel();

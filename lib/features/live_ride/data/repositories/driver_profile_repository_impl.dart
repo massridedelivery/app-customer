@@ -39,4 +39,20 @@ class DriverProfileRepositoryImpl implements IDriverProfileRepository {
       throw Exception(e.toString());
     }
   }
+
+  @override
+  Future<String?> getJobStatus(String jobId) async {
+    try {
+      final response = await _apiService.dio.get('/api/customer/jobs/$jobId');
+      final data = response.data;
+      final status = data is Map ? data['status'] : null;
+      return status is String && status.isNotEmpty
+          ? status.toUpperCase()
+          : null;
+    } on DioException catch (e) {
+      final code = e.response?.statusCode;
+      if (code == 404 || code == 403) return null;
+      rethrow;
+    }
+  }
 }

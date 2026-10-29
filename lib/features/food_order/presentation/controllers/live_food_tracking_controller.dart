@@ -68,7 +68,11 @@ class LiveFoodTrackingController extends _$LiveFoodTrackingController {
   }
 
   void startTracking(String orderId) {
-    state = state.copyWith(orderId: orderId, isLoading: true, error: null);
+    // Another order than the one held (an old notification, say): start
+    // clean, so none of that order (its rider, its restaurant) shows here.
+    state = state.orderId == orderId
+        ? state.copyWith(isLoading: true, error: null)
+        : LiveFoodTrackingState(orderId: orderId, isLoading: true);
     _loadOrderDetail(orderId);
 
     _pollingTimer?.cancel();

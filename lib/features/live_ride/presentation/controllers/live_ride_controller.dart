@@ -2,16 +2,40 @@ import 'dart:async';
 import 'package:customer_app/features/live_ride/domain/models/driver_profile_model.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:customer_app/core/services/socket_service.dart';
+import 'package:customer_app/features/live_ride/data/repositories/driver_profile_repository_impl.dart';
 import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
 import 'package:customer_app/features/ride_booking/presentation/controllers/booking_controller.dart';
 import 'package:customer_app/features/live_ride/domain/usecases/cancel_ride_usecase_impl.dart';
-import 'package:customer_app/features/live_ride/domain/usecases/get_driver_profile_usecase.dart';
 import 'package:customer_app/features/live_ride/presentation/states/live_ride_state.dart';
 import 'package:customer_app/features/payment/data/repositories/payment_repository_impl.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/widgets.dart';
 
 part 'live_ride_controller.g.dart';
+
+/// What [LiveRideController.openJob] found.
+enum LiveJobOpening {
+  /// Under way (or unreadable): the screen tracks it.
+  live,
+
+  /// The ride this session was following just ended: the live screen's own
+  /// listener takes it to the summary (completed) or home (cancelled).
+  ending,
+
+  /// Over for a while — an old notification, say. Never shown as live.
+  ended,
+
+  /// Not one of this customer's rides.
+  missing,
+}
+
+/// A ride still under way.
+bool isRideActiveStatus(String? status) => const {
+  'PENDING',
+  'ACCEPTED',
+  'ARRIVED_AT_PICK_UP',
+  'PICKED_UP',
+}.contains(status?.toUpperCase());
 
 @riverpod
 class LiveRideController extends _$LiveRideController {
@@ -188,11 +212,12 @@ class LiveRideController extends _$LiveRideController {
       if (!silent) {
         state = state.copyWith(isLoading: true, error: null);
       }
-      // Invalidate the usecase to ensure we fetch fresh data if needed,
-      // or just read the future if it's already fetching.
-      final liveState = await ref.refresh(
-        getDriverProfileUsecaseProvider.future,
-      );
+      // Straight from the repository: nothing listens to the usecase
+      // provider, which leaves its request at the mercy of auto-dispose.
+      final liveState = await ref
+          .read(driverProfileRepositoryProvider)
+          .getDriverProfile();
+      if (!ref.mounted) return;
       // Seed the live ETA from the active job so resync (app resume / restart)
       // shows an ETA immediately, without waiting for the next socket frame
       // (SCRUM-76). Keys absent → keep whatever we already have.
@@ -202,6 +227,13 @@ class LiveRideController extends _$LiveRideController {
           : (liveState.etaMin != null
                 ? DateTime.now().add(Duration(minutes: liveState.etaMin!))
                 : null);
+      // The active ride is another one than ours: ours is over (an old ride
+      // opened from a notification must not turn into the current one).
+      final ours = state.jobId;
+      if (ours != null && ours.isNotEmpty && liveState.id != ours) {
+        await _resolveEnded(ours);
+        return;
+      }
       state = state.copyWith(
         isLoading: false,
         jobId: liveState.id,
@@ -250,10 +282,20 @@ class LiveRideController extends _$LiveRideController {
             polyline: liveState.polyline,
           );
     } catch (e) {
+      if (!ref.mounted) return;
       // No active job yet (still searching for a driver) is expected while
       // polling — don't treat it as an error or log noise.
       final noActiveJob = e.toString().contains('NO_ACTIVE_JOB');
       if (noActiveJob) {
+        if (!silent) state = state.copyWith(isLoading: false);
+        final ours = state.jobId;
+        if (ours != null &&
+            ours.isNotEmpty &&
+            isRideActiveStatus(state.jobStatus) &&
+            await _resolveEnded(ours)) {
+          return;
+        }
+        if (!ref.mounted) return;
         // The job dropped off the active list. If we were already on the trip
         // (picked up, driver assigned), it finished while we weren't receiving
         // live updates — the socket was suspended in the background and the
@@ -274,6 +316,27 @@ class LiveRideController extends _$LiveRideController {
         debugPrint('LiveRideController: silent sync failed: $e');
       }
     }
+  }
+
+  /// Our ride dropped off the active list: reads its own status, so a ride
+  /// cancelled (by the driver, or the system for want of one) or finished
+  /// while the app wasn't listening ends here instead of hanging on its last
+  /// live state. Returns whether it is over. A ride still searching for a
+  /// driver is not on the active list either, and stays.
+  Future<bool> _resolveEnded(String jobId) async {
+    final String? status;
+    try {
+      status = await ref
+          .read(driverProfileRepositoryProvider)
+          .getJobStatus(jobId);
+    } catch (e) {
+      debugPrint('LiveRideController: ride status unreadable: $e');
+      return false;
+    }
+    if (!ref.mounted) return false;
+    if (state.jobId != jobId || isRideActiveStatus(status)) return false;
+    state = state.copyWith(isLoading: false, jobStatus: status ?? 'CANCELLED');
+    return true;
   }
 
   /// Arrival time from a driver-location payload: prefers an absolute
@@ -362,23 +425,44 @@ class LiveRideController extends _$LiveRideController {
   }
 
   // Pre-load a job (e.g. from app restart)
-  void initializeWithJob(Map<String, dynamic> jobData) {
-    state = state.copyWith(
-      jobId: jobData['id'],
-      jobStatus: jobData['status'] ?? 'PENDING',
-      driverId: jobData['driver_id'],
-      fare: (jobData['fare'] as num?)?.toDouble(),
-      discount: (jobData['discount'] as num?)?.toDouble(),
-    );
-
-    // If status is not provided (e.g., app restart), or if it is an active state,
-    // fetch the latest details from the server to restore state correctly.
-    if (jobData['status'] == null ||
-        jobData['status'] == 'PENDING' ||
-        jobData['status'] == 'ACCEPTED' ||
-        jobData['status'] == 'ARRIVED_AT_PICK_UP' ||
-        jobData['status'] == 'PICKED_UP') {
-      getDriverProfile();
+  /// Opens the live screen on [jobId], checking the ride itself first: an
+  /// old notification or a stale link can name a ride long over, which must
+  /// not show as live, nor pull in whichever ride is active now.
+  Future<LiveJobOpening> openJob(String jobId) async {
+    final held = state.jobId == jobId;
+    // Nothing under way is held: clear it now, so a ride that ended earlier
+    // doesn't flash up while this one is read.
+    final cleared = !held && !isRideActiveStatus(state.jobStatus);
+    if (cleared) state = LiveRideState(jobId: jobId);
+    String? status;
+    var known = false;
+    try {
+      status = await ref
+          .read(driverProfileRepositoryProvider)
+          .getJobStatus(jobId);
+      known = true;
+    } catch (e) {
+      debugPrint('LiveRideController: ride status unreadable: $e');
     }
+    if (!ref.mounted) return LiveJobOpening.missing;
+    if (known && !isRideActiveStatus(status)) {
+      if (cleared && state.jobId == jobId) state = const LiveRideState();
+      if (status == null) return LiveJobOpening.missing;
+      if (held && isRideActiveStatus(state.jobStatus)) {
+        state = state.copyWith(jobStatus: status);
+        return LiveJobOpening.ending;
+      }
+      return LiveJobOpening.ended;
+    }
+    if (state.jobId != jobId || (!held && !cleared)) {
+      // A ride other than the one held: none of that one may show here.
+      state = LiveRideState(jobId: jobId, jobStatus: status ?? 'PENDING');
+    } else if (status != null) {
+      state = state.copyWith(jobStatus: status);
+    }
+    // Polling stops at a ride's end; this one needs it again.
+    _startSyncPolling();
+    unawaited(getDriverProfile());
+    return LiveJobOpening.live;
   }
 }

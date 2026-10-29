@@ -1,6 +1,7 @@
 import 'package:customer_app/features/auth/data/datasources/email_otp_data_source.dart';
 import 'package:customer_app/core/managers/providers.dart';
 import 'package:customer_app/core/services/push_notification_service.dart';
+import 'package:customer_app/core/services/ride_ongoing_notification.dart';
 import 'package:customer_app/core/services/socket_service.dart';
 import 'package:customer_app/features/auth/data/models/send_otp_response.dart';
 import 'package:customer_app/features/auth/domain/entities/phone_login_response.dart';
@@ -114,6 +115,11 @@ class AuthController extends _$AuthController {
       state = state.copyWith(
         activeJobId: rides.isEmpty ? null : rides.first.id,
       );
+      // A pinned "ride in progress" notification outlives a ride that ended
+      // while the app was closed; tapped, it would open that old ride.
+      if (rides.isEmpty) {
+        await ref.read(rideOngoingNotificationProvider).clear();
+      }
     } catch (e) {
       // On error, assume no active job
       state = state.copyWith(activeJobId: null);

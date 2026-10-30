@@ -64,7 +64,8 @@ class InboxItem {
 }
 
 /// `GET /api/notifications?limit&offset` → a page (newest first) + unread count;
-/// `PATCH /api/notifications/{id}/read`. Both need a signed-in customer.
+/// mark read (one / all) and delete (one / all). All need a signed-in customer
+/// and only touch the caller's own messages.
 class InboxRepository {
   InboxRepository(this._dio);
 
@@ -91,13 +92,41 @@ class InboxRepository {
 
   /// `PATCH /api/notifications/prefs` — opting out stops campaign pushes and
   /// inbox entries (order-status notifications still arrive).
-  Future<void> setMarketingOptIn(bool optIn) => _dio.patch(
-    '/api/notifications/prefs',
-    data: {'marketing_opt_in': optIn},
-  );
+  Future<void> setMarketingOptIn(bool optIn) =>
+      _dio.patch('/api/notifications/prefs', data: {'marketing_opt_in': optIn});
 
   Future<void> markRead(String id) =>
       _dio.patch('/api/notifications/${Uri.encodeComponent(id)}/read');
+
+  /// `PATCH /api/notifications/read-all`. A backend from before read-all
+  /// answers 404 for the route; then each of [loadedUnread] is marked instead.
+  Future<void> markAllRead({Iterable<String> loadedUnread = const []}) async {
+    try {
+      await _dio.patch('/api/notifications/read-all');
+    } on DioException catch (e) {
+      if (e.response?.statusCode != 404) rethrow;
+      await Future.wait(loadedUnread.map(markRead));
+    }
+  }
+
+  /// `DELETE /api/notifications/{id}`. The inbox's own 404 (`{"error": "not
+  /// found"}`: already gone, or not ours) counts as deleted; a 404 from a
+  /// backend without the route still throws, so the message stays.
+  Future<void> delete(String id) async {
+    try {
+      await _dio.delete('/api/notifications/${Uri.encodeComponent(id)}');
+    } on DioException catch (e) {
+      final body = e.response?.data;
+      final gone =
+          e.response?.statusCode == 404 &&
+          body is Map &&
+          body['error'] == 'not found';
+      if (!gone) rethrow;
+    }
+  }
+
+  /// `DELETE /api/notifications` — empties the inbox for good.
+  Future<void> deleteAll() => _dio.delete('/api/notifications');
 }
 
 final inboxRepositoryProvider = Provider<InboxRepository>(

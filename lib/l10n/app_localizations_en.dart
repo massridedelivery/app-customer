@@ -3136,6 +3136,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get inboxPushOffAction => 'Open Settings';
 
   @override
+  String get inboxDelete => 'Delete';
+
+  @override
+  String get inboxDeleteAll => 'Delete all';
+
+  @override
+  String get inboxDeleteAllTitle => 'Delete all messages?';
+
+  @override
+  String get inboxDeleteAllBody => 'This can\'t be undone.';
+
+  @override
+  String get inboxActionFailed => 'Something went wrong. Please try again.';
+
+  @override
   String get errServiceAreaUnavailable =>
       'Service isn\'t available in this area yet';
 

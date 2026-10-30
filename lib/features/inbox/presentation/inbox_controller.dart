@@ -72,7 +72,10 @@ class InboxController extends AsyncNotifier<InboxState> {
       final seen = {for (final i in latest.items) i.id};
       state = AsyncData(
         latest.copyWith(
-          items: [...latest.items, ...r.items.where((i) => !seen.contains(i.id))],
+          items: [
+            ...latest.items,
+            ...r.items.where((i) => !seen.contains(i.id)),
+          ],
           unread: r.unread,
           hasMore: r.items.length >= pageSize,
           loadingMore: false,
@@ -102,17 +105,53 @@ class InboxController extends AsyncNotifier<InboxState> {
     }
   }
 
-  /// "อ่านทั้งหมดแล้ว" — the API marks one at a time, so send each unread id.
+  /// "อ่านทั้งหมดแล้ว": once the server agrees, every loaded row turns read
+  /// and the badge drops to 0. Throws (nothing changes) if the call fails.
   Future<void> markAllRead() async {
     final current = state.value;
     if (current == null) return;
     final ids = current.items.where((i) => !i.isRead).map((i) => i.id).toSet();
-    if (ids.isEmpty) return;
+    await ref.read(inboxRepositoryProvider).markAllRead(loadedUnread: ids);
     _setRead(ids);
-    final repo = ref.read(inboxRepositoryProvider);
-    await Future.wait(
-      ids.map((id) => repo.markRead(id).catchError((_) {})),
+    final latest = state.value;
+    if (latest != null) state = AsyncData(latest.copyWith(unread: 0));
+  }
+
+  /// Swipe to delete: drops [item] at once, then tells the server; puts it
+  /// back in its place and rethrows if that fails.
+  Future<void> delete(InboxItem item) async {
+    final current = state.value;
+    if (current == null) return;
+    final index = current.items.indexWhere((i) => i.id == item.id);
+    if (index < 0) return;
+    final wasUnread = item.isRead ? 0 : 1;
+    state = AsyncData(
+      current.copyWith(
+        items: [...current.items]..removeAt(index),
+        unread: (current.unread - wasUnread).clamp(0, 1 << 30),
+      ),
     );
+    try {
+      await ref.read(inboxRepositoryProvider).delete(item.id);
+    } catch (_) {
+      final latest = state.value ?? current;
+      state = AsyncData(
+        latest.copyWith(
+          items: [...latest.items]
+            ..insert(index.clamp(0, latest.items.length), item),
+          unread: latest.unread + wasUnread,
+        ),
+      );
+      rethrow;
+    }
+  }
+
+  /// "ลบทั้งหมด" (the screen confirms first). Empties the list once the
+  /// server has; throws and keeps everything if it fails.
+  Future<void> deleteAll() async {
+    if (state.value == null) return;
+    await ref.read(inboxRepositoryProvider).deleteAll();
+    state = const AsyncData(InboxState());
   }
 
   void _setRead(Set<String> ids) {

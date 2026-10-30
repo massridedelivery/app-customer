@@ -18,7 +18,7 @@ import 'package:go_router/go_router.dart';
 
 /// The "กล่องข้อความ" tab: marketing campaigns (also sent as pushes), newest
 /// first, unread ones tinted with a red dot. Tapping one marks it read and
-/// opens the screen the campaign points at.
+/// opens the screen the campaign points at; swiping one left deletes it.
 class InboxScreen extends ConsumerStatefulWidget {
   const InboxScreen({super.key});
 
@@ -29,10 +29,86 @@ class InboxScreen extends ConsumerStatefulWidget {
 class _InboxScreenState extends ConsumerState<InboxScreen> {
   bool _unreadOnly = false;
 
+  /// Times each message came back after a failed delete: part of its row's
+  /// key, so a restored row is a new Dismissible, not the dismissed one.
+  final _restores = <String, int>{};
+
   void _open(InboxItem item) {
     ref.read(inboxControllerProvider.notifier).markRead(item);
     final link = item.deeplink;
     if (link != null) context.push(link);
+  }
+
+  void _toast(String text) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(text),
+          behavior: SnackBarBehavior.floating,
+          // Above the floating tab bar.
+          margin: EdgeInsets.fromLTRB(16, 0, 16, kFloatingNavReserve + 8),
+        ),
+      );
+  }
+
+  Future<void> _delete(InboxItem item) async {
+    final failed = AppLocalizations.of(context)!.inboxActionFailed;
+    try {
+      await ref.read(inboxControllerProvider.notifier).delete(item);
+    } catch (_) {
+      if (!mounted) return;
+      setState(
+        () => _restores.update(item.id, (n) => n + 1, ifAbsent: () => 1),
+      );
+      _toast(failed);
+    }
+  }
+
+  Future<void> _markAllRead() async {
+    final failed = AppLocalizations.of(context)!.inboxActionFailed;
+    try {
+      await ref.read(inboxControllerProvider.notifier).markAllRead();
+    } catch (_) {
+      if (mounted) _toast(failed);
+    }
+  }
+
+  /// Deleting is permanent, so it always asks first.
+  Future<void> _confirmDeleteAll() async {
+    final l10n = AppLocalizations.of(context)!;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        key: const Key('inboxDeleteAllConfirm'),
+        title: Text(l10n.inboxDeleteAllTitle, style: AppTypography.heading4),
+        content: Text(
+          l10n.inboxDeleteAllBody,
+          style: AppTypography.body2.copyWith(color: AppColors.textSecondary),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.textSecondary,
+            ),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            key: const Key('inboxDeleteAllYes'),
+            onPressed: () => Navigator.of(ctx).pop(true),
+            style: TextButton.styleFrom(foregroundColor: AppColors.error),
+            child: Text(l10n.inboxDeleteAll),
+          ),
+        ],
+      ),
+    );
+    if (ok != true || !mounted) return;
+    try {
+      await ref.read(inboxControllerProvider.notifier).deleteAll();
+    } catch (_) {
+      if (mounted) _toast(l10n.inboxActionFailed);
+    }
   }
 
   @override
@@ -62,12 +138,48 @@ class _InboxScreenState extends ConsumerState<InboxScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
-                child: Text(
-                  l10n.navInbox,
-                  style: AppTypography.heading3.copyWith(
-                    color: AppColors.textPrimary,
-                  ),
+                padding: const EdgeInsets.fromLTRB(20, 16, 8, 4),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        l10n.navInbox,
+                        style: AppTypography.heading3.copyWith(
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                    ),
+                    if (inbox.value?.items.isNotEmpty ?? false)
+                      PopupMenuButton<void>(
+                        key: const Key('inboxMenu'),
+                        icon: const Icon(
+                          Icons.more_vert_rounded,
+                          color: AppColors.textSecondary,
+                        ),
+                        itemBuilder: (_) => [
+                          PopupMenuItem<void>(
+                            key: const Key('inboxDeleteAll'),
+                            onTap: _confirmDeleteAll,
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Icons.delete_outline_rounded,
+                                  color: AppColors.error,
+                                  size: 20,
+                                ),
+                                const SizedBox(width: 12),
+                                Text(
+                                  l10n.inboxDeleteAll,
+                                  style: AppTypography.label2.copyWith(
+                                    color: AppColors.error,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                  ],
                 ),
               ),
               Padding(
@@ -91,9 +203,7 @@ class _InboxScreenState extends ConsumerState<InboxScreen> {
                     if (unread > 0)
                       TextButton(
                         key: const Key('inboxMarkAllRead'),
-                        onPressed: () => ref
-                            .read(inboxControllerProvider.notifier)
-                            .markAllRead(),
+                        onPressed: _markAllRead,
                         style: TextButton.styleFrom(
                           foregroundColor: AppColors.primary,
                         ),
@@ -162,9 +272,17 @@ class _InboxScreenState extends ConsumerState<InboxScreen> {
                                           child: MassLoadingM(size: 40),
                                         ),
                                       )
-                                    : _InboxTile(
-                                        item: items[i],
-                                        onTap: () => _open(items[i]),
+                                    : Dismissible(
+                                        key: ValueKey(
+                                          '${items[i].id}/${_restores[items[i].id] ?? 0}',
+                                        ),
+                                        direction: DismissDirection.endToStart,
+                                        onDismissed: (_) => _delete(items[i]),
+                                        background: const _DeleteBackground(),
+                                        child: _InboxTile(
+                                          item: items[i],
+                                          onTap: () => _open(items[i]),
+                                        ),
                                       ),
                               ),
                             ),
@@ -224,7 +342,10 @@ class _InboxTile extends StatelessWidget {
     'promo' => (Icons.local_offer_outlined, AppColors.primary),
     'referral' => (Icons.card_giftcard_rounded, const Color(0xFFE08A00)),
     'ride_landing' => (Icons.directions_car_outlined, const Color(0xFF1D4ED8)),
-    'messenger_booking' => (Icons.inventory_2_outlined, const Color(0xFF047857)),
+    'messenger_booking' => (
+      Icons.inventory_2_outlined,
+      const Color(0xFF047857),
+    ),
     'restaurant' ||
     'category' ||
     'food_delivery' => (Icons.restaurant_rounded, const Color(0xFFB45309)),
@@ -323,6 +444,31 @@ class _InboxTile extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// What shows under a row as it's swiped away.
+class _DeleteBackground extends StatelessWidget {
+  const _DeleteBackground();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: AppColors.error,
+      alignment: Alignment.centerRight,
+      padding: const EdgeInsets.only(right: 24),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.delete_outline_rounded, color: Colors.white),
+          const SizedBox(width: 6),
+          Text(
+            AppLocalizations.of(context)!.inboxDelete,
+            style: AppTypography.label2.copyWith(color: Colors.white),
+          ),
+        ],
       ),
     );
   }

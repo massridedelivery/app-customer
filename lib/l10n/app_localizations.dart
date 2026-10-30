@@ -5785,6 +5785,36 @@ abstract class AppLocalizations {
   /// **'Open Settings'**
   String get inboxPushOffAction;
 
+  /// No description provided for @inboxDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get inboxDelete;
+
+  /// No description provided for @inboxDeleteAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete all'**
+  String get inboxDeleteAll;
+
+  /// No description provided for @inboxDeleteAllTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete all messages?'**
+  String get inboxDeleteAllTitle;
+
+  /// No description provided for @inboxDeleteAllBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This can\'t be undone.'**
+  String get inboxDeleteAllBody;
+
+  /// No description provided for @inboxActionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Please try again.'**
+  String get inboxActionFailed;
+
   /// No description provided for @errServiceAreaUnavailable.
   ///
   /// In en, this message translates to:

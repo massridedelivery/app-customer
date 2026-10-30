@@ -3095,6 +3095,21 @@ class AppLocalizationsTh extends AppLocalizations {
   String get inboxPushOffAction => 'เปิดในการตั้งค่า';
 
   @override
+  String get inboxDelete => 'ลบ';
+
+  @override
+  String get inboxDeleteAll => 'ลบทั้งหมด';
+
+  @override
+  String get inboxDeleteAllTitle => 'ลบข้อความทั้งหมด?';
+
+  @override
+  String get inboxDeleteAllBody => 'ย้อนกลับไม่ได้';
+
+  @override
+  String get inboxActionFailed => 'ทำรายการไม่สำเร็จ ลองใหม่อีกครั้ง';
+
+  @override
   String get errServiceAreaUnavailable => 'ยังไม่เปิดให้บริการในพื้นที่นี้';
 
   @override

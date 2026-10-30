@@ -5,6 +5,9 @@ import 'package:customer_app/features/inbox/data/inbox_repository.dart';
 import 'package:customer_app/features/inbox/presentation/inbox_controller.dart';
 import 'package:customer_app/features/inbox/presentation/inbox_screen.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -42,6 +45,29 @@ class _FakeRepo extends InboxRepository {
   @override
   Future<void> markRead(String id) async => marked.add(id);
 
+  var readAll = 0;
+  final deleted = <String>[];
+  var deletedAll = 0;
+  bool fail = false;
+
+  @override
+  Future<void> markAllRead({Iterable<String> loadedUnread = const []}) async {
+    if (fail) throw Exception('500');
+    readAll++;
+  }
+
+  @override
+  Future<void> delete(String id) async {
+    if (fail) throw Exception('500');
+    deleted.add(id);
+  }
+
+  @override
+  Future<void> deleteAll() async {
+    if (fail) throw Exception('500');
+    deletedAll++;
+  }
+
   final optIns = <bool>[];
   bool failPrefs = false;
 
@@ -66,11 +92,15 @@ Future<_FakeRepo> _pump(
   bool signedIn = true,
   List<InboxItem>? items,
 }) async {
-  final repo = _FakeRepo(items ?? [_item('a'), _item('b'), _item('c', read: true)]);
+  final repo = _FakeRepo(
+    items ?? [_item('a'), _item('b'), _item('c', read: true)],
+  );
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
-        authControllerProvider.overrideWith(() => _FakeAuthController(signedIn)),
+        authControllerProvider.overrideWith(
+          () => _FakeAuthController(signedIn),
+        ),
         inboxRepositoryProvider.overrideWithValue(repo),
       ],
       child: MaterialApp(
@@ -148,13 +178,86 @@ void main() {
     expect(find.byKey(const Key('inboxUnreadDot')), findsOneWidget);
   });
 
-  testWidgets('mark all read clears every dot', (tester) async {
+  testWidgets('mark all read clears every dot in one call', (tester) async {
     final repo = await _pump(tester);
     await tester.tap(find.byKey(const Key('inboxMarkAllRead')));
     await tester.pumpAndSettle();
-    expect(repo.marked.toSet(), {'a', 'b'});
+    expect(repo.readAll, 1);
+    expect(repo.marked, isEmpty);
     expect(find.byKey(const Key('inboxUnreadDot')), findsNothing);
     expect(find.byKey(const Key('inboxMarkAllRead')), findsNothing);
+    expect(find.text('ยังไม่อ่าน'), findsOneWidget);
+  });
+
+  testWidgets('mark all read failing keeps the dots and says so', (
+    tester,
+  ) async {
+    final repo = await _pump(tester);
+    repo.fail = true;
+    await tester.tap(find.byKey(const Key('inboxMarkAllRead')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('inboxUnreadDot')), findsNWidgets(2));
+    expect(find.text('ทำรายการไม่สำเร็จ ลองใหม่อีกครั้ง'), findsOneWidget);
+  });
+
+  testWidgets('swiping a message deletes it and drops the badge', (
+    tester,
+  ) async {
+    final repo = await _pump(tester);
+    await tester.drag(find.text('Title a'), const Offset(-600, 0));
+    await tester.pumpAndSettle();
+    expect(repo.deleted, ['a']);
+    expect(find.text('Title a'), findsNothing);
+    expect(find.text('ยังไม่อ่าน 1'), findsOneWidget);
+  });
+
+  testWidgets('a failed delete puts the message back', (tester) async {
+    final repo = await _pump(tester);
+    repo.fail = true;
+    await tester.drag(find.text('Title a'), const Offset(-600, 0));
+    await tester.pumpAndSettle();
+    expect(find.text('Title a'), findsOneWidget);
+    expect(find.text('ยังไม่อ่าน 2'), findsOneWidget);
+    expect(find.text('ทำรายการไม่สำเร็จ ลองใหม่อีกครั้ง'), findsOneWidget);
+  });
+
+  testWidgets('delete all asks first, then empties the inbox', (tester) async {
+    final repo = await _pump(tester);
+    await tester.tap(find.byKey(const Key('inboxMenu')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('inboxDeleteAll')));
+    await tester.pumpAndSettle();
+    expect(find.text('ลบข้อความทั้งหมด?'), findsOneWidget);
+    expect(find.text('ย้อนกลับไม่ได้'), findsOneWidget);
+
+    await tester.tap(find.text('ยกเลิก'));
+    await tester.pumpAndSettle();
+    expect(repo.deletedAll, 0);
+    expect(find.text('Title a'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('inboxMenu')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('inboxDeleteAll')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('inboxDeleteAllYes')));
+    await tester.pumpAndSettle();
+    expect(repo.deletedAll, 1);
+    expect(find.text('ยังไม่มีข้อความ'), findsOneWidget);
+    expect(find.byKey(const Key('inboxMenu')), findsNothing);
+    expect(find.byKey(const Key('inboxMarkAllRead')), findsNothing);
+  });
+
+  testWidgets('a failed delete all keeps every message', (tester) async {
+    final repo = await _pump(tester);
+    repo.fail = true;
+    await tester.tap(find.byKey(const Key('inboxMenu')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('inboxDeleteAll')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('inboxDeleteAllYes')));
+    await tester.pumpAndSettle();
+    expect(find.text('Title a'), findsOneWidget);
+    expect(find.text('ทำรายการไม่สำเร็จ ลองใหม่อีกครั้ง'), findsOneWidget);
   });
 
   testWidgets('empty inbox shows the empty message', (tester) async {
@@ -193,6 +296,62 @@ void main() {
     expect(find.text('Title m44'), findsOneWidget);
   });
 
+  group('InboxRepository', () {
+    late _Adapter adapter;
+    late InboxRepository repo;
+    setUp(() {
+      adapter = _Adapter();
+      repo = InboxRepository(Dio()..httpClientAdapter = adapter);
+    });
+
+    test('read all is one PATCH', () async {
+      adapter.answer = (200, {'updated': 2});
+      await repo.markAllRead(loadedUnread: ['a']);
+      expect(adapter.calls, ['PATCH /api/notifications/read-all']);
+    });
+
+    test('a backend without read-all marks the loaded ones instead', () async {
+      adapter.answer = (
+        404,
+        {
+          'code': 'SYSTEM_INTERNAL_ERROR',
+          'message': 'Cannot PATCH /api/notifications/read-all',
+        },
+      );
+      adapter.then = (200, {'status': 'read'});
+      await repo.markAllRead(loadedUnread: ['a', 'b']);
+      expect(adapter.calls, [
+        'PATCH /api/notifications/read-all',
+        'PATCH /api/notifications/a/read',
+        'PATCH /api/notifications/b/read',
+      ]);
+    });
+
+    test('deleting one already gone (inbox 404) counts as deleted', () async {
+      adapter.answer = (404, {'error': 'not found'});
+      await repo.delete('a');
+      expect(adapter.calls, ['DELETE /api/notifications/a']);
+    });
+
+    test('a backend without the delete route throws', () async {
+      // What prod answers today, before the route ships.
+      adapter.answer = (
+        404,
+        {
+          'code': 'SYSTEM_INTERNAL_ERROR',
+          'message': 'Cannot DELETE /api/notifications/a',
+        },
+      );
+      await expectLater(repo.delete('a'), throwsA(isA<DioException>()));
+    });
+
+    test('delete all is one DELETE', () async {
+      adapter.answer = (200, {'deleted': 3});
+      await repo.deleteAll();
+      expect(adapter.calls, ['DELETE /api/notifications']);
+    });
+  });
+
   group('marketing opt-in', () {
     test('defaults on, saves via PATCH prefs, reverts on failure', () async {
       SharedPreferences.setMockInitialValues({});
@@ -220,4 +379,32 @@ void main() {
       expect(container.read(marketingOptInProvider), isFalse);
     });
   });
+}
+
+/// Answers every request with [answer] (then [then], if set) and records
+/// "METHOD path".
+class _Adapter implements HttpClientAdapter {
+  (int, Object) answer = (200, const {});
+  (int, Object)? then;
+  final calls = <String>[];
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    final (status, body) = calls.isEmpty ? answer : (then ?? answer);
+    calls.add('${options.method} ${options.path}');
+    return ResponseBody.fromString(
+      jsonEncode(body),
+      status,
+      headers: {
+        Headers.contentTypeHeader: [Headers.jsonContentType],
+      },
+    );
+  }
+
+  @override
+  void close({bool force = false}) {}
 }

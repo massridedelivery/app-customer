@@ -23,6 +23,8 @@ plugins {
     id("org.jetbrains.kotlin.android") version "2.2.20" apply false
     // Processes android/app/google-services.json (Firebase config).
     id("com.google.gms.google-services") version "4.4.2" apply false
+    // Crashlytics: build id + upload of the R8 mapping for readable reports.
+    id("com.google.firebase.crashlytics") version "3.0.6" apply false
 }
 
 include(":app")

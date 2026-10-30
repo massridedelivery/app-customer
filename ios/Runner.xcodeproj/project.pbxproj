@@ -239,6 +239,7 @@
 				3B06AD1E1E4923F5004D2608 /* Thin Binary */,
 				2A3C5B2C0F2BB9EBDAE0259D /* [CP] Embed Pods Frameworks */,
 				53CE44513C7EE34375A55EE5 /* [CP] Copy Pods Resources */,
+				5C1A8E3F2B7D4F9A0E6C2D18 /* Upload Crashlytics dSYMs */,
 			);
 			buildRules = (
 			);
@@ -310,6 +311,29 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		5C1A8E3F2B7D4F9A0E6C2D18 /* Upload Crashlytics dSYMs */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}",
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Resources/DWARF/${PRODUCT_NAME}",
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Info.plist",
+				"$(TARGET_BUILD_DIR)/$(EXECUTABLE_PATH)",
+			);
+			name = "Upload Crashlytics dSYMs";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/scripts/crashlytics_upload_dsyms.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 		4A7C9E2E1F8B3A5C00D4E6F1 /* Copy Firebase config for flavor */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;

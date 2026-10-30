@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:customer_app/app.dart';
 import 'package:customer_app/core/managers/providers.dart';
+import 'package:customer_app/core/services/crash_reporting.dart';
 import 'package:customer_app/features/call/data/call_background.dart';
 import 'package:customer_app/features/call/data/voip_token_registrar.dart';
 import 'package:customer_app/features/call/presentation/call_controller.dart';
@@ -45,6 +46,8 @@ void main() async {
   // GoogleService-Info.plist); other platforms have no Firebase setup.
   if (_isMobilePlatform) {
     await Firebase.initializeApp();
+    // Crash reports first, so a failure anywhere after this is recorded.
+    await CrashReporting.start();
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   }
 
@@ -58,6 +61,7 @@ void main() async {
   if (_isMobilePlatform) {
     container.read(callControllerProvider.notifier).start();
     container.read(voipTokenRegistrarProvider).start();
+    CrashReporting.followUser(container);
   }
 
   runApp(UncontrolledProviderScope(container: container, child: const App()));

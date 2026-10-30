@@ -1,4 +1,4 @@
-.PHONY: gen watch fix clean clean_cache test test_cov analyze pre_pr run_dev run_prod run_ios_dev run_ios_prod build_apk_dev build_apk_dev_arm64 install_dev build_apk_prod build_ios_dev build_ios_prod build_aab_dev build_aab_prod deploy_play_dev deploy_play_prod deploy_play_check run_prod_devapi build_apk_prod_devapi build_aab_prod_devapi ipa_prod_devapi deploy_prod_devapi deploy_play_prod_devapi upload_testflight_prod_devapi upload_play_prod_devapi deploy_both_prod_devapi promote_play_prod ipa_prod upload_testflight_prod upload_play_prod deploy_both_prod
+.PHONY: gen watch fix clean clean_cache test test_cov analyze pre_pr run_dev run_prod run_ios_dev run_ios_prod build_apk_dev build_apk_dev_arm64 install_dev build_apk_prod build_ios_dev build_ios_prod build_aab_dev build_aab_prod deploy_play_dev deploy_play_prod deploy_play_check run_prod_devapi build_apk_prod_devapi build_aab_prod_devapi ipa_prod_devapi deploy_prod_devapi deploy_play_prod_devapi upload_testflight_prod_devapi upload_play_prod_devapi deploy_both_prod_devapi promote_play_prod upload_symbols_android ipa_prod upload_testflight_prod upload_play_prod deploy_both_prod
 
 # ทุก target เป็นสเต็ปที่ต้องเรียงกัน (build ก่อน upload) — กัน -j สลับลำดับ
 .NOTPARALLEL:
@@ -136,6 +136,15 @@ build_aab_prod:
 	flutter build appbundle --release --flavor prod --dart-define-from-file=env/prod.json \
 		--obfuscate --split-debug-info=$(SYMBOLS)
 
+# 🐞 upload the Dart symbols of the last obfuscated build to Firebase Crashlytics,
+#    so Android crash reports de-obfuscate. Needs a one-time `npx firebase-tools
+#    login`. Never fails the deploy it's chained into (leading "-").
+#    CRASHLYTICS_ANDROID_APP = the Firebase Android app id (default: prod).
+CRASHLYTICS_ANDROID_APP ?= 1:1077451909824:android:b35620a6f652ced402db25
+upload_symbols_android:
+	-npx --yes firebase-tools crashlytics:symbols:upload \
+		--app=$(CRASHLYTICS_ANDROID_APP) $(SYMBOLS)
+
 # ✅ verify the Play service-account JSON authenticates (no upload)
 deploy_play_check:
 	cd android && bundle exec fastlane whoami
@@ -155,6 +164,7 @@ deploy_play_prod: bump build_aab_prod
 		PLAY_PACKAGE_NAME=com.massdrive.customer_app \
 		AAB_PATH="$(CURDIR)/build/app/outputs/bundle/prodRelease/app-prod-release.aab" \
 		bundle exec fastlane deploy track:internal
+	$(MAKE) upload_symbols_android
 
 # 🍎 real-prod IPA (App Store export) + upload-only steps (no bump, no build) —
 # mirror the *_prod_devapi steps but on env/prod.json. Used by deploy_both_prod.
@@ -175,7 +185,7 @@ upload_play_prod:
 # 🚀 real prod (env/prod.json): bump ONCE → build both → upload both, so the
 # iOS build number and the Android versionCode stay in lock-step. Use this
 # instead of running deploy_prod + deploy_play_prod separately (each bumps).
-deploy_both_prod: bump ipa_prod build_aab_prod upload_testflight_prod upload_play_prod
+deploy_both_prod: bump ipa_prod build_aab_prod upload_testflight_prod upload_play_prod upload_symbols_android
 
 # ─── ⚠️  ชั่วคราว: prod flavor → dev API ─────────────────────────────────────
 # prod host เดิม (driver-api.nutchaphut.dev) ไม่ขึ้น (Cloudflare ตอบ 502) ตอนนี้ prod ย้ายไป
@@ -218,13 +228,13 @@ upload_play_prod_devapi:
 deploy_prod_devapi: bump ipa_prod_devapi upload_testflight_prod_devapi
 
 # 🚀 bump + build prod AAB (ชี้ dev API) + upload ขึ้น Google Play internal track
-deploy_play_prod_devapi: bump build_aab_prod_devapi upload_play_prod_devapi
+deploy_play_prod_devapi: bump build_aab_prod_devapi upload_play_prod_devapi upload_symbols_android
 
 # 🚀 ส่งทั้ง TestFlight + Play ด้วย build number เดียวกัน — bump ทำงานครั้งเดียว
 # เพราะ make สร้าง prerequisite ที่ซ้ำกันแค่รอบเดียวต่อการเรียกหนึ่งครั้ง
 # ลำดับสำคัญ: build ให้ครบทั้งสองก่อนค่อย upload — ฝั่งไหน build พังจะไม่มีอะไรหลุดขึ้นไปก่อน
 # (.NOTPARALLEL ด้านบนกันไม่ให้ -j สลับลำดับ)
-deploy_both_prod_devapi: bump ipa_prod_devapi build_aab_prod_devapi upload_testflight_prod_devapi upload_play_prod_devapi
+deploy_both_prod_devapi: bump ipa_prod_devapi build_aab_prod_devapi upload_testflight_prod_devapi upload_play_prod_devapi upload_symbols_android
 
 # 🚀 Promote a build already on Google Play internal → production (as DRAFT).
 # No re-upload — Google rejects a reused versionCode. Publish + set the rollout %

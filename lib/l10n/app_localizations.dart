@@ -3571,36 +3571,6 @@ abstract class AppLocalizations {
   /// **'Version {version}'**
   String profileVersion(String version);
 
-  /// No description provided for @profilePushTokenCopied.
-  ///
-  /// In en, this message translates to:
-  /// **'Push token copied'**
-  String get profilePushTokenCopied;
-
-  /// No description provided for @profilePushDiagTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Notification status'**
-  String get profilePushDiagTitle;
-
-  /// No description provided for @profilePushDiagNone.
-  ///
-  /// In en, this message translates to:
-  /// **'none'**
-  String get profilePushDiagNone;
-
-  /// No description provided for @profilePushDiagCopy.
-  ///
-  /// In en, this message translates to:
-  /// **'Copy FCM token'**
-  String get profilePushDiagCopy;
-
-  /// No description provided for @profilePushDiagCopyApns.
-  ///
-  /// In en, this message translates to:
-  /// **'Copy APNs token'**
-  String get profilePushDiagCopyApns;
-
   /// No description provided for @profileDeleteAccountConfirm.
   ///
   /// In en, this message translates to:
@@ -5664,6 +5634,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Update now'**
   String get forceUpdateButton;
+
+  /// No description provided for @updateSuggestBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Update for the latest features and fixes.'**
+  String get updateSuggestBody;
+
+  /// No description provided for @updateSuggestUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'Update'**
+  String get updateSuggestUpdate;
+
+  /// No description provided for @updateSuggestLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Later'**
+  String get updateSuggestLater;
 
   /// No description provided for @coachLocationTitle.
   ///

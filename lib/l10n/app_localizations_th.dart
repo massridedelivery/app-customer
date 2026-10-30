@@ -1883,21 +1883,6 @@ class AppLocalizationsTh extends AppLocalizations {
   }
 
   @override
-  String get profilePushTokenCopied => 'คัดลอก push token แล้ว';
-
-  @override
-  String get profilePushDiagTitle => 'สถานะการแจ้งเตือน';
-
-  @override
-  String get profilePushDiagNone => 'ไม่มี';
-
-  @override
-  String get profilePushDiagCopy => 'คัดลอก FCM token';
-
-  @override
-  String get profilePushDiagCopyApns => 'คัดลอก APNs token';
-
-  @override
   String get profileDeleteAccountConfirm =>
       'การลบบัญชีจะลบข้อมูลทั้งหมดของคุณอย่างถาวรและไม่สามารถย้อนกลับได้ ต้องการลบบัญชีใช่หรือไม่?';
 
@@ -3029,6 +3014,15 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get forceUpdateButton => 'อัปเดตตอนนี้';
+
+  @override
+  String get updateSuggestBody => 'อัปเดตเพื่อใช้ฟีเจอร์ใหม่และการแก้ไขล่าสุด';
+
+  @override
+  String get updateSuggestUpdate => 'อัปเดต';
+
+  @override
+  String get updateSuggestLater => 'ไว้ทีหลัง';
 
   @override
   String get coachLocationTitle => 'ตำแหน่งรับ-ส่ง';

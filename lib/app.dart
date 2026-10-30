@@ -5,6 +5,7 @@ import 'package:customer_app/core/configs/theme.dart';
 import 'package:customer_app/core/managers/providers.dart';
 import 'package:customer_app/core/services/push_notification_service.dart';
 import 'package:customer_app/core/services/socket_service.dart';
+import 'package:customer_app/core/update/force_update.dart';
 import 'package:customer_app/core/widgets/connectivity_banner.dart';
 import 'package:customer_app/features/call/presentation/call_controller.dart';
 import 'package:customer_app/router/app_routes.dart';
@@ -51,6 +52,8 @@ class _AppState extends ConsumerState<App> with WidgetsBindingObserver {
     switch (state) {
       case AppLifecycleState.resumed:
         if (ref.read(tokenStorageProvider).hasToken) socket.ensureConnected();
+        // An app left open for days still learns about a required update.
+        ref.read(forceUpdateProvider.notifier).checkIfStale();
       case AppLifecycleState.paused:
       case AppLifecycleState.detached:
         // A call carries its WebRTC handshake on the socket and keeps running

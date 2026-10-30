@@ -13,15 +13,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-const _update = StoreUpdate(
+const _update = AppUpdate(
   storeUrl: 'https://apps.apple.com/th/app/id1',
   currentVersion: '1.0.2',
-  storeVersion: '1.0.3',
+  latestVersion: '1.0.3',
 );
 
 class _OutdatedNotifier extends ForceUpdateNotifier {
   @override
-  StoreUpdate? build() => _update;
+  AppUpdate? build() => _update;
 
   @override
   Future<void> check() async {}
@@ -60,9 +60,10 @@ void main() {
       expect(isNewerVersion('1.0.1', '1.0.2'), isFalse);
     });
 
-    test('ignores a build suffix', () {
+    test('ignores a build or pre-release suffix', () {
       expect(isNewerVersion('1.0.2', '1.0.2+93'), isFalse);
       expect(isNewerVersion('1.0.3+1', '1.0.2+93'), isTrue);
+      expect(isNewerVersion('1.0.3', '1.0.3-beta'), isFalse);
     });
   });
 

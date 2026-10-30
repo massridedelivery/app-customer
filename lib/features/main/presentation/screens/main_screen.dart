@@ -4,6 +4,8 @@ import 'dart:io' show Platform;
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/managers/providers.dart';
+import 'package:customer_app/core/update/force_update.dart';
+import 'package:customer_app/core/update/update_suggestion_dialog.dart';
 import 'package:customer_app/core/widgets/coach_marks.dart';
 import 'package:customer_app/features/home/presentation/screens/service_selection_screen.dart';
 import 'package:customer_app/features/inbox/presentation/inbox_controller.dart';
@@ -49,6 +51,10 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       const InboxScreen(),
       const ProfileScreen(),
     ];
+    // An update suggestion found before this screen opened.
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => offerUpdateSuggestion(context, ref),
+    );
   }
 
   @override
@@ -141,6 +147,9 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   @override
   Widget build(BuildContext context) {
     ref.listen(homeTourReplayProvider, (_, _) => _replayCoachMarks());
+    ref.listen(suggestUpdateProvider, (_, next) {
+      if (next != null) offerUpdateSuggestion(context, ref);
+    });
     // `extendBody: true` draws the body behind the system navigation area.
     // Android's system nav (esp. 3-button) is opaque, so lift the floating bar
     // above it by the device inset. iOS only has a thin home indicator — adding

@@ -40,8 +40,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     if (ref.read(appStorageProvider).hasCompletedOnboarding) {
       ref.read(homeControllerProvider);
     }
-    // Is this build behind the store's? If so the router holds the app on the
-    // update screen; runs in the background, never delaying the splash.
+    // Below the admin's minimum version? Then the router holds the app on the
+    // update screen (a softer update is offered on the main screen). Runs in
+    // the background, never delaying the splash.
     ref.read(forceUpdateProvider.notifier).check();
     _navigateToNextScreen();
   }

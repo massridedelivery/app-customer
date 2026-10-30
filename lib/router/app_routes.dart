@@ -94,8 +94,8 @@ class RouterNotifier extends ChangeNotifier {
   }
 
   RouterNotifier(this._ref) {
-    // An outdated build must land on the update screen as soon as the store
-    // check finds it.
+    // A build below the admin's minimum must land on the update screen as
+    // soon as the check finds it.
     _ref.listen(forceUpdateProvider, (previous, next) {
       if ((previous == null) != (next == null)) notifyListeners();
     });
@@ -157,8 +157,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       final activeJobId = authState.activeJobId;
       final currentPath = state.matchedLocation;
 
-      // Installed version behind the store's: hold the app on the update
-      // screen — outranks everything, since an old build may not work.
+      // Installed version below the admin's minimum: hold the app on the
+      // update screen — outranks everything, since an old build may not work.
       if (ref.read(forceUpdateProvider) != null) {
         return currentPath == '/force-update' ? null : '/force-update';
       }

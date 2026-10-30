@@ -1904,21 +1904,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get profilePushTokenCopied => 'Push token copied';
-
-  @override
-  String get profilePushDiagTitle => 'Notification status';
-
-  @override
-  String get profilePushDiagNone => 'none';
-
-  @override
-  String get profilePushDiagCopy => 'Copy FCM token';
-
-  @override
-  String get profilePushDiagCopyApns => 'Copy APNs token';
-
-  @override
   String get profileDeleteAccountConfirm =>
       'Deleting your account permanently removes all your data and can\'t be undone. Delete your account?';
 
@@ -3069,6 +3054,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get forceUpdateButton => 'Update now';
+
+  @override
+  String get updateSuggestBody => 'Update for the latest features and fixes.';
+
+  @override
+  String get updateSuggestUpdate => 'Update';
+
+  @override
+  String get updateSuggestLater => 'Later';
 
   @override
   String get coachLocationTitle => 'Pickup & delivery location';

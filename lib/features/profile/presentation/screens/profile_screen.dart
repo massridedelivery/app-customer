@@ -7,7 +7,6 @@ import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/constants/layout.dart';
 import 'package:customer_app/core/providers/app_version_provider.dart';
-import 'package:customer_app/core/services/push_notification_service.dart';
 import 'package:customer_app/core/widgets/coming_soon_dialog.dart';
 import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/core/localization/locale_controller.dart';
@@ -280,22 +279,17 @@ class ProfileScreen extends ConsumerWidget {
                         ),
                         const SizedBox(height: 12),
                         // App version (moved here from the login screen).
-                        // Long-press copies the push token, for a test send
-                        // from the Firebase console.
-                        GestureDetector(
-                          onLongPress: () => _copyPushToken(context, ref),
-                          child: Center(
-                            child: Text(
-                              ref
-                                  .watch(appVersionProvider)
-                                  .maybeWhen(
-                                    data: (v) => l10n.profileVersion(v),
-                                    orElse: () => '',
-                                  ),
-                              style: AppTypography.body3.copyWith(
-                                color: AppColors.textSecondary.withValues(
-                                  alpha: 0.6,
+                        Center(
+                          child: Text(
+                            ref
+                                .watch(appVersionProvider)
+                                .maybeWhen(
+                                  data: (v) => l10n.profileVersion(v),
+                                  orElse: () => '',
                                 ),
+                            style: AppTypography.body3.copyWith(
+                              color: AppColors.textSecondary.withValues(
+                                alpha: 0.6,
                               ),
                             ),
                           ),
@@ -1088,49 +1082,4 @@ class _PhoneRowTrailing extends StatelessWidget {
       ],
     );
   }
-}
-
-/// Shows what this device holds for push (the APNs token iOS issued, the FCM
-/// token) and copies either: the FCM token for a test push from the Firebase
-/// console, the APNs token for one sent straight to Apple, which answers with
-/// the reason it refuses a push where FCM doesn't.
-Future<void> _copyPushToken(BuildContext context, WidgetRef ref) async {
-  final l10n = AppLocalizations.of(context)!;
-  final d = await ref.read(pushNotificationServiceProvider).diagnose();
-  if (!context.mounted) return;
-  String show(String? t) => t == null
-      ? l10n.profilePushDiagNone
-      : '${t.substring(0, t.length < 12 ? t.length : 12)}… (${t.length})';
-  Widget copy(BuildContext ctx, String token, String label) => TextButton(
-    onPressed: () {
-      Clipboard.setData(ClipboardData(text: token));
-      Navigator.of(ctx).pop();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.profilePushTokenCopied)),
-      );
-    },
-    child: Text(label),
-  );
-  await showDialog<void>(
-    context: context,
-    builder: (ctx) => AlertDialog(
-      title: Text(l10n.profilePushDiagTitle),
-      content: SelectableText(
-        [
-          if (Theme.of(ctx).platform == TargetPlatform.iOS)
-            'APNs: ${show(d.apns)}',
-          'FCM: ${show(d.fcm)}',
-          if (d.error != null) d.error!,
-        ].join('\n'),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(ctx).pop(),
-          child: Text(MaterialLocalizations.of(ctx).closeButtonLabel),
-        ),
-        if (d.apns != null) copy(ctx, d.apns!, l10n.profilePushDiagCopyApns),
-        if (d.fcm != null) copy(ctx, d.fcm!, l10n.profilePushDiagCopy),
-      ],
-    ),
-  );
 }

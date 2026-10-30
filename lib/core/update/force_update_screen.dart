@@ -7,30 +7,33 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_update/in_app_update.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-/// Blocks the app while the installed version is behind the store's. There is
-/// no way past it except updating; the router keeps every route here.
+/// Takes the user to [update]: Play's in-app update when allowed, else the
+/// store page.
+Future<void> openAppUpdate(AppUpdate update) async {
+  // Android: Play's own full-screen update when allowed; if it can't run or
+  // the user backs out of it, fall back to the store page.
+  if (update.playImmediate) {
+    try {
+      final result = await InAppUpdate.performImmediateUpdate();
+      if (result == AppUpdateResult.success) return;
+    } catch (_) {}
+  }
+  await launchUrl(
+    Uri.parse(update.storeUrl),
+    mode: LaunchMode.externalApplication,
+  );
+}
+
+/// Blocks the app while the installed version is below the admin's minimum.
+/// There is no way past it except updating; the router keeps every route here.
 class ForceUpdateScreen extends ConsumerWidget {
   const ForceUpdateScreen({super.key});
-
-  Future<void> _update(StoreUpdate update) async {
-    // Android: Play's own full-screen update when allowed; if it can't run or
-    // the user backs out of it, fall back to the store page.
-    if (update.playImmediate) {
-      try {
-        final result = await InAppUpdate.performImmediateUpdate();
-        if (result == AppUpdateResult.success) return;
-      } catch (_) {}
-    }
-    await launchUrl(
-      Uri.parse(update.storeUrl),
-      mode: LaunchMode.externalApplication,
-    );
-  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final update = ref.watch(forceUpdateProvider);
     final l10n = AppLocalizations.of(context)!;
+    final note = update?.note(Localizations.localeOf(context).languageCode);
 
     return PopScope(
       canPop: false,
@@ -65,19 +68,19 @@ class ForceUpdateScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 10),
                 Text(
-                  l10n.forceUpdateBody,
+                  note ?? l10n.forceUpdateBody,
                   textAlign: TextAlign.center,
                   style: AppTypography.body1.copyWith(
                     color: AppColors.textSecondary,
                     height: 1.5,
                   ),
                 ),
-                if (update?.storeVersion != null) ...[
+                if (update?.latestVersion != null) ...[
                   const SizedBox(height: 16),
                   Text(
                     l10n.forceUpdateVersions(
                       update!.currentVersion,
-                      update.storeVersion!,
+                      update.latestVersion!,
                     ),
                     textAlign: TextAlign.center,
                     style: AppTypography.body2.copyWith(
@@ -90,7 +93,9 @@ class ForceUpdateScreen extends ConsumerWidget {
                   width: double.infinity,
                   height: 52,
                   child: FilledButton(
-                    onPressed: update == null ? null : () => _update(update),
+                    onPressed: update == null
+                        ? null
+                        : () => openAppUpdate(update),
                     style: FilledButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       shape: const StadiumBorder(),

@@ -57,6 +57,7 @@ import 'package:customer_app/features/profile/presentation/screens/address_form_
 import 'package:customer_app/features/profile/presentation/screens/promo_list_screen.dart';
 import 'package:customer_app/features/profile/presentation/screens/referral_screen.dart';
 import 'package:customer_app/features/profile/presentation/screens/sos_screen.dart';
+import 'package:customer_app/features/profile/presentation/screens/my_data_screen.dart';
 import 'package:customer_app/features/profile/presentation/screens/privacy_pdpa_screen.dart';
 import 'package:customer_app/features/profile/presentation/screens/promo_detail_screen.dart';
 import 'package:customer_app/features/ride_booking/presentation/screens/booking_screen.dart';
@@ -643,6 +644,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/privacy',
         builder: (context, state) => const PrivacyPdpaScreen(),
+        routes: [
+          GoRoute(
+            path: 'my-data',
+            builder: (context, state) => const MyDataScreen(),
+          ),
+        ],
       ),
       GoRoute(
         path: '/credit-cards',

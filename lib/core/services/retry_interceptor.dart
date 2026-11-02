@@ -18,10 +18,15 @@ import 'package:dio/dio.dart';
 ///   the original resource instead of a duplicate booking/dispatch/charge.
 /// * Genuine client errors (`400` / `409` / `422` / `404` / `401`) are never
 ///   retried — `401` is owned by the auth-refresh interceptor.
+/// * A request whose `extra` sets [noRetryOn429] gets its `429` straight back,
+///   for screens that show the wait themselves (a per-user limit, not load).
 class RetryInterceptor extends Interceptor {
   RetryInterceptor(this._dio);
 
   final Dio _dio;
+
+  /// `Options(extra: {RetryInterceptor.noRetryOn429: true})`.
+  static const String noRetryOn429 = 'no_retry_on_429';
 
   static const int _maxRetries = 3;
   static const int _baseDelayMs = 400;
@@ -61,6 +66,9 @@ class RetryInterceptor extends Interceptor {
         return _methodIsSafe(err.requestOptions);
       case DioExceptionType.badResponse:
         final code = err.response?.statusCode ?? 0;
+        if (code == 429 && err.requestOptions.extra[noRetryOn429] == true) {
+          return false;
+        }
         if (code == 503 || code == 500 || code == 429) {
           return _methodIsSafe(err.requestOptions);
         }

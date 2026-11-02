@@ -1912,11 +1912,11 @@ class AppLocalizationsTh extends AppLocalizations {
   String get profilePdpaDataManagement => 'การจัดการข้อมูล';
 
   @override
-  String get profilePdpaExportTitle => 'ส่งออกข้อมูลของฉัน';
+  String get profilePdpaExportTitle => 'ข้อมูลของฉัน';
 
   @override
   String get profilePdpaExportSubtitle =>
-      'ดาวน์โหลดข้อมูลส่วนบุคคลทั้งหมดในรูปแบบ JSON';
+      'ดูข้อมูลส่วนบุคคลทั้งหมดที่เราเก็บไว้';
 
   @override
   String get profilePdpaConsentHistoryTitle => 'ประวัติความยินยอม';
@@ -1933,16 +1933,6 @@ class AppLocalizationsTh extends AppLocalizations {
   @override
   String get profilePdpaDeletionSubtitle =>
       'ส่งคำขอลบบัญชีและข้อมูลทั้งหมด (ไม่สามารถย้อนกลับได้)';
-
-  @override
-  String get profilePdpaExporting => 'กำลังส่งออกข้อมูล...';
-
-  @override
-  String get profilePdpaExportSuccess =>
-      'ส่งออกข้อมูลสำเร็จ ตรวจสอบอีเมลของคุณ';
-
-  @override
-  String get profilePdpaExportFailed => 'ไม่สามารถส่งออกข้อมูลได้ในขณะนี้';
 
   @override
   String get profilePdpaConsentTitle => 'ความยินยอม';
@@ -3556,4 +3546,179 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get callFullScreenLater => 'ไว้ทีหลัง';
+
+  @override
+  String get myDataTitle => 'ข้อมูลของฉัน';
+
+  @override
+  String get myDataShare => 'คัดลอกเป็นข้อความ / แชร์';
+
+  @override
+  String get myDataShareSubject => 'ข้อมูลของฉัน - Mass Move';
+
+  @override
+  String myDataExportedAt(String time) {
+    return 'ข้อมูล ณ $time';
+  }
+
+  @override
+  String get myDataEmpty => 'ไม่มีข้อมูล';
+
+  @override
+  String get myDataLoadMore => 'ดูเพิ่มเติม';
+
+  @override
+  String get myDataLoadFailed => 'ไม่สามารถโหลดข้อมูลได้ กรุณาลองใหม่';
+
+  @override
+  String get myDataRetry => 'ลองใหม่';
+
+  @override
+  String myDataRetryIn(int seconds) {
+    return 'ลองใหม่ได้ใน $seconds วินาที';
+  }
+
+  @override
+  String get myDataRateLimited => 'เรียกดูข้อมูลบ่อยเกินไป กรุณารอสักครู่';
+
+  @override
+  String get myDataAccountGone => 'ไม่พบบัญชีนี้แล้ว';
+
+  @override
+  String get myDataAccountGoneOk => 'ตกลง';
+
+  @override
+  String get myDataEditProfile => 'แก้ไขข้อมูลส่วนตัว';
+
+  @override
+  String get myDataEditPlaces => 'จัดการสถานที่ที่บันทึกไว้';
+
+  @override
+  String get myDataEditNotifications => 'ตั้งค่าการแจ้งเตือน';
+
+  @override
+  String get myDataFullName => 'ชื่อ-นามสกุล';
+
+  @override
+  String get myDataPhone => 'เบอร์โทรศัพท์';
+
+  @override
+  String get myDataEmail => 'อีเมล';
+
+  @override
+  String get myDataBirthday => 'วันเกิด';
+
+  @override
+  String get myDataMemberSince => 'สมัครสมาชิกเมื่อ';
+
+  @override
+  String get myDataEmergencyContact => 'ผู้ติดต่อฉุกเฉิน';
+
+  @override
+  String get myDataRidePreferences => 'ค่ากำหนดการเดินทาง';
+
+  @override
+  String get myDataMarketing => 'รับข่าวสารและโปรโมชัน';
+
+  @override
+  String get myDataOn => 'เปิด';
+
+  @override
+  String get myDataOff => 'ปิด';
+
+  @override
+  String get myDataLanguage => 'ภาษา';
+
+  @override
+  String get myDataDefault => 'ค่าเริ่มต้น';
+
+  @override
+  String get myDataNote => 'หมายเหตุ';
+
+  @override
+  String get myDataFrom => 'จาก';
+
+  @override
+  String get myDataTo => 'ถึง';
+
+  @override
+  String get myDataStop => 'จุดแวะ';
+
+  @override
+  String get myDataFare => 'ค่าโดยสาร';
+
+  @override
+  String get myDataDiscount => 'ส่วนลด';
+
+  @override
+  String get myDataTotal => 'ยอดรวม';
+
+  @override
+  String get myDataPayment => 'ชำระโดย';
+
+  @override
+  String get myDataCompletedAt => 'เสร็จสิ้นเมื่อ';
+
+  @override
+  String get myDataCancelledAt => 'ยกเลิกเมื่อ';
+
+  @override
+  String get myDataCancelReason => 'เหตุผลที่ยกเลิก';
+
+  @override
+  String get myDataYourRating => 'คะแนนที่คุณให้';
+
+  @override
+  String get myDataYourComment => 'ความคิดเห็นของคุณ';
+
+  @override
+  String get myDataDriver => 'คนขับ';
+
+  @override
+  String get myDataOrderFood => 'สั่งอาหาร';
+
+  @override
+  String get myDataOrderMessenger => 'ส่งของ';
+
+  @override
+  String get myDataRestaurant => 'ร้านอาหาร';
+
+  @override
+  String get myDataDeliveryAddress => 'ที่อยู่จัดส่ง';
+
+  @override
+  String get myDataItems => 'รายการ';
+
+  @override
+  String get myDataRecipient => 'ผู้รับ';
+
+  @override
+  String get myDataPackageSize => 'ขนาดพัสดุ';
+
+  @override
+  String get myDataPointsBalance => 'คะแนนคงเหลือ';
+
+  @override
+  String get myDataPointsLifetime => 'คะแนนที่ได้รับทั้งหมด';
+
+  @override
+  String get myDataPointsRedeemed => 'คะแนนที่ใช้ไป';
+
+  @override
+  String get myDataPointsExpired => 'คะแนนที่หมดอายุ';
+
+  @override
+  String get myDataConsentGranted => 'ให้ความยินยอม';
+
+  @override
+  String get myDataConsentWithdrawn => 'ถอนความยินยอม';
+
+  @override
+  String get myDataConsentGrantedAt => 'ยินยอมเมื่อ';
+
+  @override
+  String get myDataConsentWithdrawnAt => 'ถอนเมื่อ';
+
+  @override
+  String get myDataConsentVersion => 'เวอร์ชัน';
 }

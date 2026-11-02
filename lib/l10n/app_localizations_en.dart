@@ -1934,11 +1934,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profilePdpaDataManagement => 'Data management';
 
   @override
-  String get profilePdpaExportTitle => 'Export my data';
+  String get profilePdpaExportTitle => 'My data';
 
   @override
   String get profilePdpaExportSubtitle =>
-      'Download all your personal data as JSON';
+      'See all the personal data we hold about you';
 
   @override
   String get profilePdpaConsentHistoryTitle => 'Consent history';
@@ -1955,15 +1955,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get profilePdpaDeletionSubtitle =>
       'Request deletion of your account and all data (can\'t be undone)';
-
-  @override
-  String get profilePdpaExporting => 'Exporting data...';
-
-  @override
-  String get profilePdpaExportSuccess => 'Data exported. Check your email.';
-
-  @override
-  String get profilePdpaExportFailed => 'Can\'t export your data right now';
 
   @override
   String get profilePdpaConsentTitle => 'Consent';
@@ -3598,4 +3589,179 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get callFullScreenLater => 'Later';
+
+  @override
+  String get myDataTitle => 'My data';
+
+  @override
+  String get myDataShare => 'Copy as text / share';
+
+  @override
+  String get myDataShareSubject => 'My data - Mass Move';
+
+  @override
+  String myDataExportedAt(String time) {
+    return 'Data as of $time';
+  }
+
+  @override
+  String get myDataEmpty => 'No data';
+
+  @override
+  String get myDataLoadMore => 'Show more';
+
+  @override
+  String get myDataLoadFailed => 'Couldn\'t load your data. Please try again.';
+
+  @override
+  String get myDataRetry => 'Try again';
+
+  @override
+  String myDataRetryIn(int seconds) {
+    return 'Try again in $seconds s';
+  }
+
+  @override
+  String get myDataRateLimited => 'Too many requests. Please wait a moment.';
+
+  @override
+  String get myDataAccountGone => 'This account no longer exists';
+
+  @override
+  String get myDataAccountGoneOk => 'OK';
+
+  @override
+  String get myDataEditProfile => 'Edit profile';
+
+  @override
+  String get myDataEditPlaces => 'Manage saved places';
+
+  @override
+  String get myDataEditNotifications => 'Notification settings';
+
+  @override
+  String get myDataFullName => 'Full name';
+
+  @override
+  String get myDataPhone => 'Phone';
+
+  @override
+  String get myDataEmail => 'Email';
+
+  @override
+  String get myDataBirthday => 'Date of birth';
+
+  @override
+  String get myDataMemberSince => 'Member since';
+
+  @override
+  String get myDataEmergencyContact => 'Emergency contact';
+
+  @override
+  String get myDataRidePreferences => 'Ride preferences';
+
+  @override
+  String get myDataMarketing => 'News and promotions';
+
+  @override
+  String get myDataOn => 'On';
+
+  @override
+  String get myDataOff => 'Off';
+
+  @override
+  String get myDataLanguage => 'Language';
+
+  @override
+  String get myDataDefault => 'Default';
+
+  @override
+  String get myDataNote => 'Note';
+
+  @override
+  String get myDataFrom => 'From';
+
+  @override
+  String get myDataTo => 'To';
+
+  @override
+  String get myDataStop => 'Stop';
+
+  @override
+  String get myDataFare => 'Fare';
+
+  @override
+  String get myDataDiscount => 'Discount';
+
+  @override
+  String get myDataTotal => 'Total';
+
+  @override
+  String get myDataPayment => 'Paid by';
+
+  @override
+  String get myDataCompletedAt => 'Completed';
+
+  @override
+  String get myDataCancelledAt => 'Cancelled';
+
+  @override
+  String get myDataCancelReason => 'Cancellation reason';
+
+  @override
+  String get myDataYourRating => 'Your rating';
+
+  @override
+  String get myDataYourComment => 'Your comment';
+
+  @override
+  String get myDataDriver => 'Driver';
+
+  @override
+  String get myDataOrderFood => 'Food order';
+
+  @override
+  String get myDataOrderMessenger => 'Delivery';
+
+  @override
+  String get myDataRestaurant => 'Restaurant';
+
+  @override
+  String get myDataDeliveryAddress => 'Delivery address';
+
+  @override
+  String get myDataItems => 'Items';
+
+  @override
+  String get myDataRecipient => 'Recipient';
+
+  @override
+  String get myDataPackageSize => 'Package size';
+
+  @override
+  String get myDataPointsBalance => 'Points balance';
+
+  @override
+  String get myDataPointsLifetime => 'Points earned';
+
+  @override
+  String get myDataPointsRedeemed => 'Points used';
+
+  @override
+  String get myDataPointsExpired => 'Points expired';
+
+  @override
+  String get myDataConsentGranted => 'Granted';
+
+  @override
+  String get myDataConsentWithdrawn => 'Withdrawn';
+
+  @override
+  String get myDataConsentGrantedAt => 'Granted on';
+
+  @override
+  String get myDataConsentWithdrawnAt => 'Withdrawn on';
+
+  @override
+  String get myDataConsentVersion => 'Version';
 }

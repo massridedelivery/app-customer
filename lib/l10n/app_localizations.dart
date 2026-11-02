@@ -3628,13 +3628,13 @@ abstract class AppLocalizations {
   /// No description provided for @profilePdpaExportTitle.
   ///
   /// In en, this message translates to:
-  /// **'Export my data'**
+  /// **'My data'**
   String get profilePdpaExportTitle;
 
   /// No description provided for @profilePdpaExportSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Download all your personal data as JSON'**
+  /// **'See all the personal data we hold about you'**
   String get profilePdpaExportSubtitle;
 
   /// No description provided for @profilePdpaConsentHistoryTitle.
@@ -3666,24 +3666,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Request deletion of your account and all data (can\'t be undone)'**
   String get profilePdpaDeletionSubtitle;
-
-  /// No description provided for @profilePdpaExporting.
-  ///
-  /// In en, this message translates to:
-  /// **'Exporting data...'**
-  String get profilePdpaExporting;
-
-  /// No description provided for @profilePdpaExportSuccess.
-  ///
-  /// In en, this message translates to:
-  /// **'Data exported. Check your email.'**
-  String get profilePdpaExportSuccess;
-
-  /// No description provided for @profilePdpaExportFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Can\'t export your data right now'**
-  String get profilePdpaExportFailed;
 
   /// No description provided for @profilePdpaConsentTitle.
   ///
@@ -6588,6 +6570,348 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Later'**
   String get callFullScreenLater;
+
+  /// No description provided for @myDataTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My data'**
+  String get myDataTitle;
+
+  /// No description provided for @myDataShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy as text / share'**
+  String get myDataShare;
+
+  /// No description provided for @myDataShareSubject.
+  ///
+  /// In en, this message translates to:
+  /// **'My data - Mass Move'**
+  String get myDataShareSubject;
+
+  /// No description provided for @myDataExportedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Data as of {time}'**
+  String myDataExportedAt(String time);
+
+  /// No description provided for @myDataEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No data'**
+  String get myDataEmpty;
+
+  /// No description provided for @myDataLoadMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Show more'**
+  String get myDataLoadMore;
+
+  /// No description provided for @myDataLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load your data. Please try again.'**
+  String get myDataLoadFailed;
+
+  /// No description provided for @myDataRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get myDataRetry;
+
+  /// No description provided for @myDataRetryIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again in {seconds} s'**
+  String myDataRetryIn(int seconds);
+
+  /// No description provided for @myDataRateLimited.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many requests. Please wait a moment.'**
+  String get myDataRateLimited;
+
+  /// No description provided for @myDataAccountGone.
+  ///
+  /// In en, this message translates to:
+  /// **'This account no longer exists'**
+  String get myDataAccountGone;
+
+  /// No description provided for @myDataAccountGoneOk.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get myDataAccountGoneOk;
+
+  /// No description provided for @myDataEditProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit profile'**
+  String get myDataEditProfile;
+
+  /// No description provided for @myDataEditPlaces.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage saved places'**
+  String get myDataEditPlaces;
+
+  /// No description provided for @myDataEditNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification settings'**
+  String get myDataEditNotifications;
+
+  /// No description provided for @myDataFullName.
+  ///
+  /// In en, this message translates to:
+  /// **'Full name'**
+  String get myDataFullName;
+
+  /// No description provided for @myDataPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get myDataPhone;
+
+  /// No description provided for @myDataEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get myDataEmail;
+
+  /// No description provided for @myDataBirthday.
+  ///
+  /// In en, this message translates to:
+  /// **'Date of birth'**
+  String get myDataBirthday;
+
+  /// No description provided for @myDataMemberSince.
+  ///
+  /// In en, this message translates to:
+  /// **'Member since'**
+  String get myDataMemberSince;
+
+  /// No description provided for @myDataEmergencyContact.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency contact'**
+  String get myDataEmergencyContact;
+
+  /// No description provided for @myDataRidePreferences.
+  ///
+  /// In en, this message translates to:
+  /// **'Ride preferences'**
+  String get myDataRidePreferences;
+
+  /// No description provided for @myDataMarketing.
+  ///
+  /// In en, this message translates to:
+  /// **'News and promotions'**
+  String get myDataMarketing;
+
+  /// No description provided for @myDataOn.
+  ///
+  /// In en, this message translates to:
+  /// **'On'**
+  String get myDataOn;
+
+  /// No description provided for @myDataOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get myDataOff;
+
+  /// No description provided for @myDataLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get myDataLanguage;
+
+  /// No description provided for @myDataDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Default'**
+  String get myDataDefault;
+
+  /// No description provided for @myDataNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get myDataNote;
+
+  /// No description provided for @myDataFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'From'**
+  String get myDataFrom;
+
+  /// No description provided for @myDataTo.
+  ///
+  /// In en, this message translates to:
+  /// **'To'**
+  String get myDataTo;
+
+  /// No description provided for @myDataStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop'**
+  String get myDataStop;
+
+  /// No description provided for @myDataFare.
+  ///
+  /// In en, this message translates to:
+  /// **'Fare'**
+  String get myDataFare;
+
+  /// No description provided for @myDataDiscount.
+  ///
+  /// In en, this message translates to:
+  /// **'Discount'**
+  String get myDataDiscount;
+
+  /// No description provided for @myDataTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get myDataTotal;
+
+  /// No description provided for @myDataPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid by'**
+  String get myDataPayment;
+
+  /// No description provided for @myDataCompletedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get myDataCompletedAt;
+
+  /// No description provided for @myDataCancelledAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get myDataCancelledAt;
+
+  /// No description provided for @myDataCancelReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancellation reason'**
+  String get myDataCancelReason;
+
+  /// No description provided for @myDataYourRating.
+  ///
+  /// In en, this message translates to:
+  /// **'Your rating'**
+  String get myDataYourRating;
+
+  /// No description provided for @myDataYourComment.
+  ///
+  /// In en, this message translates to:
+  /// **'Your comment'**
+  String get myDataYourComment;
+
+  /// No description provided for @myDataDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver'**
+  String get myDataDriver;
+
+  /// No description provided for @myDataOrderFood.
+  ///
+  /// In en, this message translates to:
+  /// **'Food order'**
+  String get myDataOrderFood;
+
+  /// No description provided for @myDataOrderMessenger.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery'**
+  String get myDataOrderMessenger;
+
+  /// No description provided for @myDataRestaurant.
+  ///
+  /// In en, this message translates to:
+  /// **'Restaurant'**
+  String get myDataRestaurant;
+
+  /// No description provided for @myDataDeliveryAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery address'**
+  String get myDataDeliveryAddress;
+
+  /// No description provided for @myDataItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Items'**
+  String get myDataItems;
+
+  /// No description provided for @myDataRecipient.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipient'**
+  String get myDataRecipient;
+
+  /// No description provided for @myDataPackageSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Package size'**
+  String get myDataPackageSize;
+
+  /// No description provided for @myDataPointsBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Points balance'**
+  String get myDataPointsBalance;
+
+  /// No description provided for @myDataPointsLifetime.
+  ///
+  /// In en, this message translates to:
+  /// **'Points earned'**
+  String get myDataPointsLifetime;
+
+  /// No description provided for @myDataPointsRedeemed.
+  ///
+  /// In en, this message translates to:
+  /// **'Points used'**
+  String get myDataPointsRedeemed;
+
+  /// No description provided for @myDataPointsExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Points expired'**
+  String get myDataPointsExpired;
+
+  /// No description provided for @myDataConsentGranted.
+  ///
+  /// In en, this message translates to:
+  /// **'Granted'**
+  String get myDataConsentGranted;
+
+  /// No description provided for @myDataConsentWithdrawn.
+  ///
+  /// In en, this message translates to:
+  /// **'Withdrawn'**
+  String get myDataConsentWithdrawn;
+
+  /// No description provided for @myDataConsentGrantedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Granted on'**
+  String get myDataConsentGrantedAt;
+
+  /// No description provided for @myDataConsentWithdrawnAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Withdrawn on'**
+  String get myDataConsentWithdrawnAt;
+
+  /// No description provided for @myDataConsentVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Version'**
+  String get myDataConsentVersion;
 }
 
 class _AppLocalizationsDelegate

@@ -45,9 +45,13 @@ class ApiService {
     if (!kReleaseMode) {
       _dio.interceptors.add(
         TalkerDioLogger(
-          settings: const TalkerDioLoggerSettings(
+          settings: TalkerDioLoggerSettings(
             printRequestHeaders: true,
             printResponseHeaders: true,
+            // The PDPA export is the customer's personal data: never in a log,
+            // not even a debug one.
+            responseFilter: (r) =>
+                !r.requestOptions.path.startsWith('/api/customer/export'),
           ),
         ),
       );

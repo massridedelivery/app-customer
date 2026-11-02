@@ -1,12 +1,13 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
-import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/features/profile/data/datasources/account_remote_data_source.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
-/// Handles PDPA-related actions: data export, consent, and account deletion.
+/// Handles PDPA-related actions: my data (read only), consent, and account
+/// deletion.
 class PrivacyPdpaScreen extends ConsumerWidget {
   const PrivacyPdpaScreen({super.key});
 
@@ -72,7 +73,7 @@ class PrivacyPdpaScreen extends ConsumerWidget {
             iconColor: AppColors.primary,
             title: l10n.profilePdpaExportTitle,
             subtitle: l10n.profilePdpaExportSubtitle,
-            onTap: () => _exportData(context, ref),
+            onTap: () => context.push('/privacy/my-data'),
           ),
           const SizedBox(height: 12),
           _PdpaTile(
@@ -99,37 +100,6 @@ class PrivacyPdpaScreen extends ConsumerWidget {
         ],
       ),
     );
-  }
-
-  void _exportData(BuildContext context, WidgetRef ref) async {
-    final l10n = AppLocalizations.of(context)!;
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.profilePdpaExporting),
-        content: const Center(
-          heightFactor: 1.5,
-          child: MassLoadingM(size: 48),
-        ),
-      ),
-    );
-    try {
-      await ref.read(accountRemoteDataSourceProvider).exportData();
-      if (context.mounted) {
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.profilePdpaExportSuccess)),
-        );
-      }
-    } catch (e) {
-      if (context.mounted) {
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.profilePdpaExportFailed)),
-        );
-      }
-    }
   }
 
   void _showConsentDialog(BuildContext context, WidgetRef ref) {

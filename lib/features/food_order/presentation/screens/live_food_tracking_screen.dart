@@ -10,6 +10,7 @@ import 'package:customer_app/features/food_order/presentation/widgets/live_food_
 import 'package:customer_app/features/food_order/presentation/widgets/live_food_tracking_location_details.dart';
 import 'package:customer_app/features/food_order/presentation/widgets/live_food_tracking_order_summary.dart';
 import 'package:customer_app/features/food_order/presentation/widgets/live_food_tracking_payment_method.dart';
+import 'package:customer_app/features/food_order/presentation/widgets/live_food_tracking_pay_now.dart';
 import 'package:customer_app/features/food_order/presentation/widgets/live_food_tracking_cancel_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -662,6 +663,7 @@ class _LiveFoodTrackingScreenState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        LiveFoodTrackingPayNow(orderId: widget.orderId),
         const LiveFoodTrackingLocationDetails(),
         const SizedBox(height: 16),
         LiveFoodTrackingOrderSummary(currentState: currentState),
@@ -675,6 +677,7 @@ class _LiveFoodTrackingScreenState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        LiveFoodTrackingPayNow(orderId: widget.orderId),
         LiveFoodTrackingRider(orderId: widget.orderId),
         const SizedBox(height: 16),
         const LiveFoodTrackingLocationDetails(),

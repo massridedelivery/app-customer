@@ -17,16 +17,22 @@ import 'package:go_router/go_router.dart';
 /// messenger/food order ([orderId]) — exactly one must be provided.
 /// On PAID it replaces itself with [onPaidRoute] (defaults to the ride
 /// live screen for jobs / messenger tracking for orders).
+///
+/// [exitRoute] is for an order that can't fall back to cash (food, held until
+/// paid): leaving the QR replaces it with that route instead of popping, and
+/// the "pay cash instead" button is hidden.
 class PromptPayQrScreen extends ConsumerStatefulWidget {
   final String? jobId;
   final String? orderId;
   final String? onPaidRoute;
+  final String? exitRoute;
 
   const PromptPayQrScreen({
     super.key,
     this.jobId,
     this.orderId,
     this.onPaidRoute,
+    this.exitRoute,
   }) : assert(
           (jobId != null) ^ (orderId != null),
           'Provide exactly one of jobId or orderId',
@@ -43,6 +49,20 @@ class _PromptPayQrScreenState extends ConsumerState<PromptPayQrScreen> {
         ? '/live/${widget.jobId}'
         : '/messenger/tracking/${widget.orderId}';
   }
+
+  /// Leave the QR without paying.
+  void _leave() {
+    final exit = widget.exitRoute;
+    if (exit != null) {
+      context.pushReplacement(exit);
+    } else if (context.canPop()) {
+      context.pop();
+    }
+  }
+
+  /// Cash is offered only where the order can switch to it.
+  String? _cashLabel(AppLocalizations l10n) =>
+      widget.exitRoute == null ? l10n.payPayCashInstead : null;
 
   @override
   void initState() {
@@ -87,11 +107,11 @@ class _PromptPayQrScreenState extends ConsumerState<PromptPayQrScreen> {
               content: Text(AppLocalizations.of(context)!.payQrVoidedTitle),
             ),
           );
-        if (context.canPop()) context.pop();
+        _leave();
       }
     });
 
-    return Scaffold(
+    final scaffold = Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text(
@@ -110,6 +130,14 @@ class _PromptPayQrScreenState extends ConsumerState<PromptPayQrScreen> {
         ),
       ),
     );
+    if (widget.exitRoute == null) return scaffold;
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _leave();
+      },
+      child: scaffold,
+    );
   }
 
   Widget _buildBody(PromptPayState state) {
@@ -127,8 +155,8 @@ class _PromptPayQrScreenState extends ConsumerState<PromptPayQrScreen> {
         primaryLabel: l10n.payTryAgain,
         onPrimary: () =>
             ref.read(promptPayControllerProvider.notifier).retry(),
-        secondaryLabel: l10n.payPayCashInstead,
-        onSecondary: () => context.pop(),
+        secondaryLabel: _cashLabel(l10n),
+        onSecondary: _leave,
       );
     }
 
@@ -139,7 +167,7 @@ class _PromptPayQrScreenState extends ConsumerState<PromptPayQrScreen> {
         title: l10n.payQrVoidedTitle,
         subtitle: l10n.payVoidedSubtitle,
         primaryLabel: l10n.payBack,
-        onPrimary: () => context.pop(),
+        onPrimary: _leave,
       );
     }
 
@@ -152,8 +180,8 @@ class _PromptPayQrScreenState extends ConsumerState<PromptPayQrScreen> {
         primaryLabel: l10n.payQrCreateNew,
         onPrimary: () =>
             ref.read(promptPayControllerProvider.notifier).retry(),
-        secondaryLabel: l10n.payPayCashInstead,
-        onSecondary: () => context.pop(),
+        secondaryLabel: _cashLabel(l10n),
+        onSecondary: _leave,
       );
     }
 
@@ -166,8 +194,8 @@ class _PromptPayQrScreenState extends ConsumerState<PromptPayQrScreen> {
         primaryLabel: l10n.payQrCreateNew,
         onPrimary: () =>
             ref.read(promptPayControllerProvider.notifier).retry(),
-        secondaryLabel: l10n.payPayCashInstead,
-        onSecondary: () => context.pop(),
+        secondaryLabel: _cashLabel(l10n),
+        onSecondary: _leave,
       );
     }
 

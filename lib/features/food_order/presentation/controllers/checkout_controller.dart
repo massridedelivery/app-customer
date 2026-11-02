@@ -337,6 +337,7 @@ class Checkout extends _$Checkout {
     required double lat,
     required double lng,
     required String address,
+    double? payable,
   }) async {
     if (restaurantId.isEmpty || cartItems.isEmpty) {
       state = state.copyWith(error: 'ไม่มีสินค้าในตะกร้า');
@@ -357,7 +358,10 @@ class Checkout extends _$Checkout {
       lng: lng,
       address: address,
       notes: notes,
-      paymentMethod: state.paymentMethod,
+      // Nothing left to pay (a coupon covers it all): no QR to scan.
+      paymentMethod: payable != null && payable <= 0
+          ? 'CASH'
+          : state.paymentMethod,
       tier: state.selectedDeliveryOption,
       promoCodes: state.appliedPromoCodes.isNotEmpty
           ? state.appliedPromoCodes

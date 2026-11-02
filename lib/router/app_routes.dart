@@ -673,6 +673,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             jobId: jobId,
             orderId: orderId,
             onPaidRoute: onPaidRoute,
+            exitRoute: extra['exitRoute'] as String?,
           );
         },
       ),

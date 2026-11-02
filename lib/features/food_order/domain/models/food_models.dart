@@ -317,6 +317,9 @@ abstract class FoodOrderModel with _$FoodOrderModel {
     @JsonKey(name: 'promo_discount') @Default(0.0) double promoDiscount,
     @JsonKey(name: 'total_amount') @Default(0.0) double totalAmount,
     @JsonKey(name: 'payment_method') @Default('CASH') String paymentMethod,
+    // PENDING while a PromptPay/card order waits to be paid (the restaurant
+    // doesn't see it yet); absent for cash.
+    @JsonKey(name: 'payment_status') String? paymentStatus,
     @Default('STANDARD') String tier,
     @JsonKey(name: 'delivery_lat') @Default(0.0) double deliveryLat,
     @JsonKey(name: 'delivery_lng') @Default(0.0) double deliveryLng,

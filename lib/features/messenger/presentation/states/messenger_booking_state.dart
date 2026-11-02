@@ -1,3 +1,4 @@
+import 'package:customer_app/core/constants/feature_flags.dart';
 import 'package:customer_app/features/messenger/domain/models/messenger_estimate.dart';
 import 'package:customer_app/features/messenger/domain/models/messenger_vehicle_type.dart';
 import 'package:customer_app/features/messenger/presentation/util/delivery_service_levels.dart';
@@ -18,7 +19,9 @@ abstract class MessengerBookingState with _$MessengerBookingState {
     double? lengthCm,
     double? widthCm,
     double? heightCm,
-    @Default('CASH') String paymentMethod,
+    // PromptPay first while it's offered; the customer can still pick cash.
+    @Default(FeatureFlags.messengerPromptPayEnabled ? 'PROMPTPAY' : 'CASH')
+    String paymentMethod,
     // Who pays the delivery fee: 'SENDER' (default) or 'RECIPIENT' (dev14).
     @Default('SENDER') String payer,
     @Default(0.0) double codAmount,

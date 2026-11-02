@@ -27,12 +27,12 @@ class CheckoutPaymentSection extends ConsumerWidget {
                 Row(
                   children: [
                     Icon(
-                      checkoutState.paymentMethod == 'CASH' ? Icons.attach_money : Icons.credit_card,
+                      _icon(checkoutState.paymentMethod),
                       color: Colors.black,
                     ),
                     const SizedBox(width: 12),
                     Text(
-                      checkoutState.paymentMethod == 'CASH' ? 'เงินสด' : 'บัตรเครดิต/เดบิต',
+                      _label(checkoutState.paymentMethod),
                       style: AppTypography.body1,
                     ),
                   ],
@@ -45,6 +45,18 @@ class CheckoutPaymentSection extends ConsumerWidget {
       ),
     );
   }
+
+  static IconData _icon(String method) => switch (method) {
+        'PROMPTPAY' => Icons.qr_code_2_rounded,
+        'CARD' => Icons.credit_card,
+        _ => Icons.attach_money,
+      };
+
+  static String _label(String method) => switch (method) {
+        'PROMPTPAY' => 'พร้อมเพย์',
+        'CARD' => 'บัตรเครดิต/เดบิต',
+        _ => 'เงินสด',
+      };
 
   void _showPaymentBottomSheet(BuildContext context, WidgetRef ref, String currentPaymentMethod) {
     showModalBottomSheet(
@@ -61,6 +73,17 @@ class CheckoutPaymentSection extends ConsumerWidget {
           children: [
             Text('เลือกวิธีการชำระเงิน', style: AppTypography.heading4),
             const SizedBox(height: 20),
+            // PromptPay is paid up front: the order is held (the restaurant
+            // doesn't see it) until the QR is paid.
+            _buildPaymentOptionTile(
+              context: context,
+              ref: ref,
+              currentPaymentMethod: currentPaymentMethod,
+              id: 'PROMPTPAY',
+              title: 'พร้อมเพย์',
+              icon: Icons.qr_code_2_rounded,
+            ),
+            const SizedBox(height: 12),
             _buildPaymentOptionTile(
               context: context,
               ref: ref,

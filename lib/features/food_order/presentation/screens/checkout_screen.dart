@@ -114,7 +114,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     }
   }
 
-  void _onPlaceOrder() {
+  void _onPlaceOrder(double totalAmount) {
     final cart = ref.read(foodCartControllerProvider);
     final homeState = ref.read(homeControllerProvider);
     final location =
@@ -150,6 +150,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           lat: lat,
           lng: lng,
           address: address,
+          payable: totalAmount,
         );
   }
 
@@ -163,7 +164,21 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     ref.listen<CheckoutState>(checkoutProvider, (previous, next) {
       if (next.placedOrder != null && previous?.placedOrder == null) {
         ref.read(foodCartControllerProvider.notifier).clearCart();
-        context.pushReplacement('/food-order/tracking/${next.placedOrder!.id}');
+        final tracking = '/food-order/tracking/${next.placedOrder!.id}';
+        if (next.placedOrder!.paymentMethod.toUpperCase() == 'PROMPTPAY') {
+          // Paid up front: the restaurant sees the order once the QR is paid.
+          // Leaving the QR goes to tracking, which offers to pay again.
+          context.pushReplacement(
+            '/payment/promptpay',
+            extra: {
+              'orderId': next.placedOrder!.id,
+              'onPaidRoute': tracking,
+              'exitRoute': tracking,
+            },
+          );
+        } else {
+          context.pushReplacement(tracking);
+        }
       }
       if (next.error != null &&
           next.error != previous?.error &&
@@ -352,7 +367,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             ],
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: isPlacingOrder || _outOfArea ? null : _onPlaceOrder,
+              onPressed: isPlacingOrder || _outOfArea
+                  ? null
+                  : () => _onPlaceOrder(totalAmount),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.foundationGreen500,
                 padding: const EdgeInsets.symmetric(vertical: 16),

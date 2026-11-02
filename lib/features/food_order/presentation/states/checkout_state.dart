@@ -10,7 +10,8 @@ abstract class CheckoutState with _$CheckoutState {
     @Default('STANDARD') String selectedDeliveryOption,
     @Default('') String floorUnit,
     String? appliedPromoCode,
-    @Default('CASH') String paymentMethod,
+    // PromptPay first; the customer can still switch to cash.
+    @Default('PROMPTPAY') String paymentMethod,
     String? idempotencyKey,
     @Default(false) bool isLoading,
     @Default(false) bool isPlacingOrder,

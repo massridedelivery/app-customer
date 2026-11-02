@@ -359,7 +359,7 @@ void main() {
       expect(find.text('ใช้ 130 คะแนน −฿130'), findsOneWidget);
       // The payment method stays, even with nothing left to pay.
       expect(find.byKey(const Key('ridePaymentRow')), findsOneWidget);
-      expect(find.text('เงินสด'), findsOneWidget);
+      expect(find.text('พร้อมเพย์'), findsOneWidget);
       // S1 summary: fare, each discount on its own line in red, total.
       expect(find.text('ค่าโดยสาร'), findsOneWidget);
       expect(find.text('฿180'), findsWidgets);

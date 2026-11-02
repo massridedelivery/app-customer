@@ -240,6 +240,7 @@ class LiveRideController extends _$LiveRideController {
         driverId: liveState.driverId,
         driverName: liveState.driverJobInfo?.fullName,
         vehiclePlate: liveState.driverJobInfo?.vehiclePlate,
+        vehicleProvince: liveState.driverJobInfo?.vehicleProvince,
         vehicleColor: liveState.driverJobInfo?.vehicleColor,
         vehicleType: liveState.driverJobInfo?.vehicleModel,
         driverRating: liveState.driverJobInfo?.rating,

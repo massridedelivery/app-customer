@@ -12,6 +12,8 @@ abstract class LiveRideState with _$LiveRideState {
     String? driverId,
     String? driverName,
     String? vehiclePlate,
+    // Shown after the plate; empty for drivers who haven't added it yet.
+    String? vehicleProvince,
     String? vehicleColor,
     String? vehicleType,
     double? driverRating,

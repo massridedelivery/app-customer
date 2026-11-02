@@ -232,6 +232,7 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
           s.driverRating,
           s.vehicleType,
           s.vehiclePlate,
+          s.vehicleProvince,
           s.fare,
         ),
       ),
@@ -1059,6 +1060,9 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
     final type = (liveState.vehicleType ?? '').toLowerCase();
     final isBike = type.contains('bike') || type.contains('motor');
     final plate = liveState.vehiclePlate ?? '';
+    final province = plate.isEmpty
+        ? ''
+        : (liveState.vehicleProvince ?? '').trim();
     // Only join the parts we actually have — no "null · null" before the
     // vehicle details arrive.
     final vehicle = [
@@ -1120,6 +1124,18 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
                         style: AppTypography.heading2.copyWith(
                           fontSize: 24,
                           letterSpacing: 1,
+                        ),
+                      ),
+                    // Under the big plate, as on the plate itself; a long
+                    // name (พระนครศรีอยุธยา) ellipsizes here, never the plate.
+                    if (province.isNotEmpty)
+                      Text(
+                        province,
+                        key: const Key('liveProvince'),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTypography.caption4.copyWith(
+                          color: AppColors.semanticGrayNeutralFgHigh,
                         ),
                       ),
                     if (vehicle.isNotEmpty)

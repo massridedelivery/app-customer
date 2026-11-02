@@ -3,6 +3,7 @@ import 'package:customer_app/features/call/presentation/order_call_button.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/widgets/mass_loading_m.dart';
+import 'package:customer_app/core/utils/plate_format.dart';
 import 'package:customer_app/features/chat/domain/models/chat_message.dart';
 import 'package:customer_app/features/chat/presentation/controllers/chat_controller.dart';
 import 'package:customer_app/features/chat/presentation/widgets/chat_image_widgets.dart';
@@ -78,23 +79,28 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final chatState = ref.watch(chatControllerProvider((id: widget.jobId, kind: ChatKind.ride)));
     // Only the two fields the header needs — a whole-state watch rebuilt the
     // entire chat on every ~2s driver-location socket tick.
-    final (rideJobId, rideDriverName, rideVehicleType, rideVehiclePlate) = ref
-        .watch(
-          liveRideControllerProvider.select(
-            (s) => (s.jobId, s.driverName, s.vehicleType, s.vehiclePlate),
-          ),
-        );
+    final (rideJobId, rideDriverName, rideVehicleType, ridePlate) = ref.watch(
+      liveRideControllerProvider.select(
+        (s) => (
+          s.jobId,
+          s.driverName,
+          s.vehicleType,
+          formatPlate(s.vehiclePlate, s.vehicleProvince),
+        ),
+      ),
+    );
 
     final isActiveJob = rideJobId == widget.jobId;
     final driverName = isActiveJob
         ? (rideDriverName ?? l10n.liveChatDriver)
         : l10n.liveChatDriver;
-    // Header subtitle: car model + plate (e.g. "Honda City • กภ1234"), falling
+    // Header subtitle: car model + plate and province (e.g. "Honda City •
+    // กภ1234 กรุงเทพมหานคร"), falling
     // back to a generic label until the driver details arrive.
     final vehicleInfo = isActiveJob
         ? [
             rideVehicleType,
-            rideVehiclePlate,
+            ridePlate,
           ].where((e) => (e ?? '').trim().isNotEmpty).join('  •  ')
         : '';
     final headerSubtitle = vehicleInfo.isNotEmpty
@@ -154,6 +160,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   ),
                   Text(
                     headerSubtitle,
+                    key: const Key('chatHeaderSubtitle'),
+                    // One line in the app bar: the province, at the end, is
+                    // what an ellipsis cuts.
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: AppTypography.caption5.copyWith(
                       color: AppColors.white.withValues(alpha: 0.8),
                     ),

@@ -1,6 +1,7 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/widgets/app_filter_chip.dart';
+import 'package:customer_app/core/utils/plate_format.dart';
 import 'package:customer_app/features/live_ride/domain/models/driver_profile_model.dart';
 import 'package:customer_app/features/live_ride/presentation/controllers/rating_controller.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
@@ -179,39 +180,43 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
                               size: 32,
                             ),
                       const SizedBox(width: 12),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            widget.driverProfile?.driverInfo.fullName ??
-                                l10n.ratingDriverNameUnknown,
-                            style: AppTypography.label2,
-                          ),
-                          Text(
-                            () {
-                              final info = widget.driverProfile?.driverInfo;
-                              if (info == null) return l10n.ratingYourDriver;
-                              final parts = <String>[];
-                              if (info.vehiclePlate.isNotEmpty) {
-                                parts.add(info.vehiclePlate);
-                              }
-                              final vehicleDesc = [
-                                if (info.vehicleColor.isNotEmpty)
-                                  info.vehicleColor,
-                                if (info.vehicleModel.isNotEmpty)
-                                  info.vehicleModel,
-                              ].join(' ');
-                              if (vehicleDesc.isNotEmpty) {
-                                parts.add(vehicleDesc);
-                              }
-                              parts.add(l10n.ratingYourDriver);
-                              return parts.join('  •  ');
-                            }(),
-                            style: AppTypography.caption5.copyWith(
-                              color: AppColors.semanticGrayNeutralFgLowOnWhite,
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              widget.driverProfile?.driverInfo.fullName ??
+                                  l10n.ratingDriverNameUnknown,
+                              style: AppTypography.label2,
                             ),
-                          ),
-                        ],
+                            Text(
+                              () {
+                                final info = widget.driverProfile?.driverInfo;
+                                if (info == null) return l10n.ratingYourDriver;
+                                final parts = <String>[];
+                                final plate = formatPlate(
+                                  info.vehiclePlate,
+                                  info.vehicleProvince,
+                                );
+                                if (plate.isNotEmpty) parts.add(plate);
+                                final vehicleDesc = [
+                                  if (info.vehicleColor.isNotEmpty)
+                                    info.vehicleColor,
+                                  if (info.vehicleModel.isNotEmpty)
+                                    info.vehicleModel,
+                                ].join(' ');
+                                if (vehicleDesc.isNotEmpty) {
+                                  parts.add(vehicleDesc);
+                                }
+                                parts.add(l10n.ratingYourDriver);
+                                return parts.join('  •  ');
+                              }(),
+                              style: AppTypography.caption5.copyWith(
+                                color: AppColors.semanticGrayNeutralFgLowOnWhite,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),

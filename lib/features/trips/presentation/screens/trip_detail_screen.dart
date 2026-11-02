@@ -9,6 +9,7 @@ import 'package:customer_app/core/constants/app_icons.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/utils/map_marker_providers.dart';
 import 'package:customer_app/core/widgets/mass_loading_m.dart';
+import 'package:customer_app/core/utils/plate_format.dart';
 import 'package:customer_app/features/live_ride/presentation/controllers/rating_controller.dart';
 import 'package:customer_app/features/trips/domain/models/history_order.dart';
 import 'package:customer_app/features/trips/presentation/controllers/trip_detail_controller.dart';
@@ -448,7 +449,10 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
                 ),
                 if (driver.vehiclePlate != null)
                   Text(
-                    '${driver.vehicleModel ?? ''} • ${driver.vehiclePlate ?? ''}',
+                    [
+                      driver.vehicleModel ?? '',
+                      formatPlate(driver.vehiclePlate, driver.vehicleProvince),
+                    ].where((s) => s.isNotEmpty).join(' • '),
                     style: AppTypography.caption4.copyWith(
                       color: AppColors.semanticGrayNeutralFgMidOnWhite,
                     ),

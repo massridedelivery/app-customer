@@ -197,7 +197,11 @@ class FoodReceiptScreen extends ConsumerWidget {
                   children: [
                     Text('ชำระเงินด้วย', style: AppTypography.caption4),
                     Text(
-                      order.paymentMethod == 'CARD' ? 'บัตรเครดิต' : 'เงินสด',
+                      switch (order.paymentMethod.toUpperCase()) {
+                        'CARD' => 'บัตรเครดิต',
+                        'PROMPTPAY' => 'พร้อมเพย์',
+                        _ => 'เงินสด',
+                      },
                       style: AppTypography.label2,
                     ),
                   ],

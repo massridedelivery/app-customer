@@ -1249,13 +1249,22 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
     );
   }
 
+  /// How this ride is paid: the job's own method once it's loaded (a ride
+  /// restored after a relaunch has a fresh booking state, which now defaults
+  /// to PromptPay), else what was picked on the booking screen.
+  String _ridePaymentMethod() {
+    final fromJob = ref.watch(
+      liveRideControllerProvider.select((s) => s.paymentMethod),
+    );
+    final picked = ref.watch(bookingControllerProvider).value?.paymentMethod;
+    return (fromJob.isNotEmpty ? fromJob : (picked ?? 'CASH')).toUpperCase();
+  }
+
   /// Payment method on the left, what the rider pays on the right, with the
   /// coupon discount above it when there is one.
   Widget _buildPayTotalSection(LiveRideState liveState) {
     final l10n = AppLocalizations.of(context)!;
-    final method =
-        (ref.watch(bookingControllerProvider).value?.paymentMethod ?? 'CASH')
-            .toUpperCase();
+    final method = _ridePaymentMethod();
     final (label, icon) = switch (method) {
       'PROMPTPAY' => (l10n.promptPay, Icons.qr_code_2_rounded),
       'CARD' => (l10n.livePayCard, Icons.credit_card_rounded),
@@ -1505,9 +1514,7 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
 
   Widget _buildPaymentMethodSection() {
     final l10n = AppLocalizations.of(context)!;
-    final method =
-        (ref.watch(bookingControllerProvider).value?.paymentMethod ?? 'CASH')
-            .toUpperCase();
+    final method = _ridePaymentMethod();
     final isPromptPay = method == 'PROMPTPAY';
     final isCard = method == 'CARD';
     final label = isPromptPay

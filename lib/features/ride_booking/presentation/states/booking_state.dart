@@ -13,7 +13,8 @@ abstract class BookingState with _$BookingState {
     @Default(<NearbyDriver>[]) List<NearbyDriver> nearbyDrivers,
     double? distanceKm,
     double? durationMin,
-    @Default('CASH') String paymentMethod,
+    // PromptPay first; the customer can still switch to cash.
+    @Default('PROMPTPAY') String paymentMethod,
     String? vehicleTypeId,
     String? appliedPromoCode,
     @Default(0.0) double promoDiscount,

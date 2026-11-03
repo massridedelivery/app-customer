@@ -77,6 +77,8 @@ abstract class MessengerOrder with _$MessengerOrder {
     @JsonKey(name: 'cancelled_at') @Default('') String cancelledAt,
     @JsonKey(name: 'cancelled_by') @Default('') String cancelledBy,
     @JsonKey(name: 'cancel_reason') @Default('') String cancelReason,
+    // Who took the parcel, on the customer's reads once a driver accepts.
+    @JsonKey(name: 'driver_info') MessengerDriverInfo? driverInfo,
   }) = _MessengerOrder;
 
   factory MessengerOrder.fromJson(Map<String, dynamic> json) =>
@@ -156,4 +158,23 @@ abstract class MessengerOrder with _$MessengerOrder {
     return null;
   }
 
+}
+
+/// The assigned driver as the customer sees them: who to hand the parcel to
+/// and which vehicle to look for. No phone — calls go through the app.
+@freezed
+abstract class MessengerDriverInfo with _$MessengerDriverInfo {
+  const factory MessengerDriverInfo({
+    @JsonKey(name: 'full_name') @Default('') String fullName,
+    // Full URL of the profile photo; absent/null when the driver has none.
+    @JsonKey(name: 'avatar_url') String? avatarUrl,
+    @JsonKey(name: 'rating') @Default(0.0) double rating,
+    @JsonKey(name: 'vehicle_plate') String? vehiclePlate,
+    @JsonKey(name: 'vehicle_province') String? vehicleProvince,
+    @JsonKey(name: 'vehicle_color') String? vehicleColor,
+    @JsonKey(name: 'vehicle_model') String? vehicleModel,
+  }) = _MessengerDriverInfo;
+
+  factory MessengerDriverInfo.fromJson(Map<String, dynamic> json) =>
+      _$MessengerDriverInfoFromJson(json);
 }

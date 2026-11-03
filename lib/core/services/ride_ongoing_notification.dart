@@ -7,7 +7,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' show Color;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 /// Safety buffer added to the backend ETA before it is shown anywhere, so the
 /// app under-promises (the rider tends to arrive a little earlier than shown).
@@ -55,7 +54,6 @@ class RideOngoingNotification {
 
   String? _shownKey;
   String? _jobId;
-  String? _driverPhone;
 
   /// Reflects [state] in the notification: shows or updates it while a driver
   /// is assigned, clears it once the ride is over.
@@ -93,7 +91,6 @@ class RideOngoingNotification {
           );
 
     _jobId = state.jobId;
-    _driverPhone = state.driverProfile?.driverInfo.phone;
     final key = '$title|$body|${eta?.millisecondsSinceEpoch}';
     if (key == _shownKey) return;
     _shownKey = key;
@@ -157,13 +154,10 @@ class RideOngoingNotification {
     final jobId = _jobId ?? response.payload?.split('/').last;
     if (response.actionId == actionChat && jobId != null) {
       _ref.read(routerProvider).go('/chat/$jobId');
-    } else if (response.actionId == actionCall) {
-      final phone = (_driverPhone ?? '').trim();
-      if (phone.isNotEmpty) {
-        launchUrl(Uri(scheme: 'tel', path: phone));
-      } else if (jobId != null) {
-        _ref.read(routerProvider).go('/live/$jobId');
-      }
+    } else if (response.actionId == actionCall && jobId != null) {
+      // The driver's number is never sent (driver_info.phone is empty): the
+      // call is the in-app one, on the live ride screen.
+      _ref.read(routerProvider).go('/live/$jobId');
     }
   }
 

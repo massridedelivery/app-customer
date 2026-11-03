@@ -167,9 +167,12 @@ class LiveRideController extends _$LiveRideController {
             jobStatus: status,
             cancelReason: status == 'CANCELLED' ? reason : null,
           );
-          // A driver was (or is being) assigned but we don't have their details
-          // yet — pull the authoritative job so the confirming screen populates.
-          if (!_hasDriver && status != 'PENDING' && status != 'CANCELLED') {
+          // Pull the authoritative job on every live status so the driver's
+          // details (name, photo, vehicle) follow the status without waiting
+          // for the next poll. Ended rides resolve through their own path.
+          if (status != 'PENDING' &&
+              status != 'CANCELLED' &&
+              status != 'COMPLETED') {
             getDriverProfile(silent: true);
           }
         }

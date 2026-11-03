@@ -296,6 +296,8 @@ abstract class FoodDriverInfoModel with _$FoodDriverInfoModel {
   const factory FoodDriverInfoModel({
     @JsonKey(name: 'full_name') String? fullName,
     String? phone,
+    // Full URL of the driver's profile photo; absent/null when there is none.
+    @JsonKey(name: 'avatar_url') String? avatarUrl,
     double? rating,
     @JsonKey(name: 'vehicle_plate') String? vehiclePlate,
     @JsonKey(name: 'vehicle_color') String? vehicleColor,

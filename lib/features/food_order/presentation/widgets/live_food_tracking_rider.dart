@@ -6,6 +6,7 @@ import 'package:customer_app/features/call/presentation/order_call_button.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
+import 'package:customer_app/core/widgets/driver_avatar.dart';
 import 'package:customer_app/features/food_order/presentation/controllers/live_food_tracking_controller.dart';
 
 class LiveFoodTrackingRider extends ConsumerWidget {
@@ -60,14 +61,12 @@ class LiveFoodTrackingRider extends ConsumerWidget {
         children: [
           Row(
             children: [
-              CircleAvatar(
-                radius: 20,
+              DriverAvatar(
+                url: order?.driverInfo?.avatarUrl,
+                size: 40,
                 backgroundColor: AppColors.foundationGreen100,
-                child: const Icon(
-                  Icons.sports_motorsports,
-                  color: AppColors.foundationGreen600,
-                  size: 22,
-                ),
+                placeholderIcon: Icons.sports_motorsports,
+                placeholderColor: AppColors.foundationGreen600,
               ),
               const SizedBox(width: 12),
               Expanded(

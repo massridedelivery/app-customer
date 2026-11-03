@@ -1090,6 +1090,9 @@ class AppLocalizationsTh extends AppLocalizations {
   String get msgrPayCashInstead => 'จ่ายเงินสดแทน';
 
   @override
+  String get msgrNothingToPayNote => 'ไม่มียอดต้องชำระ จึงบันทึกเป็นเงินสด';
+
+  @override
   String get msgrPayCashConfirm =>
       'เปลี่ยนเป็นจ่ายเงินสดกับคนขับที่ปลายทาง/จุดรับแทนการสแกน QR ใช่หรือไม่?';
 
@@ -3451,6 +3454,10 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get ridePaymentExtrasNote => 'ค่าทางด่วน / ค่ารอ ชำระด้วยวิธีนี้';
+
+  @override
+  String get rideNothingToPayNote =>
+      'ไม่มียอดต้องชำระ · ค่าทางด่วน / ค่ารอ (ถ้ามี) จ่ายเงินสด';
 
   @override
   String get rideChooseCoupon => 'เลือกคูปอง';

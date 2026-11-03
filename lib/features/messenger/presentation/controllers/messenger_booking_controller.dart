@@ -241,7 +241,7 @@ class MessengerBookingController extends _$MessengerBookingController {
             dropoffLng: home.dropoffLocation!.longitude,
             packageSizeTier: state.sizeTier,
             packageWeightKg: state.weightKg,
-            paymentMethod: state.paymentMethod,
+            paymentMethod: state.nothingToPay ? 'CASH' : state.paymentMethod,
             deliveryType: state.deliveryType,
             pickupAddress: home.pickupAddress,
             dropoffAddress: home.dropoffAddress,

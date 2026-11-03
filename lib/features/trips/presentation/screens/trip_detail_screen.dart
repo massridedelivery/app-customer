@@ -616,6 +616,16 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
     );
   }
 
+  /// The backend's payment enum in words — never show `CASH` / `PROMPTPAY`.
+  String _paymentLabel(String method) => switch (method.toUpperCase()) {
+    'CASH' => _l10n.cashLabel,
+    'PROMPTPAY' => _l10n.promptPay,
+    'CARD' => _l10n.livePayCard,
+    'COD' => _l10n.livePayCod,
+    '' => _l10n.livePayUnspecified,
+    _ => method,
+  };
+
   Widget _buildPaymentCard(TripDetailState state) {
     String paymentMethod = '';
     String serviceName = '';
@@ -651,7 +661,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
       ];
     } else if (state.foodDetails != null) {
       final food = state.foodDetails!;
-      paymentMethod = food.paymentMethod ?? _l10n.cashLabel;
+      paymentMethod = food.paymentMethod ?? 'CASH';
       serviceName = widget.orderType?.toUpperCase() == 'MART'
           ? 'MassMart'
           : 'MassFood';
@@ -670,7 +680,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
         children: [
           _buildRowInfo(
             icon: Icons.account_balance_wallet_outlined,
-            title: paymentMethod,
+            title: _paymentLabel(paymentMethod),
             subtitle: serviceName,
           ),
           if (breakdownRows.isNotEmpty) ...[

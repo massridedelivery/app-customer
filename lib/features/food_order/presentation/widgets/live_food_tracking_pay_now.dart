@@ -18,11 +18,15 @@ class LiveFoodTrackingPayNow extends ConsumerWidget {
     final order = ref.watch(
       liveFoodTrackingControllerProvider.select((s) => s.order),
     );
-    final unpaid = order != null &&
+    final unpaid =
+        order != null &&
         order.paymentMethod.toUpperCase() == 'PROMPTPAY' &&
         (order.paymentStatus ?? '').toUpperCase() == 'PENDING' &&
         order.status.toUpperCase() != 'CANCELLED';
     if (!unpaid) return const SizedBox.shrink();
+    // Held at ฿0 (the app's total said there was something to pay, the
+    // server's didn't): there's no QR for ฿0, so it can never be released.
+    final cantPay = order.totalAmount <= 0;
 
     final tracking = '/food-order/tracking/$orderId';
     return Padding(
@@ -46,37 +50,46 @@ class LiveFoodTrackingPayNow extends ConsumerWidget {
                 ),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: Text('ยังไม่ได้ชำระเงิน', style: AppTypography.label2),
+                  child: Text(
+                    cantPay
+                        ? 'ชำระเงินคำสั่งซื้อนี้ไม่ได้'
+                        : 'ยังไม่ได้ชำระเงิน',
+                    style: AppTypography.label2,
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 4),
             Text(
-              'ร้านจะได้รับคำสั่งซื้อหลังชำระเงินด้วยพร้อมเพย์',
+              cantPay
+                  ? 'ยอดเป็น ฿0 จึงสร้าง QR ไม่ได้ กรุณายกเลิกแล้วสั่งใหม่'
+                  : 'ร้านจะได้รับคำสั่งซื้อหลังชำระเงินด้วยพร้อมเพย์',
               style: AppTypography.body3.copyWith(
                 color: AppColors.textSecondary,
               ),
             ),
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                key: const Key('foodPayNowButton'),
-                onPressed: () => context.pushReplacement(
-                  '/payment/promptpay',
-                  extra: {
-                    'orderId': orderId,
-                    'onPaidRoute': tracking,
-                    'exitRoute': tracking,
-                  },
+            if (!cantPay) ...[
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  key: const Key('foodPayNowButton'),
+                  onPressed: () => context.pushReplacement(
+                    '/payment/promptpay',
+                    extra: {
+                      'orderId': orderId,
+                      'onPaidRoute': tracking,
+                      'exitRoute': tracking,
+                    },
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  child: Text('ชำระเงิน', style: AppTypography.label2),
                 ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                ),
-                child: Text('ชำระเงิน', style: AppTypography.label2),
               ),
-            ),
+            ],
           ],
         ),
       ),

@@ -1098,6 +1098,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get msgrPayCashInstead => 'Pay cash instead';
 
   @override
+  String get msgrNothingToPayNote =>
+      'Nothing to pay, so it is recorded as cash';
+
+  @override
   String get msgrPayCashConfirm =>
       'Pay the driver in cash at pickup/drop-off instead of scanning the QR?';
 
@@ -3494,6 +3498,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ridePaymentExtrasNote => 'Tolls / waiting fees are paid this way';
+
+  @override
+  String get rideNothingToPayNote =>
+      'Nothing to pay · tolls / waiting fees (if any) are paid in cash';
 
   @override
   String get rideChooseCoupon => 'Choose a coupon';

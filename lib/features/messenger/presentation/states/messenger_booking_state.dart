@@ -74,4 +74,9 @@ abstract class MessengerBookingState with _$MessengerBookingState {
   /// Fare to display/charge for the selected delivery mode (server-computed).
   double get displayTotalFare =>
       selectedServiceLevel?.totalFare ?? estimate?.totalFare ?? 0;
+
+  /// A coupon covers the whole fee. There is no QR for ฿0 (the backend won't
+  /// mint one, and an unpaid PromptPay order can't be marked delivered), so
+  /// such an order is placed as cash.
+  bool get nothingToPay => estimate != null && displayTotalFare <= 0;
 }

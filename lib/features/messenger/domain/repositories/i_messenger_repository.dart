@@ -20,6 +20,8 @@ abstract class IMessengerRepository {
     double? packageHeightCm,
     String? promoCode,
     String? deliveryType,
+    // Quote the fee with all the loyalty points it allows.
+    bool usePoints = false,
   });
 
   /// POST /api/messenger/customer/orders → 201 Order (PENDING)
@@ -46,6 +48,8 @@ abstract class IMessengerRepository {
     // 'SENDER' (default) | 'RECIPIENT' (dev14). RECIPIENT dispatches unpaid and
     // the driver collects the fee at delivery.
     String? payer,
+    // Spend the points the estimate offered (refused with a POINTS_* code).
+    bool usePoints = false,
   });
 
   /// GET /api/messenger/customer/orders — the customer's messenger orders,

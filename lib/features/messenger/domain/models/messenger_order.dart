@@ -73,6 +73,10 @@ abstract class MessengerOrder with _$MessengerOrder {
     @JsonKey(name: 'encoded_polyline') String? encodedPolyline,
     @JsonKey(name: 'platform_commission') @Default(0.0) double platformCommission,
     @JsonKey(name: 'promo_id') @Default('') String promoId,
+    // Loyalty points spent on the fee (refunded if the order is cancelled);
+    // already netted out of total_amount and amount_due.
+    @JsonKey(name: 'points_used') @Default(0) int pointsUsed,
+    @JsonKey(name: 'points_discount') @Default(0.0) double pointsDiscount,
     @JsonKey(name: 'created_at') @Default('') String createdAt,
     @JsonKey(name: 'accepted_at') @Default('') String acceptedAt,
     @JsonKey(name: 'arrived_at_pickup_at') @Default('') String arrivedAtPickupAt,
@@ -135,16 +139,16 @@ abstract class MessengerOrder with _$MessengerOrder {
   double get amountDue {
     final raw = amountDueRaw;
     if (raw != null) return raw < 0 ? 0 : raw;
-    final due = fare - discount;
+    final due = fare - discount - pointsDiscount;
     return due < 0 ? 0 : due;
   }
 
-  /// The delivery fee for this parcel (fare − discount), regardless of who pays
+  /// The delivery fee for this parcel (fare − discount − points), regardless of who pays
   /// or where it's collected. Use this for the "ยอดชำระ/ชำระปลายทาง" total —
   /// unlike [amountDue], it is never 0 for a recipient-pays order (where the
   /// sender's own `amount_due` is 0 but the fee still needs to be shown).
   double get deliveryFee {
-    final fee = fare - discount;
+    final fee = fare - discount - pointsDiscount;
     return fee < 0 ? 0 : fee;
   }
 

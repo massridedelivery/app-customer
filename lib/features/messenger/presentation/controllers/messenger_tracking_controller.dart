@@ -1,3 +1,4 @@
+import 'package:customer_app/features/profile/presentation/controllers/loyalty_providers.dart';
 import 'package:customer_app/features/profile/presentation/screens/promo_list_screen.dart';
 import 'dart:async';
 
@@ -155,6 +156,11 @@ class MessengerTrackingController extends _$MessengerTrackingController {
       await ref.read(messengerRepositoryProvider).cancelOrder(id, reason: reason);
       // BE returns the promo code on cancel — reload the coupon list.
       ref.invalidate(promoListProvider);
+      // …and the points spent on it: the balance reads again.
+      if (order.pointsUsed > 0) {
+        ref.invalidate(loyaltySummaryProvider);
+        ref.invalidate(pointsHistoryProvider);
+      }
       await _loadOrder(id);
       state = state.copyWith(isCancelling: false);
       return true;

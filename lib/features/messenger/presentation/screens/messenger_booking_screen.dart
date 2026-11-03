@@ -1,3 +1,5 @@
+import 'package:customer_app/features/ride_booking/presentation/widgets/ride_points_widgets.dart';
+import 'package:customer_app/features/profile/presentation/widgets/loyalty_format.dart';
 import 'package:customer_app/core/utils/app_dates.dart';
 import 'package:customer_app/core/constants/app_assets.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
@@ -1053,6 +1055,7 @@ class _MessengerBookingScreenState
     // voucher picked elsewhere is set there without passing this screen.
     final String promoCode = bookingState.promoCode;
     final bool hasPromo = promoCode.isNotEmpty;
+    final pointsQuote = bookingState.pointsQuote;
     final String method = bookingState.paymentMethod.toUpperCase();
     return _card(
       child: Column(
@@ -1212,6 +1215,27 @@ class _MessengerBookingScreenState
               ),
             ),
           ),
+          // Loyalty points, as on the ride confirm screen. Hidden when the
+          // backend doesn't quote them or the admin switched them off.
+          if (pointsQuote != null && !pointsQuote.hidden) ...[
+            const SizedBox(height: 12),
+            Container(
+              decoration: BoxDecoration(
+                color: AppColors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.foundationGrayscale300),
+              ),
+              child: RidePointsRow(
+                key: const Key('msgrPointsRow'),
+                quote: pointsQuote,
+                on: bookingState.usePoints,
+                onToggle: ref
+                    .read(messengerBookingControllerProvider.notifier)
+                    .setUsePoints,
+                onLogin: () => ensureLoggedIn(context, ref),
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -1299,6 +1323,18 @@ class _MessengerBookingScreenState
   /// `service_levels[]` splits the size and express surcharges; the top-level
   /// `surcharge` lumps them together (and only for INSTANT), so it must not be
   /// labelled as the size fee.
+  /// "ใช้ N คะแนน −฿X" while the points go on this booking.
+  Widget? _pointsLine(MessengerBookingState bookingState) {
+    final quote = bookingState.pointsQuote;
+    if (!bookingState.spendsPoints || quote == null) return null;
+    return _priceRow(
+      _l10n.ridePointsLine(fmtPoints(quote.usedPoints)),
+      '-฿${fmtBaht(quote.discount)}',
+      key: const Key('msgrPointsLine'),
+      valueColor: AppColors.foundationGreen500,
+    );
+  }
+
   List<Widget> _fareLines(
     MessengerBookingState bookingState,
     MessengerEstimate estimate,
@@ -1326,6 +1362,7 @@ class _MessengerBookingScreenState
             '-฿${level.discount.toStringAsFixed(0)}',
             valueColor: AppColors.foundationGreen500,
           ),
+        ?_pointsLine(bookingState),
       ];
     }
     // No per-mode pricing from BE: show the top-level lines as they are.
@@ -1345,11 +1382,18 @@ class _MessengerBookingScreenState
           '-฿${estimate.discount.toStringAsFixed(0)}',
           valueColor: AppColors.foundationGreen500,
         ),
+      ?_pointsLine(bookingState),
     ];
   }
 
-  Widget _priceRow(String label, String value, {Color? valueColor}) {
+  Widget _priceRow(
+    String label,
+    String value, {
+    Color? valueColor,
+    Key? key,
+  }) {
     return Padding(
+      key: key,
       padding: const EdgeInsets.symmetric(vertical: 2),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,

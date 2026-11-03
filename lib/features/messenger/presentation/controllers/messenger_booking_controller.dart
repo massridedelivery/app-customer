@@ -148,6 +148,18 @@ class MessengerBookingController extends _$MessengerBookingController {
     _scheduleEstimate();
   }
 
+  /// Points on/off: the estimate says what they take off.
+  void setUsePoints(bool on) {
+    if (on == state.usePoints) return;
+    state = state.copyWith(usePoints: on);
+    _scheduleEstimate();
+  }
+
+  void _refreshPoints() {
+    ref.invalidate(loyaltySummaryProvider);
+    ref.invalidate(pointsHistoryProvider);
+  }
+
   void clearError() {
     state = state.copyWith(error: null);
   }
@@ -199,6 +211,7 @@ class MessengerBookingController extends _$MessengerBookingController {
             packageHeightCm: state.heightCm,
             promoCode: state.promoCode,
             deliveryType: state.deliveryType,
+            usePoints: state.usePoints,
           );
       // Keep the selection valid: if the chosen mode was disabled by admin (not
       // in the returned service_levels), fall back to the first offered mode.
@@ -254,8 +267,11 @@ class MessengerBookingController extends _$MessengerBookingController {
             codAmount: state.isCod ? state.codAmount : null,
             promoCode: state.promoCode,
             payer: state.payer,
+            usePoints: state.spendsPoints,
           );
       await ref.read(welcomePromoStoreProvider).consume(state.promoCode);
+      // The points are spent: the balance on other screens reads again.
+      if (order.pointsUsed > 0) _refreshPoints();
       state = state.copyWith(isCreating: false, createdOrderId: order.id);
     } catch (e) {
       final msg = e.toString().replaceFirst('Exception: ', '');

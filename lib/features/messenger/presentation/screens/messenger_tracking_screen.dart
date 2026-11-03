@@ -1,3 +1,4 @@
+import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
 import 'package:customer_app/features/profile/presentation/widgets/loyalty_format.dart';
 import 'package:customer_app/features/call/domain/call_models.dart';
 import 'package:customer_app/features/call/presentation/order_call_button.dart';
@@ -625,6 +626,24 @@ class _MessengerTrackingScreenState
 
   // ─── Status ────────────────────────────────────────────────────────────────
 
+  /// Same parcel again from the same two places (no driver took this one).
+  void _rebook(MessengerOrder order) {
+    final home = ref.read(homeControllerProvider.notifier);
+    if (order.pickupLat != 0 && order.pickupLng != 0) {
+      home.setPickupLocation(
+        LatLng(order.pickupLat, order.pickupLng),
+        order.pickupAddress,
+      );
+    }
+    if (order.dropoffLat != 0 && order.dropoffLng != 0) {
+      home.setDropoffLocation(
+        LatLng(order.dropoffLat, order.dropoffLng),
+        order.dropoffAddress,
+      );
+    }
+    context.pushReplacement('/messenger-booking');
+  }
+
   Widget _buildStatusCard(MessengerOrder order) {
     if (order.isCancelled) {
       return _card(
@@ -647,9 +666,33 @@ class _MessengerTrackingScreenState
             if (order.cancelReason.isNotEmpty) ...[
               const SizedBox(height: 8),
               Text(
-                _l10n.msgrCancelReason(order.cancelReason),
+                // "ไม่พบคนขับในขณะนี้" reads on its own; a customer's own
+                // reason keeps the "เหตุผล:" label.
+                order.noDriverFound
+                    ? order.cancelReason
+                    : _l10n.msgrCancelReason(order.cancelReason),
                 style: AppTypography.body2.copyWith(
                   color: AppColors.textSecondary,
+                ),
+              ),
+            ],
+            if (order.noDriverFound) ...[
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  key: const Key('msgrRebook'),
+                  onPressed: () => _rebook(order),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(_l10n.bookAgain, style: AppTypography.heading6),
                 ),
               ),
             ],

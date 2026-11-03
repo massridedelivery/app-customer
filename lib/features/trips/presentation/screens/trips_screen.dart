@@ -105,6 +105,11 @@ class _TripsScreenState extends ConsumerState<TripsScreen> {
         ),
       );
     }
+    // Keep the ride/food feed alive while this screen is up. It is
+    // auto-disposed, and the parcel tab doesn't watch it: switching parcel →
+    // ride fetched into an instance nobody held, which was dropped before the
+    // reply came back, so the ride tab read "no trips" until "ทั้งหมด".
+    ref.listen(tripsControllerProvider, (_, _) {});
     return Scaffold(
       backgroundColor: AppColors.semanticGrayNeutralBgWhite,
       appBar: AppBar(

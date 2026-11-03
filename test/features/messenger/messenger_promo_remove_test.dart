@@ -99,4 +99,31 @@ void main() {
     await _centre(tester, find.text('WELCOME20'));
     expect(find.text('WELCOME20'), findsOneWidget);
   });
+
+  testWidgets('back from the coupon screen: no field takes the focus', (
+    tester,
+  ) async {
+    await _pump(tester, '');
+    final phone = find.byWidgetPredicate(
+      (w) => w is TextField && w.keyboardType == TextInputType.phone,
+    );
+    await _centre(tester, phone.first);
+    await tester.tap(phone.first);
+    await tester.pump();
+    expect(FocusManager.instance.primaryFocus?.context?.widget, isNotNull);
+
+    await _centre(tester, find.byKey(const Key('msgrPromoRow')));
+    await tester.tap(find.byKey(const Key('msgrPromoRow')));
+    await tester.pumpAndSettle();
+    // Leave the coupon screen without picking (its own back button).
+    tester.state<NavigatorState>(find.byType(Navigator)).pop();
+    await tester.pumpAndSettle();
+
+    final focused = FocusManager.instance.primaryFocus?.context;
+    expect(
+      focused?.findAncestorWidgetOfExactType<EditableText>(),
+      isNull,
+      reason: 'the keyboard must not come back over the summary',
+    );
+  });
 }

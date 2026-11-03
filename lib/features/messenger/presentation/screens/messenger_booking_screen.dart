@@ -1140,6 +1140,9 @@ class _MessengerBookingScreenState
             key: const Key('msgrPromoRow'),
             borderRadius: BorderRadius.circular(12),
             onTap: () async {
+              // Drop the field focus first: the route would hand it back on
+              // return and pop the keyboard over the price summary.
+              FocusManager.instance.primaryFocus?.unfocus();
               final code = await Navigator.of(context).push<String>(
                 MaterialPageRoute(
                   builder: (_) =>

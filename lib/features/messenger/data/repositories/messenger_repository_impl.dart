@@ -1,3 +1,4 @@
+import 'package:customer_app/core/error/api_error.dart';
 import 'package:customer_app/core/managers/providers.dart';
 import 'package:customer_app/core/services/api_service.dart';
 import 'package:customer_app/core/services/idempotency.dart';
@@ -29,6 +30,12 @@ class MessengerRepositoryImpl implements IMessengerRepository {
         : null;
     throw Exception(message ?? fallback);
   }
+
+  /// A refusal of the discount code rather than of the parcel.
+  static bool _isCodeRefusal(String code) =>
+      code.startsWith('PROMO_') ||
+      code.startsWith('VOUCHER_') ||
+      code.startsWith('REFERRAL_');
 
   @override
   Future<List<MessengerVehicleType>> getMessengerVehicleTypes() async {
@@ -91,6 +98,19 @@ class MessengerRepositoryImpl implements IMessengerRepository {
         response.data as Map<String, dynamic>,
       );
     } on DioException catch (e) {
+      // A code this customer can't use (v1.6.16: PROMO_USAGE_LIMIT,
+      // PROMO_NEW_USERS_ONLY, …) is refused here as at checkout, with a
+      // message in the user's language.
+      final data = e.response?.data;
+      final code = data is Map ? data['code']?.toString() : null;
+      if (code != null && _isCodeRefusal(code)) {
+        throw ApiError(
+          code: code,
+          statusCode: e.response?.statusCode,
+          message: ((data as Map)['error'] ?? data['message'] ?? code)
+              .toString(),
+        );
+      }
       // 409 = no delivery mode is currently enabled (SCRUM-71).
       if (e.response?.statusCode == 409) {
         throw Exception('NO_DELIVERY_MODES');

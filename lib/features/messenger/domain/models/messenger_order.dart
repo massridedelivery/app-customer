@@ -85,6 +85,10 @@ abstract class MessengerOrder with _$MessengerOrder {
     @JsonKey(name: 'cancelled_at') @Default('') String cancelledAt,
     @JsonKey(name: 'cancelled_by') @Default('') String cancelledBy,
     @JsonKey(name: 'cancel_reason') @Default('') String cancelReason,
+    // Why the system cancelled it (v1.6.16): NO_DRIVER_AVAILABLE |
+    // PAYMENT_FAILED; empty for a customer cancel. cancel_reason is already
+    // in the user's language.
+    @JsonKey(name: 'cancel_reason_code') @Default('') String cancelReasonCode,
     // Who took the parcel, on the customer's reads once a driver accepts.
     @JsonKey(name: 'driver_info') MessengerDriverInfo? driverInfo,
   }) = _MessengerOrder;
@@ -96,6 +100,10 @@ abstract class MessengerOrder with _$MessengerOrder {
   bool get isDelivered => status.toUpperCase() == 'DELIVERED';
   bool get isCancelled => status.toUpperCase() == 'CANCELLED';
   bool get isTerminal => isDelivered || isCancelled;
+
+  /// Cancelled because no driver took it: offer to book it again.
+  bool get noDriverFound =>
+      isCancelled && cancelReasonCode.toUpperCase() == 'NO_DRIVER_AVAILABLE';
 
   /// Customer may cancel while PENDING or ACCEPTED (spec §1 transitions).
   bool get isCancellable {

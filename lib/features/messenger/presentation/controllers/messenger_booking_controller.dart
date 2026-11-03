@@ -1,3 +1,4 @@
+import 'package:customer_app/core/error/api_error.dart';
 import 'package:customer_app/features/profile/presentation/controllers/loyalty_providers.dart';
 import 'package:customer_app/features/profile/data/welcome_promo_store.dart';
 import 'dart:async';
@@ -224,6 +225,26 @@ class MessengerBookingController extends _$MessengerBookingController {
         isEstimating: false,
         estimate: result,
         deliveryType: validType,
+      );
+    } on ApiError catch (e) {
+      // The code can't be used by this customer: say why (the backend's own
+      // words), take it off and price the parcel without it — the same as
+      // the "✕" on the code row.
+      if (state.promoCode.isNotEmpty) {
+        state = state.copyWith(
+          isEstimating: false,
+          promoCode: '',
+          error: e.message,
+        );
+        // Debounced, so the message is shown before the next estimate
+        // clears the error.
+        _scheduleEstimate();
+        return;
+      }
+      state = state.copyWith(
+        isEstimating: false,
+        estimate: null,
+        error: friendlyError(e, fallback: _l10n.msgrEstimateFailed),
       );
     } catch (e) {
       final msg = e.toString().replaceFirst('Exception: ', '');

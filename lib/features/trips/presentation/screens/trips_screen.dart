@@ -706,7 +706,7 @@ class _MessengerOrderListItem extends ConsumerWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                '฿${order.amountDue.toStringAsFixed(0)}',
+                '฿${order.listPrice.toStringAsFixed(0)}',
                 style: AppTypography.body3.copyWith(
                   fontWeight: order.isCancelled
                       ? FontWeight.normal

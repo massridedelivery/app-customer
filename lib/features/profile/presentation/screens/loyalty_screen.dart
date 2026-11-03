@@ -124,6 +124,10 @@ class _Body extends ConsumerWidget {
           style: AppTypography.body3.copyWith(color: AppColors.textSecondary),
         ),
       ],
+      if (summary.spending case final spending?) ...[
+        const SizedBox(height: 24),
+        _SpendingCard(spending: spending),
+      ],
       const SizedBox(height: 24),
       Text(l10n.pointsHistory, style: AppTypography.heading5),
       const SizedBox(height: 8),
@@ -223,6 +227,85 @@ class _BalanceCard extends StatelessWidget {
           Text(
             l10n.pointsWorth(fmtBaht(summary.balanceBaht)),
             style: AppTypography.body2.copyWith(color: Colors.white70),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// "ใช้บริการไปแล้ว": the total and each service, as the API counts them.
+class _SpendingCard extends StatelessWidget {
+  const _SpendingCard({required this.spending});
+
+  final LoyaltySpending spending;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final t = spending.total;
+    Widget row(IconData icon, String label, ServiceSpending s, Key key) =>
+        Padding(
+          key: key,
+          padding: const EdgeInsets.only(top: 10),
+          child: Row(
+            children: [
+              Icon(icon, size: 20, color: AppColors.primary),
+              const SizedBox(width: 10),
+              Expanded(child: Text(label, style: AppTypography.body2)),
+              Text(
+                l10n.spendingLine(
+                  fmtBaht(s.baht),
+                  fmtPoints(s.orders),
+                  fmtPoints(s.pointsEarned),
+                ),
+                style: AppTypography.body3.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+        );
+    return Container(
+      key: const Key('loyaltySpending'),
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.foundationGrayscale200),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(l10n.spendingTitle, style: AppTypography.heading5),
+          const SizedBox(height: 4),
+          Text(
+            l10n.spendingTotal(
+              fmtBaht(t.baht),
+              fmtPoints(t.orders),
+              fmtPoints(t.pointsEarned),
+            ),
+            key: const Key('loyaltySpendingTotal'),
+            style: AppTypography.body2.copyWith(fontWeight: FontWeight.bold),
+          ),
+          row(
+            Icons.directions_car_rounded,
+            l10n.spendingRide,
+            spending.ride,
+            const Key('loyaltySpendingRide'),
+          ),
+          row(
+            Icons.inventory_2_rounded,
+            l10n.spendingParcel,
+            spending.parcel,
+            const Key('loyaltySpendingParcel'),
+          ),
+          row(
+            Icons.restaurant_rounded,
+            l10n.spendingFood,
+            spending.food,
+            const Key('loyaltySpendingFood'),
           ),
         ],
       ),

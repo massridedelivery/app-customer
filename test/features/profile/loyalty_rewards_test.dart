@@ -53,9 +53,14 @@ Map<String, dynamic> _voucher(String code, {String status = 'ACTIVE'}) => {
 
 /// Serves fixed JSON; redeem can fail with a dropped connection first.
 class _FakeLoyalty implements LoyaltyRemoteDataSource {
-  _FakeLoyalty({this.rewards = const [], this.failFirstRedeem = false});
+  _FakeLoyalty({
+    this.rewards = const [],
+    this.failFirstRedeem = false,
+    this.spending,
+  });
 
   final List<Map<String, dynamic>> rewards;
+  final Map<String, dynamic>? spending;
   bool failFirstRedeem;
   final redeemKeys = <String>[];
 
@@ -67,6 +72,7 @@ class _FakeLoyalty implements LoyaltyRemoteDataSource {
     'balance_baht': 1250,
     'expiring_soon': {'points': 120, 'expires_at': '2026-11-10T03:12:00Z'},
     'earn_per_100_baht': {'ride': 1, 'min_order': 50},
+    'spending': ?spending,
   };
 
   @override
@@ -284,7 +290,10 @@ void main() {
     expect(find.text('1,250'), findsOneWidget);
     expect(find.text('มูลค่า ≈ ฿1,250'), findsOneWidget);
     expect(find.byKey(const Key('pointsExpiring')), findsOneWidget);
-    expect(find.text('รับ 1 คะแนนทุก ฿100 ที่จ่าย (ขั้นต่ำ ฿50)'), findsOneWidget);
+    expect(
+      find.text('รับ 1 คะแนนทุก ฿100 ที่จ่าย (ขั้นต่ำ ฿50)'),
+      findsOneWidget,
+    );
     expect(find.text('ชวนเพื่อนสำเร็จ'), findsOneWidget);
     expect(find.text('แลกคูปอง'), findsOneWidget);
     expect(find.text('ใช้คะแนน'), findsOneWidget);
@@ -319,5 +328,65 @@ void main() {
     expect(pending.take('MESSENGER'), isNull);
     expect(pending.take('RIDE'), 'RW-AAAA-BBBB');
     expect(pending.take('RIDE'), isNull);
+  });
+
+  group('spending (ใช้บริการไปแล้ว)', () {
+    const sample = {
+      'total_baht': 408,
+      'orders': 3,
+      'points_earned': 3,
+      'ride': {'baht': 120, 'orders': 1, 'points_earned': 1},
+      'food': {'baht': 255, 'orders': 1, 'points_earned': 2},
+      'parcel': {'baht': 33, 'orders': 1, 'points_earned': 0},
+    };
+
+    test('parsed from the summary; absent stays null', () {
+      final s = LoyaltySummary.fromJson({
+        'points': {'total_points': 9, 'lifetime_points': 12},
+        'spending': sample,
+      });
+      expect(s.totalPoints, 9, reason: 'the balance, not lifetime');
+      expect(s.spending!.total.baht, 408);
+      expect(s.spending!.food.pointsEarned, 2);
+      expect(s.spending!.parcel.orders, 1);
+      expect(LoyaltySummary.fromJson({'points': {}}).spending, isNull);
+    });
+
+    testWidgets('the card shows the API numbers', (tester) async {
+      await _pump(tester, _FakeLoyalty(spending: sample), initial: '/loyalty');
+      expect(find.byKey(const Key('loyaltySpending')), findsOneWidget);
+      expect(find.text('ยอดรวม ฿408 · 3 รายการ · ได้ 3 คะแนน'), findsOneWidget);
+      expect(find.text('฿120 · 1 รายการ · 1 คะแนน'), findsOneWidget);
+      expect(find.text('฿255 · 1 รายการ · 2 คะแนน'), findsOneWidget);
+      expect(find.text('฿33 · 1 รายการ · 0 คะแนน'), findsOneWidget);
+      expect(find.text('1,250'), findsOneWidget);
+    });
+
+    testWidgets('no spending in the response: the card is hidden', (
+      tester,
+    ) async {
+      await _pump(tester, _FakeLoyalty(), initial: '/loyalty');
+      expect(find.byKey(const Key('loyaltySpending')), findsNothing);
+      expect(find.textContaining('฿0 ·'), findsNothing);
+    });
+
+    testWidgets('a new customer sees ฿0 / 0 orders', (tester) async {
+      await _pump(
+        tester,
+        _FakeLoyalty(
+          spending: const {
+            'total_baht': 0,
+            'orders': 0,
+            'points_earned': 0,
+            'ride': {'baht': 0, 'orders': 0, 'points_earned': 0},
+            'food': {'baht': 0, 'orders': 0, 'points_earned': 0},
+            'parcel': {'baht': 0, 'orders': 0, 'points_earned': 0},
+          },
+        ),
+        initial: '/loyalty',
+      );
+      expect(find.text('ยอดรวม ฿0 · 0 รายการ · ได้ 0 คะแนน'), findsOneWidget);
+      expect(find.text('฿0 · 0 รายการ · 0 คะแนน'), findsNWidgets(3));
+    });
   });
 }

@@ -3215,6 +3215,28 @@ class AppLocalizationsTh extends AppLocalizations {
   String get pointsDisabled => 'ระบบคะแนนปิดใช้งานชั่วคราว';
 
   @override
+  String get spendingTitle => 'ใช้บริการไปแล้ว';
+
+  @override
+  String spendingTotal(String baht, String orders, String points) {
+    return 'ยอดรวม ฿$baht · $orders รายการ · ได้ $points คะแนน';
+  }
+
+  @override
+  String spendingLine(String baht, String orders, String points) {
+    return '฿$baht · $orders รายการ · $points คะแนน';
+  }
+
+  @override
+  String get spendingRide => 'เรียกรถ';
+
+  @override
+  String get spendingFood => 'สั่งอาหาร';
+
+  @override
+  String get spendingParcel => 'ส่งพัสดุ';
+
+  @override
   String get pointsHistory => 'ประวัติคะแนน';
 
   @override

@@ -5995,6 +5995,42 @@ abstract class AppLocalizations {
   /// **'Points are temporarily unavailable'**
   String get pointsDisabled;
 
+  /// No description provided for @spendingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your spending'**
+  String get spendingTitle;
+
+  /// No description provided for @spendingTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Total ฿{baht} · {orders} orders · earned {points} points'**
+  String spendingTotal(String baht, String orders, String points);
+
+  /// No description provided for @spendingLine.
+  ///
+  /// In en, this message translates to:
+  /// **'฿{baht} · {orders} orders · {points} points'**
+  String spendingLine(String baht, String orders, String points);
+
+  /// No description provided for @spendingRide.
+  ///
+  /// In en, this message translates to:
+  /// **'Rides'**
+  String get spendingRide;
+
+  /// No description provided for @spendingFood.
+  ///
+  /// In en, this message translates to:
+  /// **'Food'**
+  String get spendingFood;
+
+  /// No description provided for @spendingParcel.
+  ///
+  /// In en, this message translates to:
+  /// **'Parcels'**
+  String get spendingParcel;
+
   /// No description provided for @pointsHistory.
   ///
   /// In en, this message translates to:

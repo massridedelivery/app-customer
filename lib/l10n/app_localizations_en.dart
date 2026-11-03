@@ -3259,6 +3259,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pointsDisabled => 'Points are temporarily unavailable';
 
   @override
+  String get spendingTitle => 'Your spending';
+
+  @override
+  String spendingTotal(String baht, String orders, String points) {
+    return 'Total ฿$baht · $orders orders · earned $points points';
+  }
+
+  @override
+  String spendingLine(String baht, String orders, String points) {
+    return '฿$baht · $orders orders · $points points';
+  }
+
+  @override
+  String get spendingRide => 'Rides';
+
+  @override
+  String get spendingFood => 'Food';
+
+  @override
+  String get spendingParcel => 'Parcels';
+
+  @override
   String get pointsHistory => 'Points history';
 
   @override

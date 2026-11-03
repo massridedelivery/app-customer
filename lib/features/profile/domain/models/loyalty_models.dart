@@ -29,6 +29,7 @@ class LoyaltySummary {
     this.expiringAt,
     this.earnPer100Ride = 0,
     this.earnMinOrder = 0,
+    this.spending,
   });
 
   final int totalPoints;
@@ -47,6 +48,11 @@ class LoyaltySummary {
   final int earnPer100Ride;
   final double earnMinOrder;
 
+  /// What the customer has spent on finished orders (v1.6.16), straight from
+  /// the API — never added up from the order list. Null when the backend
+  /// sent none (couldn't read it): the section is hidden, not shown as ฿0.
+  final LoyaltySpending? spending;
+
   factory LoyaltySummary.fromJson(Map<String, dynamic> json) {
     final points = _map(json['points']);
     final expiring = _map(json['expiring_soon']);
@@ -63,6 +69,59 @@ class LoyaltySummary {
       expiringAt: _date(expiring['expires_at']),
       earnPer100Ride: _int(earn['ride']),
       earnMinOrder: _double(earn['min_order']),
+      spending: LoyaltySpending.fromJson(json['spending']),
+    );
+  }
+}
+
+/// One service's (or the total's) spend: baht paid after promo and points,
+/// finished orders, and the points they earned.
+class ServiceSpending {
+  const ServiceSpending({
+    this.baht = 0,
+    this.orders = 0,
+    this.pointsEarned = 0,
+  });
+
+  final double baht;
+  final int orders;
+  final int pointsEarned;
+
+  factory ServiceSpending.fromJson(Object? json) {
+    final m = _map(json);
+    return ServiceSpending(
+      baht: _double(m['baht']),
+      orders: _int(m['orders']),
+      pointsEarned: _int(m['points_earned']),
+    );
+  }
+}
+
+/// `summary.spending`: the total and each service.
+class LoyaltySpending {
+  const LoyaltySpending({
+    this.total = const ServiceSpending(),
+    this.ride = const ServiceSpending(),
+    this.food = const ServiceSpending(),
+    this.parcel = const ServiceSpending(),
+  });
+
+  final ServiceSpending total;
+  final ServiceSpending ride;
+  final ServiceSpending food;
+  final ServiceSpending parcel;
+
+  static LoyaltySpending? fromJson(Object? json) {
+    if (json is! Map) return null;
+    return LoyaltySpending(
+      total: ServiceSpending(
+        baht: _double(json['total_baht']),
+        orders: _int(json['orders']),
+        pointsEarned: _int(json['points_earned']),
+      ),
+      ride: ServiceSpending.fromJson(json['ride']),
+      food: ServiceSpending.fromJson(json['food']),
+      parcel: ServiceSpending.fromJson(json['parcel']),
     );
   }
 }

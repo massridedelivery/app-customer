@@ -58,6 +58,10 @@ abstract class MessengerOrder with _$MessengerOrder {
     // cod_amount (goods value) — they are separate debts, shown on separate
     // lines. Absent on legacy orders → fall back to `fare − discount`.
     @JsonKey(name: 'amount_due') double? amountDueRaw,
+    // The parcel's price for order lists (v1.6.16): fare (express included)
+    // − promo, floored at 0. Unlike amount_due it stays put once paid or
+    // cancelled. Absent on older backends → [listPrice] falls back.
+    @JsonKey(name: 'total_amount') double? totalAmountRaw,
     // Live ETA to the next stop (dev14). omitempty: absent (not 0) when no
     // driver yet or the position is stale — always null-check before use.
     @JsonKey(name: 'eta_min') int? etaMin,
@@ -142,6 +146,15 @@ abstract class MessengerOrder with _$MessengerOrder {
   double get deliveryFee {
     final fee = fare - discount;
     return fee < 0 ? 0 : fee;
+  }
+
+  /// The price an order list shows: the server's `total_amount`, else the
+  /// [deliveryFee]. Never [amountDue] (0 once paid) and never the COD goods
+  /// value, which is the sender's money, not the delivery price.
+  double get listPrice {
+    final raw = totalAmountRaw;
+    if (raw != null) return raw < 0 ? 0 : raw;
+    return deliveryFee;
   }
 
   /// When the driver is expected at the next stop, or null when the backend

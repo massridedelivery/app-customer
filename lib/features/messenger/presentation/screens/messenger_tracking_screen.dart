@@ -1,3 +1,4 @@
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
 import 'package:customer_app/features/profile/presentation/widgets/loyalty_format.dart';
 import 'package:customer_app/features/call/domain/call_models.dart';
@@ -740,7 +741,12 @@ class _MessengerTrackingScreenState
             ?_buildEtaLine(order),
           ],
           const SizedBox(height: 18),
-          _buildTimeline(activeStep),
+          // Searching: the search timeline, as on a ride. Once a driver has
+          // it: the ride's labelled step dots, worded for a parcel.
+          if (activeStep == 0)
+            _buildTimeline(activeStep)
+          else
+            _buildParcelSteps(order.status),
         ],
       ),
     );
@@ -795,6 +801,124 @@ class _MessengerTrackingScreenState
       default:
         return _l10n.msgrStatusInProgress;
     }
+  }
+
+  /// The ride's step dots (live_ride_screen `_buildRideSteps`) for a parcel:
+  /// on the way → at pickup → delivering → delivered, each with its icon and
+  /// label; the current leg animates.
+  Widget _buildParcelSteps(String status) {
+    final active = switch (status.toUpperCase()) {
+      'ARRIVED_AT_PICKUP' => 1,
+      'PICKED_UP' => 2,
+      'DELIVERED' => 3,
+      _ => 0,
+    };
+    final labels = [
+      _l10n.msgrStepComing,
+      _l10n.msgrStepArrived,
+      _l10n.msgrStepDelivering,
+      _l10n.msgrStepDone,
+    ];
+    const icons = [
+      AppAssets.icStepBike,
+      AppAssets.icStepPickup,
+      AppAssets.icStepRoute,
+      AppAssets.icStepFinish,
+    ];
+    const green = AppColors.foundationGreen600;
+    final grey = Colors.grey.shade300;
+
+    Widget dot(int i) {
+      final reached = i <= active;
+      final current = i == active && active != 3;
+      return Container(
+        width: 30,
+        height: 30,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: reached ? green : Colors.white,
+          border: Border.all(color: reached ? green : grey, width: 2),
+          boxShadow: current
+              ? [
+                  BoxShadow(
+                    color: green.withValues(alpha: 0.25),
+                    spreadRadius: 4,
+                  ),
+                ]
+              : null,
+        ),
+        child: Center(
+          child: SvgPicture.asset(
+            icons[i],
+            width: 16,
+            height: 16,
+            colorFilter: ColorFilter.mode(
+              reached ? Colors.white : Colors.grey.shade400,
+              BlendMode.srcIn,
+            ),
+          ),
+        ),
+      );
+    }
+
+    Widget line(int i) => Expanded(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(2),
+          child: SizedBox(
+            height: 4,
+            child: i == active && active != 3
+                ? LinearProgressIndicator(
+                    backgroundColor: grey,
+                    valueColor: const AlwaysStoppedAnimation(green),
+                  )
+                : ColoredBox(color: i < active ? green : grey),
+          ),
+        ),
+      ),
+    );
+
+    return Column(
+      key: const Key('msgrParcelSteps'),
+      children: [
+        // Each dot sits over the centre of its label's quarter-width column.
+        LayoutBuilder(
+          builder: (context, constraints) => Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: constraints.maxWidth / 8 - 15,
+            ),
+            child: Row(
+              children: [
+                for (var i = 0; i < 4; i++) ...[dot(i), if (i < 3) line(i)],
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 6),
+        Row(
+          children: [
+            for (var i = 0; i < 4; i++)
+              Expanded(
+                child: Text(
+                  labels[i],
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypography.caption5.copyWith(
+                    color: i <= active
+                        ? AppColors.semanticGrayNeutralFgHigh
+                        : AppColors.semanticGrayNeutralFgLowOnWhite,
+                    fontWeight: i == active
+                        ? FontWeight.bold
+                        : FontWeight.normal,
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ],
+    );
   }
 
   // Ride-style icon timeline: find driver → pickup → in transit → delivered,

@@ -1157,6 +1157,18 @@ class AppLocalizationsTh extends AppLocalizations {
   String get msgrStatusDelivered => 'ส่งพัสดุสำเร็จ';
 
   @override
+  String get msgrStepComing => 'กำลังไปรับ';
+
+  @override
+  String get msgrStepArrived => 'ถึงจุดรับ';
+
+  @override
+  String get msgrStepDelivering => 'กำลังนำส่ง';
+
+  @override
+  String get msgrStepDone => 'ส่งสำเร็จ';
+
+  @override
   String get msgrStatusInProgress => 'กำลังดำเนินการ...';
 
   @override

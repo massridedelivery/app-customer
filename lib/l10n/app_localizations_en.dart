@@ -1165,6 +1165,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get msgrStatusDelivered => 'Parcel delivered';
 
   @override
+  String get msgrStepComing => 'On the way';
+
+  @override
+  String get msgrStepArrived => 'At pickup';
+
+  @override
+  String get msgrStepDelivering => 'Delivering';
+
+  @override
+  String get msgrStepDone => 'Delivered';
+
+  @override
   String get msgrStatusInProgress => 'In progress...';
 
   @override

@@ -11,6 +11,7 @@ import 'package:customer_app/core/constants/map_defaults.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/utils/map_marker_providers.dart';
+import 'package:customer_app/core/widgets/driver_avatar.dart';
 import 'package:customer_app/core/widgets/route_stops.dart';
 import 'package:customer_app/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
@@ -1055,8 +1056,6 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
 
   Widget _buildRiderSection(LiveRideState liveState) {
     final l10n = AppLocalizations.of(context)!;
-    final avatarUrl = liveState.driverProfile?.driverInfo.avatarUrl;
-    final hasAvatar = avatarUrl != null && avatarUrl.isNotEmpty;
     final type = (liveState.vehicleType ?? '').toLowerCase();
     final isBike = type.contains('bike') || type.contains('motor');
     final plate = liveState.vehiclePlate ?? '';
@@ -1082,17 +1081,8 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
         children: [
           Row(
             children: [
-              CircleAvatar(
-                radius: 28,
-                backgroundColor: const Color(0xFFF1F2F5),
-                backgroundImage: hasAvatar ? NetworkImage(avatarUrl) : null,
-                child: hasAvatar
-                    ? null
-                    : const Icon(
-                        Icons.person,
-                        color: AppColors.semanticGrayNeutralFgLowOnWhite,
-                        size: 30,
-                      ),
+              DriverAvatar(
+                url: liveState.driverProfile?.driverInfo.avatarUrl,
               ),
               Transform.translate(
                 offset: const Offset(-12, 0),

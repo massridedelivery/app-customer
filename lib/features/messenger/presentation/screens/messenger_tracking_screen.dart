@@ -6,7 +6,9 @@ import 'package:customer_app/core/constants/app_assets.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_icons.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
+import 'package:customer_app/core/utils/plate_format.dart';
 import 'package:customer_app/core/utils/polyline_decoder.dart';
+import 'package:customer_app/core/widgets/driver_avatar.dart';
 import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/core/widgets/route_stops.dart';
 import 'package:customer_app/features/messenger/domain/models/messenger_order.dart';
@@ -421,6 +423,12 @@ class _MessengerTrackingScreenState
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
           _buildStatusCard(order),
+          if (order.hasDriver &&
+              !order.isCancelled &&
+              order.driverInfo != null) ...[
+            const SizedBox(height: 12),
+            _buildDriverCard(order.driverInfo!),
+          ],
           // The driver has reached pickup and the sender-pays PromptPay fee is
           // still owed. QR is scanned in person at the driver — the customer app
           // does NOT open its own QR — so this is an info notice, not a button.
@@ -670,7 +678,8 @@ class _MessengerTrackingScreenState
               color: AppColors.semanticGrayNeutralFgHigh,
             ),
           ),
-          if (order.hasDriver) ...[
+          // Before the backend sent driver_info, the driver was only an id.
+          if (order.hasDriver && order.driverInfo == null) ...[
             const SizedBox(height: 4),
             Text(
               _l10n.msgrDriverId(
@@ -970,6 +979,61 @@ class _MessengerTrackingScreenState
   }
 
   // ─── Helpers ───────────────────────────────────────────────────────────────
+
+  /// Who took the parcel: photo, name, rating, and the vehicle to look for.
+  Widget _buildDriverCard(MessengerDriverInfo driver) {
+    final vehicle = [
+      formatPlate(driver.vehiclePlate, driver.vehicleProvince),
+      driver.vehicleColor,
+      driver.vehicleModel,
+    ].whereType<String>().where((s) => s.trim().isNotEmpty).join(' · ');
+    return _card(
+      child: Row(
+        key: const Key('msgrDriverCard'),
+        children: [
+          DriverAvatar(url: driver.avatarUrl, size: 48),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        driver.fullName,
+                        style: AppTypography.heading6,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    if (driver.rating > 0) ...[
+                      const SizedBox(width: 6),
+                      const Icon(Icons.star, color: Colors.amber, size: 14),
+                      const SizedBox(width: 2),
+                      Text(
+                        driver.rating.toStringAsFixed(1),
+                        style: AppTypography.caption4,
+                      ),
+                    ],
+                  ],
+                ),
+                if (vehicle.isNotEmpty) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    vehicle,
+                    style: AppTypography.caption4.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _card({required Widget child}) {
     return Container(

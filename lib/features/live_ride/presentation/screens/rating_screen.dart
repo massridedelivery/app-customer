@@ -1,6 +1,7 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/widgets/app_filter_chip.dart';
+import 'package:customer_app/core/widgets/driver_avatar.dart';
 import 'package:customer_app/core/utils/plate_format.dart';
 import 'package:customer_app/features/live_ride/domain/models/driver_profile_model.dart';
 import 'package:customer_app/features/live_ride/presentation/controllers/rating_controller.dart';
@@ -155,30 +156,10 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
                 children: [
                   Row(
                     children: [
-                      (widget.driverProfile?.driverInfo.avatarUrl != null &&
-                              widget
-                                  .driverProfile!
-                                  .driverInfo
-                                  .avatarUrl
-                                  .isNotEmpty)
-                          ? Container(
-                              width: 52,
-                              height: 52,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                image: DecorationImage(
-                                  image: NetworkImage(
-                                    widget.driverProfile!.driverInfo.avatarUrl,
-                                  ),
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                            )
-                          : const Icon(
-                              Icons.person,
-                              color: AppColors.semanticGrayNeutralFgHigh,
-                              size: 32,
-                            ),
+                      DriverAvatar(
+                        url: widget.driverProfile?.driverInfo.avatarUrl,
+                        size: 52,
+                      ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Column(

@@ -2239,6 +2239,30 @@ abstract class AppLocalizations {
   /// **'Parcel delivered'**
   String get msgrStatusDelivered;
 
+  /// No description provided for @msgrStepComing.
+  ///
+  /// In en, this message translates to:
+  /// **'On the way'**
+  String get msgrStepComing;
+
+  /// No description provided for @msgrStepArrived.
+  ///
+  /// In en, this message translates to:
+  /// **'At pickup'**
+  String get msgrStepArrived;
+
+  /// No description provided for @msgrStepDelivering.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivering'**
+  String get msgrStepDelivering;
+
+  /// No description provided for @msgrStepDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivered'**
+  String get msgrStepDone;
+
   /// No description provided for @msgrStatusInProgress.
   ///
   /// In en, this message translates to:

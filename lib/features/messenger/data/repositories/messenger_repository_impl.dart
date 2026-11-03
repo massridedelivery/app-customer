@@ -62,6 +62,7 @@ class MessengerRepositoryImpl implements IMessengerRepository {
     double? packageHeightCm,
     String? promoCode,
     String? deliveryType,
+    bool usePoints = false,
   }) async {
     try {
       final response = await _apiService.dio.post(
@@ -83,6 +84,7 @@ class MessengerRepositoryImpl implements IMessengerRepository {
           // full mode list still comes back in `service_levels` either way.
           if (deliveryType != null && deliveryType.isNotEmpty)
             'delivery_type': deliveryType,
+          if (usePoints) 'use_points': true,
         },
       );
       return MessengerEstimate.fromJson(
@@ -121,6 +123,7 @@ class MessengerRepositoryImpl implements IMessengerRepository {
     double? codAmount,
     String? promoCode,
     String? payer,
+    bool usePoints = false,
   }) async {
     try {
       final response = await _apiService.dio.post(
@@ -153,6 +156,7 @@ class MessengerRepositoryImpl implements IMessengerRepository {
           if (codAmount != null && codAmount > 0) 'cod_amount': codAmount,
           if (promoCode != null && promoCode.isNotEmpty)
             'promo_code': promoCode,
+          if (usePoints) 'use_points': true,
         },
         // Retry-safe create (SCRUM-50).
         options: Options(
@@ -161,6 +165,13 @@ class MessengerRepositoryImpl implements IMessengerRepository {
       );
       return MessengerOrder.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
+      // A points refusal (POINTS_BELOW_MIN, POINTS_INSUFFICIENT, …, some of
+      // them 409) carries its own message, already in the user's language.
+      final data = e.response?.data;
+      final code = data is Map ? data['code']?.toString() : null;
+      if (code != null && code.startsWith('POINTS_')) {
+        _throwFrom(e, 'Failed to create order');
+      }
       // 409 = the selected delivery mode was disabled between estimate and
       // create (SCRUM-71) → caller should refresh the estimate.
       if (e.response?.statusCode == 409) {

@@ -2,6 +2,7 @@ import 'package:customer_app/core/constants/feature_flags.dart';
 import 'package:customer_app/features/messenger/domain/models/messenger_estimate.dart';
 import 'package:customer_app/features/messenger/domain/models/messenger_vehicle_type.dart';
 import 'package:customer_app/features/messenger/presentation/util/delivery_service_levels.dart';
+import 'package:customer_app/features/ride_booking/domain/models/ride_quote.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'messenger_booking_state.freezed.dart';
@@ -26,6 +27,8 @@ abstract class MessengerBookingState with _$MessengerBookingState {
     @Default('SENDER') String payer,
     @Default(0.0) double codAmount,
     @Default('') String promoCode,
+    // Spend loyalty points on the fee, as on a ride (all the points allowed).
+    @Default(false) bool usePoints,
     // Selected delivery mode (delivery_type, e.g. INSTANT / TWO_HOUR). The
     // available modes + pricing come from estimate.serviceLevels (SCRUM-71).
     @Default(kDeliveryInstant) String deliveryType,
@@ -71,11 +74,23 @@ abstract class MessengerBookingState with _$MessengerBookingState {
     return levels.first;
   }
 
-  /// Fare to display/charge for the selected delivery mode (server-computed).
-  double get displayTotalFare =>
-      selectedServiceLevel?.totalFare ?? estimate?.totalFare ?? 0;
+  /// Fare to display/charge for the selected delivery mode (server-computed),
+  /// after the promo and, when used, the points.
+  double get displayTotalFare {
+    final level = selectedServiceLevel;
+    if (level != null) return level.amountToPay ?? level.totalFare;
+    return estimate?.amountToPay ?? estimate?.totalFare ?? 0;
+  }
 
-  /// A coupon covers the whole fee. There is no QR for ฿0 (the backend won't
+  /// What points can do for the selected mode, or null on an older backend.
+  RidePointsQuote? get pointsQuote =>
+      selectedServiceLevel?.points ?? estimate?.points;
+
+  /// Points actually going on this booking.
+  bool get spendsPoints =>
+      usePoints && (pointsQuote?.usable ?? false) && pointsQuote!.usedPoints > 0;
+
+  /// A coupon (or points) covers the whole fee. There is no QR for ฿0 (the backend won't
   /// mint one, and an unpaid PromptPay order can't be marked delivered), so
   /// such an order is placed as cash.
   bool get nothingToPay => estimate != null && displayTotalFare <= 0;

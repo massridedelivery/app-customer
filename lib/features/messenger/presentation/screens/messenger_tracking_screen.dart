@@ -1,3 +1,4 @@
+import 'package:customer_app/features/profile/presentation/widgets/loyalty_format.dart';
 import 'package:customer_app/features/call/domain/call_models.dart';
 import 'package:customer_app/features/call/presentation/order_call_button.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
@@ -887,6 +888,14 @@ class _MessengerTrackingScreenState
             _fareRow(
               _l10n.msgrDiscount,
               '-฿${order.discount.toStringAsFixed(0)}',
+              valueColor: AppColors.foundationGreen500,
+            ),
+          ],
+          if (order.pointsUsed > 0) ...[
+            const SizedBox(height: 4),
+            _fareRow(
+              _l10n.ridePointsLine(fmtPoints(order.pointsUsed)),
+              '-฿${fmtBaht(order.pointsDiscount)}',
               valueColor: AppColors.foundationGreen500,
             ),
           ],

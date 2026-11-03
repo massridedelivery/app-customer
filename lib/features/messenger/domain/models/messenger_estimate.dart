@@ -1,3 +1,4 @@
+import 'package:customer_app/features/ride_booking/domain/models/ride_quote.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'messenger_estimate.freezed.dart';
@@ -21,7 +22,15 @@ abstract class MessengerEstimate with _$MessengerEstimate {
     @JsonKey(name: 'service_levels')
     @Default(<MessengerServiceLevel>[])
     List<MessengerServiceLevel> serviceLevels,
+    // Loyalty points for the mode above (same shape as a ride's), and what is
+    // left to pay after the promo and the points. Absent on older backends.
+    @JsonKey(name: 'points') Map<String, dynamic>? pointsRaw,
+    @JsonKey(name: 'amount_to_pay') double? amountToPay,
   }) = _MessengerEstimate;
+
+  const MessengerEstimate._();
+
+  RidePointsQuote? get points => RidePointsQuote.fromJson(pointsRaw);
 
   factory MessengerEstimate.fromJson(Map<String, dynamic> json) =>
       _$MessengerEstimateFromJson(json);
@@ -41,7 +50,14 @@ abstract class MessengerServiceLevel with _$MessengerServiceLevel {
     @JsonKey(name: 'total_fare') @Default(0.0) double totalFare,
     @JsonKey(name: 'pickup_eta_min') int? pickupEtaMin,
     @JsonKey(name: 'deliver_by') String? deliverBy,
+    // What points can do for this mode, and the fare after promo and points.
+    @JsonKey(name: 'points') Map<String, dynamic>? pointsRaw,
+    @JsonKey(name: 'amount_to_pay') double? amountToPay,
   }) = _MessengerServiceLevel;
+
+  const MessengerServiceLevel._();
+
+  RidePointsQuote? get points => RidePointsQuote.fromJson(pointsRaw);
 
   factory MessengerServiceLevel.fromJson(Map<String, dynamic> json) =>
       _$MessengerServiceLevelFromJson(json);

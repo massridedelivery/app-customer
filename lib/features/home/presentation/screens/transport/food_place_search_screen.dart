@@ -9,6 +9,7 @@ import 'package:customer_app/features/home/presentation/controllers/home_control
 import 'package:customer_app/features/home/presentation/controllers/place_search_controller.dart';
 import 'package:customer_app/features/home/presentation/states/home_state.dart';
 import 'package:customer_app/features/home/presentation/states/place_search_state.dart';
+import 'package:customer_app/features/home/presentation/widgets/place_search_widgets.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -165,11 +166,14 @@ class _FoodPlaceSearchScreenState extends ConsumerState<FoodPlaceSearchScreen>
           itemCount: searchState.results.length,
           itemBuilder: (context, index) {
             final p = searchState.results[index];
-            return _buildSearchItem(
-              p.mainText.isNotEmpty ? p.mainText : p.description,
-              p.secondaryText,
+            return SearchItem(
+              title: p.mainText.isNotEmpty ? p.mainText : p.description,
+              subtitle: p.secondaryText,
               icon: Icons.location_on,
-              iconColor: AppColors.primary,
+              // Same red pin as the one beside the search field (and the
+              // ride / messenger result rows).
+              iconAsset: AppAssets.icLocationFill,
+              iconColor: AppColors.foundationRed700,
               onTap: () => _selectPrediction(p),
             );
           },

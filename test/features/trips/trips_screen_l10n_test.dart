@@ -104,4 +104,17 @@ void main() {
     expect(find.text('สำเร็จ'), findsOneWidget);
     expect(find.text('จองอีกครั้ง'), findsOneWidget);
   });
+
+  testWidgets('tabs read ทั้งหมด · เรียกรถ · ส่งของ · ส่งอาหาร', (
+    tester,
+  ) async {
+    await _pump(tester, 'th');
+    final xs = [
+      'ทั้งหมด',
+      'เรียกรถ',
+      'ส่งของ',
+      'ส่งอาหาร',
+    ].map((t) => tester.getTopLeft(find.text(t)).dx).toList();
+    expect(xs, [...xs]..sort());
+  });
 }

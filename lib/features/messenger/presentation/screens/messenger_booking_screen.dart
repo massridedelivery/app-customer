@@ -40,7 +40,6 @@ class _MessengerBookingScreenState
   final _recipientPhoneController = TextEditingController();
   final _notesController = TextEditingController();
   final _codAmountController = TextEditingController();
-  final _promoController = TextEditingController();
 
   @override
   void initState() {
@@ -72,7 +71,6 @@ class _MessengerBookingScreenState
     _recipientPhoneController.dispose();
     _notesController.dispose();
     _codAmountController.dispose();
-    _promoController.dispose();
     super.dispose();
   }
 
@@ -1051,6 +1049,10 @@ class _MessengerBookingScreenState
 
   Widget _buildPaymentCard(MessengerBookingState bookingState) {
     final bool isCod = bookingState.isCod;
+    // The applied code lives in the booking state: a welcome code or a
+    // voucher picked elsewhere is set there without passing this screen.
+    final String promoCode = bookingState.promoCode;
+    final bool hasPromo = promoCode.isNotEmpty;
     final String method = bookingState.paymentMethod.toUpperCase();
     return _card(
       child: Column(
@@ -1132,28 +1134,31 @@ class _MessengerBookingScreenState
             ),
           ],
           const SizedBox(height: 12),
-          // Tap to pick a discount code (or type one) on the coupon screen.
+          // Tap to pick a discount code (or type one) on the coupon screen;
+          // the ✕ takes an applied code off, as on the ride confirm screen.
           InkWell(
+            key: const Key('msgrPromoRow'),
             borderRadius: BorderRadius.circular(12),
             onTap: () async {
-              final current = ref
-                  .read(messengerBookingControllerProvider)
-                  .promoCode;
               final code = await Navigator.of(context).push<String>(
                 MaterialPageRoute(
                   builder: (_) =>
-                      MessengerCouponScreen(initialCode: current),
+                      MessengerCouponScreen(initialCode: promoCode),
                 ),
               );
               if (code != null) {
-                setState(() => _promoController.text = code);
                 ref
                     .read(messengerBookingControllerProvider.notifier)
                     .setPromoCode(code.trim());
               }
             },
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              padding: EdgeInsets.only(
+                left: 16,
+                right: hasPromo ? 4 : 16,
+                top: hasPromo ? 4 : 16,
+                bottom: hasPromo ? 4 : 16,
+              ),
               decoration: BoxDecoration(
                 color: AppColors.white,
                 borderRadius: BorderRadius.circular(12),
@@ -1161,28 +1166,45 @@ class _MessengerBookingScreenState
               ),
               child: Row(
                 children: [
-                  const Icon(
-                    Icons.local_offer_outlined,
-                    color: AppColors.primary,
+                  Icon(
+                    hasPromo ? Icons.check_circle : Icons.local_offer_outlined,
+                    color: hasPromo
+                        ? AppColors.semanticSuccessFgHigh
+                        : AppColors.primary,
                     size: 20,
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      _promoController.text.isNotEmpty
-                          ? _promoController.text
-                          : _l10n.msgrSelectPromoOptional,
+                      hasPromo ? promoCode : _l10n.msgrSelectPromoOptional,
                       style: AppTypography.body2.copyWith(
-                        color: _promoController.text.isNotEmpty
-                            ? AppColors.textPrimary
+                        color: hasPromo
+                            ? AppColors.semanticSuccessFgHigh
                             : AppColors.textSecondary,
                       ),
                     ),
                   ),
-                  const Icon(
-                    Icons.chevron_right,
-                    color: AppColors.foundationGrayscale400,
-                  ),
+                  if (hasPromo)
+                    IconButton(
+                      key: const Key('msgrPromoRemove'),
+                      tooltip: _l10n.couponRemove,
+                      onPressed: () {
+                        ref
+                            .read(messengerBookingControllerProvider.notifier)
+                            .setPromoCode('');
+                        _showSnack(_l10n.couponRemoved);
+                      },
+                      icon: const Icon(
+                        Icons.close_rounded,
+                        size: 18,
+                        color: AppColors.semanticSuccessFgHigh,
+                      ),
+                    )
+                  else
+                    const Icon(
+                      Icons.chevron_right,
+                      color: AppColors.foundationGrayscale400,
+                    ),
                 ],
               ),
             ),

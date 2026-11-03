@@ -9,6 +9,7 @@ import 'package:customer_app/features/food_order/presentation/states/checkout_st
 import 'package:customer_app/features/food_order/presentation/states/food_cart_state.dart';
 import 'package:customer_app/features/food_order/presentation/states/live_food_tracking_state.dart';
 import 'package:customer_app/features/food_order/presentation/widgets/live_food_tracking_pay_now.dart';
+import 'package:customer_app/features/messenger/domain/models/messenger_estimate.dart';
 import 'package:customer_app/features/messenger/presentation/states/messenger_booking_state.dart';
 import 'package:customer_app/features/payment/data/repositories/payment_repository_impl.dart';
 import 'package:customer_app/features/payment/domain/models/payment_intent.dart';
@@ -179,6 +180,22 @@ void main() {
     expect(const CheckoutState().paymentMethod, 'PROMPTPAY');
   });
 
+  group('messenger: nothing to pay', () {
+    MessengerBookingState withFare(double total) => MessengerBookingState(
+      estimate: MessengerEstimate(totalFare: total, discount: 50),
+    );
+
+    test('a coupon covering the whole fee means nothing to pay', () {
+      expect(withFare(0).nothingToPay, isTrue);
+    });
+
+    test('a fee to pay, or no estimate yet, is not "nothing to pay"', () {
+      expect(withFare(40).nothingToPay, isFalse);
+      // Before the estimate lands the fare reads 0 — that's not free.
+      expect(const MessengerBookingState().nothingToPay, isFalse);
+    });
+  });
+
   group('food checkout', () {
     late _FoodRepo repo;
     late ProviderContainer c;
@@ -250,6 +267,7 @@ void main() {
       String method = 'PROMPTPAY',
       String? paymentStatus = 'PENDING',
       String status = 'PLACED',
+      double total = 120,
     }) => LiveFoodTrackingState(
       orderId: 'order-1',
       order: FoodOrderModel(
@@ -257,6 +275,7 @@ void main() {
         status: status,
         paymentMethod: method,
         paymentStatus: paymentStatus,
+        totalAmount: total,
       ),
     );
 
@@ -279,6 +298,14 @@ void main() {
         find.textContaining('exitRoute: /food-order/tracking/order-1'),
         findsOneWidget,
       );
+    });
+
+    testWidgets('held at ฿0: no pay button, asks to cancel and reorder', (
+      tester,
+    ) async {
+      await pump(tester, held(total: 0));
+      expect(find.text('ชำระเงินคำสั่งซื้อนี้ไม่ได้'), findsOneWidget);
+      expect(find.byKey(const Key('foodPayNowButton')), findsNothing);
     });
 
     testWidgets('hidden once paid, for cash, and when cancelled', (

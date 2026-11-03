@@ -1093,6 +1093,16 @@ class _MessengerBookingScreenState
                 title: _l10n.msgrCod,
               ),
           ]),
+          if (bookingState.nothingToPay) ...[
+            const SizedBox(height: 8),
+            Text(
+              _l10n.msgrNothingToPayNote,
+              key: const Key('msgrNothingToPay'),
+              style: AppTypography.caption4.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
           if (FeatureFlags.messengerCodEnabled && isCod) ...[
             const SizedBox(height: 12),
             TextFormField(

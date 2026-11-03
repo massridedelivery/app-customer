@@ -165,7 +165,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       if (next.placedOrder != null && previous?.placedOrder == null) {
         ref.read(foodCartControllerProvider.notifier).clearCart();
         final tracking = '/food-order/tracking/${next.placedOrder!.id}';
-        if (next.placedOrder!.paymentMethod.toUpperCase() == 'PROMPTPAY') {
+        // The server's total decides: a ฿0 order has no QR to open.
+        if (next.placedOrder!.paymentMethod.toUpperCase() == 'PROMPTPAY' &&
+            next.placedOrder!.totalAmount > 0) {
           // Paid up front: the restaurant sees the order once the QR is paid.
           // Leaving the QR goes to tracking, which offers to pay again.
           context.pushReplacement(

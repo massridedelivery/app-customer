@@ -340,11 +340,13 @@ void main() {
       );
       expect(find.text('มี 500 คะแนน · ใช้ได้สูงสุด 130 คะแนน'), findsOneWidget);
       expect(find.text('โค้ดเพื่อน'), findsOneWidget);
+      // Something to pay: the PromptPay default, changeable.
+      expect(find.text('พร้อมเพย์'), findsOneWidget);
       await tester.tap(find.byKey(const Key('ridePointsSwitch')));
       expect(toggled, isTrue);
     });
 
-    testWidgets('paid in full by points: ฿0 total, payment method kept', (
+    testWidgets('paid in full by points: ฿0 total, booked as cash', (
       tester,
     ) async {
       await pump(
@@ -357,9 +359,15 @@ void main() {
         usePoints: true,
       );
       expect(find.text('ใช้ 130 คะแนน −฿130'), findsOneWidget);
-      // The payment method stays, even with nothing left to pay.
+      // Nothing left to pay: no QR for ฿0, so the row says cash (extras
+      // included) instead of offering the PromptPay default.
       expect(find.byKey(const Key('ridePaymentRow')), findsOneWidget);
-      expect(find.text('พร้อมเพย์'), findsOneWidget);
+      expect(find.text('เงินสด'), findsOneWidget);
+      expect(find.text('พร้อมเพย์'), findsNothing);
+      expect(
+        find.text('ไม่มียอดต้องชำระ · ค่าทางด่วน / ค่ารอ (ถ้ามี) จ่ายเงินสด'),
+        findsOneWidget,
+      );
       // S1 summary: fare, each discount on its own line in red, total.
       expect(find.text('ค่าโดยสาร'), findsOneWidget);
       expect(find.text('฿180'), findsWidgets);

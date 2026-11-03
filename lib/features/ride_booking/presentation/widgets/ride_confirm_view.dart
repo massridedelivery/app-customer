@@ -71,6 +71,8 @@ class RideConfirmView extends ConsumerWidget {
         ? 0.0
         : (selected.grossFare ?? selected.totalFare + selected.discount);
     final payable = selected?.payable ?? 0;
+    // Same rule as BookingController.dispatch: nothing to collect → cash.
+    final nothingToPay = selected != null && payable <= 0;
     final codeOff = selected?.discount ?? 0;
     final pointsUsed = selected?.points?.usedPoints ?? 0;
     final pointsOff = selected?.points?.discount ?? 0;
@@ -192,29 +194,41 @@ class RideConfirmView extends ConsumerWidget {
                           ),
                         ),
 
-                      // Payment method — always shown, even when points cover
-                      // the whole fare (tolls / waiting fees use it).
+                      // Payment method — always shown. When points / a coupon
+                      // cover the whole fare the ride is booked as cash (no QR
+                      // for ฿0), so say so instead of showing a choice that
+                      // won't be used: tolls / waiting fees go to cash.
                       sectionLabel(l10n.ridePaymentSection),
                       _Card(
                         padding: EdgeInsets.zero,
-                        child: _Row(
-                          key: const Key('ridePaymentRow'),
-                          leading: Icon(
-                            state.paymentMethod == 'PROMPTPAY'
-                                ? Icons.qr_code_2_rounded
-                                : Icons.monetization_on,
-                            color: AppColors.primary,
-                          ),
-                          title: _paymentLabel(state.paymentMethod, l10n),
-                          subtitle: l10n.ridePaymentExtrasNote,
-                          value: l10n.rideChange,
-                          onTap: () => _showPaymentPicker(
-                            context,
-                            notifier,
-                            state.paymentMethod,
-                            l10n,
-                          ),
-                        ),
+                        child: nothingToPay
+                            ? _Row(
+                                key: const Key('ridePaymentRow'),
+                                leading: const Icon(
+                                  Icons.monetization_on,
+                                  color: AppColors.primary,
+                                ),
+                                title: l10n.cashLabel,
+                                subtitle: l10n.rideNothingToPayNote,
+                              )
+                            : _Row(
+                                key: const Key('ridePaymentRow'),
+                                leading: Icon(
+                                  state.paymentMethod == 'PROMPTPAY'
+                                      ? Icons.qr_code_2_rounded
+                                      : Icons.monetization_on,
+                                  color: AppColors.primary,
+                                ),
+                                title: _paymentLabel(state.paymentMethod, l10n),
+                                subtitle: l10n.ridePaymentExtrasNote,
+                                value: l10n.rideChange,
+                                onTap: () => _showPaymentPicker(
+                                  context,
+                                  notifier,
+                                  state.paymentMethod,
+                                  l10n,
+                                ),
+                              ),
                       ),
 
                       // Discounts: the code and the points switch.

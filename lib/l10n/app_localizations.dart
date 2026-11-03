@@ -2125,6 +2125,12 @@ abstract class AppLocalizations {
   /// **'Pay cash instead'**
   String get msgrPayCashInstead;
 
+  /// No description provided for @msgrNothingToPayNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to pay, so it is recorded as cash'**
+  String get msgrNothingToPayNote;
+
   /// No description provided for @msgrPayCashConfirm.
   ///
   /// In en, this message translates to:
@@ -6384,6 +6390,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tolls / waiting fees are paid this way'**
   String get ridePaymentExtrasNote;
+
+  /// No description provided for @rideNothingToPayNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to pay · tolls / waiting fees (if any) are paid in cash'**
+  String get rideNothingToPayNote;
 
   /// No description provided for @rideChooseCoupon.
   ///

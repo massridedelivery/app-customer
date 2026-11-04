@@ -10,7 +10,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Safety buffer added to the backend ETA before it is shown anywhere, so the
 /// app under-promises (the rider tends to arrive a little earlier than shown).
-const int kRideEtaBufferMinutes = 15;
+/// Kept small: a large flat pad shows minutes of wait while the driver is
+/// already at the pickup.
+const int kRideEtaBufferMinutes = 2;
 
 final rideOngoingNotificationProvider = Provider<RideOngoingNotification>(
   (ref) => RideOngoingNotification(ref),

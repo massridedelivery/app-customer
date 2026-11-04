@@ -174,6 +174,15 @@ class CallController extends Notifier<CallSession?> {
 
   bool _started = false;
 
+  /// Call frames this phone sent while its socket was down. The relay keeps
+  /// nothing for a socket that isn't there, and after the job has ended the
+  /// socket is often still coming up (the app was in the background, or its
+  /// token had expired) when the answer and the first ICE candidates are
+  /// ready: dropping them leaves a call that is answered but never connects.
+  /// They go out, in order, once the socket is back.
+  final List<Map<String, dynamic>> _outbox = [];
+  bool _flushing = false;
+
   CallRepository get _repo => ref.read(callRepositoryProvider);
   CallSignaling get _signaling => ref.read(callSignalingProvider);
   CallSystemUi get _systemUi => ref.read(callSystemUiProvider);
@@ -201,7 +210,33 @@ class CallController extends Notifier<CallSession?> {
       ..add(_signaling.frames.listen(_onFrame))
       ..add(_systemUi.events.listen(_onSystemEvent))
       ..add(ref.read(callNetworkChangesProvider).listen((_) => _onNetwork()));
+    _keepScreenOnTop();
     unawaited(_resumeAnsweredCall());
+  }
+
+  /// A job ending under a call (the ride screen moving on to its summary, a
+  /// tracking screen going home) must not take the call screen with it: the
+  /// call goes on, so its screen comes back. Back is blocked on that screen
+  /// while the call is live, so leaving it then is never the user's doing.
+  void _keepScreenOnTop() {
+    final router = ref.read(routerProvider);
+    void reopen() {
+      final phase = state?.phase;
+      final live =
+          phase == CallPhase.connecting ||
+          phase == CallPhase.active ||
+          phase == CallPhase.outgoing;
+      if (!live || router.state.uri.path == '/call') return;
+      // After the navigation that replaced it has settled.
+      Future.microtask(() {
+        if (router.state.uri.path != '/call') {
+          ref.read(callScreenOpenerProvider)();
+        }
+      });
+    }
+
+    router.routerDelegate.addListener(reopen);
+    ref.onDispose(() => router.routerDelegate.removeListener(reopen));
   }
 
   // ─── Placing a call ────────────────────────────────────────────────────
@@ -238,6 +273,9 @@ class CallController extends Notifier<CallSession?> {
     }
 
     _beginSession(call, CallPhase.outgoing, media);
+    // The request may have refreshed an expired token the socket was refused
+    // with: try it again now rather than at the next backoff step.
+    unawaited(_signaling.connect());
     unawaited(_systemUi.startOutgoing(call));
     _ringTimer = Timer(Duration(seconds: call.ringTimeoutSec) + ringGrace, () {
       if (state?.phase == CallPhase.outgoing) hangUp(reason: 'missed');
@@ -361,6 +399,10 @@ class CallController extends Notifier<CallSession?> {
       return;
     }
     if (state?.callId != session.callId) return;
+    // After the job has ended the token is often stale: the socket's first
+    // handshake fails and the accept request refreshes it. Reconnect now so
+    // the caller's offer (replayed by the server on connect) isn't held up.
+    unawaited(_signaling.connect());
     state = state!.copyWith(
       call: session.call.copyWith(
         status: 'accepted',
@@ -516,12 +558,39 @@ class CallController extends Notifier<CallSession?> {
   void _sendSignal(String kind, Map<String, dynamic> payload) {
     final callId = state?.callId;
     if (callId == null) return;
-    _signaling.send({
+    final frame = {
       'type': 'call_signal',
       'call_id': callId,
       'kind': kind,
       'payload': payload,
-    });
+    };
+    // Behind frames still waiting, or the socket is down: queue it.
+    if (_outbox.isNotEmpty || !_signaling.send(frame)) {
+      _outbox.add(frame);
+      unawaited(_flushOutbox());
+    }
+  }
+
+  /// Sends the queued frames once the socket is up, oldest first; keeps
+  /// trying while the call lasts.
+  Future<void> _flushOutbox() async {
+    if (_flushing) return;
+    _flushing = true;
+    try {
+      while (_outbox.isNotEmpty) {
+        final callId = _outbox.first['call_id'];
+        if (state?.callId != callId || state!.phase == CallPhase.ended) {
+          _outbox.clear();
+          return;
+        }
+        if (!await _signaling.connect()) continue;
+        while (_outbox.isNotEmpty && _signaling.send(_outbox.first)) {
+          _outbox.removeAt(0);
+        }
+      }
+    } finally {
+      _flushing = false;
+    }
   }
 
   // ─── Media ─────────────────────────────────────────────────────────────
@@ -692,6 +761,7 @@ class CallController extends Notifier<CallSession?> {
     _remoteSet = false;
     _pendingCandidates.clear();
     _remoteSdps.clear();
+    _outbox.clear();
     _ops = Future.value();
     _mediaReady = Completer<void>();
     _media = media;
@@ -705,6 +775,7 @@ class CallController extends Notifier<CallSession?> {
     if (session == null || session.phase == CallPhase.ended) return;
     _cancelTimers();
     _closeMedia();
+    _outbox.clear();
     _closedHere.add(session.callId);
     unawaited(_quietly(() => _systemUi.end(session.callId)));
     _signaling.release();

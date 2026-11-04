@@ -151,15 +151,30 @@ class _Signaling implements CallSignaling {
   @override
   Stream<Map<String, dynamic>> get frames => frameCtl.stream;
 
+  /// False while the socket is down: frames are refused, connects wait.
+  bool up = true;
+  int connects = 0;
+  Completer<void>? cameUp;
+
   @override
   bool send(Map<String, dynamic> frame) {
+    if (!up) return false;
     sent.add(frame);
     return true;
   }
 
   @override
-  Future<bool> connect({Duration timeout = const Duration(seconds: 6)}) async =>
-      true;
+  Future<bool> connect({Duration timeout = const Duration(seconds: 6)}) async {
+    connects++;
+    if (!up) await (cameUp ??= Completer()).future;
+    return true;
+  }
+
+  void comeUp() {
+    up = true;
+    cameUp?.complete();
+    cameUp = null;
+  }
 
   @override
   void release() {}
@@ -641,6 +656,55 @@ void main() {
       });
       expect(h.repo.calls, ['get call-1']);
       expect(h.session!.phase, CallPhase.incoming);
+    });
+  });
+
+  group('after the job has ended (socket coming up late)', () {
+    late _Harness h;
+    setUp(() => h = _Harness());
+    tearDown(() => h.dispose());
+
+    test('the answer and ICE wait for the socket, then go in order', () async {
+      h.frame({'type': 'call_incoming', 'call': _view(direction: 'incoming')});
+      await _settle();
+      await h.controller.accept();
+      await _settle();
+      final connectsAfterAccept = h.signaling.connects;
+      expect(
+        connectsAfterAccept,
+        greaterThanOrEqualTo(2),
+        reason: 'reconnects once the accept request has refreshed the token',
+      );
+
+      // The socket drops before the answer is ready.
+      h.signaling.up = false;
+      h.signal('offer', {'type': 'offer', 'sdp': 'o'});
+      await _settle();
+      h.media.candidateCtl.add({
+        'candidate': 'mine',
+        'sdpMid': '0',
+        'sdpMLineIndex': 0,
+      });
+      await _settle();
+      expect(h.signaling.sent, isEmpty, reason: 'nothing lost, nothing sent');
+
+      h.signaling.comeUp();
+      await _settle();
+      expect(h.signaling.signals, ['answer', 'ice']);
+    });
+
+    test('a call that ends drops what was still waiting', () async {
+      h.frame({'type': 'call_incoming', 'call': _view(direction: 'incoming')});
+      await _settle();
+      await h.controller.accept();
+      await _settle();
+      h.signaling.up = false;
+      h.signal('offer', {'type': 'offer', 'sdp': 'o'});
+      await _settle();
+      await h.controller.hangUp();
+      h.signaling.comeUp();
+      await _settle();
+      expect(h.signaling.sent, isEmpty);
     });
   });
 

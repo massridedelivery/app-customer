@@ -49,6 +49,8 @@ class _FoodRepo implements IFoodOrderRepository {
     String? tier,
     List<String>? promoCodes,
     String? idempotencyKey,
+    bool usePoints = false,
+    int? pointsToUse,
   }) async {
     placedWith.add(paymentMethod);
     return FoodOrderModel(id: 'order-1', paymentMethod: paymentMethod ?? '');

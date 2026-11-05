@@ -4,6 +4,8 @@ import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/constants/feature_flags.dart';
 import 'package:customer_app/core/error/api_error.dart';
+import 'package:customer_app/core/utils/auth_gate.dart';
+import 'package:customer_app/features/ride_booking/presentation/widgets/ride_points_widgets.dart';
 import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/features/food_order/domain/models/food_models.dart';
 import 'package:customer_app/features/food_order/presentation/controllers/checkout_controller.dart';
@@ -294,7 +296,15 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       }
     }
 
-    final double totalAmount = (foodSubtotal + deliveryFee - checkoutState.validatedPromoDiscount).clamp(0.0, double.infinity);
+    // With points on, the server's amount_to_pay (after codes and points)
+    // decides; otherwise the codes are taken off here as before.
+    final serverTotal = checkoutState.spendsPoints
+        ? selectedTier?.amountToPay
+        : null;
+    final double totalAmount = serverTotal ??
+        (foodSubtotal + deliveryFee - checkoutState.validatedPromoDiscount)
+            .clamp(0.0, double.infinity);
+    final pointsQuote = checkoutState.pointsQuote;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -323,6 +333,18 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   const CheckoutDeliveryOptions(),
                   _buildDivider(),
                   const CheckoutCouponSection(),
+                  // Loyalty points, as on ride and parcel: hidden when the
+                  // estimate has none or the admin switched them off.
+                  if (pointsQuote != null && !pointsQuote.hidden)
+                    RidePointsRow(
+                      key: const Key('foodPointsRow'),
+                      quote: pointsQuote,
+                      on: checkoutState.usePoints,
+                      onToggle: ref
+                          .read(checkoutProvider.notifier)
+                          .setUsePoints,
+                      onLogin: () => ensureLoggedIn(context, ref),
+                    ),
                   _buildDivider(),
                   const CheckoutPaymentSection(),
                   // Cutlery choice isn't sent in the order body (SCRUM-44).

@@ -189,8 +189,9 @@ class MessengerRepositoryImpl implements IMessengerRepository {
       // them 409) carries its own message, already in the user's language.
       final data = e.response?.data;
       final code = data is Map ? data['code']?.toString() : null;
+      // Kept as an ApiError so the controller can branch on the code.
       if (code != null && code.startsWith('POINTS_')) {
-        _throwFrom(e, 'Failed to create order');
+        throw ApiError.from(e);
       }
       // 409 = the selected delivery mode was disabled between estimate and
       // create (SCRUM-71) → caller should refresh the estimate.

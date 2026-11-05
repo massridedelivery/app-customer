@@ -6,11 +6,16 @@ import 'package:customer_app/features/chat/domain/models/chat_message.dart';
 abstract interface class IFoodOrderRepository {
   Future<RestaurantProfileModel> getRestaurantProfile(String id);
   Future<List<MenuCategoryModel>> getRestaurantMenu(String id);
+  /// POST /api/food/customer/estimate. With [promoCodes] / [usePoints] each
+  /// tier carries `promo_discount`, `points` and `amount_to_pay`.
   Future<FareEstimateResponseModel> getFareEstimate({
     required String restaurantId,
     required List<Map<String, dynamic>> items,
     required double lat,
     required double lng,
+    List<String>? promoCodes,
+    bool usePoints = false,
+    int? pointsToUse,
   });
   Future<FoodOrderModel> placeOrder({
     required String restaurantId,
@@ -23,6 +28,8 @@ abstract interface class IFoodOrderRepository {
     String? tier,
     List<String>? promoCodes,
     String? idempotencyKey,
+    bool usePoints = false,
+    int? pointsToUse,
   });
   /// PUT /api/food/customer/cart — upsert the whole cart (SCRUM-44 Screen 4).
   Future<void> upsertCart({

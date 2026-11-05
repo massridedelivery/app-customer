@@ -294,6 +294,17 @@ class MessengerBookingController extends _$MessengerBookingController {
       // The points are spent: the balance on other screens reads again.
       if (order.pointsUsed > 0) _refreshPoints();
       state = state.copyWith(isCreating: false, createdOrderId: order.id);
+    } on ApiError catch (e) {
+      // POINTS_*: the server's message; points off when they can't be used
+      // at all (switched off / not logged in), then price it again.
+      final off =
+          e.code == 'POINTS_DISABLED' || e.code == 'POINTS_LOGIN_REQUIRED';
+      state = state.copyWith(
+        isCreating: false,
+        usePoints: off ? false : state.usePoints,
+        error: e.message,
+      );
+      unawaited(estimate());
     } catch (e) {
       final msg = e.toString().replaceFirst('Exception: ', '');
       if (msg == 'DELIVERY_MODE_UNAVAILABLE') {

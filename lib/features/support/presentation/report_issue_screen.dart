@@ -8,6 +8,7 @@ import 'package:customer_app/features/chat/data/chat_image_processor.dart';
 import 'package:customer_app/features/support/data/support_repository.dart';
 import 'package:customer_app/features/support/domain/support_ticket.dart';
 import 'package:customer_app/features/support/presentation/controllers/support_tickets_controller.dart';
+import 'package:customer_app/features/support/presentation/support_chat_launcher.dart';
 import 'package:customer_app/features/support/presentation/support_l10n.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -214,6 +215,7 @@ class _ReportIssueScreenState extends ConsumerState<ReportIssueScreen> {
         context.pushReplacement('/support/tickets/$existing');
         return;
       }
+      handleSupportDisabled(ref, e);
       messenger.showSnackBar(SnackBar(content: Text(friendlyError(e))));
     } finally {
       if (mounted) setState(() => _sending = false);

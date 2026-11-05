@@ -4003,4 +4003,10 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get ratingTagOvercharged => 'เก็บเงินเกิน';
+
+  @override
+  String get supportChatStart => 'แชทกับเจ้าหน้าที่';
+
+  @override
+  String get supportChatHint => 'พิมพ์ข้อความ…';
 }

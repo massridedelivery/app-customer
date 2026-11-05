@@ -7398,6 +7398,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Charged too much'**
   String get ratingTagOvercharged;
+
+  /// No description provided for @supportChatStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat with support'**
+  String get supportChatStart;
+
+  /// No description provided for @supportChatHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Type a message…'**
+  String get supportChatHint;
 }
 
 class _AppLocalizationsDelegate

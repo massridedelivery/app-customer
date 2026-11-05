@@ -1,5 +1,6 @@
 import 'package:customer_app/features/profile/presentation/controllers/loyalty_providers.dart';
 import 'package:customer_app/features/profile/presentation/widgets/loyalty_format.dart';
+import 'package:customer_app/core/data/support_config_provider.dart';
 import 'package:customer_app/core/utils/app_dates.dart';
 import 'package:customer_app/core/constants/map_defaults.dart';
 import 'package:customer_app/core/utils/error_text.dart';
@@ -83,8 +84,13 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
     context.push('/food-delivery');
   }
 
-  /// "ต้องการความช่วยเหลือ / แจ้งปัญหา": the report form for this order.
+  /// "ต้องการความช่วยเหลือ / แจ้งปัญหา": the report form for this order, or
+  /// SOS while in-app reports are switched off.
   void _reportProblem() {
+    if (!ref.read(supportFlagsProvider).ticketsEnabled) {
+      context.push('/sos');
+      return;
+    }
     final service =
         (widget.orderType?.toUpperCase() ?? '') == 'RIDE' ? 'ride' : 'food';
     context.push(
@@ -948,6 +954,8 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
   }
 
   Widget _buildActionButtons() {
+    // Loads the support switches before the button is tapped.
+    ref.watch(supportFlagsProvider);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(

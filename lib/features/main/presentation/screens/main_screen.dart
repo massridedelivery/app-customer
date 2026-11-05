@@ -1,3 +1,4 @@
+import 'package:customer_app/features/popup/app_popup.dart';
 import 'dart:async';
 import 'dart:io' show Platform;
 
@@ -55,6 +56,29 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     WidgetsBinding.instance.addPostFrameCallback(
       (_) => offerUpdateSuggestion(context, ref),
     );
+    // The launch pop-up: once home has settled (after the version check),
+    // and again whenever the app comes back to the foreground.
+    _schedulePopup();
+    _lifecycle = AppLifecycleListener(
+      onResume: () {
+        ref.read(appPopupStoreProvider).shownThisOpen = false;
+        _schedulePopup();
+      },
+    );
+  }
+
+  AppLifecycleListener? _lifecycle;
+  Timer? _popupTimer;
+
+  /// Launch pop-up on the home tab with nothing on top. Not on the very first
+  /// visit: the home tour goes first.
+  void _schedulePopup() {
+    _popupTimer?.cancel();
+    _popupTimer = Timer(const Duration(milliseconds: 1200), () {
+      if (!mounted || _currentIndex != 0) return;
+      if (!ref.read(appStorageProvider).hasSeenHomeCoachMarks) return;
+      maybeShowAppPopup(context, ref);
+    });
   }
 
   @override
@@ -89,6 +113,8 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   @override
   void dispose() {
     _coachTimer?.cancel();
+    _popupTimer?.cancel();
+    _lifecycle?.dispose();
     super.dispose();
   }
 

@@ -1201,5 +1201,6 @@
   "tierEarnMultiplier": "ได้คะแนน ×{x}",
   "tierYours": "ระดับของคุณ",
   "tierRange": "{min}–{max} คะแนน",
-  "tierRangeFrom": "{min} คะแนนขึ้นไป"
+  "tierRangeFrom": "{min} คะแนนขึ้นไป",
+  "popupDontShowAgain": "ไม่แสดงหน้านี้ในครั้งถัดไป"
 }

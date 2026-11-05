@@ -3843,4 +3843,7 @@ class AppLocalizationsTh extends AppLocalizations {
   String tierRangeFrom(String min) {
     return '$min คะแนนขึ้นไป';
   }
+
+  @override
+  String get popupDontShowAgain => 'ไม่แสดงหน้านี้ในครั้งถัดไป';
 }

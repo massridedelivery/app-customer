@@ -1335,5 +1335,6 @@
   "tierRange": "{min}–{max} points",
   "@tierRange": {"placeholders": {"min": {"type": "String"}, "max": {"type": "String"}}},
   "tierRangeFrom": "{min}+ points",
-  "@tierRangeFrom": {"placeholders": {"min": {"type": "String"}}}
+  "@tierRangeFrom": {"placeholders": {"min": {"type": "String"}}},
+  "popupDontShowAgain": "Don't show this again"
 }

@@ -7110,6 +7110,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{min}+ points'**
   String tierRangeFrom(String min);
+
+  /// No description provided for @popupDontShowAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t show this again'**
+  String get popupDontShowAgain;
 }
 
 class _AppLocalizationsDelegate

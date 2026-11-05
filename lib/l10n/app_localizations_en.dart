@@ -3892,4 +3892,163 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get popupDontShowAgain => 'Don\'t show this again';
+
+  @override
+  String get supportReportTitle => 'Report a problem';
+
+  @override
+  String get supportServiceRide => 'Ride';
+
+  @override
+  String get supportServiceFood => 'Food';
+
+  @override
+  String get supportServiceParcel => 'Parcel';
+
+  @override
+  String supportOrderLabel(String service, String no) {
+    return '$service · #$no';
+  }
+
+  @override
+  String get supportTopicLabel => 'What\'s the problem?';
+
+  @override
+  String get supportCatDriverBehavior => 'Rider\'s behaviour';
+
+  @override
+  String get supportCatSafety => 'Safety or dangerous driving';
+
+  @override
+  String get supportCatFarePayment => 'Fare or payment';
+
+  @override
+  String get supportCatItemIssue => 'Items damaged, missing or lost';
+
+  @override
+  String get supportCatLostItem => 'I left something in the vehicle';
+
+  @override
+  String get supportCatAppIssue => 'Problem with the app';
+
+  @override
+  String get supportCatOther => 'Something else';
+
+  @override
+  String get supportDetailLabel => 'Details';
+
+  @override
+  String get supportDetailHint =>
+      'Tell us what happened: when, where, and how we can help';
+
+  @override
+  String supportDetailTooShort(String min) {
+    return 'Please write at least $min characters';
+  }
+
+  @override
+  String supportPhotosLabel(String max) {
+    return 'Photos (optional, up to $max)';
+  }
+
+  @override
+  String get supportPhotoFailed =>
+      'Couldn\'t upload the photo. Please try again';
+
+  @override
+  String get supportSafetyNote =>
+      'In danger right now? Use SOS for immediate help';
+
+  @override
+  String get supportOpenSos => 'Open SOS';
+
+  @override
+  String get supportPickTopic => 'Please choose what the problem is';
+
+  @override
+  String get supportSubmit => 'Send report';
+
+  @override
+  String get supportSubmitted =>
+      'Report sent. Our team will get back to you soon';
+
+  @override
+  String get supportAlreadyOpen =>
+      'You\'ve already reported this. Opening that report';
+
+  @override
+  String get supportTicketsTitle => 'My reports';
+
+  @override
+  String get supportTicketsEmpty => 'You haven\'t reported anything yet';
+
+  @override
+  String get supportNewReport => 'New report';
+
+  @override
+  String get supportStatusOpen => 'Received';
+
+  @override
+  String get supportStatusInProgress => 'In progress';
+
+  @override
+  String get supportStatusResolved => 'Resolved';
+
+  @override
+  String get supportStatusClosed => 'Closed';
+
+  @override
+  String supportTicketTitle(String no) {
+    return 'Report #$no';
+  }
+
+  @override
+  String get supportNewReply => 'New reply';
+
+  @override
+  String get supportYou => 'You';
+
+  @override
+  String get supportTeam => 'Mass support';
+
+  @override
+  String get supportResolution => 'Outcome';
+
+  @override
+  String supportRefund(String amount) {
+    return 'Refunded ฿$amount';
+  }
+
+  @override
+  String get supportReplyHint => 'Add more details…';
+
+  @override
+  String get supportClosedNote =>
+      'This report is closed. If you still need help, send a new one';
+
+  @override
+  String supportFromRating(String stars) {
+    return 'Reported from a $stars-star rating';
+  }
+
+  @override
+  String get ratingLowPrompt => 'What went wrong? We\'ll pass it to our team';
+
+  @override
+  String get ratingTagUnsafe => 'Unsafe driving';
+
+  @override
+  String get ratingTagRude => 'Rude';
+
+  @override
+  String get ratingTagLate => 'Arrived late';
+
+  @override
+  String get ratingTagDetour => 'Took a longer route';
+
+  @override
+  String get ratingTagDirtyCar => 'Dirty vehicle';
+
+  @override
+  String get ratingTagOvercharged => 'Charged too much';
 }

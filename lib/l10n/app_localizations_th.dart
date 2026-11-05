@@ -3846,4 +3846,161 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get popupDontShowAgain => 'ไม่แสดงหน้านี้ในครั้งถัดไป';
+
+  @override
+  String get supportReportTitle => 'แจ้งปัญหา';
+
+  @override
+  String get supportServiceRide => 'เรียกรถ';
+
+  @override
+  String get supportServiceFood => 'ส่งอาหาร';
+
+  @override
+  String get supportServiceParcel => 'ส่งของ';
+
+  @override
+  String supportOrderLabel(String service, String no) {
+    return '$service · #$no';
+  }
+
+  @override
+  String get supportTopicLabel => 'เรื่องที่ต้องการแจ้ง';
+
+  @override
+  String get supportCatDriverBehavior => 'พฤติกรรมไรเดอร์ไม่เหมาะสม';
+
+  @override
+  String get supportCatSafety => 'ความปลอดภัย / ขับขี่อันตราย';
+
+  @override
+  String get supportCatFarePayment => 'ค่าบริการหรือการชำระเงิน';
+
+  @override
+  String get supportCatItemIssue => 'ของเสียหาย สูญหาย หรือไม่ครบ';
+
+  @override
+  String get supportCatLostItem => 'ลืมของไว้ในรถ';
+
+  @override
+  String get supportCatAppIssue => 'ปัญหาการใช้งานแอป';
+
+  @override
+  String get supportCatOther => 'อื่นๆ';
+
+  @override
+  String get supportDetailLabel => 'รายละเอียด';
+
+  @override
+  String get supportDetailHint =>
+      'เล่าสิ่งที่เกิดขึ้น เช่น เวลา สถานที่ และสิ่งที่อยากให้เราช่วย';
+
+  @override
+  String supportDetailTooShort(String min) {
+    return 'กรุณาเล่ารายละเอียดอย่างน้อย $min ตัวอักษร';
+  }
+
+  @override
+  String supportPhotosLabel(String max) {
+    return 'แนบรูป (ไม่บังคับ สูงสุด $max รูป)';
+  }
+
+  @override
+  String get supportPhotoFailed => 'อัปโหลดรูปไม่สำเร็จ ลองใหม่อีกครั้ง';
+
+  @override
+  String get supportSafetyNote =>
+      'ถ้าอยู่ในอันตรายตอนนี้ ใช้ SOS เพื่อขอความช่วยเหลือทันที';
+
+  @override
+  String get supportOpenSos => 'เปิด SOS';
+
+  @override
+  String get supportPickTopic => 'กรุณาเลือกเรื่องที่ต้องการแจ้ง';
+
+  @override
+  String get supportSubmit => 'ส่งเรื่อง';
+
+  @override
+  String get supportSubmitted => 'ส่งเรื่องแล้ว ทีมงานจะติดต่อกลับโดยเร็ว';
+
+  @override
+  String get supportAlreadyOpen =>
+      'คุณแจ้งเรื่องนี้ไว้แล้ว กำลังเปิดเรื่องเดิมให้';
+
+  @override
+  String get supportTicketsTitle => 'ประวัติการแจ้งปัญหา';
+
+  @override
+  String get supportTicketsEmpty => 'ยังไม่มีเรื่องที่แจ้ง';
+
+  @override
+  String get supportNewReport => 'แจ้งปัญหาใหม่';
+
+  @override
+  String get supportStatusOpen => 'รอดำเนินการ';
+
+  @override
+  String get supportStatusInProgress => 'กำลังดำเนินการ';
+
+  @override
+  String get supportStatusResolved => 'แก้ไขแล้ว';
+
+  @override
+  String get supportStatusClosed => 'ปิดเรื่องแล้ว';
+
+  @override
+  String supportTicketTitle(String no) {
+    return 'เรื่องที่แจ้ง #$no';
+  }
+
+  @override
+  String get supportNewReply => 'ตอบกลับใหม่';
+
+  @override
+  String get supportYou => 'คุณ';
+
+  @override
+  String get supportTeam => 'ทีมงาน Mass';
+
+  @override
+  String get supportResolution => 'ผลการดำเนินการ';
+
+  @override
+  String supportRefund(String amount) {
+    return 'คืนเงิน ฿$amount';
+  }
+
+  @override
+  String get supportReplyHint => 'เพิ่มรายละเอียด…';
+
+  @override
+  String get supportClosedNote =>
+      'เรื่องนี้ปิดแล้ว ถ้ายังมีปัญหา แจ้งเรื่องใหม่ได้';
+
+  @override
+  String supportFromRating(String stars) {
+    return 'รายงานจากการให้คะแนน $stars ดาว';
+  }
+
+  @override
+  String get ratingLowPrompt => 'เกิดอะไรขึ้น? เราจะส่งเรื่องให้ทีมงานตรวจสอบ';
+
+  @override
+  String get ratingTagUnsafe => 'ขับขี่อันตราย';
+
+  @override
+  String get ratingTagRude => 'ไม่สุภาพ';
+
+  @override
+  String get ratingTagLate => 'มาช้า';
+
+  @override
+  String get ratingTagDetour => 'เส้นทางอ้อม';
+
+  @override
+  String get ratingTagDirtyCar => 'รถไม่สะอาด';
+
+  @override
+  String get ratingTagOvercharged => 'เก็บเงินเกิน';
 }

@@ -621,6 +621,27 @@ class _MessengerTrackingScreenState
               ),
             ),
           ],
+          const SizedBox(height: 8),
+          TextButton(
+            key: const Key('msgrReportProblem'),
+            onPressed: () => context.push(
+              Uri(
+                path: '/support/report',
+                queryParameters: {
+                  'service': 'parcel',
+                  'ref': order.id,
+                  'source': 'tracking',
+                },
+              ).toString(),
+            ),
+            child: Text(
+              _l10n.tripHelpReport,
+              style: AppTypography.body3.copyWith(
+                color: AppColors.primary.withValues(alpha: 0.7),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
         ],
     );
   }

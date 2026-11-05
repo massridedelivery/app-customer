@@ -7116,6 +7116,288 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Don\'t show this again'**
   String get popupDontShowAgain;
+
+  /// No description provided for @supportReportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Report a problem'**
+  String get supportReportTitle;
+
+  /// No description provided for @supportServiceRide.
+  ///
+  /// In en, this message translates to:
+  /// **'Ride'**
+  String get supportServiceRide;
+
+  /// No description provided for @supportServiceFood.
+  ///
+  /// In en, this message translates to:
+  /// **'Food'**
+  String get supportServiceFood;
+
+  /// No description provided for @supportServiceParcel.
+  ///
+  /// In en, this message translates to:
+  /// **'Parcel'**
+  String get supportServiceParcel;
+
+  /// No description provided for @supportOrderLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{service} · #{no}'**
+  String supportOrderLabel(String service, String no);
+
+  /// No description provided for @supportTopicLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'What\'s the problem?'**
+  String get supportTopicLabel;
+
+  /// No description provided for @supportCatDriverBehavior.
+  ///
+  /// In en, this message translates to:
+  /// **'Rider\'s behaviour'**
+  String get supportCatDriverBehavior;
+
+  /// No description provided for @supportCatSafety.
+  ///
+  /// In en, this message translates to:
+  /// **'Safety or dangerous driving'**
+  String get supportCatSafety;
+
+  /// No description provided for @supportCatFarePayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Fare or payment'**
+  String get supportCatFarePayment;
+
+  /// No description provided for @supportCatItemIssue.
+  ///
+  /// In en, this message translates to:
+  /// **'Items damaged, missing or lost'**
+  String get supportCatItemIssue;
+
+  /// No description provided for @supportCatLostItem.
+  ///
+  /// In en, this message translates to:
+  /// **'I left something in the vehicle'**
+  String get supportCatLostItem;
+
+  /// No description provided for @supportCatAppIssue.
+  ///
+  /// In en, this message translates to:
+  /// **'Problem with the app'**
+  String get supportCatAppIssue;
+
+  /// No description provided for @supportCatOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Something else'**
+  String get supportCatOther;
+
+  /// No description provided for @supportDetailLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get supportDetailLabel;
+
+  /// No description provided for @supportDetailHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell us what happened: when, where, and how we can help'**
+  String get supportDetailHint;
+
+  /// No description provided for @supportDetailTooShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Please write at least {min} characters'**
+  String supportDetailTooShort(String min);
+
+  /// No description provided for @supportPhotosLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos (optional, up to {max})'**
+  String supportPhotosLabel(String max);
+
+  /// No description provided for @supportPhotoFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t upload the photo. Please try again'**
+  String get supportPhotoFailed;
+
+  /// No description provided for @supportSafetyNote.
+  ///
+  /// In en, this message translates to:
+  /// **'In danger right now? Use SOS for immediate help'**
+  String get supportSafetyNote;
+
+  /// No description provided for @supportOpenSos.
+  ///
+  /// In en, this message translates to:
+  /// **'Open SOS'**
+  String get supportOpenSos;
+
+  /// No description provided for @supportPickTopic.
+  ///
+  /// In en, this message translates to:
+  /// **'Please choose what the problem is'**
+  String get supportPickTopic;
+
+  /// No description provided for @supportSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Send report'**
+  String get supportSubmit;
+
+  /// No description provided for @supportSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Report sent. Our team will get back to you soon'**
+  String get supportSubmitted;
+
+  /// No description provided for @supportAlreadyOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve already reported this. Opening that report'**
+  String get supportAlreadyOpen;
+
+  /// No description provided for @supportTicketsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My reports'**
+  String get supportTicketsTitle;
+
+  /// No description provided for @supportTicketsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'You haven\'t reported anything yet'**
+  String get supportTicketsEmpty;
+
+  /// No description provided for @supportNewReport.
+  ///
+  /// In en, this message translates to:
+  /// **'New report'**
+  String get supportNewReport;
+
+  /// No description provided for @supportStatusOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Received'**
+  String get supportStatusOpen;
+
+  /// No description provided for @supportStatusInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'In progress'**
+  String get supportStatusInProgress;
+
+  /// No description provided for @supportStatusResolved.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolved'**
+  String get supportStatusResolved;
+
+  /// No description provided for @supportStatusClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed'**
+  String get supportStatusClosed;
+
+  /// No description provided for @supportTicketTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Report #{no}'**
+  String supportTicketTitle(String no);
+
+  /// No description provided for @supportNewReply.
+  ///
+  /// In en, this message translates to:
+  /// **'New reply'**
+  String get supportNewReply;
+
+  /// No description provided for @supportYou.
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get supportYou;
+
+  /// No description provided for @supportTeam.
+  ///
+  /// In en, this message translates to:
+  /// **'Mass support'**
+  String get supportTeam;
+
+  /// No description provided for @supportResolution.
+  ///
+  /// In en, this message translates to:
+  /// **'Outcome'**
+  String get supportResolution;
+
+  /// No description provided for @supportRefund.
+  ///
+  /// In en, this message translates to:
+  /// **'Refunded ฿{amount}'**
+  String supportRefund(String amount);
+
+  /// No description provided for @supportReplyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add more details…'**
+  String get supportReplyHint;
+
+  /// No description provided for @supportClosedNote.
+  ///
+  /// In en, this message translates to:
+  /// **'This report is closed. If you still need help, send a new one'**
+  String get supportClosedNote;
+
+  /// No description provided for @supportFromRating.
+  ///
+  /// In en, this message translates to:
+  /// **'Reported from a {stars}-star rating'**
+  String supportFromRating(String stars);
+
+  /// No description provided for @ratingLowPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'What went wrong? We\'ll pass it to our team'**
+  String get ratingLowPrompt;
+
+  /// No description provided for @ratingTagUnsafe.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsafe driving'**
+  String get ratingTagUnsafe;
+
+  /// No description provided for @ratingTagRude.
+  ///
+  /// In en, this message translates to:
+  /// **'Rude'**
+  String get ratingTagRude;
+
+  /// No description provided for @ratingTagLate.
+  ///
+  /// In en, this message translates to:
+  /// **'Arrived late'**
+  String get ratingTagLate;
+
+  /// No description provided for @ratingTagDetour.
+  ///
+  /// In en, this message translates to:
+  /// **'Took a longer route'**
+  String get ratingTagDetour;
+
+  /// No description provided for @ratingTagDirtyCar.
+  ///
+  /// In en, this message translates to:
+  /// **'Dirty vehicle'**
+  String get ratingTagDirtyCar;
+
+  /// No description provided for @ratingTagOvercharged.
+  ///
+  /// In en, this message translates to:
+  /// **'Charged too much'**
+  String get ratingTagOvercharged;
 }
 
 class _AppLocalizationsDelegate

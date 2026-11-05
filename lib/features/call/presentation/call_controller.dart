@@ -4,6 +4,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:customer_app/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:customer_app/features/call/data/call_media.dart';
 import 'package:customer_app/features/call/data/call_repository.dart';
+import 'package:customer_app/features/call/data/call_ringback.dart';
 import 'package:customer_app/features/call/data/call_signaling.dart';
 import 'package:customer_app/features/call/data/call_system_ui.dart';
 import 'package:customer_app/features/call/domain/call_models.dart';
@@ -161,6 +162,13 @@ class CallController extends Notifier<CallSession?> {
   final Set<String> _remoteSdps = {};
 
   Timer? _ringTimer;
+
+  /// Stops the caller's ringback at `ring_timeout_sec` when no frame came.
+  Timer? _ringbackTimer;
+
+  /// The ringback that is playing, kept so it can be stopped while this
+  /// controller is being disposed (no `ref` then).
+  CallRingback? _playingRingback;
   Timer? _ringPoll;
   Timer? _connectTimer;
   Timer? _clearTimer;
@@ -186,6 +194,7 @@ class CallController extends Notifier<CallSession?> {
   CallRepository get _repo => ref.read(callRepositoryProvider);
   CallSignaling get _signaling => ref.read(callSignalingProvider);
   CallSystemUi get _systemUi => ref.read(callSystemUiProvider);
+  CallRingback get _ringback => ref.read(callRingbackProvider);
 
   @override
   CallSession? build() {
@@ -277,6 +286,14 @@ class CallController extends Notifier<CallSession?> {
     // with: try it again now rather than at the next backoff step.
     unawaited(_signaling.connect());
     unawaited(_systemUi.startOutgoing(call));
+    // "ตู๊ด… ตู๊ด…" until the driver answers or the call ends; the server
+    // sends nothing for it.
+    final ringback = _playingRingback = _ringback;
+    unawaited(_quietly(ringback.start));
+    _ringbackTimer = Timer(
+      Duration(seconds: call.ringTimeoutSec),
+      _stopRingback,
+    );
     _ringTimer = Timer(Duration(seconds: call.ringTimeoutSec) + ringGrace, () {
       if (state?.phase == CallPhase.outgoing) hangUp(reason: 'missed');
     });
@@ -501,6 +518,8 @@ class CallController extends Notifier<CallSession?> {
     final session = state;
     if (session == null || session.phase != CallPhase.outgoing) return;
     _ringTimer?.cancel();
+    // Before the audio connects, so the tone is gone when the voice starts.
+    _stopRingback();
     state = session.copyWith(phase: CallPhase.connecting);
     _connectMedia(session.call.iceServers, media: _media).then((_) {
       _enqueue(() async {
@@ -785,7 +804,16 @@ class CallController extends Notifier<CallSession?> {
     });
   }
 
+  void _stopRingback() {
+    _ringbackTimer?.cancel();
+    _ringbackTimer = null;
+    final ringback = _playingRingback;
+    _playingRingback = null;
+    if (ringback != null) unawaited(_quietly(ringback.stop));
+  }
+
   void _cancelTimers() {
+    _stopRingback();
     _ringTimer?.cancel();
     _ringPoll?.cancel();
     _connectTimer?.cancel();

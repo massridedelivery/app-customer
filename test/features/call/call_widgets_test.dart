@@ -165,7 +165,7 @@ void main() {
       expect(find.byKey(const Key('callHangUp')), findsNothing);
     });
 
-    testWidgets('outgoing: กำลังโทรหา… and hang up', (tester) async {
+    testWidgets('outgoing: กำลังโทร… and hang up', (tester) async {
       final controller = _Controller(
         const CallSession(call: _call, phase: CallPhase.outgoing),
       );
@@ -174,7 +174,7 @@ void main() {
         const CallScreen(),
         overrides: [callControllerProvider.overrideWith(() => controller)],
       );
-      expect(find.text('กำลังโทรหา…'), findsOneWidget);
+      expect(find.text('กำลังโทร…'), findsOneWidget);
       await tester.tap(find.byKey(const Key('callMute')));
       await tester.tap(find.byKey(const Key('callHangUp')));
       expect(controller.asked, ['mute', 'hangUp']);

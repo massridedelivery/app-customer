@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:customer_app/features/call/data/call_media.dart';
 import 'package:customer_app/features/call/data/call_repository.dart';
+import 'package:customer_app/features/call/data/call_ringback.dart';
 import 'package:customer_app/features/call/data/call_signaling.dart';
 import 'package:customer_app/features/call/data/call_system_ui.dart';
 import 'package:customer_app/features/call/domain/call_models.dart';
@@ -216,6 +217,23 @@ class _SystemUi implements CallSystemUi {
   Future<String?> voipToken() async => null;
 }
 
+class _Ringback implements CallRingback {
+  final log = <String>[];
+  bool playing = false;
+
+  @override
+  Future<void> start() async {
+    playing = true;
+    log.add('start');
+  }
+
+  @override
+  Future<void> stop() async {
+    if (playing) log.add('stop');
+    playing = false;
+  }
+}
+
 class _Harness {
   _Harness({
     List<({String callId, bool accepted, Map<String, dynamic> extra})>
@@ -235,10 +253,13 @@ class _Harness {
         }),
         callNetworkChangesProvider.overrideWithValue(network.stream),
         callScreenOpenerProvider.overrideWithValue(() => screenOpened++),
+        callRingbackProvider.overrideWithValue(ringback),
       ],
     );
     controller.start();
   }
+
+  final ringback = _Ringback();
 
   late final ProviderContainer container;
   final repo = _Repo();
@@ -791,6 +812,76 @@ void main() {
       expect(h.session!.endReason, 'failed');
       await tester.pump(CallController.endedLinger);
       h.dispose();
+    });
+  });
+
+  group('ringback (ตู๊ด… ตู๊ด…)', () {
+    test('plays from the 201 until the driver answers', () async {
+      final h = _Harness();
+      addTearDown(h.dispose);
+      await h.controller.startCall(CallKind.ride, 'job-1');
+      expect(h.ringback.playing, isTrue);
+      h.frame({'type': 'call_accepted', 'call': _view(status: 'accepted')});
+      await _settle();
+      expect(h.ringback.playing, isFalse);
+      expect(h.ringback.log, ['start', 'stop']);
+    });
+
+    test('stops when the call ends while ringing', () async {
+      final h = _Harness();
+      addTearDown(h.dispose);
+      await h.controller.startCall(CallKind.ride, 'job-1');
+      h.frame({
+        'type': 'call_ended',
+        'call': _view(status: 'ended', endReason: 'declined'),
+      });
+      await _settle();
+      expect(h.ringback.playing, isFalse);
+    });
+
+    test('stops when the caller hangs up', () async {
+      final h = _Harness();
+      addTearDown(h.dispose);
+      await h.controller.startCall(CallKind.ride, 'job-1');
+      await h.controller.hangUp();
+      expect(h.ringback.playing, isFalse);
+    });
+
+    test('a refused start plays nothing', () async {
+      final h = _Harness();
+      addTearDown(h.dispose);
+      h.repo.startError = CallException.fromDio(_dio(409, 'CALL_BUSY'));
+      expect(
+        await h.controller.startCall(CallKind.ride, 'job-1'),
+        CallError.busy,
+      );
+      expect(h.ringback.log, isEmpty);
+    });
+
+    testWidgets('stops at ring_timeout_sec when no frame comes', (
+      tester,
+    ) async {
+      final h = _Harness();
+      unawaited(h.controller.startCall(CallKind.ride, 'job-1'));
+      await tester.pump();
+      expect(h.ringback.playing, isTrue);
+      await tester.pump(const Duration(seconds: 29));
+      expect(h.ringback.playing, isTrue);
+      await tester.pump(const Duration(seconds: 1));
+      expect(h.ringback.playing, isFalse);
+      await tester.pump(const Duration(seconds: 6));
+      await tester.pump(CallController.endedLinger);
+      h.dispose();
+    });
+
+    test('429 is its own error', () async {
+      final h = _Harness();
+      addTearDown(h.dispose);
+      h.repo.startError = CallException.fromDio(_dio(429));
+      expect(
+        await h.controller.startCall(CallKind.ride, 'job-1'),
+        CallError.rateLimited,
+      );
     });
   });
 }

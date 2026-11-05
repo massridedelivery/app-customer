@@ -7038,6 +7038,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Arriving in {minutes} min'**
   String liveArrivesDestIn(int minutes);
+
+  /// No description provided for @callErrorRateLimited.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many calls. Wait a moment and try again.'**
+  String get callErrorRateLimited;
 }
 
 class _AppLocalizationsDelegate

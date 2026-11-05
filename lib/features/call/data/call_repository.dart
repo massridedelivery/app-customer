@@ -32,6 +32,9 @@ enum CallError {
   /// The microphone permission was refused.
   microphone,
 
+  /// 429: too many calls in a short time.
+  rateLimited,
+
   /// Network or server trouble.
   failed,
 }
@@ -53,6 +56,7 @@ class CallException implements Exception {
       (_, 'CALL_DISABLED') => CallError.disabled,
       (_, 'CALL_ENDED') => CallError.ended,
       (404, _) => CallError.notFound,
+      (429, _) => CallError.rateLimited,
       _ => CallError.failed,
     }, e);
   }

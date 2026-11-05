@@ -1318,5 +1318,6 @@
   "liveDriverArrivesIn": "Your driver arrives in {minutes} min",
   "@liveDriverArrivesIn": {"placeholders": {"minutes": {"type": "int"}}},
   "liveArrivesDestIn": "Arriving in {minutes} min",
-  "@liveArrivesDestIn": {"placeholders": {"minutes": {"type": "int"}}}
+  "@liveArrivesDestIn": {"placeholders": {"minutes": {"type": "int"}}},
+  "callErrorRateLimited": "Too many calls. Wait a moment and try again."
 }

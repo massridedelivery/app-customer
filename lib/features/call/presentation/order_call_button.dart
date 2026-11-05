@@ -101,6 +101,7 @@ String callErrorText(AppLocalizations l10n, CallError error) => switch (error) {
   CallError.disabled => l10n.callErrorDisabled,
   CallError.notFound => l10n.callErrorNotFound,
   CallError.microphone => l10n.callErrorMicrophone,
+  CallError.rateLimited => l10n.callErrorRateLimited,
   CallError.ended || CallError.failed => l10n.callErrorFailed,
 };
 

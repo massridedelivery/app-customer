@@ -3889,4 +3889,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String tierRangeFrom(String min) {
     return '$min+ points';
   }
+
+  @override
+  String get popupDontShowAgain => 'Don\'t show this again';
 }

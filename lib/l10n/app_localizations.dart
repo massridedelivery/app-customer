@@ -7044,6 +7044,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Too many calls. Wait a moment and try again.'**
   String get callErrorRateLimited;
+
+  /// No description provided for @vouchersTabVoided.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get vouchersTabVoided;
+
+  /// No description provided for @vouchersVoidedRefund.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled · {points} points returned'**
+  String vouchersVoidedRefund(String points);
+
+  /// No description provided for @vouchersExpiredNoRefund.
+  ///
+  /// In en, this message translates to:
+  /// **'Expired coupons don\'t get their points back'**
+  String get vouchersExpiredNoRefund;
+
+  /// No description provided for @promoVoucherLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Points coupon'**
+  String get promoVoucherLabel;
 }
 
 class _AppLocalizationsDelegate

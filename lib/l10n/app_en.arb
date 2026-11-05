@@ -1319,5 +1319,10 @@
   "@liveDriverArrivesIn": {"placeholders": {"minutes": {"type": "int"}}},
   "liveArrivesDestIn": "Arriving in {minutes} min",
   "@liveArrivesDestIn": {"placeholders": {"minutes": {"type": "int"}}},
-  "callErrorRateLimited": "Too many calls. Wait a moment and try again."
+  "callErrorRateLimited": "Too many calls. Wait a moment and try again.",
+  "vouchersTabVoided": "Cancelled",
+  "vouchersVoidedRefund": "Cancelled · {points} points returned",
+  "@vouchersVoidedRefund": {"placeholders": {"points": {"type": "String"}}},
+  "vouchersExpiredNoRefund": "Expired coupons don't get their points back",
+  "promoVoucherLabel": "Points coupon"
 }

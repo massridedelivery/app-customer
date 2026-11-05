@@ -56,12 +56,14 @@ class _FakeLoyalty implements LoyaltyRemoteDataSource {
   _FakeLoyalty({
     this.rewards = const [],
     this.failFirstRedeem = false,
+    this.failFirstRedeemWith500 = false,
     this.spending,
   });
 
   final List<Map<String, dynamic>> rewards;
   final Map<String, dynamic>? spending;
   bool failFirstRedeem;
+  bool failFirstRedeemWith500;
   final redeemKeys = <String>[];
 
   @override
@@ -133,6 +135,17 @@ class _FakeLoyalty implements LoyaltyRemoteDataSource {
         type: DioExceptionType.connectionError,
       );
     }
+    if (failFirstRedeemWith500) {
+      failFirstRedeemWith500 = false;
+      throw DioException(
+        requestOptions: RequestOptions(path: '/redeem'),
+        response: Response(
+          requestOptions: RequestOptions(path: '/redeem'),
+          statusCode: 500,
+          data: {'code': 'DB_TIMEOUT', 'error': 'ระบบขัดข้อง ลองใหม่อีกครั้ง'},
+        ),
+      );
+    }
     return {
       'voucher': _voucher('RW-7KQ2-M9XD'),
       'points_spent': 80,
@@ -148,6 +161,8 @@ class _FakeLoyalty implements LoyaltyRemoteDataSource {
             ? [_voucher('RW-AAAA-BBBB')]
             : status == 'USED'
             ? [_voucher('RW-USED-0001', status: 'USED')]
+            : status == 'VOIDED'
+            ? [_voucher('RW-VOID-0001', status: 'VOIDED')]
             : <Map<String, dynamic>>[],
       };
 }
@@ -387,6 +402,77 @@ void main() {
       );
       expect(find.text('ยอดรวม ฿0 · 0 รายการ · ได้ 0 คะแนน'), findsOneWidget);
       expect(find.text('฿0 · 0 รายการ · 0 คะแนน'), findsNWidgets(3));
+    });
+  });
+
+  group('backend v2: rewards and vouchers', () {
+    test('reward discount, per-user limit; voucher voided; points_spent', () {
+      final r = Reward.fromJson({
+        ..._reward('x'),
+        'discount': {
+          'type': 'PERCENT',
+          'value': 20,
+          'max_discount': 50,
+          'min_spend': 100,
+          'applies_to': 'FOOD',
+          'stackable': true,
+        },
+        'per_user_limit': 2,
+        'redeemed_by_me': 1,
+      });
+      expect(r.discount!.type, 'PERCENT');
+      expect(r.discount!.maxDiscount, 50);
+      expect(r.discount!.stackable, isTrue);
+      expect(r.perUserLimit, 2);
+      expect(r.redeemedByMe, 1);
+      expect(Reward.fromJson(_reward('y')).perUserLimit, isNull);
+
+      final v = Voucher.fromJson({
+        ..._voucher('RW-VOID-0001', status: 'VOIDED'),
+        'voided_at': '2026-11-01T03:00:00Z',
+        'created_at': '2026-10-20T03:00:00Z',
+        'image_url': 'https://cdn.test/r.png',
+      });
+      expect(v.status, 'VOIDED');
+      expect(v.voidedAt, isNotNull);
+      expect(v.imageUrl, 'https://cdn.test/r.png');
+
+      final res = RedeemResult.fromJson({
+        'voucher': _voucher('RW-1'),
+        'points_spent': 80,
+        'points_balance': 40,
+        'replayed': true,
+      });
+      expect(res.pointsSpent, 80);
+      expect(res.replayed, isTrue);
+    });
+
+    testWidgets('ยกเลิก tab: points returned', (tester) async {
+      await _pump(tester, _FakeLoyalty(), initial: '/vouchers');
+      await tester.tap(find.text('ยกเลิก'));
+      await tester.pumpAndSettle();
+      expect(find.text('RW-VOID-0001'), findsOneWidget);
+      expect(find.text('ยกเลิกแล้ว คืน 80 คะแนน'), findsOneWidget);
+      expect(find.byKey(const Key('voucherUse-RW-VOID-0001')), findsNothing);
+    });
+
+    testWidgets('a 500 on redeem retries with the same key', (tester) async {
+      final fake = _FakeLoyalty(
+        rewards: [_reward('ok')],
+        failFirstRedeemWith500: true,
+      );
+      await _pump(tester, fake);
+      await tester.tap(find.byKey(const Key('rewardRedeem-ok')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('redeemNoRefundNote')), findsOneWidget);
+      await tester.tap(find.byKey(const Key('redeemConfirm')));
+      await tester.pumpAndSettle();
+      expect(find.text('ระบบขัดข้อง ลองใหม่อีกครั้ง'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('redeemConfirm')));
+      await tester.pumpAndSettle();
+      expect(fake.redeemKeys, hasLength(2));
+      expect(fake.redeemKeys.toSet(), hasLength(1));
+      expect(find.text('แลกสำเร็จ'), findsOneWidget);
     });
   });
 }

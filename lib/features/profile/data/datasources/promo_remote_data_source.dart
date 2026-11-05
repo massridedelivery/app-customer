@@ -30,6 +30,22 @@ class PromoRemoteDataSource {
     return res.data as List<dynamic>;
   }
 
+  /// What a checkout can use for [appliesTo] (RIDE | FOOD | MESSENGER):
+  /// signed in, GET /api/customer/promos/context — promotions (kind PROMO)
+  /// then the customer's points coupons (kind VOUCHER); a guest has no
+  /// coupons, so the public list.
+  Future<List<dynamic>> getForService(String appliesTo) async {
+    if (!_auth) return getList();
+    final res = await _api.dio.get(
+      '/api/customer/promos/context',
+      queryParameters: {'applies_to': appliesTo},
+    );
+    final data = res.data;
+    if (data is List) return data;
+    return (data is Map ? (data['items'] ?? data['promos']) as List? : null) ??
+        const [];
+  }
+
   /// GET /api/customer/promo/{id} (auth) or /api/public/promos/{id} (guest)
   Future<Map<String, dynamic>> getDetail(String id) async {
     final path =

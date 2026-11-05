@@ -44,6 +44,9 @@ class CouponCardData {
   /// Which service the promo is for; shown as a text label. Null hides it.
   final PromoScope? scope;
 
+  /// The customer's own points coupon (RW-…): labelled "คูปองแลกคะแนน".
+  final bool isVoucher;
+
   const CouponCardData({
     required this.code,
     required this.title,
@@ -55,6 +58,7 @@ class CouponCardData {
     this.expiresAt,
     this.color = AppColors.primary,
     this.scope,
+    this.isVoucher = false,
   });
 
   factory CouponCardData.fromRidePromo(RidePromo p) {
@@ -71,32 +75,46 @@ class CouponCardData {
       expiresAt: _expiry(p.validUntil),
       color: promoColorOf({'discount_type': p.discountType}),
       scope: PromoScope.fromAppliesTo(p.appliesTo),
+      isVoucher: p.isVoucher,
     );
   }
 
   factory CouponCardData.fromMap(Map<String, dynamic> m) {
-    final type = (m['discount_type'] ?? '').toString().toLowerCase();
-    final val = _num(m['discount_value'] ?? m['discount']);
+    // A points coupon (kind VOUCHER) carries `discount` as an object:
+    // {type FIXED|PERCENT|FREE_DELIVERY, value, max_discount, min_spend}.
+    final d = m['discount'] is Map
+        ? Map<String, dynamic>.from(m['discount'] as Map)
+        : null;
+    final dType = (d?['type'] ?? '').toString().toUpperCase();
+    final type = d != null
+        ? (dType == 'PERCENT' ? 'percentage' : 'fixed')
+        : (m['discount_type'] ?? '').toString().toLowerCase();
+    final val = _num(d?['value'] ?? m['discount_value'] ?? m['discount']);
     final isPct = type == 'percentage';
-    final maxV = _num(m['max_discount']);
+    final maxV = _num(d?['max_discount'] ?? m['max_discount']);
     // Free shipping is a 100% discount on delivery in the pricing engine, so
     // key it off `promo_type` and show "ส่งฟรี" instead of "ลด 100%".
     final isFreeShip =
+        dType == 'FREE_DELIVERY' ||
         (m['promo_type'] ?? '').toString().toLowerCase() == 'free_shipping';
+    final isVoucher = (m['kind'] ?? '').toString().toUpperCase() == 'VOUCHER';
     return CouponCardData(
       code: (m['code'] ?? '').toString(),
       title: (m['title'] ?? m['name'])?.toString(),
-      description: (m['description'] ?? '').toString(),
+      description: (m['description'] ?? m['discount_text'] ?? '').toString(),
       discountValue: isFreeShip
           ? ''
           : (val <= 0 ? '' : (isPct ? '${_fmt(val)}%' : '฿${_fmt(val)}')),
       freeShipping: isFreeShip,
       maxDiscount: (!isFreeShip && isPct && maxV > 0) ? maxV : null,
-      minSpend: _num(m['min_order'] ?? m['min_spend']),
+      minSpend: _num(m['min_order'] ?? m['min_spend'] ?? d?['min_spend']),
       expiresAt:
           _expiry((m['valid_until'] ?? m['expires_at'] ?? '').toString()),
-      color: promoColorOf(m),
+      color: isFreeShip
+          ? promoColorOf({'promo_type': 'free_shipping'})
+          : promoColorOf(d == null ? m : {'discount_type': type}),
       scope: promoScopeOf(m),
+      isVoucher: isVoucher,
     );
   }
 
@@ -106,12 +124,15 @@ class CouponCardData {
     return CouponCardData(
       code: p.code,
       title: p.title,
-      description: p.description,
+      description: p.description.isNotEmpty
+          ? p.description
+          : (p.discountText ?? ''),
       discountValue: p.discount <= 0 ? '' : '฿${_fmt(p.discount)}',
       minSpend: p.minOrder,
       expiresAt: _expiry(p.expiresAt),
       color: p.color != null ? Color(p.color!) : AppColors.primary,
       scope: PromoScope.food,
+      isVoucher: p.isVoucher,
     );
   }
 
@@ -246,7 +267,10 @@ class CouponCard extends StatelessWidget {
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          if (data.scope != null) ...[
+                          if (data.isVoucher) ...[
+                            const SizedBox(width: 6),
+                            const _VoucherLabel(),
+                          ] else if (data.scope != null) ...[
                             const SizedBox(width: 6),
                             _ScopeLabel(scope: data.scope!),
                           ],
@@ -341,6 +365,32 @@ class CouponCard extends StatelessWidget {
                 child: footer,
               ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// "คูปองแลกคะแนน" on the customer's own points coupon.
+class _VoucherLabel extends StatelessWidget {
+  const _VoucherLabel();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      key: const Key('couponVoucherLabel'),
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 1),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFF4D6),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        AppLocalizations.of(context)!.promoVoucherLabel,
+        maxLines: 1,
+        style: const TextStyle(
+          fontSize: 9,
+          color: Color(0xFF8A5A00),
+          fontWeight: FontWeight.bold,
         ),
       ),
     );

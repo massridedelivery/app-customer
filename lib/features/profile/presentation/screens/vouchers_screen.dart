@@ -20,11 +20,11 @@ String serviceLabel(AppLocalizations l10n, String? service) =>
       _ => '',
     };
 
-/// "คูปองของฉัน": ใช้ได้ / ใช้แล้ว / หมดอายุ.
+/// "คูปองของฉัน": ใช้ได้ / ใช้แล้ว / หมดอายุ / ยกเลิก.
 class VouchersScreen extends ConsumerWidget {
   const VouchersScreen({super.key});
 
-  static const _statuses = ['ACTIVE', 'USED', 'EXPIRED'];
+  static const _statuses = ['ACTIVE', 'USED', 'EXPIRED', 'VOIDED'];
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -32,7 +32,7 @@ class VouchersScreen extends ConsumerWidget {
     return RefetchOnResume(
       onResume: () => ref.invalidate(vouchersProvider),
       child: DefaultTabController(
-        length: 3,
+        length: _statuses.length,
         child: Scaffold(
           backgroundColor: AppColors.background,
           appBar: AppBar(
@@ -49,6 +49,7 @@ class VouchersScreen extends ConsumerWidget {
                 Tab(text: l10n.vouchersTabActive),
                 Tab(text: l10n.vouchersTabUsed),
                 Tab(text: l10n.vouchersTabExpired),
+                Tab(text: l10n.vouchersTabVoided),
               ],
             ),
           ),
@@ -113,9 +114,24 @@ class _VoucherList extends ConsumerWidget {
             : ListView.separated(
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: EdgeInsets.fromLTRB(16, 16, 16, 32 + MediaQuery.paddingOf(context).bottom),
-                itemCount: items.length,
+                // Expired ones aren't refunded: said once above that list.
+                itemCount: items.length + (status == 'EXPIRED' ? 1 : 0),
                 separatorBuilder: (_, _) => const SizedBox(height: 12),
-                itemBuilder: (context, i) => VoucherCard(voucher: items[i]),
+                itemBuilder: (context, i) {
+                  if (status == 'EXPIRED') {
+                    if (i == 0) {
+                      return Text(
+                        l10n.vouchersExpiredNoRefund,
+                        key: const Key('vouchersNoRefundNote'),
+                        style: AppTypography.caption4.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                      );
+                    }
+                    return VoucherCard(voucher: items[i - 1]);
+                  }
+                  return VoucherCard(voucher: items[i]);
+                },
               ),
       ),
     );
@@ -195,7 +211,15 @@ class VoucherCard extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 8),
-          if (voucher.status == 'USED' && voucher.usedAt != null)
+          if (voucher.status == 'VOIDED')
+            Text(
+              l10n.vouchersVoidedRefund(fmtPoints(voucher.pointsSpent)),
+              key: Key('voucherVoided-${voucher.code}'),
+              style: AppTypography.caption4.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            )
+          else if (voucher.status == 'USED' && voucher.usedAt != null)
             Text(
               l10n.vouchersUsedAt(
                 fmtThaiDate(context, voucher.usedAt!),

@@ -26,11 +26,15 @@ abstract class MessengerEstimate with _$MessengerEstimate {
     // left to pay after the promo and the points. Absent on older backends.
     @JsonKey(name: 'points') Map<String, dynamic>? pointsRaw,
     @JsonKey(name: 'amount_to_pay') double? amountToPay,
+    // What the code in the promo box did (kind PROMO / VOUCHER, label).
+    @JsonKey(name: 'promo') Map<String, dynamic>? promoRaw,
   }) = _MessengerEstimate;
 
   const MessengerEstimate._();
 
   RidePointsQuote? get points => RidePointsQuote.fromJson(pointsRaw);
+
+  RidePromoQuote? get promo => RidePromoQuote.fromJson(promoRaw);
 
   factory MessengerEstimate.fromJson(Map<String, dynamic> json) =>
       _$MessengerEstimateFromJson(json);

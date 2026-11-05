@@ -3,14 +3,20 @@ import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/utils/promo_style.dart';
 import 'package:customer_app/core/widgets/coupon_card.dart';
 import 'package:customer_app/core/widgets/mass_loading_m.dart';
-import 'package:customer_app/features/profile/presentation/screens/promo_list_screen.dart';
+import 'package:customer_app/features/profile/data/datasources/promo_remote_data_source.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+/// What the parcel checkout can use: promotions, then the customer's points
+/// coupons (GET /api/customer/promos/context?applies_to=MESSENGER).
+final messengerPromosProvider = FutureProvider.autoDispose<List<dynamic>>(
+  (ref) => ref.watch(promoRemoteDataSourceProvider).getForService('MESSENGER'),
+);
+
 /// Coupon picker for the messenger booking. Lets the user either type a code or
-/// tap one from their active promotions (GET /api/customer/promo/list). Returns
-/// the chosen code string via `Navigator.pop`, or null if dismissed.
+/// tap one from their promotions and points coupons. Returns the chosen code
+/// string via `Navigator.pop`, or null if dismissed.
 class MessengerCouponScreen extends ConsumerStatefulWidget {
   final String? initialCode;
   const MessengerCouponScreen({super.key, this.initialCode});
@@ -30,7 +36,7 @@ class _MessengerCouponScreenState extends ConsumerState<MessengerCouponScreen> {
     super.initState();
     // Fresh list every time the checkout coupon picker opens.
     Future.microtask(() {
-      if (mounted) ref.invalidate(promoListProvider);
+      if (mounted) ref.invalidate(messengerPromosProvider);
     });
   }
 
@@ -48,7 +54,7 @@ class _MessengerCouponScreenState extends ConsumerState<MessengerCouponScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final promosAsync = ref.watch(promoListProvider);
+    final promosAsync = ref.watch(messengerPromosProvider);
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
@@ -85,14 +91,23 @@ class _MessengerCouponScreenState extends ConsumerState<MessengerCouponScreen> {
               data: (raw) {
                 // Only promos usable on a messenger order (applies_to ALL or
                 // MESSENGER) — a ride/food-only code can't be applied here.
-                final promos = raw
-                    .map(
-                      (e) => e is Map<String, dynamic>
-                          ? e
-                          : Map<String, dynamic>.from(e as Map),
+                final all = raw
+                    .whereType<Map>()
+                    .map((e) => Map<String, dynamic>.from(e))
+                    .where(
+                      (p) =>
+                          (p['kind'] ?? '').toString().toUpperCase() ==
+                              'VOUCHER' ||
+                          promoAppliesToService(p, 'messenger'),
                     )
-                    .where((p) => promoAppliesToService(p, 'messenger'))
                     .toList();
+                bool isVoucher(Map<String, dynamic> p) =>
+                    (p['kind'] ?? '').toString().toUpperCase() == 'VOUCHER';
+                // Promotions first, then the points coupons.
+                final promos = [
+                  ...all.where((p) => !isVoucher(p)),
+                  ...all.where(isVoucher),
+                ];
                 if (promos.isEmpty) {
                   return Center(
                     child: Text(

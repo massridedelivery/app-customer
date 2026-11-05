@@ -1055,6 +1055,15 @@ class _MessengerBookingScreenState
     // voucher picked elsewhere is set there without passing this screen.
     final String promoCode = bookingState.promoCode;
     final bool hasPromo = promoCode.isNotEmpty;
+    // A points coupon applied: say so under the code.
+    final appliedPromo = bookingState.estimate?.promo;
+    final voucherLabel =
+        hasPromo &&
+            appliedPromo != null &&
+            appliedPromo.code.toUpperCase() == promoCode.toUpperCase() &&
+            appliedPromo.kind == 'VOUCHER'
+        ? (appliedPromo.label ?? _l10n.promoVoucherLabel)
+        : null;
     final pointsQuote = bookingState.pointsQuote;
     final String method = bookingState.paymentMethod.toUpperCase();
     return _card(
@@ -1181,13 +1190,27 @@ class _MessengerBookingScreenState
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: Text(
-                      hasPromo ? promoCode : _l10n.msgrSelectPromoOptional,
-                      style: AppTypography.body2.copyWith(
-                        color: hasPromo
-                            ? AppColors.semanticSuccessFgHigh
-                            : AppColors.textSecondary,
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          hasPromo ? promoCode : _l10n.msgrSelectPromoOptional,
+                          style: AppTypography.body2.copyWith(
+                            color: hasPromo
+                                ? AppColors.semanticSuccessFgHigh
+                                : AppColors.textSecondary,
+                          ),
+                        ),
+                        if (voucherLabel != null)
+                          Text(
+                            voucherLabel,
+                            key: const Key('msgrVoucherLabel'),
+                            style: AppTypography.caption4.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                   if (hasPromo)

@@ -31,6 +31,13 @@ class LoyaltyRemoteDataSource {
     return res.data as Map<String, dynamic>;
   }
 
+  /// GET /api/customer/loyalty/tiers — every member tier, in the admins'
+  /// order.
+  Future<Map<String, dynamic>> getTiers() async {
+    final res = await _api.dio.get('/api/customer/loyalty/tiers');
+    return res.data as Map<String, dynamic>;
+  }
+
   /// GET /api/customer/rewards — what points can be exchanged for.
   Future<Map<String, dynamic>> getRewards() async {
     final res = await _api.dio.get('/api/customer/rewards');

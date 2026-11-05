@@ -30,6 +30,7 @@ class LoyaltySummary {
     this.earnPer100Ride = 0,
     this.earnMinOrder = 0,
     this.spending,
+    this.tier,
   });
 
   final int totalPoints;
@@ -53,6 +54,10 @@ class LoyaltySummary {
   /// sent none (couldn't read it): the section is hidden, not shown as ฿0.
   final LoyaltySpending? spending;
 
+  /// "ระดับสมาชิก": from `tier`, else the older `current_tier` /
+  /// `next_tier_points`; null when neither came.
+  final LoyaltyTier? tier;
+
   factory LoyaltySummary.fromJson(Map<String, dynamic> json) {
     final points = _map(json['points']);
     final expiring = _map(json['expiring_soon']);
@@ -70,6 +75,178 @@ class LoyaltySummary {
       earnPer100Ride: _int(earn['ride']),
       earnMinOrder: _double(earn['min_order']),
       spending: LoyaltySpending.fromJson(json['spending']),
+      tier:
+          LoyaltyTier.fromJson(json['tier']) ??
+          LoyaltyTier.fromLegacy(json['current_tier'], json['next_tier_points']),
+    );
+  }
+}
+
+/// Text in the app's language: the `_th` / `_en` field, else the plain one
+/// (the backend already localises it by X-Lang).
+String _pick(String languageCode, String? th, String? en, String plain) {
+  final v = languageCode == 'en' ? en : th;
+  return (v == null || v.isEmpty) ? plain : v;
+}
+
+List<String> _lines(Object? v) {
+  if (v is List) {
+    return [for (final e in v) ?_str(e)];
+  }
+  final s = _str(v);
+  if (s == null) return const [];
+  return [
+    for (final line in s.split('\n'))
+      if (line.trim().isNotEmpty) line.trim(),
+  ];
+}
+
+/// `#RRGGBB` / `#AARRGGBB` (with or without `#`) → ARGB int; null if not one.
+int? parseHexColor(Object? v) {
+  var s = _str(v);
+  if (s == null) return null;
+  if (s.startsWith('#')) s = s.substring(1);
+  if (s.length == 6) s = 'FF$s';
+  if (s.length != 8) return null;
+  return int.tryParse(s, radix: 16);
+}
+
+/// The tier above the customer's (`tier.next_tier`).
+class LoyaltyNextTier {
+  const LoyaltyNextTier({
+    required this.code,
+    required this.name,
+    this.nameTh,
+    this.nameEn,
+    this.color,
+    this.minPoints = 0,
+  });
+
+  final String code;
+  final String name;
+  final String? nameTh;
+  final String? nameEn;
+
+  /// ARGB, from the admin's hex.
+  final int? color;
+  final int minPoints;
+
+  String displayName(String languageCode) =>
+      _pick(languageCode, nameTh, nameEn, name);
+
+  static LoyaltyNextTier? fromJson(Object? json) {
+    if (json is! Map) return null;
+    final m = _map(json);
+    final code = _str(m['code']) ?? '';
+    return LoyaltyNextTier(
+      code: code,
+      name: _str(m['name']) ?? code,
+      nameTh: _str(m['name_th']),
+      nameEn: _str(m['name_en']),
+      color: parseHexColor(m['color']),
+      minPoints: _int(m['min_points']),
+    );
+  }
+}
+
+/// A member tier: the customer's (`summary.tier`) or one of
+/// `GET /api/customer/loyalty/tiers`.
+class LoyaltyTier {
+  const LoyaltyTier({
+    required this.code,
+    required this.name,
+    this.nameTh,
+    this.nameEn,
+    this.color,
+    this.iconUrl,
+    this.minPoints = 0,
+    this.maxPoints,
+    this.earnMultiplier = 1,
+    this.benefits = const [],
+    this.benefitsTh = const [],
+    this.benefitsEn = const [],
+    this.lifetimePoints = 0,
+    this.nextTier,
+    this.pointsToNext,
+    this.progressPercent,
+  });
+
+  final String code;
+  final String name;
+  final String? nameTh;
+  final String? nameEn;
+
+  /// ARGB, from the admin's hex; null = the app's own colour.
+  final int? color;
+
+  /// Null: a coloured dot instead.
+  final String? iconUrl;
+  final int minPoints;
+
+  /// Null on the top tier.
+  final int? maxPoints;
+
+  /// Points earned ×this (1 = no bonus).
+  final double earnMultiplier;
+  final List<String> benefits;
+  final List<String> benefitsTh;
+  final List<String> benefitsEn;
+  final int lifetimePoints;
+
+  /// Null at the top tier.
+  final LoyaltyNextTier? nextTier;
+  final int? pointsToNext;
+
+  /// 0–100; 100 at the top tier. Null when unknown (older backend).
+  final double? progressPercent;
+
+  bool get isTop => nextTier == null && progressPercent != null;
+
+  String displayName(String languageCode) =>
+      _pick(languageCode, nameTh, nameEn, name);
+
+  List<String> benefitsFor(String languageCode) {
+    final own = languageCode == 'en' ? benefitsEn : benefitsTh;
+    return own.isNotEmpty ? own : benefits;
+  }
+
+  static LoyaltyTier? fromJson(Object? json) {
+    if (json is! Map) return null;
+    final m = _map(json);
+    final code = _str(m['code']) ?? '';
+    if (code.isEmpty && _str(m['name']) == null) return null;
+    final progress = m['progress_percent'];
+    final multiplier = m['earn_multiplier'];
+    return LoyaltyTier(
+      code: code,
+      name: _str(m['name']) ?? code,
+      nameTh: _str(m['name_th']),
+      nameEn: _str(m['name_en']),
+      color: parseHexColor(m['color']),
+      iconUrl: _str(m['icon_url']),
+      minPoints: _int(m['min_points']),
+      maxPoints: _intOrNull(m['max_points']),
+      earnMultiplier: multiplier == null ? 1 : _double(multiplier),
+      benefits: _lines(m['benefits']),
+      benefitsTh: _lines(m['benefits_th']),
+      benefitsEn: _lines(m['benefits_en']),
+      lifetimePoints: _int(m['lifetime_points']),
+      nextTier: LoyaltyNextTier.fromJson(m['next_tier']),
+      pointsToNext: _intOrNull(m['points_to_next']),
+      progressPercent: progress == null
+          ? null
+          : _double(progress).clamp(0, 100).toDouble(),
+    );
+  }
+
+  /// The older summary: `current_tier` (a name) and `next_tier_points`.
+  static LoyaltyTier? fromLegacy(Object? currentTier, Object? nextTierPoints) {
+    final name = _str(currentTier);
+    if (name == null) return null;
+    return LoyaltyTier(
+      code: name.toUpperCase(),
+      name: name,
+      pointsToNext: _intOrNull(nextTierPoints),
     );
   }
 }

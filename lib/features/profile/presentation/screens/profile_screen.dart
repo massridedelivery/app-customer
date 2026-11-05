@@ -19,6 +19,7 @@ import 'package:customer_app/features/profile/presentation/screens/account_email
 import 'package:customer_app/features/profile/presentation/controllers/profile_controller.dart';
 import 'package:customer_app/features/profile/presentation/controllers/loyalty_providers.dart';
 import 'package:customer_app/features/profile/presentation/widgets/loyalty_format.dart';
+import 'package:customer_app/features/profile/presentation/widgets/tier_widgets.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
@@ -637,12 +638,27 @@ class _PointsCard extends ConsumerWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'MASS POINTS',
-                          style: AppTypography.label3.copyWith(
-                            color: Colors.white.withValues(alpha: 0.9),
-                            letterSpacing: 2,
-                          ),
+                        Row(
+                          children: [
+                            Text(
+                              'MASS POINTS',
+                              style: AppTypography.label3.copyWith(
+                                color: Colors.white.withValues(alpha: 0.9),
+                                letterSpacing: 2,
+                              ),
+                            ),
+                            if (summary.tier != null) ...[
+                              const SizedBox(width: 8),
+                              TierBadge(
+                                name: summary.tier!.displayName(
+                                  Localizations.localeOf(context).languageCode,
+                                ),
+                                color: summary.tier!.color,
+                                iconUrl: summary.tier!.iconUrl,
+                                onDark: true,
+                              ),
+                            ],
+                          ],
                         ),
                         const SizedBox(height: 8),
                         Text.rich(

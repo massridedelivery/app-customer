@@ -5,6 +5,7 @@ import 'package:customer_app/core/widgets/refetch_on_resume.dart';
 import 'package:customer_app/features/profile/domain/models/loyalty_models.dart';
 import 'package:customer_app/features/profile/presentation/controllers/loyalty_providers.dart';
 import 'package:customer_app/features/profile/presentation/widgets/loyalty_format.dart';
+import 'package:customer_app/features/profile/presentation/widgets/tier_widgets.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -77,6 +78,13 @@ class _Body extends ConsumerWidget {
         const SizedBox(height: 12),
       ],
       _BalanceCard(summary: summary),
+      if (summary.tier != null) ...[
+        const SizedBox(height: 12),
+        TierProgressCard(
+          tier: summary.tier!,
+          onTap: () => context.push('/loyalty/tiers'),
+        ),
+      ],
       if (summary.expiringPoints > 0 && summary.expiringAt != null) ...[
         const SizedBox(height: 12),
         _Banner(

@@ -1324,5 +1324,16 @@
   "vouchersVoidedRefund": "Cancelled · {points} points returned",
   "@vouchersVoidedRefund": {"placeholders": {"points": {"type": "String"}}},
   "vouchersExpiredNoRefund": "Expired coupons don't get their points back",
-  "promoVoucherLabel": "Points coupon"
+  "promoVoucherLabel": "Points coupon",
+  "tierListTitle": "Member tiers",
+  "tierToNext": "{points} more points to {tier}",
+  "@tierToNext": {"placeholders": {"points": {"type": "String"}, "tier": {"type": "String"}}},
+  "tierTopReached": "You're at the top tier",
+  "tierEarnMultiplier": "Earn ×{x} points",
+  "@tierEarnMultiplier": {"placeholders": {"x": {"type": "String"}}},
+  "tierYours": "Your tier",
+  "tierRange": "{min}–{max} points",
+  "@tierRange": {"placeholders": {"min": {"type": "String"}, "max": {"type": "String"}}},
+  "tierRangeFrom": "{min}+ points",
+  "@tierRangeFrom": {"placeholders": {"min": {"type": "String"}}}
 }

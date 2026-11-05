@@ -3,6 +3,7 @@ import 'package:customer_app/features/profile/data/datasources/loyalty_remote_da
 import 'package:customer_app/features/profile/domain/models/loyalty_models.dart';
 import 'package:customer_app/features/profile/presentation/controllers/loyalty_providers.dart';
 import 'package:customer_app/features/profile/presentation/screens/loyalty_screen.dart';
+import 'package:customer_app/features/profile/presentation/screens/loyalty_tiers_screen.dart';
 import 'package:customer_app/features/profile/presentation/screens/rewards_screen.dart';
 import 'package:customer_app/features/profile/presentation/screens/vouchers_screen.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
@@ -58,10 +59,12 @@ class _FakeLoyalty implements LoyaltyRemoteDataSource {
     this.failFirstRedeem = false,
     this.failFirstRedeemWith500 = false,
     this.spending,
+    this.tier,
   });
 
   final List<Map<String, dynamic>> rewards;
   final Map<String, dynamic>? spending;
+  final Map<String, dynamic>? tier;
   bool failFirstRedeem;
   bool failFirstRedeemWith500;
   final redeemKeys = <String>[];
@@ -75,6 +78,35 @@ class _FakeLoyalty implements LoyaltyRemoteDataSource {
     'expiring_soon': {'points': 120, 'expires_at': '2026-11-10T03:12:00Z'},
     'earn_per_100_baht': {'ride': 1, 'min_order': 50},
     'spending': ?spending,
+    'tier': ?tier,
+  };
+
+  @override
+  Future<Map<String, dynamic>> getTiers() async => {
+    'tiers': [
+      {
+        'code': 'SILVER',
+        'name': 'Silver',
+        'name_th': 'ซิลเวอร์',
+        'name_en': 'Silver',
+        'color': '#9AA0A6',
+        'min_points': 0,
+        'max_points': 999,
+        'earn_multiplier': 1,
+        'benefits_th': ['สะสมคะแนนทุกการเดินทาง'],
+      },
+      {
+        'code': 'GOLD',
+        'name': 'Gold',
+        'name_th': 'โกลด์',
+        'name_en': 'Gold',
+        'color': '#C9A227',
+        'min_points': 1000,
+        'max_points': null,
+        'earn_multiplier': 1.5,
+        'benefits_th': ['ได้คะแนนเพิ่ม 50%', 'คูปองวันเกิด'],
+      },
+    ],
   };
 
   @override
@@ -178,7 +210,13 @@ Future<void> _pump(
   final router = GoRouter(
     initialLocation: initial,
     routes: [
-      GoRoute(path: '/loyalty', builder: (_, _) => const LoyaltyScreen()),
+      GoRoute(
+        path: '/loyalty',
+        builder: (_, _) => const LoyaltyScreen(),
+        routes: [
+          GoRoute(path: 'tiers', builder: (_, _) => const LoyaltyTiersScreen()),
+        ],
+      ),
       GoRoute(path: '/vouchers', builder: (_, _) => const VouchersScreen()),
       GoRoute(
         path: '/rewards',
@@ -473,6 +511,125 @@ void main() {
       expect(fake.redeemKeys, hasLength(2));
       expect(fake.redeemKeys.toSet(), hasLength(1));
       expect(find.text('แลกสำเร็จ'), findsOneWidget);
+    });
+  });
+
+  group('member tiers (ระดับสมาชิก)', () {
+    const silver = {
+      'code': 'SILVER',
+      'name': 'Silver',
+      'name_th': 'ซิลเวอร์',
+      'name_en': 'Silver',
+      'color': '#9AA0A6',
+      'icon_url': null,
+      'min_points': 0,
+      'max_points': 999,
+      'earn_multiplier': 1,
+      'lifetime_points': 1400,
+      'next_tier': {
+        'code': 'GOLD',
+        'name': 'Gold',
+        'name_th': 'โกลด์',
+        'name_en': 'Gold',
+        'color': '#C9A227',
+        'min_points': 1000,
+      },
+      'points_to_next': 250,
+      'progress_percent': 75,
+    };
+
+    test('summary tier, colour, next tier; old fields as a fallback', () {
+      final t = LoyaltySummary.fromJson({'tier': silver}).tier!;
+      expect(t.code, 'SILVER');
+      expect(t.displayName('th'), 'ซิลเวอร์');
+      expect(t.displayName('en'), 'Silver');
+      expect(t.color, 0xFF9AA0A6);
+      expect(t.iconUrl, isNull);
+      expect(t.nextTier!.displayName('th'), 'โกลด์');
+      expect(t.pointsToNext, 250);
+      expect(t.progressPercent, 75);
+      expect(t.isTop, isFalse);
+
+      final top = LoyaltyTier.fromJson({
+        'code': 'GOLD',
+        'name': 'Gold',
+        'next_tier': null,
+        'progress_percent': 100,
+        'earn_multiplier': 1.5,
+      })!;
+      expect(top.isTop, isTrue);
+      expect(top.earnMultiplier, 1.5);
+
+      final legacy = LoyaltySummary.fromJson({
+        'current_tier': 'Silver',
+        'next_tier_points': 300,
+      }).tier!;
+      expect(legacy.name, 'Silver');
+      expect(legacy.pointsToNext, 300);
+      expect(LoyaltySummary.fromJson(const {}).tier, isNull);
+      expect(parseHexColor('C9A227'), 0xFFC9A227);
+      expect(parseHexColor('nope'), isNull);
+    });
+
+    testWidgets('คะแนนของฉัน shows the badge, bar and points to next', (
+      tester,
+    ) async {
+      await _pump(tester, _FakeLoyalty(tier: silver), initial: '/loyalty');
+      expect(find.byKey(const Key('tierProgressCard')), findsOneWidget);
+      expect(find.text('ซิลเวอร์'), findsOneWidget);
+      expect(find.byKey(const Key('tierDot')), findsOneWidget);
+      final bar = tester.widget<LinearProgressIndicator>(
+        find.byKey(const Key('tierProgress')),
+      );
+      expect(bar.value, 0.75);
+      expect(find.text('อีก 250 คะแนนถึง โกลด์'), findsOneWidget);
+      // ×1: no multiplier line.
+      expect(find.byKey(const Key('tierMultiplier')), findsNothing);
+    });
+
+    testWidgets('top tier: full bar, top text, multiplier', (tester) async {
+      await _pump(
+        tester,
+        _FakeLoyalty(
+          tier: {
+            'code': 'GOLD',
+            'name': 'Gold',
+            'name_th': 'โกลด์',
+            'color': '#C9A227',
+            'earn_multiplier': 1.5,
+            'next_tier': null,
+            'progress_percent': 100,
+          },
+        ),
+        initial: '/loyalty',
+      );
+      expect(
+        tester
+            .widget<LinearProgressIndicator>(
+              find.byKey(const Key('tierProgress')),
+            )
+            .value,
+        1.0,
+      );
+      expect(find.text('คุณอยู่ระดับสูงสุดแล้ว'), findsOneWidget);
+      expect(find.text('ได้คะแนน ×1.5'), findsOneWidget);
+    });
+
+    testWidgets('the tier list keeps the order and marks mine', (tester) async {
+      await _pump(tester, _FakeLoyalty(tier: silver), initial: '/loyalty');
+      await tester.tap(find.byKey(const Key('tierProgressCard')));
+      await tester.pumpAndSettle();
+      final silverY = tester
+          .getTopLeft(find.byKey(const Key('tierCard-SILVER')))
+          .dy;
+      final goldY = tester
+          .getTopLeft(find.byKey(const Key('tierCard-GOLD')))
+          .dy;
+      expect(silverY, lessThan(goldY));
+      expect(find.text('0–999 คะแนน'), findsOneWidget);
+      expect(find.text('1,000 คะแนนขึ้นไป'), findsOneWidget);
+      expect(find.text('คูปองวันเกิด'), findsOneWidget);
+      expect(find.byKey(const Key('tierYours')), findsOneWidget);
     });
   });
 }

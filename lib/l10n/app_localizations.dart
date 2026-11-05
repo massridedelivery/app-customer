@@ -7068,6 +7068,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Points coupon'**
   String get promoVoucherLabel;
+
+  /// No description provided for @tierListTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Member tiers'**
+  String get tierListTitle;
+
+  /// No description provided for @tierToNext.
+  ///
+  /// In en, this message translates to:
+  /// **'{points} more points to {tier}'**
+  String tierToNext(String points, String tier);
+
+  /// No description provided for @tierTopReached.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re at the top tier'**
+  String get tierTopReached;
+
+  /// No description provided for @tierEarnMultiplier.
+  ///
+  /// In en, this message translates to:
+  /// **'Earn ×{x} points'**
+  String tierEarnMultiplier(String x);
+
+  /// No description provided for @tierYours.
+  ///
+  /// In en, this message translates to:
+  /// **'Your tier'**
+  String get tierYours;
+
+  /// No description provided for @tierRange.
+  ///
+  /// In en, this message translates to:
+  /// **'{min}–{max} points'**
+  String tierRange(String min, String max);
+
+  /// No description provided for @tierRangeFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'{min}+ points'**
+  String tierRangeFrom(String min);
 }
 
 class _AppLocalizationsDelegate

@@ -17,6 +17,8 @@ final supportRepositoryProvider = Provider<SupportRepository>(
 ///   - `GET  /api/customer/support/tickets` lists them, newest first
 ///   - `GET  /api/customer/support/tickets/{id}` one, with the team's replies
 ///   - `POST /api/customer/support/tickets/{id}/reply` adds details
+///   - live chat (step 2): `POST /api/customer/support/chat` and
+///     `GET/POST /api/customer/support/tickets/{id}/chat`
 /// Photos go up with the media protocol, category `support`.
 ///
 /// Every failure is thrown as an [ApiError] (the backend's own message).
@@ -84,6 +86,48 @@ class SupportRepository {
     } catch (e) {
       throw ApiError.from(e);
     }
+  }
+
+  /// Live chat (step 2): the customer's open chat with the team, started if
+  /// there is none — `POST /api/customer/support/chat`.
+  Future<SupportTicket> startChat() async {
+    try {
+      final res = await _api.dio.post('/api/customer/support/chat');
+      return SupportTicket.fromJson(_ticketBody(res.data));
+    } catch (e) {
+      throw ApiError.from(e);
+    }
+  }
+
+  /// Live chat history, newest first like the order chats —
+  /// `GET {base}/{id}/chat`. Errors stay [DioException]s for the chat
+  /// controller.
+  Future<List<dynamic>> chatHistory(
+    String id, {
+    int limit = 50,
+    String? before,
+  }) async {
+    final res = await _api.dio.get(
+      '$_base/$id/chat',
+      queryParameters: {'limit': limit, 'before': ?before},
+    );
+    final data = res.data;
+    if (data is List) return data;
+    return (data is Map ? data['messages'] as List? : null) ?? const [];
+  }
+
+  /// Posts a text or `image` (with [fileKey]) message —
+  /// `POST {base}/{id}/chat`, the same body as the order chats.
+  Future<void> sendChat(
+    String id, {
+    required String text,
+    required String msgType,
+    String? fileKey,
+  }) async {
+    await _api.dio.post(
+      '$_base/$id/chat',
+      data: {'text': text, 'msg_type': msgType, 'file_key': ?fileKey},
+    );
   }
 
   /// Uploads one JPEG for a report and returns its `file_key`:

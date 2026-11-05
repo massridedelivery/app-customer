@@ -2,6 +2,7 @@ import 'package:customer_app/core/services/ride_ongoing_notification.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:customer_app/core/configs/theme.dart';
+import 'package:customer_app/core/data/support_config_provider.dart';
 import 'package:customer_app/core/managers/providers.dart';
 import 'package:customer_app/core/services/push_notification_service.dart';
 import 'package:customer_app/core/services/socket_service.dart';
@@ -54,6 +55,8 @@ class _AppState extends ConsumerState<App> with WidgetsBindingObserver {
         if (ref.read(tokenStorageProvider).hasToken) socket.ensureConnected();
         // An app left open for days still learns about a required update.
         ref.read(forceUpdateProvider.notifier).checkIfStale();
+        // In-app support switches flipped in admin apply on the next return.
+        ref.invalidate(supportConfigProvider);
       case AppLifecycleState.paused:
       case AppLifecycleState.detached:
         // A call carries its WebRTC handshake on the socket and keeps running

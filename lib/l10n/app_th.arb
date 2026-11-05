@@ -1249,5 +1249,7 @@
   "ratingTagLate": "มาช้า",
   "ratingTagDetour": "เส้นทางอ้อม",
   "ratingTagDirtyCar": "รถไม่สะอาด",
-  "ratingTagOvercharged": "เก็บเงินเกิน"
+  "ratingTagOvercharged": "เก็บเงินเกิน",
+  "supportChatStart": "แชทกับเจ้าหน้าที่",
+  "supportChatHint": "พิมพ์ข้อความ…"
 }

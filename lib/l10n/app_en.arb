@@ -1389,5 +1389,7 @@
   "ratingTagLate": "Arrived late",
   "ratingTagDetour": "Took a longer route",
   "ratingTagDirtyCar": "Dirty vehicle",
-  "ratingTagOvercharged": "Charged too much"
+  "ratingTagOvercharged": "Charged too much",
+  "supportChatStart": "Chat with support",
+  "supportChatHint": "Type a message…"
 }

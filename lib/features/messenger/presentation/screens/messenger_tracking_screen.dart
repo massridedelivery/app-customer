@@ -4,6 +4,7 @@ import 'package:customer_app/features/profile/presentation/widgets/loyalty_forma
 import 'package:customer_app/features/call/domain/call_models.dart';
 import 'package:customer_app/features/call/presentation/order_call_button.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
+import 'package:customer_app/core/data/support_config_provider.dart';
 import 'package:customer_app/core/utils/app_dates.dart';
 import 'package:customer_app/core/constants/app_assets.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
@@ -621,6 +622,7 @@ class _MessengerTrackingScreenState
               ),
             ),
           ],
+          if (ref.watch(supportFlagsProvider).ticketsEnabled) ...[
           const SizedBox(height: 8),
           TextButton(
             key: const Key('msgrReportProblem'),
@@ -642,6 +644,7 @@ class _MessengerTrackingScreenState
               ),
             ),
           ),
+          ],
         ],
     );
   }

@@ -1,8 +1,14 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:customer_app/core/data/support_config_provider.dart';
+import 'package:customer_app/core/data/token_storage.dart';
 import 'package:customer_app/core/error/api_error.dart';
+import 'package:customer_app/core/managers/providers.dart';
 import 'package:customer_app/core/services/api_service.dart';
+import 'package:customer_app/core/services/socket_service.dart';
+import 'package:customer_app/features/chat/domain/chat_room_ids.dart';
 import 'package:customer_app/features/support/data/support_repository.dart';
 import 'package:customer_app/features/support/domain/low_rating_report.dart';
 import 'package:customer_app/features/support/domain/support_ticket.dart';
@@ -15,6 +21,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // ─── HTTP fakes ──────────────────────────────────────────────────────────────
 
@@ -114,6 +121,47 @@ class _FakeRepo implements SupportRepository {
 
   @override
   Future<String> uploadPhoto(Uint8List jpeg) async => 'support/u/x.jpg';
+
+  // Live chat.
+  List<dynamic> chat = const [];
+  final chatSent = <(String, String, String)>[];
+  int chatsStarted = 0;
+
+  @override
+  Future<SupportTicket> startChat() async {
+    chatsStarted++;
+    return SupportTicket.fromJson(_ticketJson(id: 'chat-1'));
+  }
+
+  @override
+  Future<List<dynamic>> chatHistory(
+    String id, {
+    int limit = 50,
+    String? before,
+  }) async => chat;
+
+  @override
+  Future<void> sendChat(
+    String id, {
+    required String text,
+    required String msgType,
+    String? fileKey,
+  }) async => chatSent.add((id, text, msgType));
+}
+
+class _Socket extends SocketService {
+  _Socket(super.tokenStorage);
+
+  final frames = StreamController<Map<String, dynamic>>.broadcast();
+
+  @override
+  Stream<Map<String, dynamic>> get messages => frames.stream;
+
+  @override
+  void connect({bool isReconnect = false}) {}
+
+  @override
+  void disconnect() {}
 }
 
 /// Report form (or [initial]) inside a router that also knows the ticket
@@ -122,7 +170,10 @@ Future<GoRouter> _pumpApp(
   WidgetTester tester,
   _FakeRepo repo, {
   String initial = '/report',
+  SupportConfig flags = const SupportConfig(ticketsEnabled: true),
 }) async {
+  SharedPreferences.setMockInitialValues({});
+  final prefs = await SharedPreferences.getInstance();
   tester.view.physicalSize = const Size(1170, 2532);
   tester.view.devicePixelRatio = 3;
   addTearDown(tester.view.reset);
@@ -156,7 +207,12 @@ Future<GoRouter> _pumpApp(
   );
   await tester.pumpWidget(
     ProviderScope(
-      overrides: [supportRepositoryProvider.overrideWithValue(repo)],
+      overrides: [
+        supportRepositoryProvider.overrideWithValue(repo),
+        sharedPreferencesProvider.overrideWithValue(prefs),
+        socketServiceProvider.overrideWithValue(_Socket(TokenStorage(prefs))),
+        supportFlagsProvider.overrideWithValue(flags),
+      ],
       child: MaterialApp.router(
         routerConfig: router,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -170,6 +226,32 @@ Future<GoRouter> _pumpApp(
 }
 
 void main() {
+  group('support switches (GET /api/config/support)', () {
+    test('off unless the backend says on; chat needs tickets', () {
+      expect(SupportConfig.fromJson(null).ticketsEnabled, isFalse);
+      final none = SupportConfig.fromJson({'support_phone': '02-111-2222'});
+      expect(none.phone, '02-111-2222');
+      expect(none.ticketsEnabled, isFalse);
+      expect(none.chatEnabled, isFalse);
+      final tickets = SupportConfig.fromJson({'support_tickets_enabled': true});
+      expect(tickets.ticketsEnabled, isTrue);
+      expect(tickets.chatEnabled, isFalse);
+      final chatOnly = SupportConfig.fromJson({'support_chat_enabled': true});
+      expect(chatOnly.chatEnabled, isFalse);
+      final both = SupportConfig.fromJson({
+        'support_tickets_enabled': true,
+        'support_chat_enabled': true,
+      });
+      expect(both.chatEnabled, isTrue);
+      expect(both.phone, kSupportPhoneFallback);
+    });
+
+    test('a support chat push opens its report', () {
+      expect(chatRouteForRoom('ticket:t-1'), '/support/tickets/t-1');
+      expect(bareChatRoomId('ticket:t-1'), 't-1');
+    });
+  });
+
   group('SupportRepository', () {
     late _Adapter adapter;
     late SupportRepository repo;
@@ -502,6 +584,70 @@ void main() {
       expect(find.text('คืนเงิน ฿40'), findsOneWidget);
       expect(find.byKey(const Key('supportReplyField')), findsNothing);
       expect(find.byKey(const Key('supportClosedNote')), findsOneWidget);
+    });
+  });
+
+  group('live chat (step 2 on)', () {
+    const chatOn = SupportConfig(ticketsEnabled: true, chatEnabled: true);
+
+    testWidgets('a report is a chat: team messages, photos, send', (
+      tester,
+    ) async {
+      final repo = _FakeRepo()
+        ..detail = SupportTicket.fromJson(_ticketJson(status: 'resolved'))
+        ..chat = [
+          {
+            'id': 'm1',
+            'sender_id': 'admin-1',
+            'sender_role': 'admin',
+            'msg_type': 'text',
+            'text': 'สวัสดีค่ะ ทีมงานรับเรื่องแล้ว',
+            'sent_at': '2026-11-05T04:00:00Z',
+          },
+        ];
+      await _pumpApp(
+        tester,
+        repo,
+        initial: '/support/tickets/t-1',
+        flags: chatOn,
+      );
+      expect(find.text('สวัสดีค่ะ ทีมงานรับเรื่องแล้ว'), findsOneWidget);
+      expect(find.byKey(const Key('supportChatAttach')), findsOneWidget);
+      // A resolved report still takes messages in chat (they reopen it).
+      expect(find.byKey(const Key('supportClosedNote')), findsNothing);
+
+      await tester.enterText(
+        find.byKey(const Key('supportReplyField')),
+        'ยังไม่ได้รับเงินคืนค่ะ',
+      );
+      await tester.tap(find.byKey(const Key('supportReplySend')));
+      await tester.pumpAndSettle();
+      expect(repo.chatSent.single, ('t-1', 'ยังไม่ได้รับเงินคืนค่ะ', 'text'));
+      expect(repo.replies, isEmpty);
+      expect(find.text('ยังไม่ได้รับเงินคืนค่ะ'), findsOneWidget);
+    });
+
+    testWidgets('a closed report takes no more messages', (tester) async {
+      final repo = _FakeRepo()
+        ..detail = SupportTicket.fromJson(_ticketJson(status: 'closed'));
+      await _pumpApp(
+        tester,
+        repo,
+        initial: '/support/tickets/t-1',
+        flags: chatOn,
+      );
+      expect(find.byKey(const Key('supportReplyField')), findsNothing);
+      expect(find.byKey(const Key('supportClosedNote')), findsOneWidget);
+    });
+
+    testWidgets('with chat off the same report has no photo button', (
+      tester,
+    ) async {
+      final repo = _FakeRepo()
+        ..detail = SupportTicket.fromJson(_ticketJson(status: 'open'));
+      await _pumpApp(tester, repo, initial: '/support/tickets/t-1');
+      expect(find.byKey(const Key('supportChatAttach')), findsNothing);
+      expect(find.byKey(const Key('supportReplyField')), findsOneWidget);
     });
   });
 }

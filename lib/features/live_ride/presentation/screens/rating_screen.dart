@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
+import 'package:customer_app/core/data/support_config_provider.dart';
 import 'package:customer_app/core/widgets/app_filter_chip.dart';
 import 'package:customer_app/core/widgets/driver_avatar.dart';
 import 'package:customer_app/core/services/idempotency.dart';
@@ -97,6 +98,7 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
   /// as a report. Best effort: the rating is already saved, so a failure here
   /// is not shown.
   void _fileLowRatingReport(AppLocalizations l10n) {
+    if (!ref.read(supportFlagsProvider).ticketsEnabled) return;
     final report = lowRatingReport(
       jobId: widget.jobId,
       rating: _rating,

@@ -1,3 +1,4 @@
+import 'package:customer_app/features/support/presentation/support_chat_launcher.dart';
 import 'package:customer_app/features/inbox/presentation/inbox_controller.dart';
 import 'package:customer_app/features/main/presentation/controllers/home_tour_controller.dart';
 import 'package:customer_app/core/widgets/refetch_on_resume.dart';
@@ -79,6 +80,7 @@ class ProfileScreen extends ConsumerWidget {
     // not a hardcoded constant; fall back while loading / on error.
     final supportPhone =
         ref.watch(supportPhoneProvider).asData?.value ?? kSupportPhoneFallback;
+    final supportFlags = ref.watch(supportFlagsProvider);
 
     // A white page under the home tab's red header: dark status bar icons,
     // and a white strip behind them so the list doesn't scroll into the clock.
@@ -233,12 +235,20 @@ class ProfileScreen extends ConsumerWidget {
                                   .read(homeTourReplayProvider.notifier)
                                   .request(),
                             ),
-                            _MenuTile(
-                              key: const Key('profileReportProblem'),
-                              icon: Icons.support_agent_rounded,
-                              title: l10n.supportTicketsTitle,
-                              onTap: () => context.push('/support/tickets'),
-                            ),
+                            if (supportFlags.chatEnabled)
+                              _MenuTile(
+                                key: const Key('profileSupportChat'),
+                                icon: Icons.forum_outlined,
+                                title: l10n.supportChatStart,
+                                onTap: () => openSupportChat(context, ref),
+                              ),
+                            if (supportFlags.ticketsEnabled)
+                              _MenuTile(
+                                key: const Key('profileReportProblem'),
+                                icon: Icons.support_agent_rounded,
+                                title: l10n.supportTicketsTitle,
+                                onTap: () => context.push('/support/tickets'),
+                              ),
                             _MenuTile(
                               icon: Icons.headset_mic_outlined,
                               title: l10n.profileContactSupport,

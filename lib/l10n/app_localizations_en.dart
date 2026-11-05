@@ -4051,4 +4051,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ratingTagOvercharged => 'Charged too much';
+
+  @override
+  String get supportChatStart => 'Chat with support';
+
+  @override
+  String get supportChatHint => 'Type a message…';
 }

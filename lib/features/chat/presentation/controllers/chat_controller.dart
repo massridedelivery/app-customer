@@ -11,14 +11,16 @@ import 'package:customer_app/features/chat/domain/models/chat_message.dart';
 import 'package:dio/dio.dart';
 import 'package:customer_app/features/chat/presentation/states/chat_state.dart';
 import 'package:customer_app/features/messenger/data/repositories/messenger_repository_impl.dart';
+import 'package:customer_app/features/support/data/support_repository.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'chat_controller.g.dart';
 
 /// Which backend chat channel a [ChatController] talks to. Rides use the
 /// `jobs/{id}/chat` endpoints; food orders use `orders/{id}/chat`; messenger
-/// orders use `messenger/customer/orders/{id}/chat`.
-enum ChatKind { ride, food, messenger }
+/// orders use `messenger/customer/orders/{id}/chat`; a report to the support
+/// team (live chat switched on) uses `support/tickets/{id}/chat`.
+enum ChatKind { ride, food, messenger, support }
 
 /// Identifies a chat room — its id plus which channel it belongs to. Used as
 /// the [chatControllerProvider] family key.
@@ -44,6 +46,7 @@ class ChatController extends _$ChatController {
     ChatKind.ride => 'job:${room.id}',
     ChatKind.food => 'order:${room.id}',
     ChatKind.messenger => 'messenger:${room.id}',
+    ChatKind.support => 'ticket:${room.id}',
   };
 
   void _initSocket() {
@@ -82,10 +85,13 @@ class ChatController extends _$ChatController {
       if (data == null) return;
 
       if (type.contains('chat') || type.contains('message')) {
-        // Ride rooms key on job_id; food and messenger both key on order_id.
-        final isRide = room.kind == ChatKind.ride;
-        final idKey = isRide ? 'job_id' : 'order_id';
-        final idKeyCamel = isRide ? 'jobId' : 'orderId';
+        // Ride rooms key on job_id; food and messenger both key on order_id;
+        // support on ticket_id.
+        final (idKey, idKeyCamel) = switch (room.kind) {
+          ChatKind.ride => ('job_id', 'jobId'),
+          ChatKind.support => ('ticket_id', 'ticketId'),
+          _ => ('order_id', 'orderId'),
+        };
         final roomId =
             (data['room_id'] ??
                     data['roomId'] ??
@@ -177,6 +183,10 @@ class ChatController extends _$ChatController {
         return ref
             .read(messengerRepositoryProvider)
             .getChat(room.id, limit: 50, before: before);
+      case ChatKind.support:
+        return ref
+            .read(supportRepositoryProvider)
+            .chatHistory(room.id, limit: 50, before: before);
     }
   }
 
@@ -265,6 +275,10 @@ class ChatController extends _$ChatController {
           await ref
               .read(messengerRepositoryProvider)
               .sendChatMessage(room.id, text: text, msgType: 'text');
+        case ChatKind.support:
+          await ref
+              .read(supportRepositoryProvider)
+              .sendChat(room.id, text: text, msgType: 'text');
       }
     } catch (e) {
       // Remove optimistic message and set error
@@ -363,7 +377,10 @@ class ChatController extends _$ChatController {
             .read(chatMediaRepositoryProvider)
             .uploadChatImage(
               upload.bytes,
-              roomId: room.id,
+              // A ticket id could match an order id: name the room in full.
+              roomId: room.kind == ChatKind.support
+                  ? _backendRoomId(room)
+                  : room.id,
               onProgress: (p) => _updateUpload(
                 tempId,
                 (u) => u.copyWith(progress: 0.1 + p * 0.8),
@@ -451,6 +468,10 @@ class ChatController extends _$ChatController {
               msgType: msgType,
               fileKey: fileKey,
             );
+      case ChatKind.support:
+        await ref
+            .read(supportRepositoryProvider)
+            .sendChat(room.id, text: text, msgType: msgType, fileKey: fileKey);
     }
   }
 }

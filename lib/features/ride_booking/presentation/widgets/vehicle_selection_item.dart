@@ -93,22 +93,37 @@ class VehicleSelectionItem extends StatelessWidget {
                               children: [
                                 Row(
                                   children: [
-                                    Text(
-                                      vehicleName(
-                                        estimation.displayName,
-                                        vehicleTypeName:
-                                            estimation.vehicleTypeName,
-                                        languageCode:
-                                            Localizations.localeOf(context)
-                                                .languageCode,
-                                      ),
-                                      style: AppTypography.heading5.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                        color: isSelected
-                                            ? AppColors.primary
-                                            : Colors.black87,
+                                    Flexible(
+                                      child: Text(
+                                        vehicleName(
+                                          estimation.displayName,
+                                          vehicleTypeName:
+                                              estimation.vehicleTypeName,
+                                          languageCode:
+                                              Localizations.localeOf(context)
+                                                  .languageCode,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: AppTypography.heading5.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: isSelected
+                                              ? AppColors.primary
+                                              : Colors.black87,
+                                        ),
                                       ),
                                     ),
+                                    if (estimation.seats != null) ...[
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        '👤 ${estimation.seats}',
+                                        key: const Key('vehicleSeats'),
+                                        style: AppTypography.caption4.copyWith(
+                                          color: AppColors
+                                              .semanticGrayNeutralFgMidOnWhite,
+                                        ),
+                                      ),
+                                    ],
 
                                     if (estimation.surgeMultiplier > 1.0) ...[
                                       const SizedBox(width: 4),

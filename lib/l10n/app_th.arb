@@ -1187,5 +1187,7 @@
   "promoStubAll": "ทุกบริการ",
   "promoNoMinSpend": "ไม่มีขั้นต่ำ",
   "promoLeftDays": "เหลือ {days} วัน",
-  "promoLeftHours": "เหลือ {hours} ชม."
+  "promoLeftHours": "เหลือ {hours} ชม.",
+  "liveDriverArrivesIn": "คนขับจะถึงในอีก {minutes} นาที",
+  "liveArrivesDestIn": "จะถึงปลายทางในอีก {minutes} นาที"
 }

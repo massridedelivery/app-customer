@@ -3506,7 +3506,7 @@ class AppLocalizationsTh extends AppLocalizations {
   String get callButton => 'โทร';
 
   @override
-  String get callStatusCalling => 'กำลังโทรหา…';
+  String get callStatusCalling => 'กำลังโทร…';
 
   @override
   String get callStatusIncoming => 'สายเรียกเข้า';
@@ -3797,4 +3797,7 @@ class AppLocalizationsTh extends AppLocalizations {
   String liveArrivesDestIn(int minutes) {
     return 'จะถึงปลายทางในอีก $minutes นาที';
   }
+
+  @override
+  String get callErrorRateLimited => 'โทรบ่อยเกินไป รอสักครู่แล้วลองใหม่';
 }

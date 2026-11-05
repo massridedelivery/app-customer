@@ -3841,4 +3841,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String liveArrivesDestIn(int minutes) {
     return 'Arriving in $minutes min';
   }
+
+  @override
+  String get callErrorRateLimited =>
+      'Too many calls. Wait a moment and try again.';
 }

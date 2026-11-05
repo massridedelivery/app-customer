@@ -10,6 +10,8 @@ import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/utils/map_marker_providers.dart';
 import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/core/utils/plate_format.dart';
+import 'package:customer_app/features/call/domain/call_models.dart';
+import 'package:customer_app/features/call/presentation/order_call_button.dart';
 import 'package:customer_app/features/live_ride/presentation/controllers/rating_controller.dart';
 import 'package:customer_app/features/trips/domain/models/history_order.dart';
 import 'package:customer_app/features/trips/presentation/controllers/trip_detail_controller.dart';
@@ -877,6 +879,58 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
   }
 
 
+  /// "โทร" to the driver of this order: shown while it runs and up to 24 h
+  /// after it completed / was delivered, when calling is on (see
+  /// [OrderCallButton]).
+  Widget _buildCallButton() {
+    final state = ref.watch(tripDetailControllerProvider);
+    final ride = state.rideDetails;
+    final food = state.foodDetails;
+    final (kind, id, status, doneAt) = ride != null
+        ? (
+            CallKind.ride,
+            ride.id,
+            ride.status,
+            DateTime.tryParse(ride.completedAt ?? ''),
+          )
+        : food != null
+        ? (
+            CallKind.food,
+            food.id,
+            food.status,
+            DateTime.tryParse(food.deliveredAt ?? ''),
+          )
+        : (CallKind.ride, '', null, null);
+    return OrderCallButton(
+      kind: kind,
+      jobId: id,
+      status: status,
+      doneAt: doneAt,
+      builder: (context, onCall) => onCall == null
+          ? const SizedBox.shrink()
+          : Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  key: const Key('tripCallButton'),
+                  onPressed: onCall,
+                  icon: const Icon(Icons.call_outlined, size: 18),
+                  label: Text(_l10n.callButton, style: AppTypography.body2),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.primary,
+                    side: const BorderSide(color: AppColors.primary),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+    );
+  }
+
   Widget _buildActionButtons() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -885,6 +939,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
         // and pushes the page content off-screen (blank detail page).
         mainAxisSize: MainAxisSize.min,
         children: [
+          _buildCallButton(),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(

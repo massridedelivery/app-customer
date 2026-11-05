@@ -1097,7 +1097,7 @@
   "rideFareLabel": "ค่าโดยสาร",
   "rideToPay": "ยอดชำระ",
   "callButton": "โทร",
-  "callStatusCalling": "กำลังโทรหา…",
+  "callStatusCalling": "กำลังโทร…",
   "callStatusIncoming": "สายเรียกเข้า",
   "callStatusConnecting": "กำลังเชื่อมต่อ…",
   "callAccept": "รับสาย",
@@ -1189,5 +1189,6 @@
   "promoLeftDays": "เหลือ {days} วัน",
   "promoLeftHours": "เหลือ {hours} ชม.",
   "liveDriverArrivesIn": "คนขับจะถึงในอีก {minutes} นาที",
-  "liveArrivesDestIn": "จะถึงปลายทางในอีก {minutes} นาที"
+  "liveArrivesDestIn": "จะถึงปลายทางในอีก {minutes} นาที",
+  "callErrorRateLimited": "โทรบ่อยเกินไป รอสักครู่แล้วลองใหม่"
 }

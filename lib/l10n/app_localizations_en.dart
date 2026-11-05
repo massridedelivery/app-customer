@@ -3806,4 +3806,29 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get myDataConsentVersion => 'Version';
+
+  @override
+  String get promoStubRide => 'Ride';
+
+  @override
+  String get promoStubFood => 'Food';
+
+  @override
+  String get promoStubParcel => 'Parcel';
+
+  @override
+  String get promoStubAll => 'All services';
+
+  @override
+  String get promoNoMinSpend => 'No minimum';
+
+  @override
+  String promoLeftDays(String days) {
+    return '$days days left';
+  }
+
+  @override
+  String promoLeftHours(String hours) {
+    return '${hours}h left';
+  }
 }

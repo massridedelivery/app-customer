@@ -6984,6 +6984,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Version'**
   String get myDataConsentVersion;
+
+  /// No description provided for @promoStubRide.
+  ///
+  /// In en, this message translates to:
+  /// **'Ride'**
+  String get promoStubRide;
+
+  /// No description provided for @promoStubFood.
+  ///
+  /// In en, this message translates to:
+  /// **'Food'**
+  String get promoStubFood;
+
+  /// No description provided for @promoStubParcel.
+  ///
+  /// In en, this message translates to:
+  /// **'Parcel'**
+  String get promoStubParcel;
+
+  /// No description provided for @promoStubAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All services'**
+  String get promoStubAll;
+
+  /// No description provided for @promoNoMinSpend.
+  ///
+  /// In en, this message translates to:
+  /// **'No minimum'**
+  String get promoNoMinSpend;
+
+  /// No description provided for @promoLeftDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days left'**
+  String promoLeftDays(String days);
+
+  /// No description provided for @promoLeftHours.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours}h left'**
+  String promoLeftHours(String hours);
 }
 
 class _AppLocalizationsDelegate

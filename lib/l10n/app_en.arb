@@ -1305,5 +1305,14 @@
   "myDataConsentWithdrawn": "Withdrawn",
   "myDataConsentGrantedAt": "Granted on",
   "myDataConsentWithdrawnAt": "Withdrawn on",
-  "myDataConsentVersion": "Version"
+  "myDataConsentVersion": "Version",
+  "promoStubRide": "Ride",
+  "promoStubFood": "Food",
+  "promoStubParcel": "Parcel",
+  "promoStubAll": "All services",
+  "promoNoMinSpend": "No minimum",
+  "promoLeftDays": "{days} days left",
+  "@promoLeftDays": {"placeholders": {"days": {"type": "String"}}},
+  "promoLeftHours": "{hours}h left",
+  "@promoLeftHours": {"placeholders": {"hours": {"type": "String"}}}
 }

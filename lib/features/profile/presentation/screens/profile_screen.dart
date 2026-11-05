@@ -234,6 +234,12 @@ class ProfileScreen extends ConsumerWidget {
                                   .request(),
                             ),
                             _MenuTile(
+                              key: const Key('profileReportProblem'),
+                              icon: Icons.support_agent_rounded,
+                              title: l10n.supportTicketsTitle,
+                              onTap: () => context.push('/support/tickets'),
+                            ),
+                            _MenuTile(
                               icon: Icons.headset_mic_outlined,
                               title: l10n.profileContactSupport,
                               trailing: Text(

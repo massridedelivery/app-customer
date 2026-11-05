@@ -83,6 +83,22 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
     context.push('/food-delivery');
   }
 
+  /// "ต้องการความช่วยเหลือ / แจ้งปัญหา": the report form for this order.
+  void _reportProblem() {
+    final service =
+        (widget.orderType?.toUpperCase() ?? '') == 'RIDE' ? 'ride' : 'food';
+    context.push(
+      Uri(
+        path: '/support/report',
+        queryParameters: {
+          'service': service,
+          'ref': widget.tripId,
+          'source': 'trip_detail',
+        },
+      ).toString(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(tripDetailControllerProvider);
@@ -964,7 +980,8 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
           ),
           const SizedBox(height: 12),
           TextButton(
-            onPressed: () => context.push('/sos'),
+            key: const Key('tripReportProblem'),
+            onPressed: _reportProblem,
             style: TextButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 12),
             ),

@@ -1,10 +1,15 @@
+import 'dart:async';
+
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/widgets/app_filter_chip.dart';
 import 'package:customer_app/core/widgets/driver_avatar.dart';
+import 'package:customer_app/core/services/idempotency.dart';
 import 'package:customer_app/core/utils/plate_format.dart';
 import 'package:customer_app/features/live_ride/domain/models/driver_profile_model.dart';
 import 'package:customer_app/features/live_ride/presentation/controllers/rating_controller.dart';
+import 'package:customer_app/features/support/data/support_repository.dart';
+import 'package:customer_app/features/support/domain/low_rating_report.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -56,9 +61,59 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
         return l10n.ratingTagOnTime;
       case 'ขับขี่ปลอดภัย':
         return l10n.ratingTagSafeDriving;
+      case 'ขับขี่อันตราย':
+        return l10n.ratingTagUnsafe;
+      case 'ไม่สุภาพ':
+        return l10n.ratingTagRude;
+      case 'มาช้า':
+        return l10n.ratingTagLate;
+      case 'เส้นทางอ้อม':
+        return l10n.ratingTagDetour;
+      case 'รถไม่สะอาด':
+        return l10n.ratingTagDirtyCar;
+      case 'เก็บเงินเกิน':
+        return l10n.ratingTagOvercharged;
       default:
         return tag;
     }
+  }
+
+  /// 1–3 stars: ask what went wrong instead of what was good.
+  bool get _isLow => _rating > 0 && _rating <= kLowRatingMax;
+
+  List<String> get _tags =>
+      _isLow ? kLowRatingTags.keys.toList() : _feedbackTags;
+
+  void _setRating(int v) {
+    setState(() {
+      _rating = v;
+      // Switching between the good and the bad tags drops the other set.
+      final shown = _tags.toSet();
+      _selectedTags.removeWhere((t) => !shown.contains(t));
+    });
+  }
+
+  /// A low rating with a "what went wrong" tag also goes to the support team
+  /// as a report. Best effort: the rating is already saved, so a failure here
+  /// is not shown.
+  void _fileLowRatingReport(AppLocalizations l10n) {
+    final report = lowRatingReport(
+      jobId: widget.jobId,
+      rating: _rating,
+      tags: _selectedTags,
+      comment: _commentController.text,
+      heading: (stars) => l10n.supportFromRating('$stars'),
+      tagLabel: (tag) => _tagLabel(l10n, tag),
+    );
+    if (report == null) return;
+    unawaited(
+      ref
+          .read(supportRepositoryProvider)
+          .create(report, idempotencyKey: generateIdempotencyKey())
+          .then<void>((_) {}, onError: (Object e) {
+            debugPrint('Low-rating report not filed: $e');
+          }),
+    );
   }
 
   @override
@@ -104,6 +159,7 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
           );
         },
         data: (_) {
+          _fileLowRatingReport(l10n);
           context.go('/main');
         },
       );
@@ -209,12 +265,23 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  _buildStarRow(_rating, (v) => setState(() => _rating = v)),
+                  _buildStarRow(_rating, _setRating),
                   const SizedBox(height: 16),
+                  if (_isLow) ...[
+                    Text(
+                      l10n.ratingLowPrompt,
+                      key: const Key('ratingLowPrompt'),
+                      textAlign: TextAlign.center,
+                      style: AppTypography.caption4.copyWith(
+                        color: AppColors.semanticGrayNeutralFgMidOnWhite,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
-                    children: _feedbackTags.map((tag) {
+                    children: _tags.map((tag) {
                       final selected = _selectedTags.contains(tag);
                       return AppFilterChip(
                         label: _tagLabel(l10n, tag),

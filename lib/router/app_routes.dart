@@ -58,6 +58,10 @@ import 'package:customer_app/features/profile/presentation/screens/address_form_
 import 'package:customer_app/features/profile/presentation/screens/promo_list_screen.dart';
 import 'package:customer_app/features/profile/presentation/screens/referral_screen.dart';
 import 'package:customer_app/features/profile/presentation/screens/sos_screen.dart';
+import 'package:customer_app/features/support/domain/support_ticket.dart';
+import 'package:customer_app/features/support/presentation/report_issue_screen.dart';
+import 'package:customer_app/features/support/presentation/support_ticket_detail_screen.dart';
+import 'package:customer_app/features/support/presentation/support_tickets_screen.dart';
 import 'package:customer_app/features/profile/presentation/screens/my_data_screen.dart';
 import 'package:customer_app/features/profile/presentation/screens/privacy_pdpa_screen.dart';
 import 'package:customer_app/features/profile/presentation/screens/promo_detail_screen.dart';
@@ -137,7 +141,7 @@ bool _requiresAuth(String path) {
     '/saved-places', '/saved-restaurants', '/add-address',
     // '/promos' is public (guest can browse promos + detail via the public
     // endpoint); applying a code still happens at checkout, which needs auth.
-    '/referral', '/sos', '/privacy', '/credit-cards',
+    '/referral', '/sos', '/support', '/privacy', '/credit-cards',
     '/messenger/', '/food-order',
   ];
   return protectedPrefixes.any((p) => path == p || path.startsWith(p));
@@ -648,6 +652,40 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const ReferralScreen(),
       ),
       GoRoute(path: '/sos', builder: (context, state) => const SOSScreen()),
+      // "แจ้งปัญหา": /support/report?service=ride|food|parcel&ref=<order id>
+      // &no=<short no>&source=trip_detail|tracking|profile&category=<api>
+      GoRoute(
+        path: '/support/report',
+        builder: (context, state) {
+          final q = state.uri.queryParameters;
+          final source = SupportSource.values.firstWhere(
+            (s) => s.api == q['source'],
+            orElse: () => SupportSource.profile,
+          );
+          final category = q['category'];
+          return ReportIssueScreen(
+            service: SupportService.fromApi(q['service']),
+            refId: q['ref'],
+            orderNo: q['no'],
+            source: source,
+            initialCategory: category == null
+                ? null
+                : SupportCategory.fromApi(category),
+          );
+        },
+      ),
+      GoRoute(
+        path: '/support/tickets',
+        builder: (context, state) => const SupportTicketsScreen(),
+        routes: [
+          GoRoute(
+            path: ':id',
+            builder: (context, state) => SupportTicketDetailScreen(
+              ticketId: state.pathParameters['id']!,
+            ),
+          ),
+        ],
+      ),
       GoRoute(
         path: '/privacy',
         builder: (context, state) => const PrivacyPdpaScreen(),

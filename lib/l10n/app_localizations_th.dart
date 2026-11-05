@@ -3762,4 +3762,29 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get myDataConsentVersion => 'เวอร์ชัน';
+
+  @override
+  String get promoStubRide => 'เรียกรถ';
+
+  @override
+  String get promoStubFood => 'ส่งอาหาร';
+
+  @override
+  String get promoStubParcel => 'ส่งของ';
+
+  @override
+  String get promoStubAll => 'ทุกบริการ';
+
+  @override
+  String get promoNoMinSpend => 'ไม่มีขั้นต่ำ';
+
+  @override
+  String promoLeftDays(String days) {
+    return 'เหลือ $days วัน';
+  }
+
+  @override
+  String promoLeftHours(String hours) {
+    return 'เหลือ $hours ชม.';
+  }
 }

@@ -1180,5 +1180,12 @@
   "myDataConsentWithdrawn": "ถอนความยินยอม",
   "myDataConsentGrantedAt": "ยินยอมเมื่อ",
   "myDataConsentWithdrawnAt": "ถอนเมื่อ",
-  "myDataConsentVersion": "เวอร์ชัน"
+  "myDataConsentVersion": "เวอร์ชัน",
+  "promoStubRide": "เรียกรถ",
+  "promoStubFood": "ส่งอาหาร",
+  "promoStubParcel": "ส่งของ",
+  "promoStubAll": "ทุกบริการ",
+  "promoNoMinSpend": "ไม่มีขั้นต่ำ",
+  "promoLeftDays": "เหลือ {days} วัน",
+  "promoLeftHours": "เหลือ {hours} ชม."
 }

@@ -5,6 +5,7 @@ import 'package:customer_app/core/utils/promo_style.dart';
 import 'package:customer_app/core/widgets/coupon_card.dart';
 import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/features/profile/data/datasources/promo_remote_data_source.dart';
+import 'package:customer_app/features/profile/presentation/widgets/promo_ticket_card.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -138,7 +139,7 @@ class _PromoListScreenState extends ConsumerState<PromoListScreen> {
                     itemBuilder: (context, index) {
                       final promo = visible[index];
                       final promoId = promo['id']?.toString() ?? '';
-                      return CouponCard(
+                      return PromoTicketCard(
                         data: CouponCardData.fromMap(promo),
                         onTap: promoId.isEmpty
                             ? null

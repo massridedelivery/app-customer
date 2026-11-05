@@ -4057,4 +4057,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get supportChatHint => 'Type a message…';
+
+  @override
+  String get supportTicketNotFound => 'This report couldn\'t be found';
 }

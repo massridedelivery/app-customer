@@ -1391,5 +1391,6 @@
   "ratingTagDirtyCar": "Dirty vehicle",
   "ratingTagOvercharged": "Charged too much",
   "supportChatStart": "Chat with support",
-  "supportChatHint": "Type a message…"
+  "supportChatHint": "Type a message…",
+  "supportTicketNotFound": "This report couldn't be found"
 }

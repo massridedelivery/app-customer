@@ -11,6 +11,18 @@ final loyaltySummaryProvider = FutureProvider.autoDispose<LoyaltySummary>((
   return LoyaltySummary.fromJson(json);
 });
 
+/// "ระดับสมาชิก" list, in the order received.
+final loyaltyTiersProvider = FutureProvider.autoDispose<List<LoyaltyTier>>((
+  ref,
+) async {
+  final json = await ref.watch(loyaltyRemoteDataSourceProvider).getTiers();
+  final raw = json['tiers'];
+  return [
+    if (raw is List)
+      for (final t in raw) ?LoyaltyTier.fromJson(t),
+  ];
+});
+
 /// แลกคะแนน list, with this customer's balance and per-reward eligibility.
 final rewardsProvider = FutureProvider.autoDispose<RewardList>((ref) async {
   final json = await ref.watch(loyaltyRemoteDataSourceProvider).getRewards();
@@ -52,6 +64,7 @@ final pointsEarnedForOrderProvider = FutureProvider.autoDispose
 /// After a redeem: every screen showing points or vouchers reads again.
 void refreshLoyalty(WidgetRef ref) {
   ref.invalidate(loyaltySummaryProvider);
+  ref.invalidate(loyaltyTiersProvider);
   ref.invalidate(rewardsProvider);
   ref.invalidate(vouchersProvider);
   ref.invalidate(pointsHistoryProvider);

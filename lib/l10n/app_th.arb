@@ -1194,5 +1194,12 @@
   "vouchersTabVoided": "ยกเลิก",
   "vouchersVoidedRefund": "ยกเลิกแล้ว คืน {points} คะแนน",
   "vouchersExpiredNoRefund": "คูปองที่หมดอายุแล้วจะไม่คืนคะแนน",
-  "promoVoucherLabel": "คูปองแลกคะแนน"
+  "promoVoucherLabel": "คูปองแลกคะแนน",
+  "tierListTitle": "ระดับสมาชิก",
+  "tierToNext": "อีก {points} คะแนนถึง {tier}",
+  "tierTopReached": "คุณอยู่ระดับสูงสุดแล้ว",
+  "tierEarnMultiplier": "ได้คะแนน ×{x}",
+  "tierYours": "ระดับของคุณ",
+  "tierRange": "{min}–{max} คะแนน",
+  "tierRangeFrom": "{min} คะแนนขึ้นไป"
 }

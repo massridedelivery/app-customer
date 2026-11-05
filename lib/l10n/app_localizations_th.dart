@@ -3814,4 +3814,33 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get promoVoucherLabel => 'คูปองแลกคะแนน';
+
+  @override
+  String get tierListTitle => 'ระดับสมาชิก';
+
+  @override
+  String tierToNext(String points, String tier) {
+    return 'อีก $points คะแนนถึง $tier';
+  }
+
+  @override
+  String get tierTopReached => 'คุณอยู่ระดับสูงสุดแล้ว';
+
+  @override
+  String tierEarnMultiplier(String x) {
+    return 'ได้คะแนน ×$x';
+  }
+
+  @override
+  String get tierYours => 'ระดับของคุณ';
+
+  @override
+  String tierRange(String min, String max) {
+    return '$min–$max คะแนน';
+  }
+
+  @override
+  String tierRangeFrom(String min) {
+    return '$min คะแนนขึ้นไป';
+  }
 }

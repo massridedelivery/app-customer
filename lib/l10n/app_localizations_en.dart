@@ -3860,4 +3860,33 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get promoVoucherLabel => 'Points coupon';
+
+  @override
+  String get tierListTitle => 'Member tiers';
+
+  @override
+  String tierToNext(String points, String tier) {
+    return '$points more points to $tier';
+  }
+
+  @override
+  String get tierTopReached => 'You\'re at the top tier';
+
+  @override
+  String tierEarnMultiplier(String x) {
+    return 'Earn ×$x points';
+  }
+
+  @override
+  String get tierYours => 'Your tier';
+
+  @override
+  String tierRange(String min, String max) {
+    return '$min–$max points';
+  }
+
+  @override
+  String tierRangeFrom(String min) {
+    return '$min+ points';
+  }
 }

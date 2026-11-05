@@ -47,6 +47,7 @@ import 'package:customer_app/features/profile/presentation/screens/account_email
 import 'package:customer_app/features/profile/presentation/screens/account_phone_screen.dart';
 import 'package:customer_app/features/profile/domain/models/loyalty_models.dart';
 import 'package:customer_app/features/profile/presentation/screens/loyalty_screen.dart';
+import 'package:customer_app/features/profile/presentation/screens/loyalty_tiers_screen.dart';
 import 'package:customer_app/features/profile/presentation/screens/rewards_screen.dart';
 import 'package:customer_app/features/profile/presentation/screens/vouchers_screen.dart';
 import 'package:customer_app/features/food_delivery/presentation/screens/saved_restaurants_screen.dart';
@@ -582,6 +583,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/loyalty',
         builder: (context, state) => const LoyaltyScreen(),
+        routes: [
+          GoRoute(
+            path: 'tiers',
+            builder: (context, state) => const LoyaltyTiersScreen(),
+          ),
+        ],
       ),
       GoRoute(
         path: '/rewards',

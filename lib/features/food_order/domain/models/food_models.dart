@@ -50,14 +50,22 @@ Object? _readPromoTitle(Map<dynamic, dynamic> json, String fieldName) {
 }
 
 Object? _readPromoDiscount(Map<dynamic, dynamic> json, String fieldName) {
-  return (json['discount'] as num?)?.toDouble() ??
-      (json['discount_value'] as num?)?.toDouble() ??
-      0.0;
+  final d = json['discount'];
+  if (d is num) return d.toDouble();
+  // A points coupon (kind VOUCHER) carries `discount` as an object; only a
+  // fixed one has a flat baht value — the others show their discount_text.
+  if (d is Map) {
+    final fixed = (d['type'] ?? '').toString().toUpperCase() == 'FIXED';
+    return fixed ? ((d['value'] as num?)?.toDouble() ?? 0.0) : 0.0;
+  }
+  return (json['discount_value'] as num?)?.toDouble() ?? 0.0;
 }
 
 Object? _readPromoMinOrder(Map<dynamic, dynamic> json, String fieldName) {
+  final d = json['discount'];
   return (json['min_order'] as num?)?.toDouble() ??
       (json['min_spend'] as num?)?.toDouble() ??
+      (d is Map ? (d['min_spend'] as num?)?.toDouble() : null) ??
       0.0;
 }
 
@@ -389,21 +397,31 @@ abstract class FoodOrderReviewResponseModel with _$FoodOrderReviewResponseModel 
 @freezed
 abstract class PromoModel with _$PromoModel {
   const factory PromoModel({
-    required String id,
+    @Default('') String id,
     required String code,
     @JsonKey(readValue: _readPromoTitle) required String title,
-    required String description,
+    @Default('') String description,
     @JsonKey(readValue: _readPromoDiscount) required double discount,
     @JsonKey(name: 'min_order', readValue: _readPromoMinOrder)
     required double minOrder,
     @JsonKey(name: 'expires_at', readValue: _readPromoExpiresAt)
-    required String expiresAt,
+    @Default('')
+    String expiresAt,
     @JsonKey(name: 'is_collected', readValue: _readPromoIsCollected)
     required bool isCollected,
     int? color,
     String? tag,
     @JsonKey(name: 'sub_tag') String? subTag,
+    // PROMO, or VOUCHER for the customer's own points coupon (RW-…), listed
+    // by GET /api/customer/promos/context after the promos.
+    @Default('PROMO') String kind,
+    @JsonKey(name: 'voucher_id') String? voucherId,
+    @JsonKey(name: 'discount_text') String? discountText,
   }) = _PromoModel;
+
+  const PromoModel._();
+
+  bool get isVoucher => kind.toUpperCase() == 'VOUCHER';
 
   factory PromoModel.fromJson(Map<String, dynamic> json) =>
       _$PromoModelFromJson(json);

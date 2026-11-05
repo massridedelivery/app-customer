@@ -173,9 +173,13 @@ class Checkout extends _$Checkout {
         promos = await repo.getPromoList();
       }
 
+      // Promotions first, then the customer's points coupons.
       state = state.copyWith(
         isPromoLoading: false,
-        availablePromos: promos,
+        availablePromos: [
+          ...promos.where((p) => !p.isVoucher),
+          ...promos.where((p) => p.isVoucher),
+        ],
       );
     } catch (e) {
       state = state.copyWith(

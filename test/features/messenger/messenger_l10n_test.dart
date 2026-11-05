@@ -1,6 +1,5 @@
 import 'package:customer_app/features/messenger/presentation/screens/messenger_coupon_screen.dart';
 import 'package:customer_app/features/messenger/presentation/screens/messenger_review_screen.dart';
-import 'package:customer_app/features/profile/presentation/screens/promo_list_screen.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -89,7 +88,7 @@ void main() {
         const MessengerCouponScreen(),
         'en',
         overrides: [
-          promoListProvider.overrideWith((ref) async => <dynamic>[]),
+          messengerPromosProvider.overrideWith((ref) async => <dynamic>[]),
         ],
       ),
     );

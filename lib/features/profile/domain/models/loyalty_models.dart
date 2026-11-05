@@ -166,6 +166,43 @@ class PointsEntry {
   );
 }
 
+/// What a reward's voucher takes off: `discount` in the rewards and
+/// vouchers payloads.
+class RewardDiscount {
+  const RewardDiscount({
+    this.type = 'FIXED',
+    this.value = 0,
+    this.maxDiscount,
+    this.minSpend = 0,
+    this.appliesTo = 'ALL',
+    this.stackable = false,
+  });
+
+  /// FIXED | PERCENT | FREE_DELIVERY.
+  final String type;
+  final double value;
+  final double? maxDiscount;
+  final double minSpend;
+
+  /// RIDE | FOOD | MESSENGER | ALL.
+  final String appliesTo;
+  final bool stackable;
+
+  static RewardDiscount? fromJson(Object? json) {
+    if (json is! Map) return null;
+    final m = _map(json);
+    final max = m['max_discount'];
+    return RewardDiscount(
+      type: (_str(m['type']) ?? 'FIXED').toUpperCase(),
+      value: _double(m['value']),
+      maxDiscount: max == null ? null : _double(max),
+      minSpend: _double(m['min_spend']),
+      appliesTo: (_str(m['applies_to']) ?? 'ALL').toUpperCase(),
+      stackable: m['stackable'] == true,
+    );
+  }
+}
+
 /// One reward in `GET /api/customer/rewards`.
 class Reward {
   const Reward({
@@ -182,11 +219,23 @@ class Reward {
     this.reason,
     this.startsAt,
     this.endsAt,
+    this.discount,
+    this.perUserLimit,
+    this.redeemedByMe = 0,
   });
 
   final String id;
   final String title;
   final String description;
+
+  /// The voucher's terms; [discountText] is what to show.
+  final RewardDiscount? discount;
+
+  /// How many one customer may get; null = unlimited.
+  final int? perUserLimit;
+
+  /// How many this customer already got.
+  final int redeemedByMe;
 
   /// Conditions, one per line (`\n`).
   final String terms;
@@ -223,6 +272,9 @@ class Reward {
     reason: _str(json['reason'])?.toUpperCase(),
     startsAt: _date(json['starts_at']),
     endsAt: _date(json['ends_at']),
+    discount: RewardDiscount.fromJson(json['discount']),
+    perUserLimit: _intOrNull(json['per_user_limit']),
+    redeemedByMe: _int(json['redeemed_by_me']),
   );
 }
 
@@ -262,17 +314,30 @@ class Voucher {
     this.expiresAt,
     this.usedAt,
     this.usedOrderType,
+    this.imageUrl,
+    this.discount,
+    this.voidedAt,
+    this.createdAt,
   });
 
   final String id;
   final String code;
   final String title;
+
+  /// Fixed when the voucher was made: an admin editing the reward later
+  /// doesn't change it. Always the text to show.
   final String discountText;
+  final String? imageUrl;
+  final RewardDiscount? discount;
+
+  /// When it was cancelled (VOIDED) and the points went back.
+  final DateTime? voidedAt;
+  final DateTime? createdAt;
 
   /// RIDE | FOOD | MESSENGER | ALL.
   final String appliesTo;
 
-  /// ACTIVE | USED | EXPIRED.
+  /// ACTIVE | USED | EXPIRED | VOIDED.
   final String status;
   final int pointsSpent;
   final DateTime? expiresAt;
@@ -292,6 +357,10 @@ class Voucher {
     expiresAt: _date(json['expires_at']),
     usedAt: _date(json['used_at']),
     usedOrderType: _str(json['used_order_type'])?.toUpperCase(),
+    imageUrl: _str(json['image_url']),
+    discount: RewardDiscount.fromJson(json['discount']),
+    voidedAt: _date(json['voided_at']),
+    createdAt: _date(json['created_at']),
   );
 }
 
@@ -300,11 +369,13 @@ class RedeemResult {
   const RedeemResult({
     required this.voucher,
     required this.pointsBalance,
+    this.pointsSpent = 0,
     this.replayed = false,
   });
 
   final Voucher voucher;
   final int pointsBalance;
+  final int pointsSpent;
 
   /// The same Idempotency-Key was sent again: this is the first call's
   /// voucher, nothing was spent twice.
@@ -313,6 +384,7 @@ class RedeemResult {
   factory RedeemResult.fromJson(Map<String, dynamic> json) => RedeemResult(
     voucher: Voucher.fromJson(_map(json['voucher'])),
     pointsBalance: _int(json['points_balance']),
+    pointsSpent: _int(json['points_spent']),
     replayed: json['replayed'] == true,
   );
 }

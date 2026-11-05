@@ -191,12 +191,12 @@ class _RideCouponScreenState extends ConsumerState<RideCouponScreen> {
           onApply: () => _applyPromo(promo.code),
           onCancel: _cancelPromo,
         );
-        // The customer's own point-reward coupons first, under their own
-        // heading; then the regular promotions.
+        // The promotions first, then the customer's own points coupons under
+        // their own heading (as GET /promos/context orders them).
         final vouchers = promos.where((p) => p.isVoucher).toList();
         return _CouponList(
           onRefresh: () => ref.refresh(discoverPromosProvider.future),
-          leading: [
+          trailing: [
             if (vouchers.isNotEmpty) ...[
               Padding(
                 padding: const EdgeInsets.only(top: 16, bottom: 12),
@@ -255,12 +255,12 @@ class _RideCouponScreenState extends ConsumerState<RideCouponScreen> {
 /// "คูปองส่วนลดที่มี" header + cards (or an empty message), pull-to-refresh.
 class _CouponList extends StatelessWidget {
   final List<Widget> cards;
-  final List<Widget> leading;
+  final List<Widget> trailing;
   final Future<Object?> Function() onRefresh;
   const _CouponList({
     required this.cards,
     required this.onRefresh,
-    this.leading = const [],
+    this.trailing = const [],
   });
 
   @override
@@ -272,7 +272,6 @@ class _CouponList extends StatelessWidget {
         physics: const AlwaysScrollableScrollPhysics(),
         padding: EdgeInsets.fromLTRB(16, 0, 16, 36 + MediaQuery.paddingOf(context).bottom),
         children: [
-          ...leading,
           Padding(
             padding: const EdgeInsets.only(top: 16, bottom: 12),
             child: Text(
@@ -280,7 +279,7 @@ class _CouponList extends StatelessWidget {
               style: AppTypography.label1.copyWith(fontWeight: FontWeight.bold),
             ),
           ),
-          if (cards.isEmpty)
+          if (cards.isEmpty && trailing.isEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 64),
               child: Center(
@@ -292,6 +291,7 @@ class _CouponList extends StatelessWidget {
             )
           else
             ...cards,
+          ...trailing,
         ],
       ),
     );

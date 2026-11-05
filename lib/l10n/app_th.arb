@@ -1190,5 +1190,9 @@
   "promoLeftHours": "เหลือ {hours} ชม.",
   "liveDriverArrivesIn": "คนขับจะถึงในอีก {minutes} นาที",
   "liveArrivesDestIn": "จะถึงปลายทางในอีก {minutes} นาที",
-  "callErrorRateLimited": "โทรบ่อยเกินไป รอสักครู่แล้วลองใหม่"
+  "callErrorRateLimited": "โทรบ่อยเกินไป รอสักครู่แล้วลองใหม่",
+  "vouchersTabVoided": "ยกเลิก",
+  "vouchersVoidedRefund": "ยกเลิกแล้ว คืน {points} คะแนน",
+  "vouchersExpiredNoRefund": "คูปองที่หมดอายุแล้วจะไม่คืนคะแนน",
+  "promoVoucherLabel": "คูปองแลกคะแนน"
 }

@@ -3845,4 +3845,19 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get callErrorRateLimited =>
       'Too many calls. Wait a moment and try again.';
+
+  @override
+  String get vouchersTabVoided => 'Cancelled';
+
+  @override
+  String vouchersVoidedRefund(String points) {
+    return 'Cancelled · $points points returned';
+  }
+
+  @override
+  String get vouchersExpiredNoRefund =>
+      'Expired coupons don\'t get their points back';
+
+  @override
+  String get promoVoucherLabel => 'Points coupon';
 }

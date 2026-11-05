@@ -63,8 +63,12 @@ class _RedeemSheetState extends ConsumerState<_RedeemSheet> {
     } catch (e) {
       if (!mounted) return;
       final err = ApiError.from(e);
-      if (err.isNetwork || err.code == 'INTERNAL_ERROR' || err.code == null) {
-        // Not refused, just didn't get through: retry with the same key.
+      if (err.isNetwork ||
+          (err.statusCode ?? 0) >= 500 ||
+          err.code == 'INTERNAL_ERROR' ||
+          err.code == null) {
+        // Not refused, just didn't get through (or a 5xx): retry with the
+        // same key, so the server replays instead of spending twice.
         setState(() {
           _busy = false;
           _retryable = err;
@@ -74,7 +78,9 @@ class _RedeemSheetState extends ConsumerState<_RedeemSheet> {
       switch (err.code) {
         case 'REWARD_OUT_OF_STOCK' ||
             'REWARD_NOT_ACTIVE' ||
+            'REWARD_NOT_STARTED' ||
             'REWARD_ENDED' ||
+            'REWARD_LIMIT_REACHED' ||
             'REWARD_NOT_FOUND' ||
             'POINTS_DISABLED':
           ref.invalidate(rewardsProvider);
@@ -111,6 +117,14 @@ class _RedeemSheetState extends ConsumerState<_RedeemSheet> {
             Text(
               l10n.rewardsConfirmLeft(fmtPoints(left < 0 ? 0 : left)),
               style: AppTypography.body2.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              l10n.vouchersExpiredNoRefund,
+              key: const Key('redeemNoRefundNote'),
+              style: AppTypography.caption4.copyWith(
                 color: AppColors.textSecondary,
               ),
             ),

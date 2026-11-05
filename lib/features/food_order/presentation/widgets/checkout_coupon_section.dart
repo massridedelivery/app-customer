@@ -2,6 +2,7 @@ import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/features/food_order/presentation/controllers/checkout_controller.dart';
 import 'package:customer_app/features/food_order/presentation/screens/food_coupon_screen.dart';
+import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -36,6 +37,19 @@ class CheckoutCouponSection extends ConsumerWidget {
                     'ใช้คูปอง: ${checkoutState.appliedPromoCodes.join(', ')}',
                     style: AppTypography.caption4.copyWith(
                       color: AppColors.primary,
+                    ),
+                  ),
+                // One of them is the customer's points coupon.
+                if (checkoutState.availablePromos.any(
+                  (p) =>
+                      p.isVoucher &&
+                      checkoutState.appliedPromoCodes.contains(p.code),
+                ))
+                  Text(
+                    AppLocalizations.of(context)!.promoVoucherLabel,
+                    key: const Key('foodVoucherLabel'),
+                    style: AppTypography.caption4.copyWith(
+                      color: AppColors.textSecondary,
                     ),
                   ),
               ],

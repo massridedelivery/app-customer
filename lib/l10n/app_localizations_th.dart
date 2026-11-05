@@ -3800,4 +3800,18 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get callErrorRateLimited => 'โทรบ่อยเกินไป รอสักครู่แล้วลองใหม่';
+
+  @override
+  String get vouchersTabVoided => 'ยกเลิก';
+
+  @override
+  String vouchersVoidedRefund(String points) {
+    return 'ยกเลิกแล้ว คืน $points คะแนน';
+  }
+
+  @override
+  String get vouchersExpiredNoRefund => 'คูปองที่หมดอายุแล้วจะไม่คืนคะแนน';
+
+  @override
+  String get promoVoucherLabel => 'คูปองแลกคะแนน';
 }

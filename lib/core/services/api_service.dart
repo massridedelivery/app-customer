@@ -10,10 +10,38 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:customer_app/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:customer_app/core/localization/locale_controller.dart';
 
+/// How a `POST /auth/refresh` ended.
+enum RefreshOutcome {
+  /// New pair stored.
+  refreshed,
+
+  /// 401: the refresh token is no longer valid — the only case that logs out.
+  unauthorized,
+
+  /// Suspended / deleted account; already handled (account-blocked screen).
+  blocked,
+
+  /// Timeout, no connection, 5xx, or an unusable answer, still failing after
+  /// the retries. The session is kept; the next 401 tries again.
+  failed,
+}
+
 class ApiService {
   final Dio _dio;
   final TokenStorage _tokenStorage;
   final Ref _ref;
+
+  /// Client for `POST /auth/refresh` (no auth header, no logging: the body is
+  /// the token pair). Injectable for tests.
+  final Dio _refreshDio;
+
+  /// Pause before refresh retry [attempt] (1-based). Injectable for tests.
+  final Duration Function(int attempt) _refreshBackoff;
+
+  /// Refresh retries stay inside this window: the backend hands back the same
+  /// pair for a reused refresh token for 60 s, so a retry after a lost answer
+  /// still succeeds.
+  static const Duration _refreshWindow = Duration(seconds: 50);
 
   // Resolved from the active flavor (env/dev.json | env/prod.json) via
   // --dart-define-from-file; defaults to dev.
@@ -23,35 +51,57 @@ class ApiService {
   // subsequent 401 logs out instead of triggering another refresh (loop guard).
   static const String _retriedFlag = 'retried_after_refresh';
 
-  Completer<bool>? _refreshCompleter;
+  Completer<RefreshOutcome>? _refreshCompleter;
 
-  ApiService(this._tokenStorage, this._ref)
-    : _dio = Dio(
-        BaseOptions(
-          baseUrl: baseUrl,
-          connectTimeout: const Duration(seconds: 15),
-          receiveTimeout: const Duration(seconds: 15),
-          contentType: 'application/json',
-        ),
-      ) {
+  ApiService(
+    this._tokenStorage,
+    this._ref, {
+    Dio? dio,
+    Dio? refreshDio,
+    Duration Function(int attempt)? refreshBackoff,
+  }) : _dio =
+           dio ??
+           Dio(
+             BaseOptions(
+               baseUrl: baseUrl,
+               connectTimeout: const Duration(seconds: 15),
+               receiveTimeout: const Duration(seconds: 15),
+               contentType: 'application/json',
+             ),
+           ),
+       _refreshDio =
+           refreshDio ??
+           Dio(
+             BaseOptions(
+               baseUrl: baseUrl,
+               contentType: 'application/json',
+               connectTimeout: const Duration(seconds: 10),
+               receiveTimeout: const Duration(seconds: 10),
+             ),
+           ),
+       _refreshBackoff =
+           refreshBackoff ??
+           ((attempt) => Duration(seconds: 1 << (attempt - 1).clamp(0, 3))) {
     _setupInterceptors();
   }
 
   Dio get dio => _dio;
 
   void _setupInterceptors() {
-    // Only log request/response headers in debug builds — headers carry the
-    // `Authorization: Bearer <token>`, which must never be logged in release.
+    // Debug builds only, and never a token: request headers carry
+    // `Authorization: Bearer <token>`, and the /auth/* answers carry the
+    // token pair, so neither is printed.
     if (!kReleaseMode) {
       _dio.interceptors.add(
         TalkerDioLogger(
           settings: TalkerDioLoggerSettings(
-            printRequestHeaders: true,
+            printRequestHeaders: false,
             printResponseHeaders: true,
             // The PDPA export is the customer's personal data: never in a log,
             // not even a debug one.
             responseFilter: (r) =>
-                !r.requestOptions.path.startsWith('/api/customer/export'),
+                !r.requestOptions.path.startsWith('/api/customer/export') &&
+                !r.requestOptions.path.startsWith('/auth/'),
           ),
         ),
       );
@@ -66,8 +116,9 @@ class ApiService {
           }
           // Localize backend error messages (th|en) to the user's chosen
           // language; omitting it defaults to English server-side.
-          options.headers['X-Lang'] =
-              _ref.read(localeControllerProvider).languageCode;
+          options.headers['X-Lang'] = _ref
+              .read(localeControllerProvider)
+              .languageCode;
           return handler.next(options);
         },
         onError: (DioException error, handler) async {
@@ -101,27 +152,43 @@ class ApiService {
             return handler.next(error);
           }
 
-          // Coalesce concurrent 401s onto a single in-flight refresh.
+          // Sent with a token that has since been replaced (its answer came
+          // back after a refresh finished): replay with the new one instead
+          // of refreshing again.
+          final sentWith = error.requestOptions.headers['Authorization'];
+          final current = _tokenStorage.getAccessToken();
+          if (_refreshCompleter == null &&
+              current != null &&
+              sentWith != null &&
+              sentWith != 'Bearer $current') {
+            return _retry(error, handler);
+          }
+
+          // One refresh at a time: concurrent 401s wait for it.
           if (_refreshCompleter != null) {
-            final isRefreshed = await _refreshCompleter!.future;
-            if (isRefreshed) {
+            final outcome = await _refreshCompleter!.future;
+            if (outcome == RefreshOutcome.refreshed) {
               return _retry(error, handler);
             }
-            // The shared refresh failed; the initiator already logged out, so
-            // just surface the error instead of starting another refresh.
+            // The initiator already acted on the outcome (logout only on 401).
             return handler.next(error);
           }
 
-          _refreshCompleter = Completer<bool>();
-          final isRefreshed = await _refreshToken();
-          _refreshCompleter!.complete(isRefreshed);
+          final completer = _refreshCompleter = Completer<RefreshOutcome>();
+          final outcome = await _refreshToken();
+          completer.complete(outcome);
           _refreshCompleter = null;
 
-          if (isRefreshed) {
-            return _retry(error, handler);
-          } else {
-            _handleLogout();
-            return handler.next(error);
+          switch (outcome) {
+            case RefreshOutcome.refreshed:
+              return _retry(error, handler);
+            case RefreshOutcome.unauthorized:
+              _handleLogout();
+              return handler.next(error);
+            case RefreshOutcome.blocked:
+            case RefreshOutcome.failed:
+              // Blocked is already handled; a failed refresh keeps the session.
+              return handler.next(error);
           }
         },
       ),
@@ -144,8 +211,7 @@ class ApiService {
       // onError). The tag rides on requestOptions.extra of the cloned request.
       extra: {...error.requestOptions.extra, _retriedFlag: true},
     );
-    opts.headers!['Authorization'] =
-        'Bearer ${_tokenStorage.getAccessToken()}';
+    opts.headers!['Authorization'] = 'Bearer ${_tokenStorage.getAccessToken()}';
 
     try {
       final cloneReq = await _dio.request(
@@ -194,57 +260,62 @@ class ApiService {
     });
   }
 
-  Future<bool> _refreshToken() async {
+  /// `POST /auth/refresh {refresh_token}` → `{access_token, refresh_token}`.
+  ///
+  /// The new pair is stored the moment it arrives. A timeout, lost
+  /// connection, 5xx, 408/429 or an answer without tokens is retried with the
+  /// SAME refresh token (the backend returns the same pair again within 60 s)
+  /// until [_refreshWindow] runs out. Only a 401 means the session is over.
+  /// Callers serialise it via [_refreshCompleter].
+  Future<RefreshOutcome> _refreshToken() async {
     final refreshToken = _tokenStorage.getRefreshToken();
-    if (refreshToken == null) return false;
+    if (refreshToken == null) return RefreshOutcome.unauthorized;
 
-    try {
-      final noAuthDio = Dio(
-        BaseOptions(
-          baseUrl: baseUrl,
-          contentType: 'application/json',
-          connectTimeout: const Duration(seconds: 15),
-        ),
-      );
-
-      // Add logger to see the refresh request in console (debug only — the
-      // response body contains the new access/refresh tokens).
-      if (!kReleaseMode) {
-        noAuthDio.interceptors.add(
-          TalkerDioLogger(
-            settings: const TalkerDioLoggerSettings(
-              printRequestHeaders: true,
-              printResponseHeaders: true,
-              printResponseMessage: true,
-            ),
-          ),
+    final started = DateTime.now();
+    for (var attempt = 1; ; attempt++) {
+      try {
+        final response = await _refreshDio.post(
+          '/auth/refresh',
+          data: {'refresh_token': refreshToken},
         );
-      }
-
-      final response = await noAuthDio.post(
-        '/auth/refresh',
-        data: {'refresh_token': refreshToken},
-      );
-
-      if (response.statusCode == 200) {
-        final newAccessToken = response.data['access_token'];
-        final newRefreshToken = response.data['refresh_token'];
-        if (newAccessToken != null && newRefreshToken != null) {
+        final data = response.data;
+        final access = data is Map ? data['access_token'] : null;
+        final refresh = data is Map ? data['refresh_token'] : null;
+        if (access is String &&
+            access.isNotEmpty &&
+            refresh is String &&
+            refresh.isNotEmpty) {
           await _tokenStorage.saveTokens(
-            accessToken: newAccessToken,
-            refreshToken: newRefreshToken,
+            accessToken: access,
+            refreshToken: refresh,
           );
-          return true;
+          return RefreshOutcome.refreshed;
         }
+        // 2xx without a pair: treat like a server error and try again.
+      } on DioException catch (e) {
+        // The refresh itself can be refused for a suspended/deleted account.
+        final block = accountBlockOf(e.response);
+        if (block != null) {
+          _handleAccountBlocked(block);
+          return RefreshOutcome.blocked;
+        }
+        final status = e.response?.statusCode;
+        if (status == 401) return RefreshOutcome.unauthorized;
+        final retryable =
+            status == null || status >= 500 || status == 408 || status == 429;
+        // Any other 4xx won't change on a retry, but isn't a 401 either:
+        // keep the session.
+        if (!retryable) return RefreshOutcome.failed;
+      } catch (_) {
+        // Unexpected (e.g. a malformed body): retry like a server error.
       }
-      return false;
-    } on DioException catch (e) {
-      // The refresh itself can be refused for a suspended/deleted account.
-      final block = accountBlockOf(e.response);
-      if (block != null) _handleAccountBlocked(block);
-      return false;
-    } catch (e) {
-      return false;
+
+      final wait = _refreshBackoff(attempt);
+      if (DateTime.now().add(wait).difference(started) > _refreshWindow ||
+          attempt >= 6) {
+        return RefreshOutcome.failed;
+      }
+      await Future<void>.delayed(wait);
     }
   }
 }

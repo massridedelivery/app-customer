@@ -1,3 +1,4 @@
+import 'package:customer_app/features/ride_booking/domain/models/ride_quote.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'food_models.freezed.dart';
@@ -253,7 +254,17 @@ abstract class DeliveryTierModel with _$DeliveryTierModel {
     @JsonKey(name: 'delivery_fee') required double deliveryFee,
     @JsonKey(name: 'estimated_min') required int estimatedMin,
     String? description,
+    // What the codes sent with the estimate take off this tier.
+    @JsonKey(name: 'promo_discount') double? promoDiscount,
+    // After the codes AND points; null on older payloads.
+    @JsonKey(name: 'amount_to_pay') double? amountToPay,
+    // Loyalty points for this tier (same shape as ride / parcel).
+    @JsonKey(name: 'points') Map<String, dynamic>? pointsRaw,
   }) = _DeliveryTierModel;
+
+  const DeliveryTierModel._();
+
+  RidePointsQuote? get points => RidePointsQuote.fromJson(pointsRaw);
 
   factory DeliveryTierModel.fromJson(Map<String, dynamic> json) =>
       _$DeliveryTierModelFromJson(json);

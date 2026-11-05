@@ -1,3 +1,4 @@
+import 'package:customer_app/core/error/api_error.dart';
 import 'package:customer_app/core/error/server_exception.dart';
 import 'package:customer_app/core/error/food_delivery_exception.dart';
 import 'package:customer_app/features/food_order/data/datasources/food_order_remote_data_source.dart';
@@ -50,6 +51,9 @@ class FoodOrderRepositoryImpl implements IFoodOrderRepository {
     required List<Map<String, dynamic>> items,
     required double lat,
     required double lng,
+    List<String>? promoCodes,
+    bool usePoints = false,
+    int? pointsToUse,
   }) async {
     try {
       return await _dataSource.getFareEstimate(
@@ -57,8 +61,12 @@ class FoodOrderRepositoryImpl implements IFoodOrderRepository {
         items: items,
         lat: lat,
         lng: lng,
+        promoCodes: promoCodes,
+        usePoints: usePoints,
+        pointsToUse: pointsToUse,
       );
     } on DioException catch (e) {
+      if (_hasCode(e)) throw ApiError.from(e);
       throw mapDioErrorToException(e, 'Failed to get fare estimate');
     } catch (e) {
       throw ServerException(e.toString());
@@ -77,6 +85,8 @@ class FoodOrderRepositoryImpl implements IFoodOrderRepository {
     String? tier,
     List<String>? promoCodes,
     String? idempotencyKey,
+    bool usePoints = false,
+    int? pointsToUse,
   }) async {
     try {
       return await _dataSource.placeOrder(
@@ -90,8 +100,11 @@ class FoodOrderRepositoryImpl implements IFoodOrderRepository {
         tier: tier,
         promoCodes: promoCodes,
         idempotencyKey: idempotencyKey,
+        usePoints: usePoints,
+        pointsToUse: pointsToUse,
       );
     } on DioException catch (e) {
+      if (_hasCode(e)) throw ApiError.from(e);
       throw mapDioErrorToException(e, 'Failed to place order');
     } catch (e) {
       throw ServerException(e.toString());
@@ -369,5 +382,13 @@ class FoodOrderRepositoryImpl implements IFoodOrderRepository {
     } catch (e) {
       throw ServerException(e.toString());
     }
+  }
+
+  /// A points / voucher refusal: the caller branches on its `code`
+  /// (POINTS_*, VOUCHER_*), so it stays an [ApiError] with the server text.
+  static bool _hasCode(DioException e) {
+    final data = e.response?.data;
+    final code = data is Map ? data['code']?.toString() ?? '' : '';
+    return code.startsWith('POINTS_') || code.startsWith('VOUCHER_');
   }
 }

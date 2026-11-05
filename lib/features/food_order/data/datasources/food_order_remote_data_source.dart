@@ -18,6 +18,9 @@ abstract interface class FoodOrderRemoteDataSource {
     required List<Map<String, dynamic>> items,
     required double lat,
     required double lng,
+    List<String>? promoCodes,
+    bool usePoints = false,
+    int? pointsToUse,
   });
   Future<FoodOrderModel> placeOrder({
     required String restaurantId,
@@ -30,6 +33,8 @@ abstract interface class FoodOrderRemoteDataSource {
     String? tier,
     List<String>? promoCodes,
     String? idempotencyKey,
+    bool usePoints = false,
+    int? pointsToUse,
   });
   Future<void> upsertCart({
     required String restaurantId,
@@ -131,6 +136,9 @@ class FoodOrderRemoteDataSourceImpl implements FoodOrderRemoteDataSource {
     required List<Map<String, dynamic>> items,
     required double lat,
     required double lng,
+    List<String>? promoCodes,
+    bool usePoints = false,
+    int? pointsToUse,
   }) async {
     final response = await _apiService.dio.post(
       '/api/food/customer/estimate',
@@ -139,6 +147,10 @@ class FoodOrderRemoteDataSourceImpl implements FoodOrderRemoteDataSource {
         'items': items,
         'delivery_lat': lat,
         'delivery_lng': lng,
+        if (promoCodes != null && promoCodes.isNotEmpty)
+          'promo_codes': promoCodes,
+        if (usePoints) 'use_points': true,
+        'points_to_use': ?pointsToUse,
       },
     );
     return FareEstimateResponseModel.fromJson(
@@ -158,6 +170,8 @@ class FoodOrderRemoteDataSourceImpl implements FoodOrderRemoteDataSource {
     String? tier,
     List<String>? promoCodes,
     String? idempotencyKey,
+    bool usePoints = false,
+    int? pointsToUse,
   }) async {
     final body = <String, dynamic>{
       'restaurant_id': restaurantId,
@@ -171,6 +185,8 @@ class FoodOrderRemoteDataSourceImpl implements FoodOrderRemoteDataSource {
     if (tier != null) body['tier'] = tier;
     if (promoCodes != null) body['promo_codes'] = promoCodes;
     if (idempotencyKey != null) body['idempotency_key'] = idempotencyKey;
+    if (usePoints) body['use_points'] = true;
+    if (pointsToUse != null) body['points_to_use'] = pointsToUse;
 
     final response = await _apiService.dio.post(
       '/api/food/customer/orders',

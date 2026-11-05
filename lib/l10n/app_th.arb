@@ -437,6 +437,7 @@
   "msgrLoadMessagesFailed": "โหลดข้อความไม่สำเร็จ",
   "msgrTypeMessage": "พิมพ์ข้อความ...",
   "rideDriversNearby": "มีคนขับใกล้ฉัน {count} คน",
+  "rideSeats": "{count} ที่นั่ง",
   "rideNoDriversNow": "ยังไม่มีคนขับว่างขณะนี้",
   "rideDiscountOff": "ลด ฿{amount}",
   "rideDropoffUnspecified": "ไม่ระบุจุดส่ง",

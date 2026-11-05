@@ -33,9 +33,14 @@ Future<void> _pump(WidgetTester tester, VehicleEstimation e) =>
     );
 
 void main() {
-  testWidgets('shows 👤 seats when the estimate has them', (tester) async {
+  testWidgets('shows a "N ที่นั่ง" chip when the estimate has seats', (
+    tester,
+  ) async {
     await _pump(tester, VehicleEstimation.fromJson(_json(seats: 10)));
-    expect(find.text('👤 10'), findsOneWidget);
+    expect(find.byKey(const Key('vehicleSeats')), findsOneWidget);
+    expect(find.text('10 ที่นั่ง'), findsOneWidget);
+    // The fare note stays on the same line as the chip.
+    expect(find.text('ค่าโดยสารเริ่มต้น'), findsOneWidget);
   });
 
   testWidgets('no seats, no badge', (tester) async {

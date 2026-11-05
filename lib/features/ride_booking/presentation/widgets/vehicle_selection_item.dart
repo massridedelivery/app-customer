@@ -113,18 +113,6 @@ class VehicleSelectionItem extends StatelessWidget {
                                         ),
                                       ),
                                     ),
-                                    if (estimation.seats != null) ...[
-                                      const SizedBox(width: 6),
-                                      Text(
-                                        '👤 ${estimation.seats}',
-                                        key: const Key('vehicleSeats'),
-                                        style: AppTypography.caption4.copyWith(
-                                          color: AppColors
-                                              .semanticGrayNeutralFgMidOnWhite,
-                                        ),
-                                      ),
-                                    ],
-
                                     if (estimation.surgeMultiplier > 1.0) ...[
                                       const SizedBox(width: 4),
                                       Container(
@@ -151,22 +139,38 @@ class VehicleSelectionItem extends StatelessWidget {
                                   ],
                                 ),
 
-                                if (estimation.surchargeName != null &&
-                                    (estimation.pickupSurcharge > 0 ||
-                                        estimation.dropoffSurcharge > 0))
-                                  Text(
-                                    '${estimation.surchargeName}: ฿${(estimation.pickupSurcharge + estimation.dropoffSurcharge).toStringAsFixed(0)}',
-                                    style: AppTypography.caption5.copyWith(
-                                      color: AppColors.foundationOrange600,
-                                    ),
-                                  )
-                                else
-                                  Text(
-                                    l10n.baseFareLabel,
-                                    style: AppTypography.caption5.copyWith(
-                                      color: Colors.grey,
-                                    ),
-                                  ),
+                                // Seats chip ("👤 4 ที่นั่ง", design A) on the
+                                // same line as the fare note, so the card
+                                // doesn't grow a row.
+                                const SizedBox(height: 2),
+                                Wrap(
+                                  spacing: 6,
+                                  runSpacing: 2,
+                                  crossAxisAlignment: WrapCrossAlignment.center,
+                                  children: [
+                                    if (estimation.seats != null)
+                                      _SeatsChip(
+                                        label: l10n.rideSeats(estimation.seats!),
+                                      ),
+                                    if (estimation.surchargeName != null &&
+                                        (estimation.pickupSurcharge > 0 ||
+                                            estimation.dropoffSurcharge > 0))
+                                      Text(
+                                        '${estimation.surchargeName}: ฿${(estimation.pickupSurcharge + estimation.dropoffSurcharge).toStringAsFixed(0)}',
+                                        style: AppTypography.caption5.copyWith(
+                                          color: AppColors.foundationOrange600,
+                                        ),
+                                      )
+                                    else
+                                      Text(
+                                        l10n.baseFareLabel,
+                                        style: AppTypography.caption5.copyWith(
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+
+                                  ],
+                                ),
                                 // Nearby-driver count (SCRUM-64) — only when the
                                 // backend sends the field.
                                 if (estimation.driversNearby != null) ...[
@@ -278,6 +282,43 @@ class VehicleSelectionItem extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Grey pill with a person icon and "N ที่นั่ง" under the vehicle name.
+class _SeatsChip extends StatelessWidget {
+  final String label;
+
+  const _SeatsChip({required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      key: const Key('vehicleSeats'),
+      padding: const EdgeInsets.fromLTRB(6, 2, 8, 2),
+      decoration: BoxDecoration(
+        color: AppColors.foundationGrayscale100,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            Icons.person_rounded,
+            size: 13,
+            color: AppColors.semanticGrayNeutralFgHigh,
+          ),
+          const SizedBox(width: 3),
+          Text(
+            label,
+            style: AppTypography.caption5.copyWith(
+              color: AppColors.semanticGrayNeutralFgHigh,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
       ),
     );
   }

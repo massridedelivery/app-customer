@@ -2527,6 +2527,12 @@ abstract class AppLocalizations {
   /// **'{count, plural, =1{1 driver nearby} other{{count} drivers nearby}}'**
   String rideDriversNearby(int count);
 
+  /// No description provided for @rideSeats.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 seat} other{{count} seats}}'**
+  String rideSeats(int count);
+
   /// No description provided for @rideNoDriversNow.
   ///
   /// In en, this message translates to:

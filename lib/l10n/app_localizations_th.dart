@@ -1317,6 +1317,11 @@ class AppLocalizationsTh extends AppLocalizations {
   }
 
   @override
+  String rideSeats(int count) {
+    return '$count ที่นั่ง';
+  }
+
+  @override
   String get rideNoDriversNow => 'ยังไม่มีคนขับว่างขณะนี้';
 
   @override

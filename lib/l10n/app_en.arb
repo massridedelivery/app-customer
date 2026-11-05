@@ -471,6 +471,8 @@
   "msgrTypeMessage": "Type a message...",
   "rideDriversNearby": "{count, plural, =1{1 driver nearby} other{{count} drivers nearby}}",
   "@rideDriversNearby": {"placeholders": {"count": {"type": "int"}}},
+  "rideSeats": "{count, plural, =1{1 seat} other{{count} seats}}",
+  "@rideSeats": {"placeholders": {"count": {"type": "int"}}},
   "rideNoDriversNow": "No drivers available right now",
   "rideDiscountOff": "฿{amount} off",
   "@rideDiscountOff": {"placeholders": {"amount": {"type": "String"}}},

@@ -3831,4 +3831,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String promoLeftHours(String hours) {
     return '${hours}h left';
   }
+
+  @override
+  String liveDriverArrivesIn(int minutes) {
+    return 'Your driver arrives in $minutes min';
+  }
+
+  @override
+  String liveArrivesDestIn(int minutes) {
+    return 'Arriving in $minutes min';
+  }
 }

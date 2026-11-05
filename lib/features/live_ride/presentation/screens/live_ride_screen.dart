@@ -66,9 +66,18 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
   Timer? _findingTimer;
   bool _findingPromptOpen = false;
 
+  /// Redraws the countdown between socket frames, so "อีก N นาที" follows
+  /// `arrive_at` instead of jumping when the next frame lands.
+  Timer? _etaTicker;
+
   @override
   void initState() {
     super.initState();
+    _etaTicker = Timer.periodic(const Duration(seconds: 20), (_) {
+      if (mounted && ref.read(liveRideControllerProvider).etaArriveAt != null) {
+        setState(() {});
+      }
+    });
     final jobId = widget.jobId;
     if (jobId != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) => _openJob(jobId));
@@ -100,6 +109,7 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
   @override
   void dispose() {
     _findingTimer?.cancel();
+    _etaTicker?.cancel();
     super.dispose();
   }
 
@@ -880,20 +890,24 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
   ) {
     final l10n = AppLocalizations.of(context)!;
     final completed = liveState.jobStatus?.toUpperCase() == 'COMPLETED';
-    final title = completed
-        ? l10n.rideCompleted
-        : switch (uiState) {
-            RideUIState.pickupArrived => l10n.driverArrived,
-            RideUIState.onTrip => l10n.liveHeadingToDestTitle,
-            _ => l10n.liveDriverOnTheWay,
-          };
     final place = uiState == RideUIState.onTrip
         ? dropoffAddress
         : pickupAddress;
     // No countdown once the driver is waiting at pickup or the ride is over.
+    // The ETA is to the pickup until the passenger is aboard, then to the
+    // destination; with no ETA from the server it reads "กำลังเดินทาง".
     final minutes = uiState == RideUIState.pickupArrived || completed
         ? null
         : _etaMinutes(liveState);
+    final title = completed
+        ? l10n.rideCompleted
+        : uiState == RideUIState.pickupArrived
+        ? l10n.driverArrived
+        : minutes == null
+        ? l10n.rideStepOnTrip
+        : uiState == RideUIState.onTrip
+        ? l10n.liveArrivesDestIn(minutes)
+        : l10n.liveDriverArrivesIn(minutes);
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -901,7 +915,11 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: AppTypography.heading3),
+              Text(
+                title,
+                key: minutes == null ? null : const Key('liveEtaMinutes'),
+                style: AppTypography.heading3,
+              ),
               if (place != null && place.isNotEmpty) ...[
                 const SizedBox(height: 2),
                 Text(
@@ -916,14 +934,6 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
             ],
           ),
         ),
-        if (minutes != null) ...[
-          const SizedBox(width: 12),
-          Text(
-            '$minutes ${l10n.minutes}',
-            key: const Key('liveEtaMinutes'),
-            style: AppTypography.heading3,
-          ),
-        ],
       ],
     );
   }

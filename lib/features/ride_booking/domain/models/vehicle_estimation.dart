@@ -34,6 +34,8 @@ sealed class VehicleEstimation with _$VehicleEstimation {
     // Number of available drivers near the pickup for this type (SCRUM-64).
     // Nullable so "field not sent" (null) is distinguishable from "0 drivers".
     @JsonKey(name: 'drivers_nearby') int? driversNearby,
+    // Passenger seats for this type (1–20), set by admin; null = not shown.
+    int? seats,
     // After the code AND points (BE §3.1); null on older payloads / guests.
     @JsonKey(name: 'amount_to_pay') double? amountToPay,
     // Unpaid cancellation fees from earlier rides that booking this one adds

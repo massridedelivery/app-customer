@@ -1314,5 +1314,9 @@
   "promoLeftDays": "{days} days left",
   "@promoLeftDays": {"placeholders": {"days": {"type": "String"}}},
   "promoLeftHours": "{hours}h left",
-  "@promoLeftHours": {"placeholders": {"hours": {"type": "String"}}}
+  "@promoLeftHours": {"placeholders": {"hours": {"type": "String"}}},
+  "liveDriverArrivesIn": "Your driver arrives in {minutes} min",
+  "@liveDriverArrivesIn": {"placeholders": {"minutes": {"type": "int"}}},
+  "liveArrivesDestIn": "Arriving in {minutes} min",
+  "@liveArrivesDestIn": {"placeholders": {"minutes": {"type": "int"}}}
 }

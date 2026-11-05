@@ -3787,4 +3787,14 @@ class AppLocalizationsTh extends AppLocalizations {
   String promoLeftHours(String hours) {
     return 'เหลือ $hours ชม.';
   }
+
+  @override
+  String liveDriverArrivesIn(int minutes) {
+    return 'คนขับจะถึงในอีก $minutes นาที';
+  }
+
+  @override
+  String liveArrivesDestIn(int minutes) {
+    return 'จะถึงปลายทางในอีก $minutes นาที';
+  }
 }

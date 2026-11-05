@@ -7026,6 +7026,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{hours}h left'**
   String promoLeftHours(String hours);
+
+  /// No description provided for @liveDriverArrivesIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Your driver arrives in {minutes} min'**
+  String liveDriverArrivesIn(int minutes);
+
+  /// No description provided for @liveArrivesDestIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Arriving in {minutes} min'**
+  String liveArrivesDestIn(int minutes);
 }
 
 class _AppLocalizationsDelegate

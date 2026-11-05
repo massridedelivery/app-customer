@@ -94,6 +94,10 @@ class _SupportTicketDetailScreenState
       ref.invalidate(supportTicketProvider(widget.ticketId));
     } on ApiError catch (e) {
       handleSupportDisabled(ref, e);
+      // Closed meanwhile: reload so the box goes away.
+      if (e.code == 'TICKET_CLOSED') {
+        ref.invalidate(supportTicketProvider(widget.ticketId));
+      }
       messenger.showSnackBar(SnackBar(content: Text(friendlyError(e))));
     } finally {
       if (mounted) setState(() => _sending = false);
@@ -133,6 +137,9 @@ class _SupportTicketDetailScreenState
         error,
       ) {
         if (error == null) return;
+        // A refused message is usually a ticket closed meanwhile (409):
+        // reload it so the box follows its status.
+        ref.invalidate(supportTicketProvider(widget.ticketId));
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text(friendlyError(error))));
@@ -174,27 +181,39 @@ class _SupportTicketDetailScreenState
         skipLoadingOnRefresh: true,
         skipLoadingOnReload: true,
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  friendlyError(e),
-                  textAlign: TextAlign.center,
-                  style: AppTypography.body3,
-                ),
-                const SizedBox(height: 12),
-                TextButton(
-                  onPressed: () =>
-                      ref.invalidate(supportTicketProvider(widget.ticketId)),
-                  child: Text(l10n.retry),
-                ),
-              ],
+        error: (e, _) {
+          // Gone (or someone else's): retrying can't help — back to the list.
+          final notFound =
+              e is ApiError &&
+              (e.code == 'TICKET_NOT_FOUND' || e.statusCode == 404);
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    notFound ? l10n.supportTicketNotFound : friendlyError(e),
+                    key: notFound ? const Key('supportTicketNotFound') : null,
+                    textAlign: TextAlign.center,
+                    style: AppTypography.body3,
+                  ),
+                  const SizedBox(height: 12),
+                  TextButton(
+                    onPressed: () => notFound
+                        ? context.go('/support/tickets')
+                        : ref.invalidate(
+                            supportTicketProvider(widget.ticketId),
+                          ),
+                    child: Text(
+                      notFound ? l10n.supportTicketsTitle : l10n.retry,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ),
+          );
+        },
         data: (t) => RefreshIndicator(
           onRefresh: () => _refresh(chat),
           child: ListView(

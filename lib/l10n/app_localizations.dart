@@ -7410,6 +7410,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Type a message…'**
   String get supportChatHint;
+
+  /// No description provided for @supportTicketNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'This report couldn\'t be found'**
+  String get supportTicketNotFound;
 }
 
 class _AppLocalizationsDelegate

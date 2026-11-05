@@ -92,8 +92,12 @@ Map<String, dynamic> _ticketJson({
 
 class _FakeRepo implements SupportRepository {
   final created = <NewSupportTicket>[];
+  final keys = <String>[];
   final replies = <(String, String)>[];
   Object? createError;
+  Object? getError;
+  Object? replyError;
+  int gets = 0;
   SupportTicket? detail;
   List<SupportTicket> tickets = const [];
 
@@ -103,6 +107,7 @@ class _FakeRepo implements SupportRepository {
     required String idempotencyKey,
   }) async {
     created.add(ticket);
+    keys.add(idempotencyKey);
     if (createError != null) throw createError!;
     return SupportTicket.fromJson(_ticketJson(id: 'new-1'));
   }
@@ -112,12 +117,17 @@ class _FakeRepo implements SupportRepository {
       tickets;
 
   @override
-  Future<SupportTicket> get(String id) async =>
-      detail ?? SupportTicket.fromJson(_ticketJson(id: id));
+  Future<SupportTicket> get(String id) async {
+    gets++;
+    if (getError != null) throw getError!;
+    return detail ?? SupportTicket.fromJson(_ticketJson(id: id));
+  }
 
   @override
-  Future<void> reply(String id, String message) async =>
-      replies.add((id, message));
+  Future<void> reply(String id, String message) async {
+    if (replyError != null) throw replyError!;
+    replies.add((id, message));
+  }
 
   @override
   Future<String> uploadPhoto(Uint8List jpeg) async => 'support/u/x.jpg';
@@ -148,6 +158,8 @@ class _FakeRepo implements SupportRepository {
     String? fileKey,
   }) async => chatSent.add((id, text, msgType));
 }
+
+late _Socket _lastSocket;
 
 class _Socket extends SocketService {
   _Socket(super.tokenStorage);
@@ -210,7 +222,9 @@ Future<GoRouter> _pumpApp(
       overrides: [
         supportRepositoryProvider.overrideWithValue(repo),
         sharedPreferencesProvider.overrideWithValue(prefs),
-        socketServiceProvider.overrideWithValue(_Socket(TokenStorage(prefs))),
+        socketServiceProvider.overrideWithValue(
+          _lastSocket = _Socket(TokenStorage(prefs)),
+        ),
         supportFlagsProvider.overrideWithValue(flags),
       ],
       child: MaterialApp.router(
@@ -648,6 +662,132 @@ void main() {
       await _pumpApp(tester, repo, initial: '/support/tickets/t-1');
       expect(find.byKey(const Key('supportChatAttach')), findsNothing);
       expect(find.byKey(const Key('supportReplyField')), findsOneWidget);
+    });
+  });
+
+  group('backend contract details', () {
+    testWidgets('a refused report gets a new key; a bad photo re-uploads', (
+      tester,
+    ) async {
+      final repo = _FakeRepo()
+        ..createError = const ApiError(
+          message: 'รายละเอียดสั้นเกินไป',
+          code: 'VALIDATION_ERROR',
+          statusCode: 400,
+        );
+      await _pumpApp(tester, repo);
+      await tester.tap(find.byKey(const Key('supportTopic_other')));
+      await tester.enterText(
+        find.byKey(const Key('supportDetail')),
+        'มีปัญหาอื่นๆ ที่อยากแจ้ง',
+      );
+      await tester.tap(find.byKey(const Key('supportSend')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('supportSend')));
+      await tester.pumpAndSettle();
+      expect(repo.keys, hasLength(2));
+      expect(repo.keys.toSet(), hasLength(2));
+    });
+
+    testWidgets('a lost answer (no status) keeps the same key', (tester) async {
+      final repo = _FakeRepo()
+        ..createError = const ApiError(message: 'เน็ตหลุด', isNetwork: true);
+      await _pumpApp(tester, repo);
+      await tester.tap(find.byKey(const Key('supportTopic_other')));
+      await tester.enterText(
+        find.byKey(const Key('supportDetail')),
+        'มีปัญหาอื่นๆ ที่อยากแจ้ง',
+      );
+      await tester.tap(find.byKey(const Key('supportSend')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('supportSend')));
+      await tester.pumpAndSettle();
+      expect(repo.keys.toSet(), hasLength(1));
+    });
+
+    testWidgets('TICKET_NOT_FOUND: no retry, back to the list', (tester) async {
+      final repo = _FakeRepo()
+        ..getError = const ApiError(
+          message: 'not found',
+          code: 'TICKET_NOT_FOUND',
+          statusCode: 404,
+        );
+      final router = await _pumpApp(
+        tester,
+        repo,
+        initial: '/support/tickets/t-9',
+      );
+      expect(find.byKey(const Key('supportTicketNotFound')), findsOneWidget);
+      repo.getError = null;
+      await tester.tap(find.widgetWithText(TextButton, 'ประวัติการแจ้งปัญหา'));
+      await tester.pumpAndSettle();
+      expect(
+        router.routerDelegate.currentConfiguration.uri.path,
+        '/support/tickets',
+      );
+    });
+
+    testWidgets('TICKET_CLOSED on /reply reloads the ticket', (tester) async {
+      final repo = _FakeRepo()
+        ..replyError = const ApiError(
+          message: 'เรื่องนี้ปิดแล้ว',
+          code: 'TICKET_CLOSED',
+          statusCode: 409,
+        );
+      await _pumpApp(tester, repo, initial: '/support/tickets/t-1');
+      final before = repo.gets;
+      repo.detail = SupportTicket.fromJson(_ticketJson(status: 'closed'));
+      await tester.enterText(
+        find.byKey(const Key('supportReplyField')),
+        'ขอเพิ่มเติม',
+      );
+      await tester.tap(find.byKey(const Key('supportReplySend')));
+      await tester.pumpAndSettle();
+      expect(repo.gets, before + 1);
+      expect(find.byKey(const Key('supportClosedNote')), findsOneWidget);
+    });
+
+    testWidgets('a support chat takes only its own room\'s frames', (
+      tester,
+    ) async {
+      final repo = _FakeRepo()
+        ..detail = SupportTicket.fromJson(_ticketJson(status: 'open'));
+      await _pumpApp(
+        tester,
+        repo,
+        initial: '/support/tickets/t-1',
+        flags: const SupportConfig(ticketsEnabled: true, chatEnabled: true),
+      );
+      Map<String, dynamic> frame(String room, String id, String text) => {
+        'type': 'chat_message',
+        'room_id': room,
+        'data': {
+          'id': id,
+          'content': text,
+          'msg_type': 'text',
+          'sender_type': 'admin',
+          'created_at': '2026-11-05T04:00:00Z',
+        },
+      };
+      _lastSocket.frames.add(frame('order:t-1', 'm1', 'ของออเดอร์อื่น'));
+      _lastSocket.frames.add(frame('ticket:t-1', 'm2', 'จากทีมงาน'));
+      await tester.pumpAndSettle();
+      expect(find.text('ของออเดอร์อื่น'), findsNothing);
+      expect(find.text('จากทีมงาน'), findsOneWidget);
+    });
+
+    testWidgets('a support_ticket frame reloads the list', (tester) async {
+      final repo = _FakeRepo();
+      await _pumpApp(tester, repo, initial: '/support/tickets');
+      expect(find.byKey(const Key('supportTicketsEmpty')), findsOneWidget);
+      repo.tickets = [SupportTicket.fromJson(_ticketJson())];
+      _lastSocket.frames.add({
+        'type': 'support_ticket',
+        'ticket_id': 't-1',
+        'status': 'in_progress',
+      });
+      await tester.pumpAndSettle();
+      expect(find.text('พฤติกรรมไรเดอร์ไม่เหมาะสม'), findsOneWidget);
     });
   });
 }

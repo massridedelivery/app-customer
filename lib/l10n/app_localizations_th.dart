@@ -4009,4 +4009,7 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get supportChatHint => 'พิมพ์ข้อความ…';
+
+  @override
+  String get supportTicketNotFound => 'ไม่พบเรื่องที่แจ้งนี้';
 }

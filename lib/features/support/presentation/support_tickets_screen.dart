@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
+import 'package:customer_app/core/services/socket_service.dart';
 import 'package:customer_app/core/utils/app_dates.dart';
 import 'package:customer_app/core/utils/error_text.dart';
 import 'package:customer_app/features/support/domain/support_ticket.dart';
@@ -11,11 +14,36 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 /// "ประวัติการแจ้งปัญหา": every report with its status, plus "แจ้งปัญหาใหม่".
-class SupportTicketsScreen extends ConsumerWidget {
+/// A `support_ticket` socket frame (status changed) reloads the list.
+class SupportTicketsScreen extends ConsumerStatefulWidget {
   const SupportTicketsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SupportTicketsScreen> createState() =>
+      _SupportTicketsScreenState();
+}
+
+class _SupportTicketsScreenState extends ConsumerState<SupportTicketsScreen> {
+  StreamSubscription<Map<String, dynamic>>? _socketSub;
+
+  @override
+  void initState() {
+    super.initState();
+    _socketSub = ref.read(socketServiceProvider).messages.listen((frame) {
+      if (frame['type'] == 'support_ticket' && mounted) {
+        ref.invalidate(supportTicketsProvider);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _socketSub?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final tickets = ref.watch(supportTicketsProvider);
 

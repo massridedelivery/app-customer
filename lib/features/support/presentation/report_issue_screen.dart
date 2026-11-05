@@ -69,7 +69,9 @@ class _ReportIssueScreenState extends ConsumerState<ReportIssueScreen> {
   bool _triedSend = false;
 
   /// One key per report: a retry after a lost response returns the same one.
-  final String _idempotencyKey = generateIdempotencyKey();
+  /// A definite refusal (4xx) gets a new one, since the customer changes the
+  /// report before sending again.
+  String _idempotencyKey = generateIdempotencyKey();
 
   AppLocalizations get _l10n => AppLocalizations.of(context)!;
 
@@ -216,6 +218,16 @@ class _ReportIssueScreenState extends ConsumerState<ReportIssueScreen> {
         return;
       }
       handleSupportDisabled(ref, e);
+      final status = e.statusCode ?? 0;
+      if (status >= 400 && status < 500) {
+        _idempotencyKey = generateIdempotencyKey();
+      }
+      // A photo the backend won't take: upload them all again next time.
+      if (e.code == 'TICKET_ATTACHMENT_INVALID') {
+        for (final p in _photos) {
+          p.fileKey = null;
+        }
+      }
       messenger.showSnackBar(SnackBar(content: Text(friendlyError(e))));
     } finally {
       if (mounted) setState(() => _sending = false);

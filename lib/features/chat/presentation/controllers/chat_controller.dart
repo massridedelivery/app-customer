@@ -72,7 +72,13 @@ class ChatController extends _$ChatController {
           ? Map<String, dynamic>.from(data)
           : Map<String, dynamic>.from(message);
       final roomId = (message['room_id'] ?? payload['room_id'])?.toString();
-      if (roomId != null && bareChatRoomId(roomId) == room.id) {
+      // A prefixed id must be this room's exactly (a ticket and an order can
+      // share an id); a bare one is matched as is.
+      final ours = roomId != null &&
+          (roomId.contains(':')
+              ? roomId == _backendRoomId(room)
+              : roomId == room.id);
+      if (ours) {
         try {
           _addMessageFromSocket(ChatMessage.fromJson(payload));
         } catch (_) {

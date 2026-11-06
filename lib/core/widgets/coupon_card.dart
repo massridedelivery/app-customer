@@ -165,14 +165,14 @@ extension PromoStubStyle on PromoScope {
     PromoScope.ride => const Color(0xFFC8323F),
     PromoScope.food => const Color(0xFFE2855A),
     PromoScope.messenger => const Color(0xFF2F6FD6),
-    PromoScope.all => const Color(0xFF4B4F5C),
+    PromoScope.all => const Color(0xFFC8323F),
   };
 
   Color get linkColor => switch (this) {
     PromoScope.ride => const Color(0xFFB4313F),
     PromoScope.food => const Color(0xFFB5561F),
     PromoScope.messenger => const Color(0xFF1F55B0),
-    PromoScope.all => const Color(0xFF3F414E),
+    PromoScope.all => const Color(0xFFB4313F),
   };
 
   IconData get stubIcon => switch (this) {

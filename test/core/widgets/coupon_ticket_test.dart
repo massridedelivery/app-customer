@@ -36,7 +36,7 @@ Future<void> _pump(
 }
 
 void main() {
-  testWidgets('the stub names the service; free delivery is food', (
+  testWidgets('the stub names the service; free delivery has its own', (
     tester,
   ) async {
     const cases = {
@@ -64,8 +64,10 @@ void main() {
       'discount_value': 100,
       'applies_to': 'ALL',
     });
-    expect(find.text('ส่งอาหาร'), findsOneWidget);
-    expect(find.text('ส่งฟรี'), findsOneWidget);
+    expect(
+      tester.widget<Text>(find.byKey(const Key('couponStubLabel'))).data,
+      'ส่งฟรี',
+    );
   });
 
   testWidgets('shows what it gives, the minimum and time left', (tester) async {

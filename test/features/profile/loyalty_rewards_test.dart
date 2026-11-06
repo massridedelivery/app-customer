@@ -360,7 +360,19 @@ void main() {
   ) async {
     await _pump(tester, _FakeLoyalty(), initial: '/vouchers');
     expect(find.text('RW-AAAA-BBBB'), findsOneWidget);
-    expect(find.byKey(const Key('voucherExpiringSoon')), findsOneWidget);
+    // Expires within a day: the ticket says how long is left.
+    expect(
+      tester
+          .widget<Text>(
+            find.descendant(
+              of: find.byKey(const Key('voucher-RW-AAAA-BBBB')),
+              matching: find.byKey(const Key('couponMeta')),
+            ),
+          )
+          .textSpan!
+          .toPlainText(),
+      contains('เหลือ'),
+    );
     expect(find.byKey(const Key('voucherUse-RW-AAAA-BBBB')), findsOneWidget);
 
     await tester.tap(find.text('ใช้แล้ว'));

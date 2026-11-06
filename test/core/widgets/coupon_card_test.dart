@@ -8,7 +8,12 @@ Widget _host(Widget child, {String locale = 'th'}) => MaterialApp(
   localizationsDelegates: AppLocalizations.localizationsDelegates,
   supportedLocales: AppLocalizations.supportedLocales,
   locale: Locale(locale),
-  home: Scaffold(body: SingleChildScrollView(child: child)),
+  home: Scaffold(
+    body: SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: child,
+    ),
+  ),
 );
 
 const _data = CouponCardData(
@@ -20,53 +25,66 @@ const _data = CouponCardData(
 );
 
 void main() {
-  testWidgets('browse mode: scope label, detail link, whole card taps', (
+  testWidgets('browse mode: service stub, detail link, whole card taps', (
     tester,
   ) async {
     var tapped = false;
     await tester.pumpWidget(
       _host(CouponCard(data: _data, onTap: () => tapped = true)),
     );
-    expect(find.text('เฉพาะเรียกรถ'), findsOneWidget);
+    expect(find.text('เรียกรถ'), findsOneWidget);
+    expect(find.text('เรียกรถครั้งแรก ลด ฿50'), findsOneWidget);
     expect(find.text('ดูรายละเอียด ›'), findsOneWidget);
     expect(find.text('ใช้คูปอง'), findsNothing);
-
     await tester.tap(find.text('RIDE50'));
     expect(tapped, isTrue);
   });
 
-  testWidgets('picker mode: apply fires, footer renders', (tester) async {
+  testWidgets('picker mode: the same ticket with apply, footer renders', (
+    tester,
+  ) async {
     var applied = false;
+    var tapped = false;
     await tester.pumpWidget(
       _host(
         CouponCard(
           data: _data,
           onApply: () => applied = true,
           onCancel: () {},
+          onTap: () => tapped = true,
           footer: const Text('สั่งเพิ่มอีก ฿20'),
         ),
       ),
     );
     await tester.pumpAndSettle();
+    expect(find.byKey(const Key('couponStubLabel')), findsOneWidget);
+    expect(find.text('ดูรายละเอียด ›'), findsNothing);
     expect(find.text('สั่งเพิ่มอีก ฿20'), findsOneWidget);
+    // In a picker the card itself doesn't open anything.
+    await tester.tap(find.text('RIDE50'));
+    expect(tapped, isFalse);
     await tester.tap(find.text('ใช้คูปอง'));
     expect(applied, isTrue);
   });
 
-  testWidgets('English: scope label, detail link and stub are English', (
-    tester,
-  ) async {
+  testWidgets('picker: a selected coupon offers cancel', (tester) async {
+    var cancelled = false;
     await tester.pumpWidget(
-      _host(CouponCard(data: _data, onTap: () {}), locale: 'en'),
+      _host(
+        CouponCard(
+          data: _data,
+          isSelected: true,
+          onApply: () {},
+          onCancel: () => cancelled = true,
+        ),
+      ),
     );
-    expect(find.text('Rides only'), findsOneWidget);
-    expect(find.text('View details ›'), findsOneWidget);
-    expect(find.text('Save'), findsOneWidget);
-    expect(find.text('เฉพาะเรียกรถ'), findsNothing);
-    expect(find.text('ลด'), findsNothing);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('ยกเลิก'));
+    expect(cancelled, isTrue);
   });
 
-  testWidgets('English: picker shows "Use", min spend and max discount', (
+  testWidgets('English: stub, headline, minimum and action are English', (
     tester,
   ) async {
     final data = CouponCardData.fromMap({
@@ -78,20 +96,20 @@ void main() {
       'applies_to': 'ALL',
     });
     await tester.pumpWidget(
-      _host(CouponCard(data: data, onApply: () {}), locale: 'en'),
+      _host(
+        CouponCard(data: data, onApply: () {}),
+        locale: 'en',
+      ),
     );
     await tester.pumpAndSettle();
-    expect(find.text('Use'), findsOneWidget);
-    expect(find.text('Min. ฿150'), findsOneWidget);
-    expect(find.text('Up to ฿100'), findsOneWidget);
     expect(find.text('All services'), findsOneWidget);
-    // No title in the payload → localized default title.
-    expect(find.text('Promotion'), findsOneWidget);
+    expect(find.text('20% off · Up to ฿100'), findsOneWidget);
+    expect(find.text('Min. ฿150'), findsOneWidget);
+    expect(find.text('Use'), findsOneWidget);
+    expect(find.textContaining('ลด'), findsNothing);
   });
 
-  testWidgets('Thai: free shipping stub and default title keep Thai text', (
-    tester,
-  ) async {
+  testWidgets('free shipping is food, says ส่งฟรี', (tester) async {
     final data = CouponCardData.fromMap({
       'code': 'FREESHIP',
       'promo_type': 'free_shipping',
@@ -101,12 +119,9 @@ void main() {
       'applies_to': 'MESSENGER',
     });
     await tester.pumpWidget(_host(CouponCard(data: data, onTap: () {})));
+    expect(find.text('ส่งอาหาร'), findsOneWidget);
     expect(find.text('ส่งฟรี'), findsOneWidget);
-    expect(find.text('ลด'), findsNothing);
     expect(find.text('ขั้นต่ำ ฿99'), findsOneWidget);
-    // Free delivery is food-only, even on a promo scoped to messenger.
-    expect(find.text('เฉพาะอาหาร'), findsOneWidget);
-    expect(find.text('โปรโมชั่น'), findsOneWidget);
   });
 
   testWidgets('disabled card cannot be applied', (tester) async {
@@ -124,5 +139,19 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('ใช้คูปอง'), warnIfMissed: false);
     expect(applied, isFalse);
+  });
+
+  testWidgets('a custom action replaces the link', (tester) async {
+    await tester.pumpWidget(
+      _host(
+        const CouponCard(
+          data: _data,
+          action: Text('ใช้เลย', key: Key('a')),
+        ),
+      ),
+    );
+    expect(find.byKey(const Key('a')), findsOneWidget);
+    expect(find.text('ดูรายละเอียด ›'), findsNothing);
+    expect(find.text('ใช้คูปอง'), findsNothing);
   });
 }

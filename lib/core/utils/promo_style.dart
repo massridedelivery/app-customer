@@ -1,45 +1,47 @@
 import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
-/// Shared styling for promotion cards/banners (home Style-B card + detail),
-/// derived from the backend `promo_type` so the three promo kinds get a
-/// consistent brand color and headline without the admin having to pick a color.
-///
-/// - `fixed`         → red,    "ลด ฿{value}"
-/// - `percentage`    → orange, "ลด {value}%"
-/// - `free_shipping` → green,  "ส่งฟรี"  (value not shown)
-///
-/// `promo_type` is the display kind and is distinct from `discount_type`, which
-/// the pricing engine uses to compute money (free shipping is a 100% discount on
-/// delivery, i.e. discount_type "percentage"). We key the card styling off
-/// `promo_type`, falling back to `discount_type` only for pre-rollout payloads
-/// that don't carry it yet. An unknown type falls back to the red/`fixed` look.
-///
-/// An explicit `color` on the promo (ARGB int) overrides the type color.
-
-const Color _promoRed = Color(0xFFC0343E);
-const Color _promoOrange = Color(0xFFE08A00);
-const Color _promoGreen = Color(0xFF1E9E63);
+/// Shared styling for promotions: the colour (by the service a promo is
+/// for, see [PromoServiceColor]) and the headline ("ลด ฿100" / "ลด 20%" /
+/// "ส่งฟรี", from `promo_type`, falling back to `discount_type` for payloads
+/// without it; free shipping is a 100% delivery discount in the pricing
+/// engine, so it's keyed off `promo_type`).
 
 String _type(Map<String, dynamic> promo) =>
     (promo['promo_type'] ?? promo['discount_type'] ?? '')
         .toString()
         .toLowerCase();
 
-/// Card color: the admin-set `color` (64-bit ARGB int) if present, otherwise a
-/// brand color chosen by `discount_type`.
-Color promoColorOf(Map<String, dynamic> promo) {
-  final override = (promo['color'] as num?)?.toInt();
-  if (override != null) return Color(override);
-  switch (_type(promo)) {
-    case 'percentage':
-      return _promoOrange;
-    case 'free_shipping':
-      return _promoGreen;
-    default:
-      return _promoRed;
-  }
+/// Free delivery's own colour (teal), whatever its scope.
+const Color kFreeDeliveryColor = Color(0xFF13A08F);
+const Color kFreeDeliveryDarkColor = Color(0xFF0B7568);
+
+/// The one promo colour scheme of the app, by the service a promo is for —
+/// the same everywhere a promo appears (promo lists, coupon pickers, the home
+/// "โปรโมชั่นสำหรับคุณ" cards, the promo detail, service-card badges):
+/// เรียกรถ and ทุกบริการ red, ส่งอาหาร orange, ส่งของ blue; free delivery
+/// teal.
+extension PromoServiceColor on PromoScope {
+  Color get serviceColor => switch (this) {
+    PromoScope.ride || PromoScope.all => const Color(0xFFC8323F),
+    PromoScope.food => const Color(0xFFE2855A),
+    PromoScope.messenger => const Color(0xFF2F6FD6),
+  };
+
+  /// Darker shade for text / links in that colour.
+  Color get serviceDarkColor => switch (this) {
+    PromoScope.ride || PromoScope.all => const Color(0xFFB4313F),
+    PromoScope.food => const Color(0xFFB5561F),
+    PromoScope.messenger => const Color(0xFF1F55B0),
+  };
 }
+
+/// The colour of [promo]: teal for free delivery, otherwise its service's
+/// colour (see [PromoServiceColor]).
+Color promoColorOf(Map<String, dynamic> promo) =>
+    _type(promo) == 'free_shipping'
+    ? kFreeDeliveryColor
+    : promoScopeOf(promo).serviceColor;
 
 /// Headline shown large on the card, in the UI language: "ลด ฿100" /
 /// "ลด 20%" / "ส่งฟรี" (English: "฿100 off" / "20% off" / "Free Delivery").
@@ -143,10 +145,11 @@ bool promoAppliesToService(Map<String, dynamic> promo, String serviceKey) {
 /// ("ALL" | "RIDE" | "FOOD" | "MESSENGER"). Shown as a text-only label on the
 /// promo cards and used to filter the "โปรโมชั่นของฉัน" list.
 enum PromoScope {
-  all(Color(0xFF9A2832), Color(0xFFFBE9EA)),
-  ride(Color(0xFF1D4ED8), Color(0xFFE6EFFF)),
-  food(Color(0xFFB45309), Color(0xFFFFF1DF)),
-  messenger(Color(0xFF047857), Color(0xFFE3F6EE));
+  // Pill text / tint in the service colours (see [PromoServiceColor]).
+  all(Color(0xFFB4313F), Color(0xFFFBECEE)),
+  ride(Color(0xFFB4313F), Color(0xFFFBECEE)),
+  food(Color(0xFFB5561F), Color(0xFFFCEEE6)),
+  messenger(Color(0xFF1F55B0), Color(0xFFE8F0FC));
 
   const PromoScope(this.foreground, this.background);
 

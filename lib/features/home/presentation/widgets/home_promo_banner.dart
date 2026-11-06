@@ -103,8 +103,8 @@ class _PromoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final title = _title(l10n);
-    // Card color: admin-set `color` if present, else auto by discount_type
-    // (fixed→red, percentage→orange, free_shipping→green). Tapping opens detail.
+    // Card colour by service, the same as every promo list (เรียกรถ / ทุกบริการ
+    // red, ส่งอาหาร orange, ส่งของ blue, ส่งฟรี teal). Tapping opens detail.
     final Color base = promoColorOf(promo);
     final Color dark = Color.lerp(base, Colors.black, 0.28)!;
     final bool hasCode = _code != null && _code!.isNotEmpty;

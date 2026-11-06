@@ -161,19 +161,9 @@ const double _notch = 8;
 /// The look of a [PromoScope]'s stub: solid colour, the darker colour used for
 /// the card's link, its icon and name.
 extension PromoStubStyle on PromoScope {
-  Color get stubColor => switch (this) {
-    PromoScope.ride => const Color(0xFFC8323F),
-    PromoScope.food => const Color(0xFFE2855A),
-    PromoScope.messenger => const Color(0xFF2F6FD6),
-    PromoScope.all => const Color(0xFFC8323F),
-  };
+  Color get stubColor => serviceColor;
 
-  Color get linkColor => switch (this) {
-    PromoScope.ride => const Color(0xFFB4313F),
-    PromoScope.food => const Color(0xFFB5561F),
-    PromoScope.messenger => const Color(0xFF1F55B0),
-    PromoScope.all => const Color(0xFFB4313F),
-  };
+  Color get linkColor => serviceDarkColor;
 
   IconData get stubIcon => switch (this) {
     PromoScope.ride => Icons.two_wheeler_rounded,
@@ -192,8 +182,8 @@ extension PromoStubStyle on PromoScope {
 
 /// Free delivery has a stub of its own (whatever its scope): teal, a
 /// delivery icon and "ส่งฟรี".
-const Color kFreeDeliveryStubColor = Color(0xFF13A08F);
-const Color kFreeDeliveryLinkColor = Color(0xFF0B7568);
+const Color kFreeDeliveryStubColor = kFreeDeliveryColor;
+const Color kFreeDeliveryLinkColor = kFreeDeliveryDarkColor;
 
 /// "เหลือ 3 วัน" / "เหลือ 5 ชม." once a promo ends within 7 days; null
 /// otherwise (or when it has no end, or has already ended).

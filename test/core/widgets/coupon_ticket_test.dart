@@ -153,8 +153,11 @@ void main() {
     },
   );
 
-  test('every scope has its own stub color', () {
-    final colors = PromoScope.values.map((s) => s.stubColor).toSet();
-    expect(colors.length, PromoScope.values.length);
+  test('stub colours: ride and all red, food orange, parcel blue', () {
+    expect(PromoScope.ride.stubColor, const Color(0xFFC8323F));
+    expect(PromoScope.all.stubColor, const Color(0xFFC8323F));
+    expect(PromoScope.food.stubColor, const Color(0xFFE2855A));
+    expect(PromoScope.messenger.stubColor, const Color(0xFF2F6FD6));
+    expect(kFreeDeliveryStubColor, const Color(0xFF13A08F));
   });
 }

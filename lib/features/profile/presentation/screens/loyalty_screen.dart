@@ -205,6 +205,9 @@ class _Body extends ConsumerWidget {
   }
 }
 
+/// A history row: Thai label by type, the description, date, ± points.
+final _thai = RegExp(r'[\u0E00-\u0E7F]');
+
 class _EntryRow extends StatelessWidget {
   const _EntryRow({required this.entry});
 

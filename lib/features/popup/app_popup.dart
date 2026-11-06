@@ -254,11 +254,13 @@ class AppPopupDialog extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Stack(
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: GestureDetector(
+          // The ✕ is a tab cut flush into the image's top-right corner,
+          // clipped with the image so it follows its rounded corner.
+          ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: Stack(
+              children: [
+                GestureDetector(
                   key: const Key('appPopupImage'),
                   onTap: action == null ? null : onOpen,
                   child: ConstrainedBox(
@@ -276,25 +278,27 @@ class AppPopupDialog extends StatelessWidget {
                     ),
                   ),
                 ),
-              ),
-              Positioned(
-                top: 8,
-                right: 8,
-                child: Material(
-                  color: Colors.black54,
-                  shape: const CircleBorder(),
-                  child: InkWell(
-                    key: const Key('appPopupClose'),
-                    customBorder: const CircleBorder(),
-                    onTap: onClose,
-                    child: const Padding(
-                      padding: EdgeInsets.all(6),
-                      child: Icon(Icons.close, size: 20, color: Colors.white),
+                Positioned(
+                  top: 0,
+                  right: 0,
+                  child: Material(
+                    color: Colors.black.withValues(alpha: 0.45),
+                    borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(16),
+                    ),
+                    child: InkWell(
+                      key: const Key('appPopupClose'),
+                      onTap: onClose,
+                      child: const SizedBox(
+                        width: 44,
+                        height: 44,
+                        child: Icon(Icons.close, size: 22, color: Colors.white),
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           if (action?.buttonText != null) ...[
             const SizedBox(height: 12),

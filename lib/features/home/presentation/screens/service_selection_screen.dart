@@ -18,6 +18,7 @@ import 'package:customer_app/features/home/presentation/widgets/home_promo_banne
 import 'package:customer_app/features/active_orders/presentation/widgets/active_orders_banner.dart';
 import 'package:app_settings/app_settings.dart';
 import 'package:flutter/foundation.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:customer_app/core/widgets/app_network_image.dart';
 import 'package:customer_app/core/widgets/hero_header.dart';
@@ -48,6 +49,15 @@ double homeHeroHeight({
   final band = (screenHeight * ratio).clamp(56.0, 96.0);
   return statusPadding + kHomeSearchBarBottom + band;
 }
+
+/// Where to check the service zone: the device's GPS fix, else the pickup
+/// (a saved default place or a manual pick), else the food address. GPS can
+/// still be resolving — on iOS with approximate location `getLocation()` may
+/// not return for a while — and the check used to be skipped silently then,
+/// so the "เร็วๆ นี้ในพื้นที่ของคุณ" heads-up never showed.
+@visibleForTesting
+LatLng? zoneCheckLocation(HomeState home) =>
+    home.currentLocation ?? home.pickupLocation ?? home.foodLocation;
 
 class ServiceSelectionScreen extends ConsumerStatefulWidget {
   const ServiceSelectionScreen({
@@ -601,9 +611,9 @@ class _ServiceSelectionScreenState
     if (_openingService || ModalRoute.of(context)?.isCurrent == false) return;
     _openingService = true;
     try {
-      final loc = ref.read(homeControllerProvider).currentLocation;
+      final loc = zoneCheckLocation(ref.read(homeControllerProvider));
       if (loc == null) {
-        onAvailable(); // no location yet → don't notify
+        onAvailable(); // no location at all yet → don't notify
         return;
       }
       final result = await ref

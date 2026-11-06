@@ -405,41 +405,14 @@ void main() {
       expect(LoyaltySummary.fromJson({'points': {}}).spending, isNull);
     });
 
-    testWidgets('the card shows the API numbers', (tester) async {
-      await _pump(tester, _FakeLoyalty(spending: sample), initial: '/loyalty');
-      expect(find.byKey(const Key('loyaltySpending')), findsOneWidget);
-      expect(find.text('ยอดรวม ฿408 · 3 รายการ · ได้ 3 คะแนน'), findsOneWidget);
-      expect(find.text('฿120 · 1 รายการ · 1 คะแนน'), findsOneWidget);
-      expect(find.text('฿255 · 1 รายการ · 2 คะแนน'), findsOneWidget);
-      expect(find.text('฿33 · 1 รายการ · 0 คะแนน'), findsOneWidget);
-      expect(find.text('1,250'), findsOneWidget);
-    });
-
-    testWidgets('no spending in the response: the card is hidden', (
+    testWidgets('คะแนนของฉัน no longer shows the spending card', (
       tester,
     ) async {
-      await _pump(tester, _FakeLoyalty(), initial: '/loyalty');
+      // Even when the API still sends `spending`, the page leaves it out.
+      await _pump(tester, _FakeLoyalty(spending: sample), initial: '/loyalty');
       expect(find.byKey(const Key('loyaltySpending')), findsNothing);
-      expect(find.textContaining('฿0 ·'), findsNothing);
-    });
-
-    testWidgets('a new customer sees ฿0 / 0 orders', (tester) async {
-      await _pump(
-        tester,
-        _FakeLoyalty(
-          spending: const {
-            'total_baht': 0,
-            'orders': 0,
-            'points_earned': 0,
-            'ride': {'baht': 0, 'orders': 0, 'points_earned': 0},
-            'food': {'baht': 0, 'orders': 0, 'points_earned': 0},
-            'parcel': {'baht': 0, 'orders': 0, 'points_earned': 0},
-          },
-        ),
-        initial: '/loyalty',
-      );
-      expect(find.text('ยอดรวม ฿0 · 0 รายการ · ได้ 0 คะแนน'), findsOneWidget);
-      expect(find.text('฿0 · 0 รายการ · 0 คะแนน'), findsNWidgets(3));
+      expect(find.textContaining('ยอดรวม'), findsNothing);
+      expect(find.text('1,250'), findsOneWidget);
     });
   });
 
@@ -575,8 +548,21 @@ void main() {
       tester,
     ) async {
       await _pump(tester, _FakeLoyalty(tier: silver), initial: '/loyalty');
-      expect(find.byKey(const Key('tierProgressCard')), findsOneWidget);
-      expect(find.text('ซิลเวอร์'), findsOneWidget);
+      final ladder = find.byKey(const Key('tierProgressCard'));
+      expect(ladder, findsOneWidget);
+      // Every tier in the list, the customer's marked, the next with its gap.
+      expect(find.byKey(const Key('tierLadder-SILVER')), findsOneWidget);
+      expect(find.byKey(const Key('tierLadder-GOLD')), findsOneWidget);
+      expect(
+        find.descendant(of: ladder, matching: find.text('ระดับของคุณ')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: ladder, matching: find.text('อีก 250 คะแนน')),
+        findsOneWidget,
+      );
+      // The MASS POINTS card carries the same tier badge as the profile.
+      expect(find.byKey(const Key('tierBadge')), findsOneWidget);
       expect(find.byKey(const Key('tierDot')), findsOneWidget);
       final bar = tester.widget<LinearProgressIndicator>(
         find.byKey(const Key('tierProgress')),

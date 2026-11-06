@@ -2527,6 +2527,12 @@ abstract class AppLocalizations {
   /// **'{count, plural, =1{1 driver nearby} other{{count} drivers nearby}}'**
   String rideDriversNearby(int count);
 
+  /// No description provided for @rideSeats.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 seat} other{{count} seats}}'**
+  String rideSeats(int count);
+
   /// No description provided for @rideNoDriversNow.
   ///
   /// In en, this message translates to:
@@ -7080,6 +7086,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{points} more points to {tier}'**
   String tierToNext(String points, String tier);
+
+  /// No description provided for @tierPointsLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{points} more points'**
+  String tierPointsLeft(String points);
 
   /// No description provided for @tierTopReached.
   ///

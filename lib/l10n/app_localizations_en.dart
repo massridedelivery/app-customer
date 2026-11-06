@@ -1332,6 +1332,17 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String rideSeats(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count seats',
+      one: '1 seat',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get rideNoDriversNow => 'No drivers available right now';
 
   @override
@@ -3867,6 +3878,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String tierToNext(String points, String tier) {
     return '$points more points to $tier';
+  }
+
+  @override
+  String tierPointsLeft(String points) {
+    return '$points more points';
   }
 
   @override

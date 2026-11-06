@@ -954,8 +954,9 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
   }
 
   Widget _buildActionButtons() {
-    // Loads the support switches before the button is tapped.
-    ref.watch(supportFlagsProvider);
+    // Loads the support switches before the button is tapped; with reports
+    // off the button is help (SOS) only and says so.
+    final reportsOn = ref.watch(supportFlagsProvider).ticketsEnabled;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
@@ -994,7 +995,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
               padding: const EdgeInsets.symmetric(vertical: 12),
             ),
             child: Text(
-              _l10n.tripHelpReport,
+              reportsOn ? _l10n.tripHelpReport : _l10n.needHelp,
               style: AppTypography.body3.copyWith(
                 color: AppColors.primary.withValues(alpha: 0.7),
                 fontWeight: FontWeight.w500,

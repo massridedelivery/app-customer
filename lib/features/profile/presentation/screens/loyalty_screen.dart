@@ -4,21 +4,25 @@ import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/core/widgets/refetch_on_resume.dart';
 import 'package:customer_app/features/profile/domain/models/loyalty_models.dart';
 import 'package:customer_app/features/profile/presentation/controllers/loyalty_providers.dart';
+import 'package:customer_app/features/profile/presentation/controllers/profile_controller.dart';
 import 'package:customer_app/features/profile/presentation/widgets/loyalty_format.dart';
+import 'package:customer_app/features/profile/presentation/widgets/mass_points_card.dart';
 import 'package:customer_app/features/profile/presentation/widgets/tier_widgets.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-/// "คะแนนของฉัน": balance and its baht value, points about to expire,
-/// shortcuts to แลกคะแนน / คูปองของฉัน / ชวนเพื่อน, and the points history.
+/// "คะแนนของฉัน" (design B): the same MASS POINTS card as the profile page
+/// with แลกคะแนน / คูปองของฉัน / ชวนเพื่อน on a strip tucked under it, the
+/// member tiers (design E), points about to expire, and the points history.
 class LoyaltyScreen extends ConsumerWidget {
   const LoyaltyScreen({super.key});
 
   void _refresh(WidgetRef ref) {
     ref.invalidate(loyaltySummaryProvider);
     ref.invalidate(pointsHistoryProvider);
+    ref.invalidate(loyaltyTiersProvider);
   }
 
   @override
@@ -28,10 +32,10 @@ class LoyaltyScreen extends ConsumerWidget {
     return RefetchOnResume(
       onResume: () => _refresh(ref),
       child: Scaffold(
-        backgroundColor: AppColors.background,
+        backgroundColor: AppColors.foundationGrayscale100,
         appBar: AppBar(
           title: Text(l10n.pointsTitle, style: AppTypography.heading4),
-          backgroundColor: AppColors.background,
+          backgroundColor: AppColors.foundationGrayscale100,
           foregroundColor: AppColors.textPrimary,
           elevation: 0,
           surfaceTintColor: Colors.transparent,
@@ -77,11 +81,51 @@ class _Body extends ConsumerWidget {
         ),
         const SizedBox(height: 12),
       ],
-      _BalanceCard(summary: summary),
+      // The card with its action strip tucked under it. Laid out bottom-up
+      // so the card paints over the strip's top edge; the strip is pulled up
+      // under the card by the same amount it is padded at the top.
+      Column(
+        verticalDirection: VerticalDirection.up,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Transform.translate(
+            offset: const Offset(0, -_stripTuck),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: _ActionStrip(
+                actions: [
+                  _StripAction(
+                    key: const Key('pointsGoRewards'),
+                    icon: Icons.redeem_rounded,
+                    label: l10n.pointsActionRedeem,
+                    onTap: () => context.push('/rewards'),
+                  ),
+                  _StripAction(
+                    key: const Key('pointsGoVouchers'),
+                    icon: Icons.confirmation_number_outlined,
+                    label: l10n.pointsActionVouchers,
+                    onTap: () => context.push('/vouchers'),
+                  ),
+                  _StripAction(
+                    key: const Key('pointsGoReferral'),
+                    icon: Icons.group_add_outlined,
+                    label: l10n.pointsActionInvite,
+                    onTap: () => context.push('/referral'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          MassPointsCard(
+            summary: summary,
+            name: ref.watch(profileControllerProvider).value?.editName ?? '',
+          ),
+        ],
+      ),
       if (summary.tier != null) ...[
-        const SizedBox(height: 12),
-        TierProgressCard(
+        TierLadder(
           tier: summary.tier!,
+          tiers: ref.watch(loyaltyTiersProvider).value,
           onTap: () => context.push('/loyalty/tiers'),
         ),
       ],
@@ -96,31 +140,6 @@ class _Body extends ConsumerWidget {
           ),
         ),
       ],
-      const SizedBox(height: 16),
-      Row(
-        children: [
-          _Shortcut(
-            key: const Key('pointsGoRewards'),
-            icon: Icons.redeem_rounded,
-            label: l10n.pointsActionRedeem,
-            onTap: () => context.push('/rewards'),
-          ),
-          const SizedBox(width: 10),
-          _Shortcut(
-            key: const Key('pointsGoVouchers'),
-            icon: Icons.confirmation_number_outlined,
-            label: l10n.pointsActionVouchers,
-            onTap: () => context.push('/vouchers'),
-          ),
-          const SizedBox(width: 10),
-          _Shortcut(
-            key: const Key('pointsGoReferral'),
-            icon: Icons.group_add_outlined,
-            label: l10n.pointsActionInvite,
-            onTap: () => context.push('/referral'),
-          ),
-        ],
-      ),
       if (summary.earnPer100Ride > 0) ...[
         const SizedBox(height: 16),
         Text(
@@ -131,10 +150,6 @@ class _Body extends ConsumerWidget {
           key: const Key('pointsEarnRule'),
           style: AppTypography.body3.copyWith(color: AppColors.textSecondary),
         ),
-      ],
-      if (summary.spending case final spending?) ...[
-        const SizedBox(height: 24),
-        _SpendingCard(spending: spending),
       ],
       const SizedBox(height: 24),
       Text(l10n.pointsHistory, style: AppTypography.heading5),
@@ -189,140 +204,6 @@ class _Body extends ConsumerWidget {
     );
   }
 }
-
-class _BalanceCard extends StatelessWidget {
-  const _BalanceCard({required this.summary});
-
-  final LoyaltySummary summary;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [AppColors.primary, AppColors.accentRedDeep],
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
-            children: [
-              Text(
-                fmtPoints(summary.totalPoints),
-                key: const Key('pointsBalance'),
-                style: AppTypography.heading1.copyWith(
-                  color: Colors.white,
-                  fontSize: 40,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                l10n.pointsUnit,
-                style: AppTypography.heading5.copyWith(color: Colors.white),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(
-            l10n.pointsWorth(fmtBaht(summary.balanceBaht)),
-            style: AppTypography.body2.copyWith(color: Colors.white70),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// "ใช้บริการไปแล้ว": the total and each service, as the API counts them.
-class _SpendingCard extends StatelessWidget {
-  const _SpendingCard({required this.spending});
-
-  final LoyaltySpending spending;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final t = spending.total;
-    Widget row(IconData icon, String label, ServiceSpending s, Key key) =>
-        Padding(
-          key: key,
-          padding: const EdgeInsets.only(top: 10),
-          child: Row(
-            children: [
-              Icon(icon, size: 20, color: AppColors.primary),
-              const SizedBox(width: 10),
-              Expanded(child: Text(label, style: AppTypography.body2)),
-              Text(
-                l10n.spendingLine(
-                  fmtBaht(s.baht),
-                  fmtPoints(s.orders),
-                  fmtPoints(s.pointsEarned),
-                ),
-                style: AppTypography.body3.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ],
-          ),
-        );
-    return Container(
-      key: const Key('loyaltySpending'),
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.foundationGrayscale200),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(l10n.spendingTitle, style: AppTypography.heading5),
-          const SizedBox(height: 4),
-          Text(
-            l10n.spendingTotal(
-              fmtBaht(t.baht),
-              fmtPoints(t.orders),
-              fmtPoints(t.pointsEarned),
-            ),
-            key: const Key('loyaltySpendingTotal'),
-            style: AppTypography.body2.copyWith(fontWeight: FontWeight.bold),
-          ),
-          row(
-            Icons.directions_car_rounded,
-            l10n.spendingRide,
-            spending.ride,
-            const Key('loyaltySpendingRide'),
-          ),
-          row(
-            Icons.inventory_2_rounded,
-            l10n.spendingParcel,
-            spending.parcel,
-            const Key('loyaltySpendingParcel'),
-          ),
-          row(
-            Icons.restaurant_rounded,
-            l10n.spendingFood,
-            spending.food,
-            const Key('loyaltySpendingFood'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// A history row: Thai label by type, the description, date, ± points.
-final _thai = RegExp(r'[\u0E00-\u0E7F]');
 
 class _EntryRow extends StatelessWidget {
   const _EntryRow({required this.entry});
@@ -395,8 +276,52 @@ class _EntryRow extends StatelessWidget {
   }
 }
 
-class _Shortcut extends StatelessWidget {
-  const _Shortcut({
+/// How far the action strip slides up under the MASS POINTS card.
+const double _stripTuck = 20;
+
+/// White strip of shortcuts hanging under the MASS POINTS card; its top
+/// padding sits under the card, so only its rounded bottom shows.
+class _ActionStrip extends StatelessWidget {
+  const _ActionStrip({required this.actions});
+
+  final List<Widget> actions;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(4, _stripTuck + 8, 4, 8),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(18)),
+        boxShadow: [
+          BoxShadow(
+            color: Color(0x0F000000),
+            blurRadius: 16,
+            offset: Offset(0, 6),
+          ),
+        ],
+      ),
+      child: IntrinsicHeight(
+        child: Row(
+          children: [
+            for (var i = 0; i < actions.length; i++) ...[
+              if (i > 0)
+                const VerticalDivider(
+                  width: 1,
+                  thickness: 1,
+                  color: Color(0xFFECEDF1),
+                ),
+              Expanded(child: actions[i]),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _StripAction extends StatelessWidget {
+  const _StripAction({
     super.key,
     required this.icon,
     required this.label,
@@ -409,31 +334,22 @@ class _Shortcut extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Material(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: onTap,
-          child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 6),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: const Color(0xFFE5E2E1), width: 0.5),
+    return InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: AppColors.primary),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: AppTypography.label3,
             ),
-            child: Column(
-              children: [
-                Icon(icon, color: AppColors.primary),
-                const SizedBox(height: 6),
-                Text(
-                  label,
-                  textAlign: TextAlign.center,
-                  style: AppTypography.label3,
-                ),
-              ],
-            ),
-          ),
+          ],
         ),
       ),
     );

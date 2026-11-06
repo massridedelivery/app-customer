@@ -3829,6 +3829,11 @@ class AppLocalizationsTh extends AppLocalizations {
   }
 
   @override
+  String tierPointsLeft(String points) {
+    return 'อีก $points คะแนน';
+  }
+
+  @override
   String get tierTopReached => 'คุณอยู่ระดับสูงสุดแล้ว';
 
   @override

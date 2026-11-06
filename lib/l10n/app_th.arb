@@ -1198,6 +1198,7 @@
   "promoVoucherLabel": "คูปองแลกคะแนน",
   "tierListTitle": "ระดับสมาชิก",
   "tierToNext": "อีก {points} คะแนนถึง {tier}",
+  "tierPointsLeft": "อีก {points} คะแนน",
   "tierTopReached": "คุณอยู่ระดับสูงสุดแล้ว",
   "tierEarnMultiplier": "ได้คะแนน ×{x}",
   "tierYours": "ระดับของคุณ",

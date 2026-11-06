@@ -3881,6 +3881,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String tierPointsLeft(String points) {
+    return '$points more points';
+  }
+
+  @override
   String get tierTopReached => 'You\'re at the top tier';
 
   @override

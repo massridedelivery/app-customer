@@ -1330,6 +1330,8 @@
   "tierListTitle": "Member tiers",
   "tierToNext": "{points} more points to {tier}",
   "@tierToNext": {"placeholders": {"points": {"type": "String"}, "tier": {"type": "String"}}},
+  "tierPointsLeft": "{points} more points",
+  "@tierPointsLeft": {"placeholders": {"points": {"type": "String"}}},
   "tierTopReached": "You're at the top tier",
   "tierEarnMultiplier": "Earn ×{x} points",
   "@tierEarnMultiplier": {"placeholders": {"x": {"type": "String"}}},

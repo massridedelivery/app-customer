@@ -7087,6 +7087,12 @@ abstract class AppLocalizations {
   /// **'{points} more points to {tier}'**
   String tierToNext(String points, String tier);
 
+  /// No description provided for @tierPointsLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{points} more points'**
+  String tierPointsLeft(String points);
+
   /// No description provided for @tierTopReached.
   ///
   /// In en, this message translates to:

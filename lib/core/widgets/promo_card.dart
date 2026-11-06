@@ -21,6 +21,7 @@ class PromoApplyButton extends StatelessWidget {
   final bool isEnabled;
   final VoidCallback onApply;
   final VoidCallback onCancel;
+
   /// Defaults to the localized "ใช้คูปอง" / "Use".
   final String? applyLabel;
 
@@ -45,6 +46,9 @@ class PromoApplyButton extends StatelessWidget {
             ? ElevatedButton(
                 onPressed: onCancel,
                 style: ElevatedButton.styleFrom(
+                  // The app theme's buttons are full width; this one sits in
+                  // a row.
+                  minimumSize: const Size(0, 32),
                   backgroundColor: Colors.red[50],
                   foregroundColor: Colors.red[600],
                   elevation: 0,
@@ -65,6 +69,7 @@ class PromoApplyButton extends StatelessWidget {
             : OutlinedButton(
                 onPressed: isEnabled ? onApply : null,
                 style: OutlinedButton.styleFrom(
+                  minimumSize: const Size(0, 32),
                   foregroundColor: AppColors.primary,
                   side: BorderSide(
                     color: isEnabled ? AppColors.primary : Colors.grey[300]!,

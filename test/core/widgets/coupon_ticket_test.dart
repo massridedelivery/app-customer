@@ -1,6 +1,6 @@
 import 'package:customer_app/core/utils/promo_style.dart';
 import 'package:customer_app/core/widgets/coupon_card.dart';
-import 'package:customer_app/features/profile/presentation/widgets/promo_ticket_card.dart';
+
 import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -24,7 +24,7 @@ Future<void> _pump(
       home: Scaffold(
         body: Padding(
           padding: const EdgeInsets.all(16),
-          child: PromoTicketCard(
+          child: CouponCard(
             data: CouponCardData.fromMap(promo),
             onTap: onTap,
             now: _now,
@@ -53,7 +53,7 @@ void main() {
         'applies_to': e.key,
       });
       expect(
-        tester.widget<Text>(find.byKey(const Key('promoTicketStubLabel'))).data,
+        tester.widget<Text>(find.byKey(const Key('couponStubLabel'))).data,
         e.value,
       );
     }
@@ -80,7 +80,7 @@ void main() {
     });
     expect(find.text('DIS30'), findsOneWidget);
     expect(find.text('ลด 30% · สูงสุด ฿30'), findsOneWidget);
-    final meta = tester.widget<Text>(find.byKey(const Key('promoTicketMeta')));
+    final meta = tester.widget<Text>(find.byKey(const Key('couponMeta')));
     expect(meta.textSpan!.toPlainText(), 'ขั้นต่ำ ฿100 · เหลือ 3 วัน');
     expect(find.text('ใช้ถึง 1 ธ.ค. 2569'), findsOneWidget);
   });
@@ -97,7 +97,7 @@ void main() {
       'valid_until': '2026-12-31T16:59:00Z',
     });
     expect(find.text('ส่วนลด ฿50 ลูกค้าใหม่'), findsOneWidget);
-    final meta = tester.widget<Text>(find.byKey(const Key('promoTicketMeta')));
+    final meta = tester.widget<Text>(find.byKey(const Key('couponMeta')));
     expect(meta.textSpan!.toPlainText(), 'ไม่มีขั้นต่ำ');
   });
 
@@ -143,7 +143,7 @@ void main() {
         width: 320,
       );
       expect(tester.takeException(), isNull);
-      final link = find.byKey(const Key('promoTicketDetails'));
+      final link = find.byKey(const Key('couponDetails'));
       final box = tester.getSize(link);
       expect(box.height, lessThan(24));
       await tester.tap(find.text('NEW50'));

@@ -1,5 +1,7 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
+import 'package:customer_app/core/widgets/coupon_card.dart';
+import 'package:customer_app/core/utils/promo_style.dart';
 import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/core/widgets/refetch_on_resume.dart';
 import 'package:customer_app/features/profile/domain/models/loyalty_models.dart';
@@ -36,7 +38,10 @@ class VouchersScreen extends ConsumerWidget {
         child: Scaffold(
           backgroundColor: AppColors.background,
           appBar: AppBar(
-            title: Text(l10n.pointsActionVouchers, style: AppTypography.heading4),
+            title: Text(
+              l10n.pointsActionVouchers,
+              style: AppTypography.heading4,
+            ),
             backgroundColor: AppColors.background,
             foregroundColor: AppColors.textPrimary,
             elevation: 0,
@@ -113,7 +118,12 @@ class _VoucherList extends ConsumerWidget {
               )
             : ListView.separated(
                 physics: const AlwaysScrollableScrollPhysics(),
-                padding: EdgeInsets.fromLTRB(16, 16, 16, 32 + MediaQuery.paddingOf(context).bottom),
+                padding: EdgeInsets.fromLTRB(
+                  16,
+                  16,
+                  16,
+                  32 + MediaQuery.paddingOf(context).bottom,
+                ),
                 // Expired ones aren't refunded: said once above that list.
                 itemCount: items.length + (status == 'EXPIRED' ? 1 : 0),
                 separatorBuilder: (_, _) => const SizedBox(height: 12),
@@ -138,131 +148,107 @@ class _VoucherList extends ConsumerWidget {
   }
 }
 
-/// A voucher: title, what it takes off, the code (copyable) and validity.
+/// A voucher, as the same ticket [CouponCard] as every other promo list: the
+/// service stub, the code, its own discount_text, the minimum and validity.
+/// Active ones can be copied and used now; used / expired / cancelled ones
+/// are greyed with what happened to them.
 class VoucherCard extends ConsumerWidget {
   const VoucherCard({super.key, required this.voucher});
 
   final Voucher voucher;
 
+  /// The voucher in the card's terms. Its own discount_text is what it
+  /// gives (fixed when it was made); the numbers come from `discount`.
+  static CouponCardData dataOf(Voucher v) {
+    final d = v.discount;
+    final type = d?.type ?? 'FIXED';
+    final free = type == 'FREE_DELIVERY';
+    final value = d?.value ?? 0;
+    String fmt(double x) => x.toStringAsFixed(0);
+    return CouponCardData(
+      code: v.code,
+      title: v.discountText.isNotEmpty ? v.discountText : v.title,
+      description: '',
+      discountValue: free || value <= 0
+          ? ''
+          : (type == 'PERCENT' ? '${fmt(value)}%' : '฿${fmt(value)}'),
+      freeShipping: free,
+      maxDiscount: type == 'PERCENT' || free ? d?.maxDiscount : null,
+      minSpend: d?.minSpend ?? 0,
+      expiresAt: v.expiresAt,
+      scope: free ? PromoScope.food : PromoScope.fromAppliesTo(v.appliesTo),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final active = voucher.status == 'ACTIVE';
-    final expires = voucher.expiresAt;
-    final soon =
-        expires != null &&
-        expires.difference(DateTime.now()) < const Duration(days: 3);
-    return Container(
+    const muted = TextStyle(fontSize: 12, color: Color(0xFF6B6E7A));
+    final Widget? status = switch (voucher.status) {
+      'VOIDED' => Text(
+        l10n.vouchersVoidedRefund(fmtPoints(voucher.pointsSpent)),
+        key: Key('voucherVoided-${voucher.code}'),
+        style: muted,
+      ),
+      'USED' when voucher.usedAt != null => Text(
+        l10n.vouchersUsedAt(
+          fmtThaiDate(context, voucher.usedAt!),
+          serviceLabel(l10n, voucher.usedOrderType),
+        ),
+        style: muted,
+      ),
+      _ => null,
+    };
+    return CouponCard(
       key: Key('voucher-${voucher.code}'),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE5E2E1), width: 0.5),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            voucher.title,
-            style: AppTypography.label1.copyWith(
-              color: active ? AppColors.textPrimary : AppColors.textSecondary,
-            ),
-          ),
-          if (voucher.discountText.isNotEmpty)
-            Text(
-              voucher.discountText,
-              style: AppTypography.body3.copyWith(
-                color: AppColors.textSecondary,
-              ),
-            ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF7F7F9),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: SelectableText(
-                    voucher.code,
-                    style: AppTypography.heading5.copyWith(letterSpacing: 1.5),
+      data: dataOf(voucher),
+      isEnabled: active,
+      footer: status,
+      action: active
+          ? Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  key: Key('voucherCopy-${voucher.code}'),
+                  tooltip: l10n.profileReferralCopy,
+                  visualDensity: VisualDensity.compact,
+                  icon: const Icon(Icons.copy_rounded, size: 18),
+                  onPressed: () {
+                    Clipboard.setData(ClipboardData(text: voucher.code));
+                    ScaffoldMessenger.of(context)
+                      ..hideCurrentSnackBar()
+                      ..showSnackBar(
+                        SnackBar(content: Text(l10n.profileReferralCodeCopied)),
+                      );
+                  },
+                ),
+                SizedBox(
+                  height: 32,
+                  child: FilledButton(
+                    key: Key('voucherUse-${voucher.code}'),
+                    onPressed: () => useVoucherCode(
+                      context,
+                      ref,
+                      code: voucher.code,
+                      appliesTo: voucher.appliesTo,
+                    ),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      padding: const EdgeInsets.symmetric(horizontal: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                    child: Text(
+                      l10n.rewardsUseNow,
+                      style: const TextStyle(fontSize: 12),
+                    ),
                   ),
                 ),
-              ),
-              IconButton(
-                key: Key('voucherCopy-${voucher.code}'),
-                tooltip: l10n.profileReferralCopy,
-                icon: const Icon(Icons.copy_rounded, size: 20),
-                onPressed: () {
-                  Clipboard.setData(ClipboardData(text: voucher.code));
-                  ScaffoldMessenger.of(context)
-                    ..hideCurrentSnackBar()
-                    ..showSnackBar(
-                      SnackBar(content: Text(l10n.profileReferralCodeCopied)),
-                    );
-                },
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          if (voucher.status == 'VOIDED')
-            Text(
-              l10n.vouchersVoidedRefund(fmtPoints(voucher.pointsSpent)),
-              key: Key('voucherVoided-${voucher.code}'),
-              style: AppTypography.caption4.copyWith(
-                color: AppColors.textSecondary,
-              ),
+              ],
             )
-          else if (voucher.status == 'USED' && voucher.usedAt != null)
-            Text(
-              l10n.vouchersUsedAt(
-                fmtThaiDate(context, voucher.usedAt!),
-                serviceLabel(l10n, voucher.usedOrderType),
-              ),
-              style: AppTypography.caption4.copyWith(
-                color: AppColors.textSecondary,
-              ),
-            )
-          else if (expires != null)
-            Text(
-              l10n.rewardsValidUntil(fmtThaiDate(context, expires)),
-              key: soon && active ? const Key('voucherExpiringSoon') : null,
-              style: AppTypography.caption4.copyWith(
-                color: soon && active
-                    ? AppColors.semanticErrorFgHigh
-                    : AppColors.textSecondary,
-              ),
-            ),
-          if (active) ...[
-            const SizedBox(height: 10),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton(
-                key: Key('voucherUse-${voucher.code}'),
-                onPressed: () => useVoucherCode(
-                  context,
-                  ref,
-                  code: voucher.code,
-                  appliesTo: voucher.appliesTo,
-                ),
-                style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                ),
-                child: Text(l10n.rewardsUseNow),
-              ),
-            ),
-          ],
-        ],
-      ),
+          : const SizedBox.shrink(),
     );
   }
 }
@@ -286,7 +272,12 @@ class RedeemSuccessScreen extends ConsumerWidget {
         surfaceTintColor: Colors.transparent,
       ),
       body: ListView(
-        padding: EdgeInsets.fromLTRB(24, 24, 24, 24 + MediaQuery.paddingOf(context).bottom),
+        padding: EdgeInsets.fromLTRB(
+          24,
+          24,
+          24,
+          24 + MediaQuery.paddingOf(context).bottom,
+        ),
         children: [
           const Icon(
             Icons.check_circle_rounded,

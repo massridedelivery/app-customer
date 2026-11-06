@@ -39,12 +39,13 @@ void main() {
     await _pump(tester, VehicleEstimation.fromJson(_json(seats: 10)));
     expect(find.byKey(const Key('vehicleSeats')), findsOneWidget);
     expect(find.text('10 ที่นั่ง'), findsOneWidget);
-    // The fare note stays on the same line as the chip.
-    expect(find.text('ค่าโดยสารเริ่มต้น'), findsOneWidget);
+    // No "ค่าโดยสารเริ่มต้น" note on the vehicle list.
+    expect(find.text('ค่าโดยสารเริ่มต้น'), findsNothing);
   });
 
   testWidgets('no seats, no badge', (tester) async {
     await _pump(tester, VehicleEstimation.fromJson(_json()));
     expect(find.byKey(const Key('vehicleSeats')), findsNothing);
+    expect(find.text('ค่าโดยสารเริ่มต้น'), findsNothing);
   });
 }

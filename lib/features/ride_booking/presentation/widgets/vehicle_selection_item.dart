@@ -160,13 +160,6 @@ class VehicleSelectionItem extends StatelessWidget {
                                         style: AppTypography.caption5.copyWith(
                                           color: AppColors.foundationOrange600,
                                         ),
-                                      )
-                                    else
-                                      Text(
-                                        l10n.baseFareLabel,
-                                        style: AppTypography.caption5.copyWith(
-                                          color: Colors.grey,
-                                        ),
                                       ),
 
                                   ],

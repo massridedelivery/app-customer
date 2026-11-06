@@ -164,14 +164,14 @@ extension PromoStubStyle on PromoScope {
   Color get stubColor => switch (this) {
     PromoScope.ride => const Color(0xFFC8323F),
     PromoScope.food => const Color(0xFFE2855A),
-    PromoScope.messenger => const Color(0xFF3E9361),
+    PromoScope.messenger => const Color(0xFF2F6FD6),
     PromoScope.all => const Color(0xFF4B4F5C),
   };
 
   Color get linkColor => switch (this) {
     PromoScope.ride => const Color(0xFFB4313F),
     PromoScope.food => const Color(0xFFB5561F),
-    PromoScope.messenger => const Color(0xFF2E7D4F),
+    PromoScope.messenger => const Color(0xFF1F55B0),
     PromoScope.all => const Color(0xFF3F414E),
   };
 
@@ -189,6 +189,11 @@ extension PromoStubStyle on PromoScope {
     PromoScope.all => l10n.promoStubAll,
   };
 }
+
+/// Free delivery has a stub of its own (whatever its scope): teal, a
+/// delivery icon and "ส่งฟรี".
+const Color kFreeDeliveryStubColor = Color(0xFF13A08F);
+const Color kFreeDeliveryLinkColor = Color(0xFF0B7568);
 
 /// "เหลือ 3 วัน" / "เหลือ 5 ชม." once a promo ends within 7 days; null
 /// otherwise (or when it has no end, or has already ended).
@@ -294,7 +299,11 @@ class CouponCard extends StatelessWidget {
         : l10n.promoNoMinSpend;
     final muted = isEnabled ? const Color(0xFF6B6E7A) : Colors.grey.shade400;
     final ink = isEnabled ? const Color(0xFF1B1D22) : Colors.grey.shade500;
-    final linkColor = isEnabled ? scope.linkColor : Colors.grey.shade500;
+    final free = data.freeShipping;
+    final stubColor = free ? kFreeDeliveryStubColor : scope.stubColor;
+    final linkColor = !isEnabled
+        ? Colors.grey.shade500
+        : (free ? kFreeDeliveryLinkColor : scope.linkColor);
     final codeLine = data.code.isNotEmpty ? data.code : (title ?? headline);
     final secondLine = data.code.isNotEmpty && title != null && title.isNotEmpty
         ? title
@@ -421,15 +430,19 @@ class CouponCard extends StatelessWidget {
 
     final stub = Container(
       width: kCouponStubWidth,
-      color: isEnabled ? scope.stubColor : Colors.grey.shade400,
+      color: isEnabled ? stubColor : Colors.grey.shade400,
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 10),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(scope.stubIcon, color: Colors.white, size: 28),
+          Icon(
+            free ? Icons.delivery_dining_rounded : scope.stubIcon,
+            color: Colors.white,
+            size: 28,
+          ),
           const SizedBox(height: 6),
           Text(
-            scope.stubLabel(l10n),
+            free ? l10n.freeDelivery : scope.stubLabel(l10n),
             key: const Key('couponStubLabel'),
             textAlign: TextAlign.center,
             maxLines: 2,

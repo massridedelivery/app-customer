@@ -109,7 +109,7 @@ void main() {
     expect(find.textContaining('ลด'), findsNothing);
   });
 
-  testWidgets('free shipping is food, says ส่งฟรี', (tester) async {
+  testWidgets('free shipping has its own ส่งฟรี stub', (tester) async {
     final data = CouponCardData.fromMap({
       'code': 'FREESHIP',
       'promo_type': 'free_shipping',
@@ -119,8 +119,12 @@ void main() {
       'applies_to': 'MESSENGER',
     });
     await tester.pumpWidget(_host(CouponCard(data: data, onTap: () {})));
-    expect(find.text('ส่งอาหาร'), findsOneWidget);
-    expect(find.text('ส่งฟรี'), findsOneWidget);
+    // Its own stub (teal, "ส่งฟรี") and the headline.
+    expect(
+      tester.widget<Text>(find.byKey(const Key('couponStubLabel'))).data,
+      'ส่งฟรี',
+    );
+    expect(find.text('ส่งฟรี'), findsNWidgets(2));
     expect(find.text('ขั้นต่ำ ฿99'), findsOneWidget);
   });
 

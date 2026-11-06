@@ -16,12 +16,13 @@ part 'ride_booking_repository_impl.g.dart';
 @riverpod
 RideBookingRepository rideBookingRepository(Ref ref) {
   final dataSource = ref.watch(rideBookingRemoteDataSourceProvider);
+  // Fallback error text in the app language. Read now (the provider rebuilds
+  // when it changes): this auto-disposed provider's ref is gone by the time
+  // an estimate fails, and reading it then threw over the real error.
+  final language = ref.watch(localeControllerProvider).languageCode;
   return RideBookingRepositoryImpl(
     dataSource,
-    // Fallback error text follows the app language at the time of the error.
-    l10n: () => lookupAppLocalizations(
-      Locale(ref.read(localeControllerProvider).languageCode),
-    ),
+    l10n: () => lookupAppLocalizations(Locale(language)),
   );
 }
 

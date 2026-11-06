@@ -1,6 +1,7 @@
 import 'package:customer_app/core/error/api_error.dart';
 import 'package:customer_app/features/profile/data/welcome_promo_store.dart';
 import 'package:customer_app/features/profile/presentation/controllers/loyalty_providers.dart';
+import 'package:customer_app/features/ride_booking/data/ride_vehicle_classes.dart';
 import 'package:customer_app/features/ride_booking/domain/models/ride_quote.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -22,13 +23,29 @@ class BookingController extends _$BookingController {
   }
 
   /// The ride page ("การรับส่งผู้โดยสาร") is passenger transport only, but the
-  /// backend fare estimate can include messenger (delivery) vehicle types like
-  /// "Messenger Bike" / "รถส่งของ". Drop those so only passenger vehicles show.
-  List<VehicleEstimation> _passengerOnly(List<VehicleEstimation> all) {
-    return all.where((e) {
-      final key = '${e.vehicleTypeName} ${e.displayName}'.toLowerCase();
-      return !key.contains('messenger') && !key.contains('ส่งของ');
-    }).toList();
+  /// backend fare estimate also returns the parcel types ("Messenger Bike" /
+  /// "Messenger Car"). Drop every option whose type has vehicle_class
+  /// messenger / motorcycle_delivery (GET /api/vehicle-types?active_only=true),
+  /// keeping the order the estimate sent.
+  Future<List<VehicleEstimation>> _passengerOnly(
+    List<VehicleEstimation> all,
+  ) async {
+    Map<String, String> classes;
+    try {
+      classes = await ref.read(rideVehicleClassesProvider.future);
+    } catch (_) {
+      classes = const {};
+    }
+    return all
+        .where(
+          (e) => !isDeliveryOnlyVehicle(
+            vehicleTypeId: e.vehicleTypeId,
+            vehicleTypeName: e.vehicleTypeName,
+            displayName: e.displayName,
+            classes: classes,
+          ),
+        )
+        .toList();
   }
 
   Future<void> estimateFare(
@@ -52,10 +69,11 @@ class BookingController extends _$BookingController {
         vehicleTypeId: vehicleTypeId,
         usePoints: previousState.usePoints ? true : null,
       );
+      final estimations = await _passengerOnly(response.estimations);
 
       return previousState.copyWith(
         isLoading: false,
-        estimations: _passengerOnly(response.estimations),
+        estimations: estimations,
         nearbyDrivers: response.nearbyDrivers,
         distanceKm: response.distanceKm,
         durationMin: response.durationMin.toDouble(),
@@ -157,12 +175,13 @@ class BookingController extends _$BookingController {
         promoCode: promoCode,
         usePoints: current.usePoints ? true : null,
       );
+      final estimations = await _passengerOnly(response.estimations);
       final latest = state.value;
       // A dispatch / fresh estimate may have landed during the await.
       if (latest == null || latest.activeJobId != null) return;
       state = AsyncValue.data(
         latest.copyWith(
-          estimations: _passengerOnly(response.estimations),
+          estimations: estimations,
           nearbyDrivers: response.nearbyDrivers,
           distanceKm: response.distanceKm,
           durationMin: response.durationMin.toDouble(),

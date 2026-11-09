@@ -90,7 +90,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
+          // Nothing to pop when the app reopened straight onto this screen
+          // (GoError on iOS 1.0.3); fall back to the login screen.
+          onPressed: () =>
+              context.canPop() ? context.pop() : context.go('/auth'),
         ),
       ),
       body: Stack(

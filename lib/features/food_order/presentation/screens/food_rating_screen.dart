@@ -324,6 +324,7 @@ class _FoodRatingScreenState extends ConsumerState<FoodRatingScreen> {
                                   stateInfo.restaurant!.imageUrl!,
                                 ),
                                 fit: BoxFit.cover,
+                                onError: (_, _) {},
                               )
                             : null,
                       ),

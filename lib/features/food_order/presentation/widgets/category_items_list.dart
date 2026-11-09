@@ -42,6 +42,7 @@ class CategoryItemsList extends StatelessWidget {
                       ? DecorationImage(
                           image: NetworkImage(item.imageUrl!),
                           fit: BoxFit.cover,
+                          onError: (_, _) {},
                         )
                       : null,
                 ),

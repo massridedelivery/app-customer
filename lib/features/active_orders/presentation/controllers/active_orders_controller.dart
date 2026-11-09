@@ -34,8 +34,13 @@ class ActiveOrdersController extends _$ActiveOrdersController {
     state = const AsyncValue.loading();
     // Explicit refresh means "give me the latest" — bypass the repo's TTL cache
     // (still coalesced with any in-flight request).
-    state = await AsyncValue.guard(
+    final next = await AsyncValue.guard(
       () => _fetchActiveOrders(forceRefresh: true),
     );
+    // Callers often `ref.read(...notifier).refresh()` with nobody watching
+    // (tab taps, the route observer), so the auto-dispose provider can be gone
+    // by the time the request lands. Writing state then throws.
+    if (!ref.mounted) return;
+    state = next;
   }
 }

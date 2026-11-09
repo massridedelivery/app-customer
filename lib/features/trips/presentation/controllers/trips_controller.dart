@@ -22,6 +22,8 @@ class TripsController extends _$TripsController {
   }
 
   Future<void> fetchTrips() async {
+    // Runs from a microtask in build(), so the provider may already be gone.
+    if (!ref.mounted) return;
     state = state.copyWith(isLoading: true, error: null);
 
     try {
@@ -38,14 +40,17 @@ class TripsController extends _$TripsController {
         } catch (_) {
           trips = _parseTrips(data);
         }
+        if (!ref.mounted) return;
         state = state.copyWith(trips: trips, isLoading: false);
       } else {
+        if (!ref.mounted) return;
         state = state.copyWith(
           isLoading: false,
           error: 'Failed to fetch trips: ${response.statusCode}',
         );
       }
     } catch (e) {
+      if (!ref.mounted) return;
       state = state.copyWith(
         isLoading: false,
         error: 'An error occurred while fetching trips: $e',
@@ -86,6 +91,7 @@ class TripsController extends _$TripsController {
         limit: limit,
       );
 
+      if (!ref.mounted) return;
       final newOrders = response.data;
       final updatedOrders = isRefresh
           ? newOrders
@@ -104,6 +110,7 @@ class TripsController extends _$TripsController {
         hasMore: hasMore,
       );
     } catch (e) {
+      if (!ref.mounted) return;
       state = state.copyWith(
         isHistoryLoading: false,
         isLoadingMore: false,

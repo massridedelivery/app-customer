@@ -517,6 +517,8 @@ class _ProfileHeader extends StatelessWidget {
                           ? DecorationImage(
                               image: NetworkImage(avatarUrl!),
                               fit: BoxFit.cover,
+                              // A dead avatar URL leaves the grey circle.
+                              onError: (_, _) {},
                             )
                           : null,
                     ),

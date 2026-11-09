@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:customer_app/features/live_ride/domain/models/driver_profile_model.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:customer_app/core/services/socket_service.dart';
@@ -101,9 +102,23 @@ class LiveRideController extends _$LiveRideController {
   bool get _hasDriver =>
       state.driverId != null && state.driverId!.isNotEmpty;
 
+  /// Socket `data` is usually an object, but some events send it as a JSON
+  /// string or a plain string (iOS 1.0.3: "String is not a subtype of Map").
+  static Map<String, dynamic>? _asMap(Object? raw) {
+    if (raw is Map<String, dynamic>) return raw;
+    if (raw is Map) return Map<String, dynamic>.from(raw);
+    if (raw is String && raw.trimLeft().startsWith('{')) {
+      try {
+        final decoded = jsonDecode(raw);
+        if (decoded is Map) return Map<String, dynamic>.from(decoded);
+      } catch (_) {}
+    }
+    return null;
+  }
+
   void _handleSocketMessage(Map<String, dynamic> message) {
     final type = (message['type'] as String?)?.toLowerCase();
-    final data = message['data'] as Map<String, dynamic>?;
+    final data = _asMap(message['data']);
 
     if (type == null) return;
     debugPrint('LiveRideController: Received message [$type]: $message');

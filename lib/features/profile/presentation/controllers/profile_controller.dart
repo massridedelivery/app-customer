@@ -43,7 +43,7 @@ class ProfileController extends _$ProfileController {
       maxHeight: 512,
       imageQuality: 85,
     );
-    if (image == null) return;
+    if (image == null || !ref.mounted) return;
 
     final current = state.value;
     if (current == null) return;
@@ -59,6 +59,7 @@ class ProfileController extends _$ProfileController {
     final fileKey = await ref
         .read(avatarUploadServiceProvider)
         .uploadAvatar(image);
+    if (!ref.mounted) return;
     final after = state.value;
     if (after == null) return;
     state = AsyncData(
@@ -113,6 +114,7 @@ class ProfileController extends _$ProfileController {
           );
     });
 
+    if (!ref.mounted) return result.hasValue;
     final saved = result.value;
     state = AsyncData(
       currentState.copyWith(

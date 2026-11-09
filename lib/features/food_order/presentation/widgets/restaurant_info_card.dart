@@ -40,6 +40,7 @@ class RestaurantInfoCard extends StatelessWidget {
                   ? DecorationImage(
                       image: NetworkImage(restaurant.imageUrl!),
                       fit: BoxFit.cover,
+                      onError: (_, _) {},
                     )
                   : null,
             ),

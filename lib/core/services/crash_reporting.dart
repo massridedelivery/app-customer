@@ -29,7 +29,16 @@ class CrashReporting {
       await crashlytics.setCrashlyticsCollectionEnabled(!kDebugMode);
       if (kDebugMode) return;
 
-      FlutterError.onError = crashlytics.recordFlutterFatalError;
+      FlutterError.onError = (details) {
+        // A picture that fails to load (404 avatar, dead promo image) leaves a
+        // blank box, not a crashed app. Keep it visible as non-fatal so it
+        // doesn't drag the crash-free rate down.
+        if (details.library == 'image resource service') {
+          crashlytics.recordFlutterError(details);
+          return;
+        }
+        crashlytics.recordFlutterFatalError(details);
+      };
       PlatformDispatcher.instance.onError = (error, stack) {
         crashlytics.recordError(error, stack, fatal: true);
         return true;

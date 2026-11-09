@@ -19,8 +19,10 @@ class MessengerHistoryController extends _$MessengerHistoryController {
 
   Future<void> refresh() async {
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(
-      () => ref.read(messengerRepositoryProvider).getOrders(),
-    );
+    final repository = ref.read(messengerRepositoryProvider);
+    final next = await AsyncValue.guard(repository.getOrders);
+    // The provider may be disposed while the request is in flight.
+    if (!ref.mounted) return;
+    state = next;
   }
 }

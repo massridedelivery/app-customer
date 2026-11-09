@@ -208,7 +208,11 @@ class _MenuItemBottomSheetState extends State<MenuItemBottomSheet> {
         // Neutral placeholder instead of a random stock photo when the item has
         // no image.
         image: hasImage
-            ? DecorationImage(image: NetworkImage(url), fit: BoxFit.cover)
+            ? DecorationImage(
+                image: NetworkImage(url),
+                fit: BoxFit.cover,
+                onError: (_, _) {},
+              )
             : null,
       ),
       child: hasImage

@@ -183,7 +183,11 @@ class _ProfileImageSection extends StatelessWidget {
                   width: 2,
                 ),
                 image: image != null
-                    ? DecorationImage(image: image, fit: BoxFit.cover)
+                    ? DecorationImage(
+                        image: image,
+                        fit: BoxFit.cover,
+                        onError: (_, _) {},
+                      )
                     : null,
               ),
               child: isUploading

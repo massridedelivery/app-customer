@@ -775,6 +775,7 @@
   "homeActiveRide": "การเดินทางของคุณ",
   "homeActiveFood": "ร้านอาหาร",
   "homeViewStatus": "ดูสถานะ",
+  "homeActiveOrdersTitle": "งานที่กำลังดำเนินการ",
   "homeStatusInProgress": "กำลังดำเนินการ...",
   "homeStatusFindingDriver": "กำลังค้นหาคนขับ...",
   "homeFoodStatusPlaced": "กำลังส่งคำสั่งซื้อ...",

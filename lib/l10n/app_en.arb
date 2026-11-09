@@ -835,6 +835,7 @@
   "homeActiveRide": "Your ride",
   "homeActiveFood": "Food order",
   "homeViewStatus": "View status",
+  "homeActiveOrdersTitle": "Active orders",
   "homeStatusInProgress": "In progress...",
   "homeStatusFindingDriver": "Finding a driver...",
   "homeFoodStatusPlaced": "Placing your order...",

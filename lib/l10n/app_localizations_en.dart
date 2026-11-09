@@ -2447,6 +2447,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeViewStatus => 'View status';
 
   @override
+  String get homeActiveOrdersTitle => 'Active orders';
+
+  @override
   String get homeStatusInProgress => 'In progress...';
 
   @override

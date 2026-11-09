@@ -236,6 +236,11 @@ class CallController extends Notifier<CallSession?> {
           phase == CallPhase.active ||
           phase == CallPhase.outgoing;
       if (!live || router.state.uri.path == '/call') return;
+      // Before the splash is done the router sends every location back to
+      // /splash, so pushing /call here loops forever and the app never leaves
+      // the splash (a call still marked answered after the app was killed).
+      // The redirect stashes /call and opens it once the splash is done.
+      if (!ref.read(routerNotifierProvider).splashShown) return;
       // After the navigation that replaced it has settled.
       Future.microtask(() {
         if (router.state.uri.path != '/call') {

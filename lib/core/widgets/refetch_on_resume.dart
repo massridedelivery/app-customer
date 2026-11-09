@@ -24,7 +24,17 @@ class _RefetchOnResumeState extends State<RefetchOnResume> {
   @override
   void initState() {
     super.initState();
-    _lifecycle = AppLifecycleListener(onResume: () => widget.onResume());
+    _lifecycle = AppLifecycleListener(
+      onResume: () {
+        // Only the screen on top refetches. A screen under another one (the
+        // profile tab under "edit profile") must not reload while the user is
+        // busy above it: coming back from the Android photo picker is a
+        // resume, and invalidating the profile then threw away the photo the
+        // customer had just picked.
+        if (!mounted) return;
+        if (ModalRoute.of(context)?.isCurrent ?? true) widget.onResume();
+      },
+    );
   }
 
   @override

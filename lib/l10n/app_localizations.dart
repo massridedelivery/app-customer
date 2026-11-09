@@ -4555,6 +4555,12 @@ abstract class AppLocalizations {
   /// **'View status'**
   String get homeViewStatus;
 
+  /// No description provided for @homeActiveOrdersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Active orders'**
+  String get homeActiveOrdersTitle;
+
   /// No description provided for @homeStatusInProgress.
   ///
   /// In en, this message translates to:

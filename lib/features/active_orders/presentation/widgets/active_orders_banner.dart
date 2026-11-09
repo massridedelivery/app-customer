@@ -26,22 +26,7 @@ class ActiveOrdersBanner extends ConsumerWidget {
         // Newest first per spec — surface the most recent one
         final ActiveOrderItem order = orders.first;
         final l10n = AppLocalizations.of(context)!;
-        final String statusText;
-        final String title;
-        final IconData icon;
-        if (order.isRide) {
-          statusText = _getRideStatusText(l10n, order.status);
-          title = l10n.homeActiveRide;
-          icon = Icons.local_taxi;
-        } else if (order.isMessenger) {
-          statusText = _getMessengerStatusText(l10n, order.status);
-          title = l10n.homeServiceParcel;
-          icon = Icons.local_shipping;
-        } else {
-          statusText = _getFoodStatusText(l10n, order.status);
-          title = l10n.homeActiveFood;
-          icon = Icons.delivery_dining;
-        }
+        final (:title, :statusText, :icon) = _describe(l10n, order);
 
         return AnimatedContainer(
           duration: const Duration(milliseconds: 300),
@@ -199,26 +184,136 @@ class ActiveOrdersBanner extends ConsumerWidget {
     );
   }
 
-  /// Branch on type per SCRUM-45 §6: RIDE → live ride, FOOD → tracking,
-  /// MESSENGER → package tracking; several running at once → the resume list
-  /// (food-only for now, so a messenger item always opens directly).
+  ({String title, String statusText, IconData icon}) _describe(
+    AppLocalizations l10n,
+    ActiveOrderItem order,
+  ) {
+    if (order.isRide) {
+      return (
+        title: l10n.homeActiveRide,
+        statusText: _getRideStatusText(l10n, order.status),
+        icon: Icons.local_taxi,
+      );
+    }
+    if (order.isMessenger) {
+      return (
+        title: l10n.homeServiceParcel,
+        statusText: _getMessengerStatusText(l10n, order.status),
+        icon: Icons.local_shipping,
+      );
+    }
+    return (
+      title: l10n.homeActiveFood,
+      statusText: _getFoodStatusText(l10n, order.status),
+      icon: Icons.delivery_dining,
+    );
+  }
+
+  /// One order opens its own screen. Several open a picker listing every
+  /// running order across verticals: the old food-only resume list hid rides
+  /// and parcels, so two rides at once landed on an empty food screen.
   void _openOrder(
     BuildContext context,
     List<ActiveOrderItem> orders,
     ActiveOrderItem order,
   ) {
-    if (order.isMessenger) {
-      context.push('/messenger/tracking/${order.id}');
+    if (orders.length == 1) {
+      _openSingle(context, order);
       return;
     }
-    if (orders.length == 1) {
-      if (order.isRide) {
-        context.push('/live/${order.id}');
-      } else {
-        context.push('/food-order/tracking/${order.id}');
-      }
+    final l10n = AppLocalizations.of(context)!;
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.white,
+      showDragHandle: true,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (sheetContext) => SafeArea(
+        top: false,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.sizeOf(sheetContext).height * 0.7,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+                child: Text(
+                  l10n.homeActiveOrdersTitle,
+                  style: AppTypography.heading5.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ),
+              Flexible(
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                  itemCount: orders.length,
+                  separatorBuilder: (_, _) => const SizedBox(height: 8),
+                  itemBuilder: (_, i) {
+                    final item = orders[i];
+                    final d = _describe(l10n, item);
+                    return Material(
+                      color: const Color(0xFFFEF4F5),
+                      borderRadius: BorderRadius.circular(14),
+                      child: ListTile(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        leading: CircleAvatar(
+                          backgroundColor:
+                              AppColors.primary.withValues(alpha: 0.1),
+                          child: Icon(d.icon, color: AppColors.primary),
+                        ),
+                        title: Text(
+                          d.title,
+                          style: AppTypography.label1.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        subtitle: Text(
+                          d.statusText,
+                          style: AppTypography.caption5.copyWith(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        trailing: const Icon(
+                          Icons.chevron_right,
+                          color: AppColors.primary,
+                        ),
+                        onTap: () {
+                          Navigator.of(sheetContext).pop();
+                          _openSingle(context, item);
+                        },
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Per type (SCRUM-45 §6): RIDE → live ride, FOOD → food tracking,
+  /// MESSENGER → parcel tracking.
+  void _openSingle(BuildContext context, ActiveOrderItem order) {
+    if (order.isRide) {
+      context.push('/live/${order.id}');
+    } else if (order.isMessenger) {
+      context.push('/messenger/tracking/${order.id}');
     } else {
-      context.push('/food-order/resume');
+      context.push('/food-order/tracking/${order.id}');
     }
   }
 

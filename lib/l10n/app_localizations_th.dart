@@ -2418,6 +2418,9 @@ class AppLocalizationsTh extends AppLocalizations {
   String get homeViewStatus => 'ดูสถานะ';
 
   @override
+  String get homeActiveOrdersTitle => 'งานที่กำลังดำเนินการ';
+
+  @override
   String get homeStatusInProgress => 'กำลังดำเนินการ...';
 
   @override

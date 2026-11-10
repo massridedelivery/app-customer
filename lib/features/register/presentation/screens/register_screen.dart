@@ -68,6 +68,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     : l10n.authRegisterFailed,
               ),
               backgroundColor: Colors.red,
+              // A SnackBar with an action stays up until dismissed by default,
+              // and the messenger is app-wide, so it followed the customer to
+              // the home screen. Let it time out.
+              persist: false,
+              duration: const Duration(seconds: 6),
               action: isConflict
                   ? SnackBarAction(
                       label: l10n.signIn,
@@ -78,6 +83,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             ),
           );
       } else if (next is AsyncData && previous is! AsyncData) {
+        // Signed up: drop any earlier error so it doesn't ride along to home.
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
         ref.read(authControllerProvider.notifier).setAuthenticated();
         context.go('/main');
       }

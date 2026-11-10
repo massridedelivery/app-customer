@@ -117,6 +117,9 @@ class _ReportIssueScreenState extends ConsumerState<ReportIssueScreen> {
       messenger.showSnackBar(
         SnackBar(
           content: Text(l10n.chatPhotoPermissionDenied),
+          // An action makes a SnackBar stay until dismissed; let it time out.
+          persist: false,
+          duration: const Duration(seconds: 6),
           action: SnackBarAction(
             label: l10n.chatOpenSettings,
             onPressed: AppSettings.openAppSettings,

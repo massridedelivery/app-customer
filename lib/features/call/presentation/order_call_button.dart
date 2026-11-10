@@ -84,6 +84,9 @@ Future<void> placeOrderCall(
     ..showSnackBar(
       SnackBar(
         content: Text(callErrorText(l10n, error)),
+        // An action makes a SnackBar stay until dismissed; let it time out.
+        persist: false,
+        duration: const Duration(seconds: 6),
         action: error == CallError.microphone
             ? SnackBarAction(
                 label: l10n.chatOpenSettings,

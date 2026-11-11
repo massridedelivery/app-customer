@@ -7434,6 +7434,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This report couldn\'t be found'**
   String get supportTicketNotFound;
+
+  /// No description provided for @phoneMobileHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a 10-digit mobile number'**
+  String get phoneMobileHint;
 }
 
 class _AppLocalizationsDelegate

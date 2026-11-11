@@ -38,6 +38,11 @@ class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
 
   late LoginMethod _method = widget.initialMethod;
 
+  /// The server's 400 INVALID_PHONE text, shown under the phone field until
+  /// the number is edited.
+  String? _phoneServerError;
+  String _lastPhone = '';
+
   /// Email login isn't offered by this backend (503 EMAIL_LOGIN_UNAVAILABLE,
   /// e.g. prod before launch): hide the email tab and stay on phone.
   bool _emailUnavailable = false;
@@ -48,6 +53,11 @@ class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
     for (final c in [_phoneController, _emailController]) {
       c.addListener(() => setState(() {}));
     }
+    _phoneController.addListener(() {
+      if (_phoneController.text == _lastPhone) return;
+      _lastPhone = _phoneController.text;
+      _phoneServerError = null;
+    });
   }
 
   @override
@@ -58,7 +68,7 @@ class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
     super.dispose();
   }
 
-  bool get _isValidPhone => _phoneController.text.trim().length >= 9;
+  bool get _isValidPhone => isValidThaiMobile(_phoneController.text);
 
   bool get _isValidEmail => RegExp(
     r'^[^@\s]+@[^@\s]+\.[^@\s]+$',
@@ -71,7 +81,19 @@ class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
 
     final SendOtpResponse? response = await ref
         .read(authControllerProvider.notifier)
-        .sendOtp(phone);
+        .sendOtp(
+          phone,
+          onInvalidPhone: (message) {
+            if (!mounted) return;
+            final l10n = AppLocalizations.of(context)!;
+            setState(
+              () => _phoneServerError = message.isNotEmpty
+                  ? message
+                  : l10n.profilePhoneInvalid,
+            );
+            _phoneFocus.requestFocus();
+          },
+        );
 
     if (response != null && mounted) {
       context.push(
@@ -213,15 +235,19 @@ class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
         focusNode: _phoneFocus,
         keyboardType: TextInputType.phone,
         autofillHints: const [AutofillHints.telephoneNumber],
-        inputFormatters: [
-          FilteringTextInputFormatter.allow(RegExp(r'[0-9+]')),
-          LengthLimitingTextInputFormatter(15),
-        ],
+        inputFormatters: const [ThaiMobileInputFormatter()],
+        textInputAction: TextInputAction.done,
+        onSubmitted: (_) {
+          if (_isValidPhone && !isLoading) _requestOtp();
+        },
         style: AppTypography.body1.copyWith(color: _kInk),
         decoration: _decoration(
           label: l10n.phoneNumber,
-          hint: '812345678',
-          prefix: '+66 ',
+          hint: '0812345678',
+          helper: _phoneController.text.isNotEmpty && !_isValidPhone
+              ? l10n.phoneMobileHint
+              : null,
+          error: _phoneServerError,
         ),
       ),
       const SizedBox(height: 14),
@@ -265,6 +291,8 @@ class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
     required String label,
     String? hint,
     String? prefix,
+    String? helper,
+    String? error,
   }) {
     OutlineInputBorder border(Color color, [double width = 1]) =>
         OutlineInputBorder(
@@ -274,6 +302,10 @@ class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
     return InputDecoration(
       labelText: label,
       hintText: hint,
+      helperText: helper,
+      errorText: error,
+      errorMaxLines: 2,
+      helperStyle: AppTypography.caption5.copyWith(color: _kMuted),
       // Keep the label up so the "+66" prefix and the hint show before focus.
       floatingLabelBehavior: FloatingLabelBehavior.always,
       prefixText: prefix,
@@ -289,6 +321,8 @@ class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
       border: border(_kFieldBorder),
       enabledBorder: border(_kFieldBorder),
       focusedBorder: border(AppColors.primary, 1.5),
+      errorBorder: border(AppColors.error),
+      focusedErrorBorder: border(AppColors.error, 1.5),
     );
   }
 }

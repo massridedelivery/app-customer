@@ -4025,4 +4025,7 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get supportTicketNotFound => 'ไม่พบเรื่องที่แจ้งนี้';
+
+  @override
+  String get phoneMobileHint => 'กรุณากรอกเบอร์มือถือ 10 หลัก';
 }

@@ -1,4 +1,5 @@
 import 'package:customer_app/core/error/failures.dart';
+import 'package:customer_app/core/utils/phone_format.dart';
 import 'package:customer_app/core/utils/either.dart';
 import 'package:customer_app/features/auth/data/models/send_otp_response.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -29,6 +30,8 @@ class PhoneLoginRepositoryImpl implements PhoneLoginRepository {
       final response = await _dataSource.sendOtp(phone: phone, role: role);
       return Right(SendOtpResponse.fromJson(response));
     } on DioException catch (e) {
+      final invalid = invalidPhoneMessage(e);
+      if (invalid != null) return Left(InvalidPhoneFailure(invalid));
       return Left(
         ServerFailure(e.response?.data['message'] ?? 'Failed to send OTP'),
       );

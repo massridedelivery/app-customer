@@ -1,3 +1,4 @@
+import 'package:customer_app/features/auth/data/models/send_otp_response.dart';
 import 'package:customer_app/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:customer_app/features/auth/presentation/screens/phone_login_screen.dart';
 import 'package:customer_app/features/auth/presentation/states/auth_state.dart';
@@ -13,6 +14,24 @@ class _SpyAuthController extends AuthController {
 
   final EmailOtpSendResult sendResult;
   final emailCodes = <String>[];
+  final smsCodes = <String>[];
+
+  /// When set, the SMS send answers 400 INVALID_PHONE with this text.
+  String? invalidPhoneText;
+
+  @override
+  Future<SendOtpResponse?> sendOtp(
+    String phone, {
+    void Function(String message)? onInvalidPhone,
+  }) async {
+    smsCodes.add(phone);
+    final invalid = invalidPhoneText;
+    if (invalid != null) {
+      onInvalidPhone?.call(invalid);
+      return null;
+    }
+    return SendOtpResponse(message: 'ok', refId: 'r1', isRegistered: true);
+  }
 
   @override
   AuthState build() => const AuthState(isAuthenticated: false);
@@ -48,6 +67,11 @@ Future<_SpyAuthController> _pump(
               builder: (_, _) => PhoneLoginScreen(initialMethod: method),
             ),
             GoRoute(
+              path: '/auth/otp',
+              builder: (_, state) =>
+                  Text('sms-otp:${(state.extra as Map)['phone']}'),
+            ),
+            GoRoute(
               path: '/auth/email-otp',
               builder: (_, state) =>
                   Text('otp:${(state.extra as Map)['email']}'),
@@ -69,7 +93,7 @@ FilledButton _button(WidgetTester tester, String key) => tester.widget(
 );
 
 void main() {
-  testWidgets('phone tab: OTP button enables once the number is long enough', (
+  testWidgets('phone tab: OTP button enables only for a 10-digit mobile', (
     tester,
   ) async {
     await _pump(tester);
@@ -77,10 +101,55 @@ void main() {
     expect(find.byKey(const Key('loginPhone')), findsOneWidget);
     expect(find.byKey(const Key('loginIdentifier')), findsNothing);
     expect(_button(tester, 'loginRequestOtp').onPressed, isNull);
+    expect(find.text('กรุณากรอกเบอร์มือถือ 10 หลัก'), findsNothing);
 
-    await tester.enterText(find.byKey(const Key('loginPhone')), '812345678');
+    for (final short in ['081234567', '812345678']) {
+      await tester.enterText(find.byKey(const Key('loginPhone')), short);
+      await tester.pump();
+      expect(_button(tester, 'loginRequestOtp').onPressed, isNull);
+      expect(find.text('กรุณากรอกเบอร์มือถือ 10 หลัก'), findsOneWidget);
+    }
+
+    await tester.enterText(find.byKey(const Key('loginPhone')), '0812345678');
     await tester.pump();
     expect(_button(tester, 'loginRequestOtp').onPressed, isNotNull);
+    expect(find.text('กรุณากรอกเบอร์มือถือ 10 หลัก'), findsNothing);
+  });
+
+  testWidgets('a dashed number is sent as E.164', (tester) async {
+    final spy = await _pump(tester);
+    await tester.enterText(find.byKey(const Key('loginPhone')), '081-234-5678');
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('loginRequestOtp')));
+    await tester.pumpAndSettle();
+
+    expect(spy.smsCodes, ['+66812345678']);
+    expect(find.text('sms-otp:+66812345678'), findsOneWidget);
+  });
+
+  testWidgets('INVALID_PHONE shows the server text under the field and stays', (
+    tester,
+  ) async {
+    final spy = await _pump(tester)
+      ..invalidPhoneText = 'เบอร์โทรไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง';
+    await tester.enterText(find.byKey(const Key('loginPhone')), '0812345678');
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('loginRequestOtp')));
+    await tester.pumpAndSettle();
+
+    expect(spy.smsCodes, ['+66812345678']);
+    expect(
+      find.text('เบอร์โทรไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง'),
+      findsOneWidget,
+    );
+    expect(find.byType(SnackBar), findsNothing);
+    expect(find.textContaining('sms-otp'), findsNothing);
+
+    // Editing the number clears it.
+    await tester.enterText(find.byKey(const Key('loginPhone')), '081234567');
+    await tester.pumpAndSettle(); // the error text fades out
+    expect(find.text('เบอร์โทรไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง'), findsNothing);
+    expect(find.text('กรุณากรอกเบอร์มือถือ 10 หลัก'), findsOneWidget);
   });
 
   testWidgets('email tab sends a code (no password) and opens the OTP page', (

@@ -6,10 +6,6 @@ part 'register_remote_data_source.g.dart';
 
 abstract interface class RegisterRemoteDataSource {
   Future<void> register({required String email, required String fullName});
-  Future<void> registerDevice({
-    required String token,
-    required String deviceType,
-  });
 }
 
 @riverpod
@@ -31,17 +27,6 @@ class RegisterRemoteDataSourceImpl implements RegisterRemoteDataSource {
     await _apiService.dio.post(
       '/auth/register',
       data: {'email': email, 'role': 'customer', 'full_name': fullName},
-    );
-  }
-
-  @override
-  Future<void> registerDevice({
-    required String token,
-    required String deviceType,
-  }) async {
-    await _apiService.dio.post(
-      '/api/notifications/register-device',
-      data: {'token': token, 'device_type': deviceType},
     );
   }
 }

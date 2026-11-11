@@ -5,6 +5,7 @@ import 'package:customer_app/features/chat/domain/chat_room_ids.dart';
 import 'package:customer_app/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:customer_app/features/inbox/presentation/inbox_controller.dart';
 import 'package:customer_app/router/app_routes.dart';
+import 'package:dio/dio.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -63,6 +64,10 @@ class PushNotificationService {
     _ref.listen(authControllerProvider, (previous, next) {
       if (next.isAuthenticated && previous?.isAuthenticated != true) {
         _requestPermissionAndRegister();
+      } else if (!next.isAuthenticated && previous?.isAuthenticated == true) {
+        // Signed out: the next login must register again (the backend drops
+        // a user's devices on login).
+        _registeredToken = null;
       }
     });
   }
@@ -89,6 +94,12 @@ class PushNotificationService {
 
   bool _initialized = false;
   AppLifecycleListener? _lifecycle;
+
+  /// The FCM token this session already registered, and the registration in
+  /// flight. Login and a restored session can both ask at start-up; together
+  /// they make sure each FCM token goes to the backend once per session.
+  String? _registeredToken;
+  Future<void>? _registering;
 
   Future<void> _refreshPermission() async {
     if (!_ref.read(authControllerProvider).isAuthenticated) return;
@@ -172,8 +183,9 @@ class PushNotificationService {
         await _ref.read(apiRepositoryProvider).unregisterDeviceToken(token);
       }
     } catch (e) {
-      debugPrint('Push: unregister failed (ignored): $e');
+      debugPrint('Push: unregister failed (ignored): ${_describe(e)}');
     }
+    _registeredToken = null;
     try {
       // Invalidate the token client-side so stale server copies stop working.
       await _messaging.deleteToken();
@@ -184,7 +196,10 @@ class PushNotificationService {
 
   /// Runs after every login and at start when signed in. The backend drops
   /// all of a user's devices on each login, so this must follow it.
-  Future<void> _requestPermissionAndRegister() async {
+  Future<void> _requestPermissionAndRegister() => _registering ??=
+      _doRequestPermissionAndRegister().whenComplete(() => _registering = null);
+
+  Future<void> _doRequestPermissionAndRegister() async {
     try {
       final settings = await _messaging.requestPermission(
         alert: true,
@@ -202,14 +217,12 @@ class PushNotificationService {
     try {
       final token = await _fcmToken();
       if (token != null) {
-        // Handy for sending test messages from the Firebase console.
-        debugPrint('Push: FCM token: $token');
         await _registerToken(token);
       } else {
         debugPrint('Push: no FCM token, device not registered');
       }
     } catch (e) {
-      debugPrint('Push: registration failed (ignored): $e');
+      debugPrint('Push: registration failed (ignored): ${_describe(e)}');
     }
   }
 
@@ -235,7 +248,16 @@ class PushNotificationService {
     return _messaging.getToken();
   }
 
+  /// Sends [token] — only ever a value from FirebaseMessaging.getToken() or
+  /// onTokenRefresh, never the session's access/refresh token — to
+  /// register-device, once per token per session. Never logs the token.
   Future<void> _registerToken(String token) async {
+    if (token == _registeredToken) return;
+    if (_looksLikeJwt(token)) {
+      // A session token here is a bug in the caller; the backend would 422 it.
+      debugPrint('Push: refused to register a JWT as the FCM token');
+      return;
+    }
     try {
       await _ref
           .read(apiRepositoryProvider)
@@ -245,11 +267,37 @@ class PushNotificationService {
                 ? 'ios'
                 : 'android',
           );
+      _registeredToken = token;
+    } on DioException catch (e) {
+      // Login must keep working even if the backend refuses the token, and
+      // this never reaches the user. A 422 (e.g. `token_not_fcm`) means the
+      // app sent the wrong kind of token: a programming error, so no retry.
+      final status = e.response?.statusCode;
+      if (status == 422) {
+        final data = e.response?.data;
+        final code = data is Map ? data['code'] : null;
+        debugPrint(
+          'Push: register-device rejected the token (422 $code) — '
+          'not an FCM token; not retrying',
+        );
+      } else {
+        debugPrint('Push: token registration failed (ignored): HTTP $status');
+      }
     } catch (e) {
-      // Login must keep working even if the backend refuses the token.
-      debugPrint('Push: token registration failed (ignored): $e');
+      debugPrint('Push: token registration failed (ignored): ${_describe(e)}');
     }
   }
+
+  /// A JWT (`eyJ….….…`) is the app's own session token, never an FCM one
+  /// (those are `<id>:APA91…`).
+  static bool _looksLikeJwt(String token) =>
+      token.startsWith('eyJ') && token.split('.').length == 3;
+
+  /// An error for a log line: the HTTP status for a Dio error (whose request
+  /// body holds the token), the type otherwise.
+  static String _describe(Object e) => e is DioException
+      ? 'HTTP ${e.response?.statusCode ?? e.type.name}'
+      : e.runtimeType.toString();
 
   void _showForegroundNotification(RemoteMessage message) {
     // A driver's call while the app is open: the socket usually brought it

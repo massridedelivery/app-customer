@@ -96,6 +96,8 @@ class ApiService {
         TalkerDioLogger(
           settings: TalkerDioLoggerSettings(
             printRequestHeaders: false,
+            // register-device / unregister-device bodies carry the FCM token.
+            requestFilter: (o) => !o.path.startsWith('/api/notifications/'),
             printResponseHeaders: true,
             // The PDPA export is the customer's personal data: never in a log,
             // not even a debug one.

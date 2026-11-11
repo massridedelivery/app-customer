@@ -31,20 +31,4 @@ class RegisterRepositoryImpl implements RegisterRepository {
       throw ServerException(e.toString());
     }
   }
-
-  @override
-  Future<void> registerDevice({
-    required String token,
-    required String deviceType,
-  }) async {
-    try {
-      await _dataSource.registerDevice(token: token, deviceType: deviceType);
-    } on DioException catch (e) {
-      final message =
-          e.response?.data['message'] ?? 'Device registration failed';
-      throw ServerException(message);
-    } catch (e) {
-      throw ServerException(e.toString());
-    }
-  }
 }

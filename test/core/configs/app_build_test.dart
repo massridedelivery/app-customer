@@ -13,6 +13,7 @@ void main() {
     expect(AppBuild.format('1.0 5', '1'), '');
     expect(AppBuild.format('1.${'0' * 70}', '1'), '');
     expect(AppBuild.format('', ''), '');
+    expect(AppBuild.format('v1.0.5', '1'), '');
   });
 
   test('no X-App-Version before the build is read', () {

@@ -28,13 +28,13 @@ abstract class AppBuild {
 
   /// `1.0.5` + `129` → `1.0.5+129`; just the version when there is no build
   /// number. Empty when the result isn't something the backend keeps
-  /// (printable ASCII, at most 64 characters).
+  /// (printable ASCII starting with the number, at most 64 characters).
   @visibleForTesting
   static String format(String version, String buildNumber) {
     final v = version.trim();
     final b = buildNumber.trim();
     final s = b.isEmpty ? v : '$v+$b';
-    if (s.length > 64 || !RegExp(r'^[\x21-\x7e]+$').hasMatch(s)) return '';
+    if (s.length > 64 || !RegExp(r'^[0-9][\x21-\x7e]*$').hasMatch(s)) return '';
     return s;
   }
 

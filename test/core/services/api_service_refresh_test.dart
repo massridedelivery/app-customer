@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:customer_app/core/configs/app_build.dart';
 import 'package:customer_app/core/data/token_storage.dart';
 import 'package:customer_app/core/managers/providers.dart';
 import 'package:customer_app/core/services/api_service.dart';
@@ -92,6 +93,18 @@ void main() {
     expect(body(refresh.requests.single), {'refresh_token': 'old-r'});
     expect(storage.getAccessToken(), 'new-a');
     expect(storage.getRefreshToken(), 'new-r');
+  });
+
+  test('API and refresh requests carry the app build headers', () async {
+    AppBuild.debugVersion = '1.0.5+129';
+    addTearDown(() => AppBuild.debugVersion = '');
+    await service.dio.get('/api/x');
+    for (final o in [...api.requests, ...refresh.requests]) {
+      expect(o.headers['X-App-Version'], '1.0.5+129');
+      expect(o.headers['X-App-Platform'], 'android');
+    }
+    expect(api.requests, hasLength(2));
+    expect(refresh.requests, hasLength(1));
   });
 
   test('a timeout retries with the SAME refresh token', () async {

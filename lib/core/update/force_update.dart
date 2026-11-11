@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io' show Platform;
 
+import 'package:customer_app/core/configs/app_build.dart';
 import 'package:customer_app/core/configs/app_env.dart';
 import 'package:customer_app/core/managers/providers.dart';
 import 'package:dio/dio.dart';
@@ -190,8 +191,14 @@ class UpdateSources {
 
   String get platform => Platform.isIOS ? 'ios' : 'android';
 
-  Future<String> currentVersion() async =>
-      (await PackageInfo.fromPlatform()).version;
+  /// `<version>+<build>` (e.g. `1.0.5+129`), the same string every API
+  /// request sends as `X-App-Version`; comparisons ignore the build.
+  Future<String> currentVersion() async {
+    if (AppBuild.version.isEmpty) await AppBuild.load();
+    return AppBuild.version.isNotEmpty
+        ? AppBuild.version
+        : (await PackageInfo.fromPlatform()).version;
+  }
 
   Future<String> bundleId() async =>
       (await PackageInfo.fromPlatform()).packageName;
@@ -207,6 +214,7 @@ class UpdateSources {
               baseUrl: Env.apiBaseUrl,
               connectTimeout: const Duration(seconds: 6),
               receiveTimeout: const Duration(seconds: 6),
+              headers: AppBuild.headers,
             ),
           ).get(
             '/api/config/version',

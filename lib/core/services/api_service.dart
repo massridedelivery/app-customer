@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:customer_app/core/auth/account_block.dart';
+import 'package:customer_app/core/configs/app_build.dart';
 import 'package:customer_app/core/configs/app_env.dart';
 import 'package:talker_dio_logger/talker_dio_logger.dart';
 import 'package:customer_app/core/data/token_storage.dart';
@@ -88,6 +89,16 @@ class ApiService {
   Dio get dio => _dio;
 
   void _setupInterceptors() {
+    // The token refresh is a backend request too.
+    _refreshDio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) {
+          options.headers.addAll(AppBuild.headers);
+          return handler.next(options);
+        },
+      ),
+    );
+
     // Debug builds only, and never a token: request headers carry
     // `Authorization: Bearer <token>`, and the /auth/* answers carry the
     // token pair, so neither is printed.
@@ -125,6 +136,8 @@ class ApiService {
           options.headers['X-Lang'] = _ref
               .read(localeControllerProvider)
               .languageCode;
+          // Which build sent this (admin "App iOS 1.0.5+129", update rules).
+          options.headers.addAll(AppBuild.headers);
           return handler.next(options);
         },
         onError: (DioException error, handler) async {

@@ -4082,4 +4082,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get phoneMobileHint => 'Enter a 10-digit mobile number';
+
+  @override
+  String get authPhoneInvalid => 'Invalid phone number';
+
+  @override
+  String get authOtpSendFailed => 'Couldn\'t send the OTP. Please try again';
+
+  @override
+  String get authOtpNetworkError =>
+      'Couldn\'t connect. Check your internet and try again';
+
+  @override
+  String authOtpRetryIn(String time) {
+    return 'You can request a new code in $time';
+  }
 }

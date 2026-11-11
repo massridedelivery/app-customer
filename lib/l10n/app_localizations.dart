@@ -7440,6 +7440,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enter a 10-digit mobile number'**
   String get phoneMobileHint;
+
+  /// No description provided for @authPhoneInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid phone number'**
+  String get authPhoneInvalid;
+
+  /// No description provided for @authOtpSendFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t send the OTP. Please try again'**
+  String get authOtpSendFailed;
+
+  /// No description provided for @authOtpNetworkError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t connect. Check your internet and try again'**
+  String get authOtpNetworkError;
+
+  /// No description provided for @authOtpRetryIn.
+  ///
+  /// In en, this message translates to:
+  /// **'You can request a new code in {time}'**
+  String authOtpRetryIn(String time);
 }
 
 class _AppLocalizationsDelegate

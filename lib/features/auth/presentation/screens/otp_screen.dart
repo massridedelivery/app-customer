@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
+import 'package:customer_app/core/error/failures.dart';
+import 'package:customer_app/core/utils/countdown.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -90,6 +92,12 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
   bool get _codedErrors => _isEmail || widget.linkToAccount;
   String? _codeError;
 
+  /// Why the last resend failed (rate limit, no SMS, offline).
+  String? _sendError;
+
+  /// A resend is in flight: the link is off so it can't fire twice.
+  bool _resending = false;
+
   /// SMS mode: the backend says the code may not have arrived and offers email.
   bool _offerEmail = false;
   Timer? _smsStatusTimer;
@@ -137,9 +145,9 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
     }
   }
 
-  void _startResendTimer() {
+  void _startResendTimer([int seconds = _resendSeconds]) {
     _timer?.cancel();
-    setState(() => _secondsRemaining = _resendSeconds);
+    setState(() => _secondsRemaining = seconds);
     _timer = Timer.periodic(const Duration(seconds: 1), (t) {
       if (!mounted) {
         t.cancel();
@@ -154,11 +162,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
     });
   }
 
-  String get _countdownLabel {
-    final m = (_secondsRemaining ~/ 60).toString().padLeft(2, '0');
-    final s = (_secondsRemaining % 60).toString().padLeft(2, '0');
-    return '$m:$s';
-  }
+  String get _countdownLabel => formatCountdown(_secondsRemaining);
 
   Future<void> _checkSmsDelivery() async {
     final offered = await ref
@@ -255,6 +259,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
 
   Future<void> _verifyOtp() async {
     if (!_isComplete) return;
+    if (_sendError != null) setState(() => _sendError = null);
     if (_codedErrors) return _verifyCodedOtp();
     final success = await ref
         .read(authControllerProvider.notifier)
@@ -319,14 +324,35 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
   }
 
   Future<void> _resendOtp() async {
-    if (_secondsRemaining > 0) return;
-    if (_codedErrors) return _resendCodedOtp();
-    final response = await ref
+    if (_secondsRemaining > 0 || _resending) return;
+    setState(() => _resending = true);
+    try {
+      if (_codedErrors) return await _resendCodedOtp();
+      await _resendSmsOtp();
+    } finally {
+      if (mounted) setState(() => _resending = false);
+    }
+  }
+
+  /// Same endpoint and rules as the first send; the new ref_id replaces the
+  /// old one, so verify always uses the newest code.
+  Future<void> _resendSmsOtp() async {
+    final result = await ref
         .read(authControllerProvider.notifier)
         .sendOtp(widget.phone);
-    if (!mounted || response == null) return;
+    if (!mounted) return;
+    final response = result.response;
+    if (response == null) {
+      if (result.error == OtpSendError.accountBlocked) return;
+      setState(() => _sendError = result.message);
+      if (result.error == OtpSendError.rateLimited) {
+        _startResendTimer(result.retryAfter);
+      }
+      return;
+    }
     setState(() {
       _refId = response.refId;
+      _sendError = null;
       _autoSubmitted = false;
       _otpController.clear();
     });
@@ -342,6 +368,8 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
     final l10n = AppLocalizations.of(context)!;
     final authState = ref.watch(authControllerProvider);
     final isLoading = authState.isLoading;
+    final shownError =
+        _sendError ?? (_codedErrors ? _codeError : authState.error);
 
     return Scaffold(
       backgroundColor: _kBg,
@@ -425,11 +453,12 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
 
               _buildVerifyButton(l10n, isLoading),
 
-              if ((_codedErrors ? _codeError : authState.error) != null)
+              if (shownError != null)
                 Padding(
                   padding: const EdgeInsets.only(top: 16),
                   child: Text(
-                    (_codedErrors ? _codeError : authState.error)!,
+                    shownError,
+                    key: const Key('otpError'),
                     style: TextStyle(color: AppColors.error),
                     textAlign: TextAlign.center,
                   ),
@@ -582,7 +611,8 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
       );
     }
     return TextButton(
-      onPressed: _resendOtp,
+      key: const Key('otpResend'),
+      onPressed: _resending ? null : _resendOtp,
       child: Text(
         l10n.resendCode,
         style: AppTypography.label2.copyWith(color: AppColors.primary),

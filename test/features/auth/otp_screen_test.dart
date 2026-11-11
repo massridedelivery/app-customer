@@ -1,3 +1,5 @@
+import 'package:customer_app/core/error/failures.dart';
+import 'package:customer_app/features/auth/data/models/send_otp_response.dart';
 import 'package:customer_app/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:customer_app/features/auth/presentation/screens/otp_screen.dart';
 import 'package:customer_app/features/auth/presentation/states/auth_state.dart';
@@ -30,6 +32,35 @@ class _FakeAuthController extends AuthController {
 
   @override
   Future<bool> smsEmailFallbackOffered(String refId) async => fallbackOffered;
+
+  /// SMS resend: answers with [resendResult] (default: a new ref id).
+  PhoneOtpSendResult? resendResult;
+  final resent = <String>[];
+
+  @override
+  Future<PhoneOtpSendResult> sendOtp(String phone) async {
+    resent.add(phone);
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+    return resendResult ??
+        PhoneOtpSendResult.sent(
+          SendOtpResponse(message: 'ok', refId: 'ref-new', isRegistered: true),
+        );
+  }
+
+  final smsVerified = <(String, String)>[];
+
+  @override
+  Future<bool> sendVerifyOtp({
+    required String phone,
+    required String otp,
+    required String refId,
+    required String role,
+    required bool isRegistered,
+    String? fullName,
+  }) async {
+    smsVerified.add((otp, refId));
+    return false;
+  }
 }
 
 Future<void> _pump(
@@ -126,5 +157,91 @@ void main() {
     await tester.tap(find.byKey(const Key('smsEmailFallback')));
     await tester.pumpAndSettle();
     expect(find.text('email login'), findsOneWidget);
+  });
+
+  testWidgets('SMS resend: one send per tap, verify uses the new ref_id', (
+    tester,
+  ) async {
+    final fake = _FakeAuthController();
+    await _pump(
+      tester,
+      fake,
+      const OtpScreen(
+        phone: '+66892616445',
+        refId: 'ref-old',
+        isRegistered: true,
+      ),
+    );
+    await tester.pump(const Duration(seconds: 60));
+    await tester.pump();
+
+    await tester.tap(find.byKey(const Key('otpResend')));
+    await tester.pump(); // in flight: the link is off
+    await tester.tap(find.byKey(const Key('otpResend')), warnIfMissed: false);
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(fake.resent, ['+66892616445']);
+    expect(find.text('ส่งรหัสอีกครั้งใน 01:00'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField), '654321');
+    await tester.pump();
+    expect(fake.smsVerified, [('654321', 'ref-new')]);
+    await tester.pump(const Duration(seconds: 61));
+  });
+
+  testWidgets('SMS resend 429: shows why and counts down retry_after', (
+    tester,
+  ) async {
+    final fake = _FakeAuthController()
+      ..resendResult = const PhoneOtpSendResult.failed(
+        OtpSendError.rateLimited,
+        'ขอ OTP บ่อยเกินไป',
+        retryAfter: 90,
+      );
+    await _pump(
+      tester,
+      fake,
+      const OtpScreen(
+        phone: '+66892616445',
+        refId: 'ref-old',
+        isRegistered: true,
+      ),
+    );
+    await tester.pump(const Duration(seconds: 60));
+    await tester.pump();
+
+    await tester.tap(find.byKey(const Key('otpResend')));
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.text('ขอ OTP บ่อยเกินไป'), findsOneWidget);
+    expect(find.text('ส่งรหัสอีกครั้งใน 01:30'), findsOneWidget);
+    expect(find.byKey(const Key('otpResend')), findsNothing);
+
+    // The old code still verifies against the old ref.
+    await tester.enterText(find.byType(TextField), '111111');
+    await tester.pump();
+    expect(fake.smsVerified, [('111111', 'ref-old')]);
+    await tester.pump(const Duration(seconds: 91));
+  });
+
+  testWidgets('SMS resend failure (500) shows the message, can try again', (
+    tester,
+  ) async {
+    final fake = _FakeAuthController()
+      ..resendResult = const PhoneOtpSendResult.failed(
+        OtpSendError.sendFailed,
+        'ส่ง OTP ไม่สำเร็จ ลองใหม่อีกครั้ง',
+      );
+    await _pump(
+      tester,
+      fake,
+      const OtpScreen(phone: '+66892616445', refId: 'r', isRegistered: true),
+    );
+    await tester.pump(const Duration(seconds: 60));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('otpResend')));
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.text('ส่ง OTP ไม่สำเร็จ ลองใหม่อีกครั้ง'), findsOneWidget);
+    expect(find.byKey(const Key('otpResend')), findsOneWidget);
   });
 }

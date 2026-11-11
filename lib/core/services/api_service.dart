@@ -96,8 +96,12 @@ class ApiService {
         TalkerDioLogger(
           settings: TalkerDioLoggerSettings(
             printRequestHeaders: false,
-            // register-device / unregister-device bodies carry the FCM token.
-            requestFilter: (o) => !o.path.startsWith('/api/notifications/'),
+            // register-device / unregister-device bodies carry the FCM token;
+            // /auth/* bodies carry the OTP, ref_id and passwords (OTP sends
+            // log URL + status + code themselves, see PhoneLoginDataSource).
+            requestFilter: (o) =>
+                !o.path.startsWith('/api/notifications/') &&
+                !o.path.startsWith('/auth/'),
             printResponseHeaders: true,
             // The PDPA export is the customer's personal data: never in a log,
             // not even a debug one.

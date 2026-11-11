@@ -63,6 +63,17 @@ class CrashReporting {
     }
   }
 
+  /// A one-line trail entry: printed to the device log and, in release
+  /// builds, attached to the next Crashlytics report. Never pass a code, token,
+  /// ref id or phone number.
+  static void breadcrumb(String message) {
+    debugPrint(message);
+    if (kDebugMode || !_started) return;
+    try {
+      FirebaseCrashlytics.instance.log(message).catchError((Object _) {});
+    } catch (_) {}
+  }
+
   /// Ties reports to the signed-in customer (hashed) and drops that on logout.
   static void followUser(ProviderContainer container) {
     if (kDebugMode) return;

@@ -1,3 +1,4 @@
+import 'package:customer_app/core/error/failures.dart';
 import 'package:customer_app/features/auth/data/models/send_otp_response.dart';
 import 'package:customer_app/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:customer_app/features/auth/presentation/screens/phone_login_screen.dart';
@@ -16,21 +17,16 @@ class _SpyAuthController extends AuthController {
   final emailCodes = <String>[];
   final smsCodes = <String>[];
 
-  /// When set, the SMS send answers 400 INVALID_PHONE with this text.
-  String? invalidPhoneText;
+  /// What the SMS send answers; null = success.
+  PhoneOtpSendResult? smsFailure;
 
   @override
-  Future<SendOtpResponse?> sendOtp(
-    String phone, {
-    void Function(String message)? onInvalidPhone,
-  }) async {
+  Future<PhoneOtpSendResult> sendOtp(String phone) async {
     smsCodes.add(phone);
-    final invalid = invalidPhoneText;
-    if (invalid != null) {
-      onInvalidPhone?.call(invalid);
-      return null;
-    }
-    return SendOtpResponse(message: 'ok', refId: 'r1', isRegistered: true);
+    return smsFailure ??
+        PhoneOtpSendResult.sent(
+          SendOtpResponse(message: 'ok', refId: 'r1', isRegistered: true),
+        );
   }
 
   @override
@@ -131,7 +127,10 @@ void main() {
     tester,
   ) async {
     final spy = await _pump(tester)
-      ..invalidPhoneText = 'เบอร์โทรไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง';
+      ..smsFailure = const PhoneOtpSendResult.failed(
+        OtpSendError.invalidPhone,
+        'เบอร์โทรไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง',
+      );
     await tester.enterText(find.byKey(const Key('loginPhone')), '0812345678');
     await tester.pump();
     await tester.tap(find.byKey(const Key('loginRequestOtp')));
@@ -150,6 +149,81 @@ void main() {
     await tester.pumpAndSettle(); // the error text fades out
     expect(find.text('เบอร์โทรไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง'), findsNothing);
     expect(find.text('กรุณากรอกเบอร์มือถือ 10 หลัก'), findsOneWidget);
+  });
+
+  testWidgets('429: shows the text and a countdown, button off until 0', (
+    tester,
+  ) async {
+    final spy = await _pump(tester)
+      ..smsFailure = const PhoneOtpSendResult.failed(
+        OtpSendError.rateLimited,
+        'ขอ OTP บ่อยเกินไป',
+        retryAfter: 3,
+      );
+    await tester.enterText(find.byKey(const Key('loginPhone')), '0892616445');
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('loginRequestOtp')));
+    await tester.pump();
+
+    expect(find.text('ขอ OTP บ่อยเกินไป'), findsOneWidget);
+    expect(find.text('ขอรหัสใหม่ได้ใน 00:03'), findsOneWidget);
+    expect(_button(tester, 'loginRequestOtp').onPressed, isNull);
+    expect(find.textContaining('sms-otp'), findsNothing);
+
+    // Keyboard "done" can't get around it either.
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pump();
+    expect(spy.smsCodes, hasLength(1)); // no auto-retry, no second send
+
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('ขอรหัสใหม่ได้ใน 00:02'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 2));
+    expect(find.byKey(const Key('loginSendCooldown')), findsNothing);
+    expect(find.text('ขอ OTP บ่อยเกินไป'), findsNothing);
+    expect(_button(tester, 'loginRequestOtp').onPressed, isNotNull);
+  });
+
+  testWidgets('500 / offline: message under the button, no code screen', (
+    tester,
+  ) async {
+    final spy = await _pump(tester)
+      ..smsFailure = const PhoneOtpSendResult.failed(
+        OtpSendError.sendFailed,
+        'ส่ง OTP ไม่สำเร็จ ลองใหม่อีกครั้ง',
+      );
+    await tester.enterText(find.byKey(const Key('loginPhone')), '0892616445');
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('loginRequestOtp')));
+    await tester.pump();
+
+    expect(find.text('ส่ง OTP ไม่สำเร็จ ลองใหม่อีกครั้ง'), findsOneWidget);
+    expect(find.textContaining('sms-otp'), findsNothing);
+    // Can try again straight away.
+    expect(_button(tester, 'loginRequestOtp').onPressed, isNotNull);
+
+    spy.smsFailure = const PhoneOtpSendResult.failed(
+      OtpSendError.network,
+      'เชื่อมต่อไม่สำเร็จ',
+    );
+    await tester.tap(find.byKey(const Key('loginRequestOtp')));
+    await tester.pump();
+    expect(find.text('เชื่อมต่อไม่สำเร็จ'), findsOneWidget);
+    expect(find.textContaining('sms-otp'), findsNothing);
+  });
+
+  testWidgets('403 blocked: no code screen (the blocked screen takes over)', (
+    tester,
+  ) async {
+    final spy = await _pump(tester);
+    spy.smsFailure = const PhoneOtpSendResult.failed(
+      OtpSendError.accountBlocked,
+      'x',
+    );
+    await tester.enterText(find.byKey(const Key('loginPhone')), '0892616445');
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('loginRequestOtp')));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('sms-otp'), findsNothing);
   });
 
   testWidgets('email tab sends a code (no password) and opens the OTP page', (

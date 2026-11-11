@@ -7,7 +7,6 @@ import 'package:customer_app/features/profile/presentation/controllers/profile_c
 import 'package:customer_app/features/profile/presentation/screens/account_email_screen.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -24,13 +23,24 @@ class _AccountPhoneScreenState extends ConsumerState<AccountPhoneScreen> {
   final _phoneController = TextEditingController();
   bool _sending = false;
 
-  String get _e164 => toE164Thai(_phoneController.text.trim());
-  bool get _isValid => isThaiE164(_e164);
+  /// The server's 400 INVALID_PHONE text, shown under the field until the
+  /// number is edited.
+  String? _serverError;
+  String _lastText = '';
+
+  String get _e164 => toE164Thai(_phoneController.text);
+  bool get _isValid => isValidThaiMobile(_phoneController.text);
 
   @override
   void initState() {
     super.initState();
-    _phoneController.addListener(() => setState(() {}));
+    _phoneController.addListener(
+      () => setState(() {
+        if (_phoneController.text == _lastText) return;
+        _lastText = _phoneController.text;
+        _serverError = null;
+      }),
+    );
   }
 
   @override
@@ -49,6 +59,15 @@ class _AccountPhoneScreenState extends ConsumerState<AccountPhoneScreen> {
         .sendAccountPhone(phone);
     if (!mounted) return;
     setState(() => _sending = false);
+    if (result.error == EmailOtpError.invalidPhone) {
+      final message = result.message;
+      setState(
+        () => _serverError = message != null && message.isNotEmpty
+            ? message
+            : l10n.profilePhoneInvalid,
+      );
+      return;
+    }
     if (!result.ok) {
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
@@ -57,7 +76,6 @@ class _AccountPhoneScreenState extends ConsumerState<AccountPhoneScreen> {
             content: Text(switch (result.error) {
               EmailOtpError.phoneInUse => l10n.profilePhoneInUse,
               EmailOtpError.rateLimited => l10n.authOtpRateLimited,
-              EmailOtpError.invalidPhone => l10n.profilePhoneInvalid,
               _ => l10n.profilePhoneSendFailed,
             }),
           ),
@@ -143,16 +161,18 @@ class _AccountPhoneScreenState extends ConsumerState<AccountPhoneScreen> {
               controller: _phoneController,
               keyboardType: TextInputType.phone,
               autofillHints: const [AutofillHints.telephoneNumber],
-              inputFormatters: [
-                FilteringTextInputFormatter.allow(RegExp(r'[0-9+]')),
-                LengthLimitingTextInputFormatter(15),
-              ],
+              inputFormatters: const [ThaiMobileInputFormatter()],
               textInputAction: TextInputAction.done,
               onSubmitted: (_) => _sendCode(),
               style: AppTypography.body1,
               decoration: InputDecoration(
                 labelText: l10n.phoneNumber,
                 hintText: '0812345678',
+                helperText: _phoneController.text.isNotEmpty && !_isValid
+                    ? l10n.phoneMobileHint
+                    : null,
+                errorText: _serverError,
+                errorMaxLines: 2,
                 labelStyle: AppTypography.body2,
                 hintStyle: AppTypography.body1.copyWith(
                   color: AppColors.textSecondary,

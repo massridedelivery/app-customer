@@ -105,7 +105,10 @@ Future<void> _enterAndSend(WidgetTester tester, String phone) async {
 
 void main() {
   test('parses GET /auth/phone', () {
-    final p = AccountPhone.fromJson({'phone': '+66812345678', 'verified': true});
+    final p = AccountPhone.fromJson({
+      'phone': '+66812345678',
+      'verified': true,
+    });
     expect(p.phone, '+66812345678');
     expect(p.verified, isTrue);
     expect(AccountPhone.fromJson({'phone': ''}).isEmpty, isTrue);
@@ -140,7 +143,11 @@ void main() {
   testWidgets('no number yet → "เพิ่มเบอร์โทร"; short input stays disabled', (
     tester,
   ) async {
-    await _pump(tester, _Script(), current: const AccountPhone(phone: '', verified: false));
+    await _pump(
+      tester,
+      _Script(),
+      current: const AccountPhone(phone: '', verified: false),
+    );
     expect(find.text('เพิ่มเบอร์โทร'), findsOneWidget);
     await tester.enterText(find.byKey(const Key('accountPhoneInput')), '0812');
     await tester.pump();
@@ -148,6 +155,28 @@ void main() {
       find.byKey(const Key('accountPhoneSend')),
     );
     expect(button.onPressed, isNull);
+  });
+
+  testWidgets('INVALID_PHONE shows the server text under the field', (
+    tester,
+  ) async {
+    await _pump(
+      tester,
+      _Script(
+        send: const EmailOtpSendResult.failed(
+          EmailOtpError.invalidPhone,
+          message: 'เบอร์โทรไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง',
+        ),
+      ),
+    );
+    await _enterAndSend(tester, '0812345678');
+    expect(
+      find.text('เบอร์โทรไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง'),
+      findsOneWidget,
+    );
+    expect(find.byType(SnackBar), findsNothing);
+    expect(find.byType(OtpScreen), findsNothing);
+    expect(find.byKey(const Key('accountPhoneInput')), findsOneWidget);
   });
 
   testWidgets('a number on another account is refused', (tester) async {

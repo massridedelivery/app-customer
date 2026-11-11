@@ -4079,4 +4079,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get supportTicketNotFound => 'This report couldn\'t be found';
+
+  @override
+  String get phoneMobileHint => 'Enter a 10-digit mobile number';
 }

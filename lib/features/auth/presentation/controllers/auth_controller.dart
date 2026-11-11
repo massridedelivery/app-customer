@@ -14,6 +14,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 // Added imports for PhoneLoginUseCase and Failure
 import 'package:customer_app/core/error/failures.dart';
+import 'package:customer_app/core/utils/phone_format.dart';
 import 'package:customer_app/core/localization/locale_controller.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
 
@@ -245,7 +246,13 @@ class AuthController extends _$AuthController {
   // ─── PHONE LOGIN USE CASE ──────────────────────────────────────────────────
 
   /// Calls PhoneLoginUseCase to send OTP.
-  Future<SendOtpResponse?> sendOtp(String phone) async {
+  ///
+  /// A 400 INVALID_PHONE goes to [onInvalidPhone] with the server's text
+  /// (shown under the phone field) instead of `state.error`'s snackbar.
+  Future<SendOtpResponse?> sendOtp(
+    String phone, {
+    void Function(String message)? onInvalidPhone,
+  }) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
       // Assuming phoneLoginUseCaseProvider is defined elsewhere and available
@@ -261,6 +268,11 @@ class AuthController extends _$AuthController {
       );
       return result.fold(
         (Failure failure) {
+          if (failure is InvalidPhoneFailure && onInvalidPhone != null) {
+            state = state.copyWith(isLoading: false);
+            onInvalidPhone(failure.message);
+            return null;
+          }
           state = state.copyWith(isLoading: false, error: failure.message);
           return null;
         },
@@ -457,6 +469,13 @@ class AuthController extends _$AuthController {
       final code = _errorCode(e);
       final inUse = _inUse(code, status);
       if (inUse != null) return EmailOtpSendResult.failed(inUse);
+      final invalidPhone = invalidPhoneMessage(e);
+      if (invalidPhone != null) {
+        return EmailOtpSendResult.failed(
+          EmailOtpError.invalidPhone,
+          message: invalidPhone,
+        );
+      }
       if (status == 503 || code == 'EMAIL_LOGIN_UNAVAILABLE') {
         return const EmailOtpSendResult.failed(EmailOtpError.unavailable);
       }
@@ -547,7 +566,7 @@ enum EmailOtpError {
   /// Add-phone: the number belongs to another account (409 PHONE_IN_USE).
   phoneInUse,
 
-  /// Add-phone: not a valid number (400 without a code).
+  /// Add-phone: not a valid number (400 INVALID_PHONE, or 400 without a code).
   invalidPhone,
 
   /// Add-email: the code wasn't issued for this account/email (OTP_MISMATCH).
@@ -558,12 +577,18 @@ enum EmailOtpError {
 /// Outcome of [AuthController.sendEmailOtp].
 class EmailOtpSendResult {
   const EmailOtpSendResult.sent({required this.refId, required this.isRegistered})
-    : error = null;
-  const EmailOtpSendResult.failed(this.error) : refId = '', isRegistered = false;
+    : error = null,
+      message = null;
+  const EmailOtpSendResult.failed(this.error, {this.message})
+    : refId = '',
+      isRegistered = false;
 
   final String refId;
   final bool isRegistered;
   final EmailOtpError? error;
+
+  /// The server's own text for the failure, when it sent one (INVALID_PHONE).
+  final String? message;
 
   bool get ok => error == null;
 }

@@ -1255,5 +1255,6 @@
   "ratingTagOvercharged": "เก็บเงินเกิน",
   "supportChatStart": "แชทกับเจ้าหน้าที่",
   "supportChatHint": "พิมพ์ข้อความ…",
-  "supportTicketNotFound": "ไม่พบเรื่องที่แจ้งนี้"
+  "supportTicketNotFound": "ไม่พบเรื่องที่แจ้งนี้",
+  "phoneMobileHint": "กรุณากรอกเบอร์มือถือ 10 หลัก"
 }

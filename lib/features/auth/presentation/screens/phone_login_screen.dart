@@ -1,11 +1,14 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
+import 'package:customer_app/core/error/failures.dart';
+import 'package:customer_app/core/utils/countdown.dart';
 import 'package:customer_app/core/utils/phone_format.dart';
 import 'package:customer_app/core/widgets/hero_header.dart';
 import 'package:customer_app/core/widgets/pill_tabs.dart';
-import 'package:customer_app/features/auth/data/models/send_otp_response.dart';
 import 'package:customer_app/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -43,6 +46,13 @@ class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
   String? _phoneServerError;
   String _lastPhone = '';
 
+  /// Why the last send failed (anything but a bad number), under the button.
+  String? _sendError;
+
+  /// 429: seconds until sending is allowed again; the button stays off.
+  int _cooldown = 0;
+  Timer? _cooldownTimer;
+
   /// Email login isn't offered by this backend (503 EMAIL_LOGIN_UNAVAILABLE,
   /// e.g. prod before launch): hide the email tab and stay on phone.
   bool _emailUnavailable = false;
@@ -57,11 +67,13 @@ class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
       if (_phoneController.text == _lastPhone) return;
       _lastPhone = _phoneController.text;
       _phoneServerError = null;
+      if (_cooldown == 0) _sendError = null;
     });
   }
 
   @override
   void dispose() {
+    _cooldownTimer?.cancel();
     _phoneController.dispose();
     _emailController.dispose();
     _phoneFocus.dispose();
@@ -75,27 +87,17 @@ class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
   ).hasMatch(_emailController.text.trim());
 
   Future<void> _requestOtp() async {
-    if (!_isValidPhone) return;
+    if (!_isValidPhone || _cooldown > 0) return;
 
     final phone = toE164Thai(_phoneController.text.trim());
-
-    final SendOtpResponse? response = await ref
+    final result = await ref
         .read(authControllerProvider.notifier)
-        .sendOtp(
-          phone,
-          onInvalidPhone: (message) {
-            if (!mounted) return;
-            final l10n = AppLocalizations.of(context)!;
-            setState(
-              () => _phoneServerError = message.isNotEmpty
-                  ? message
-                  : l10n.profilePhoneInvalid,
-            );
-            _phoneFocus.requestFocus();
-          },
-        );
+        .sendOtp(phone);
+    if (!mounted) return;
 
-    if (response != null && mounted) {
+    final response = result.response;
+    if (response != null) {
+      setState(() => _sendError = null);
       context.push(
         '/auth/otp',
         extra: {
@@ -104,7 +106,38 @@ class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
           'isRegistered': response.isRegistered,
         },
       );
+      return;
     }
+    switch (result.error!) {
+      case OtpSendError.invalidPhone:
+        setState(() => _phoneServerError = result.message);
+        _phoneFocus.requestFocus();
+      case OtpSendError.accountBlocked:
+        return; // the account-blocked screen takes over
+      case OtpSendError.rateLimited:
+        setState(() => _sendError = result.message);
+        _startCooldown(result.retryAfter);
+      case OtpSendError.sendFailed:
+      case OtpSendError.network:
+      case OtpSendError.server:
+        setState(() => _sendError = result.message);
+    }
+  }
+
+  void _startCooldown(int seconds) {
+    _cooldownTimer?.cancel();
+    setState(() => _cooldown = seconds);
+    _cooldownTimer = Timer.periodic(const Duration(seconds: 1), (t) {
+      if (!mounted) return t.cancel();
+      setState(() => _cooldown--);
+      if (_cooldown <= 0) {
+        t.cancel();
+        setState(() {
+          _cooldown = 0;
+          _sendError = null;
+        });
+      }
+    });
   }
 
   /// Email login is a one-time code (no password): send it, then the OTP
@@ -238,7 +271,7 @@ class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
         inputFormatters: const [ThaiMobileInputFormatter()],
         textInputAction: TextInputAction.done,
         onSubmitted: (_) {
-          if (_isValidPhone && !isLoading) _requestOtp();
+          if (_isValidPhone && !isLoading && _cooldown == 0) _requestOtp();
         },
         style: AppTypography.body1.copyWith(color: _kInk),
         decoration: _decoration(
@@ -255,8 +288,28 @@ class _PhoneLoginScreenState extends ConsumerState<PhoneLoginScreen> {
         key: const Key('loginRequestOtp'),
         label: l10n.authRequestOtp,
         loading: isLoading,
-        onPressed: _isValidPhone && !isLoading ? _requestOtp : null,
+        onPressed: _isValidPhone && !isLoading && _cooldown == 0
+            ? _requestOtp
+            : null,
       ),
+      if (_sendError != null) ...[
+        const SizedBox(height: 10),
+        Text(
+          _sendError!,
+          key: const Key('loginSendError'),
+          textAlign: TextAlign.center,
+          style: AppTypography.caption4.copyWith(color: AppColors.error),
+        ),
+      ],
+      if (_cooldown > 0) ...[
+        const SizedBox(height: 4),
+        Text(
+          l10n.authOtpRetryIn(formatCountdown(_cooldown)),
+          key: const Key('loginSendCooldown'),
+          textAlign: TextAlign.center,
+          style: AppTypography.caption4.copyWith(color: _kMuted),
+        ),
+      ],
     ];
   }
 

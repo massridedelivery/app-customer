@@ -245,47 +245,64 @@ class AuthController extends _$AuthController {
 
   // ─── PHONE LOGIN USE CASE ──────────────────────────────────────────────────
 
-  /// Calls PhoneLoginUseCase to send OTP.
-  ///
-  /// A 400 INVALID_PHONE goes to [onInvalidPhone] with the server's text
-  /// (shown under the phone field) instead of `state.error`'s snackbar.
-  Future<SendOtpResponse?> sendOtp(
-    String phone, {
-    void Function(String message)? onInvalidPhone,
-  }) async {
+  /// The send in flight, so a double tap (login button + keyboard "done", or
+  /// resend tapped twice) can't fire a second SMS that voids the first code.
+  Future<PhoneOtpSendResult>? _otpSend;
+
+  /// Sends a login code to [phone] (E.164). Every failure comes back with a
+  /// message to show: nothing is swallowed, and the caller opens the code
+  /// screen only for [PhoneOtpSendResult.ok]. Never retried automatically.
+  Future<PhoneOtpSendResult> sendOtp(String phone) =>
+      _otpSend ??= _sendOtp(phone).whenComplete(() => _otpSend = null);
+
+  Future<PhoneOtpSendResult> _sendOtp(String phone) async {
+    // A bad number never reaches the API.
+    if (!isValidThaiMobile(phone)) {
+      return PhoneOtpSendResult.failed(
+        OtpSendError.invalidPhone,
+        _l10n.authPhoneInvalid,
+      );
+    }
     state = state.copyWith(isLoading: true, error: null);
     try {
-      // Assuming phoneLoginUseCaseProvider is defined elsewhere and available
-      // If it's in providers.dart, this import would be needed:
-      // import 'package:customer_app/core/managers/providers.dart'; // Already present
-      // And the provider would be: ref.read(phoneLoginUseCaseProvider);
-      final phoneLoginUseCase = ref.read(
-        phoneLoginUseCaseProvider,
-      ); // Assuming this provider exists
-      final result = await phoneLoginUseCase.sendOtp(
-        phone: phone,
-        role: 'customer', // Assuming 'customer' role based on context
-      );
+      final result = await ref
+          .read(phoneLoginUseCaseProvider)
+          .sendOtp(phone: phone, role: 'customer');
+      state = state.copyWith(isLoading: false);
       return result.fold(
-        (Failure failure) {
-          if (failure is InvalidPhoneFailure && onInvalidPhone != null) {
-            state = state.copyWith(isLoading: false);
-            onInvalidPhone(failure.message);
-            return null;
-          }
-          state = state.copyWith(isLoading: false, error: failure.message);
-          return null;
-        },
-        (SendOtpResponse response) {
-          state = state.copyWith(isLoading: false);
-          return response;
-        },
+        (failure) => failure is OtpSendFailure
+            ? PhoneOtpSendResult.failed(
+                failure.kind,
+                _otpSendMessage(failure),
+                retryAfter: failure.retryAfter,
+              )
+            : PhoneOtpSendResult.failed(
+                OtpSendError.server,
+                _l10n.authOtpSendFailed,
+              ),
+        PhoneOtpSendResult.sent,
       );
-    } catch (e) {
-      // Catch any unexpected exceptions
-      state = state.copyWith(isLoading: false, error: _errorMessage(e));
-      return null;
+    } catch (_) {
+      state = state.copyWith(isLoading: false);
+      return PhoneOtpSendResult.failed(
+        OtpSendError.server,
+        _l10n.authOtpSendFailed,
+      );
     }
+  }
+
+  String _otpSendMessage(OtpSendFailure f) {
+    if (f.message.isNotEmpty) return f.message; // the server's own words
+    return switch (f.kind) {
+      OtpSendError.invalidPhone => _l10n.authPhoneInvalid,
+      OtpSendError.accountBlocked =>
+        f.code == 'account_deleted'
+            ? _l10n.authAccountDeletedBody
+            : _l10n.authAccountSuspendedBody,
+      OtpSendError.rateLimited => _l10n.authOtpRateLimited,
+      OtpSendError.network => _l10n.authOtpNetworkError,
+      OtpSendError.sendFailed || OtpSendError.server => _l10n.authOtpSendFailed,
+    };
   }
 
   Future<bool> sendVerifyOtp({
@@ -309,7 +326,12 @@ class AuthController extends _$AuthController {
       );
       return result.fold(
         (Failure failure) {
-          state = state.copyWith(isLoading: false, error: failure.message);
+          state = state.copyWith(
+            isLoading: false,
+            error: failure.message.isEmpty
+                ? _l10n.authGenericError
+                : failure.message,
+          );
           return false;
         },
         (PhoneLoginResponse response) async {
@@ -572,6 +594,30 @@ enum EmailOtpError {
   /// Add-email: the code wasn't issued for this account/email (OTP_MISMATCH).
   mismatch,
   failed,
+}
+
+/// Outcome of [AuthController.sendOtp] (phone login / resend).
+class PhoneOtpSendResult {
+  const PhoneOtpSendResult.sent(SendOtpResponse this.response)
+    : error = null,
+      message = '',
+      retryAfter = 0;
+  const PhoneOtpSendResult.failed(
+    OtpSendError this.error,
+    this.message, {
+    this.retryAfter = 0,
+  }) : response = null;
+
+  final SendOtpResponse? response;
+  final OtpSendError? error;
+
+  /// What to show the user (localized, or the server's own text).
+  final String message;
+
+  /// Rate limited: seconds before sending is allowed again.
+  final int retryAfter;
+
+  bool get ok => response != null;
 }
 
 /// Outcome of [AuthController.sendEmailOtp].

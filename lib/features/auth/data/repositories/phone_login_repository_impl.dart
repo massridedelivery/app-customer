@@ -1,7 +1,7 @@
 import 'package:customer_app/core/error/failures.dart';
-import 'package:customer_app/core/utils/phone_format.dart';
 import 'package:customer_app/core/utils/either.dart';
 import 'package:customer_app/features/auth/data/models/send_otp_response.dart';
+import 'package:customer_app/features/auth/data/otp_send_errors.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../domain/entities/phone_login_response.dart';
 import '../../domain/repositories/phone_login_repository.dart';
@@ -30,13 +30,10 @@ class PhoneLoginRepositoryImpl implements PhoneLoginRepository {
       final response = await _dataSource.sendOtp(phone: phone, role: role);
       return Right(SendOtpResponse.fromJson(response));
     } on DioException catch (e) {
-      final invalid = invalidPhoneMessage(e);
-      if (invalid != null) return Left(InvalidPhoneFailure(invalid));
-      return Left(
-        ServerFailure(e.response?.data['message'] ?? 'Failed to send OTP'),
-      );
-    } catch (e) {
-      return Left(ServerFailure(e.toString()));
+      return Left(otpSendFailureOf(e));
+    } catch (_) {
+      // A 200 without a ref_id, or a body that isn't the expected JSON.
+      return const Left(OtpSendFailure(OtpSendError.server));
     }
   }
 
@@ -58,11 +55,12 @@ class PhoneLoginRepositoryImpl implements PhoneLoginRepository {
       );
       return Right(PhoneLoginResponse.fromJson(response));
     } on DioException catch (e) {
-      return Left(
-        AuthFailure(e.response?.data['message'] ?? 'OTP verification failed'),
-      );
-    } catch (e) {
-      return Left(ServerFailure(e.toString()));
+      // The body can be a proxy's HTML page: read it only when it's JSON.
+      final data = e.response?.data;
+      final text = data is Map ? data['error'] ?? data['message'] : null;
+      return Left(AuthFailure(text is String ? text : ''));
+    } catch (_) {
+      return const Left(ServerFailure(''));
     }
   }
 }

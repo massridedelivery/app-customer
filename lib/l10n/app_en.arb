@@ -1398,5 +1398,16 @@
   "supportChatStart": "Chat with support",
   "supportChatHint": "Type a message…",
   "supportTicketNotFound": "This report couldn't be found",
-  "phoneMobileHint": "Enter a 10-digit mobile number"
+  "phoneMobileHint": "Enter a 10-digit mobile number",
+  "authPhoneInvalid": "Invalid phone number",
+  "authOtpSendFailed": "Couldn't send the OTP. Please try again",
+  "authOtpNetworkError": "Couldn't connect. Check your internet and try again",
+  "authOtpRetryIn": "You can request a new code in {time}",
+  "@authOtpRetryIn": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  }
 }

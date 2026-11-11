@@ -4028,4 +4028,19 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get phoneMobileHint => 'กรุณากรอกเบอร์มือถือ 10 หลัก';
+
+  @override
+  String get authPhoneInvalid => 'เบอร์โทรไม่ถูกต้อง';
+
+  @override
+  String get authOtpSendFailed => 'ส่ง OTP ไม่สำเร็จ ลองใหม่อีกครั้ง';
+
+  @override
+  String get authOtpNetworkError =>
+      'เชื่อมต่อไม่สำเร็จ กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองใหม่อีกครั้ง';
+
+  @override
+  String authOtpRetryIn(String time) {
+    return 'ขอรหัสใหม่ได้ใน $time';
+  }
 }

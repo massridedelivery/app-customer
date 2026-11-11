@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:customer_app/app.dart';
+import 'package:customer_app/core/configs/app_build.dart';
 import 'package:customer_app/core/managers/providers.dart';
 import 'package:customer_app/core/services/crash_reporting.dart';
 import 'package:customer_app/features/call/data/call_background.dart';
@@ -51,6 +52,8 @@ void main() async {
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   }
 
+  // Read once; every API request carries it (X-App-Version).
+  await AppBuild.load();
   final prefs = await SharedPreferences.getInstance();
 
   final container = ProviderContainer(

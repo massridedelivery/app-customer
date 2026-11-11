@@ -79,7 +79,8 @@ class ForceUpdateScreen extends ConsumerWidget {
                   const SizedBox(height: 16),
                   Text(
                     l10n.forceUpdateVersions(
-                      update!.currentVersion,
+                      // "1.0.5", not the "+129" build the backend gets.
+                      update!.currentVersion.split('+').first,
                       update.latestVersion!,
                     ),
                     textAlign: TextAlign.center,

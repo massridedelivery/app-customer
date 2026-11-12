@@ -1,5 +1,6 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
+import 'package:customer_app/core/constants/feature_flags.dart';
 import 'package:customer_app/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:customer_app/features/profile/presentation/screens/referral_screen.dart';
 import 'package:customer_app/features/profile/presentation/widgets/loyalty_format.dart';
@@ -23,6 +24,7 @@ class HomeReferralCards extends ConsumerWidget {
     if (info == null || !info.enabled) return const SizedBox.shrink();
     final l10n = AppLocalizations.of(context)!;
     final canStillApply =
+        FeatureFlags.homeFriendCodeCard &&
         info.canApplyCode &&
         !info.wasReferred &&
         (info.applyBefore == null ||

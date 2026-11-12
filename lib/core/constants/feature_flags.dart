@@ -19,6 +19,11 @@ abstract class FeatureFlags {
   /// the messenger booking screen offers "เงินสด / พร้อมเพย์".
   static const bool messengerPromptPayEnabled = true;
 
+  /// The home card "มีโค้ดจากเพื่อนไหม?" for a new customer who may still
+  /// enter a friend's code. Hidden for now (product call); the "ชวนเพื่อน รับ
+  /// N คะแนน" card still shows whenever the referral programme is on.
+  static const bool homeFriendCodeCard = false;
+
   // ─── Food delivery ─────────────────────────────────────────────────────────
   // These gate UI that has no backing API yet (SCRUM-44 audit). Flip on once
   // the matching endpoint/field exists.

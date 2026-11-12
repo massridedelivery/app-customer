@@ -308,13 +308,8 @@ class _TripsListBody extends ConsumerWidget {
 }
 
 /// True when an order is still in progress (not completed/cancelled/failed).
-bool _isOngoingOrder(String status) {
-  final s = status.toUpperCase();
-  return s != 'COMPLETED' &&
-      s != 'SUCCESS' &&
-      s != 'CANCELLED' &&
-      s != 'FAILED';
-}
+bool _isOngoingOrder(String status) =>
+    !isCompletedOrderStatus(status) && !isCancelledOrderStatus(status);
 
 class _OrderListItem extends ConsumerWidget {
   final HistoryOrder order;
@@ -359,9 +354,7 @@ class _OrderListItem extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final isCancelled =
-        order.status.toUpperCase() == 'CANCELLED' ||
-        order.status.toUpperCase() == 'FAILED';
+    final isCancelled = isCancelledOrderStatus(order.status);
 
     final String serviceAsset;
     final typeUpper = order.type.toUpperCase();
@@ -496,7 +489,7 @@ class _StatusText extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final s = status.toUpperCase();
-    if (s == 'COMPLETED' || s == 'SUCCESS') {
+    if (isCompletedOrderStatus(s)) {
       return Text(
         l10n.completed,
         style: AppTypography.caption4.copyWith(
@@ -504,7 +497,7 @@ class _StatusText extends StatelessWidget {
           fontWeight: FontWeight.bold,
         ),
       );
-    } else if (s == 'CANCELLED' || s == 'FAILED') {
+    } else if (isCancelledOrderStatus(s)) {
       return Text(
         l10n.cancelledLabel,
         style: AppTypography.caption4.copyWith(

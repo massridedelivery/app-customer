@@ -36,7 +36,10 @@ class FoodRatingController extends _$FoodRatingController {
     }
   }
 
-  Future<bool> submitReview({
+  /// Null when the review went through, else the text to show. A failed
+  /// submit leaves [FoodRatingState.error] alone: that is the load error,
+  /// which replaces the whole form.
+  Future<String?> submitReview({
     required int rating,
     required String comment,
     required bool isAnonymous,
@@ -53,10 +56,10 @@ class FoodRatingController extends _$FoodRatingController {
         itemReviews: itemReviews,
       );
       state = state.copyWith(isSubmitting: false, isSubmitSuccess: true);
-      return true;
+      return null;
     } catch (e) {
-      state = state.copyWith(isSubmitting: false, error: e.toString());
-      return false;
+      state = state.copyWith(isSubmitting: false);
+      return e.toString();
     }
   }
 }

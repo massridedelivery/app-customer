@@ -272,3 +272,18 @@ abstract class HistoryRideStop with _$HistoryRideStop {
 enum HistoryType { ride, food, mart, messenger }
 
 enum HistoryStatus { ongoing, completed, canceled }
+
+/// An order that ended fulfilled: a ride's COMPLETED, a food or mart order's
+/// DELIVERED (the history API passes each table's own status through).
+bool isCompletedOrderStatus(String status) =>
+    const {'COMPLETED', 'SUCCESS', 'DELIVERED'}.contains(status.toUpperCase());
+
+/// An order that ended without being fulfilled, shown as cancelled: a cancel,
+/// the restaurant refusing it, or no driver taking it in time
+/// (FAILED_DISPATCH, which the backend cancels after 30 minutes).
+bool isCancelledOrderStatus(String status) => const {
+  'CANCELLED',
+  'FAILED',
+  'RESTAURANT_REJECTED',
+  'FAILED_DISPATCH',
+}.contains(status.toUpperCase());

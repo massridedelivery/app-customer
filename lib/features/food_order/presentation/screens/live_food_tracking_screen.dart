@@ -49,9 +49,11 @@ class _LiveFoodTrackingScreenState
       liveFoodTrackingControllerProvider.select((s) => s.orderStatus),
     );
 
+    final noDriver = orderStatus == 'FAILED_DISPATCH';
     final isCancelled =
         orderStatus == 'CANCELLED' ||
-        orderStatus == 'RESTAURANT_REJECTED';
+        orderStatus == 'RESTAURANT_REJECTED' ||
+        noDriver;
 
     if (isCancelled) {
       return Scaffold(
@@ -151,7 +153,9 @@ class _LiveFoodTrackingScreenState
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        orderStatus == 'RESTAURANT_REJECTED'
+                        noDriver
+                            ? 'ไม่พบคนขับ คำสั่งซื้อถูกยกเลิก'
+                            : orderStatus == 'RESTAURANT_REJECTED'
                             ? 'ขออภัย ร้านค้าปฏิเสธคำสั่งซื้อ'
                             : 'คำสั่งซื้อนี้ถูกยกเลิกแล้ว',
                         style: AppTypography.heading3.copyWith(
@@ -162,7 +166,9 @@ class _LiveFoodTrackingScreenState
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        orderStatus == 'RESTAURANT_REJECTED'
+                        noDriver
+                            ? 'ไม่มีคนขับรับคำสั่งซื้อของคุณภายในเวลาที่กำหนด ระบบจึงยกเลิกคำสั่งซื้อนี้ และคืนโค้ดส่วนลดกับพอยต์ที่ใช้ไปให้แล้ว หากคุณชำระเงินล่วงหน้าแล้ว กรุณาติดต่อฝ่ายบริการลูกค้าเพื่อขอคืนเงิน'
+                            : orderStatus == 'RESTAURANT_REJECTED'
                             ? 'ร้านอาหารปฏิเสธรายการสั่งซื้อนี้เนื่องจากมีเมนูบางรายการหมด หรืออยู่นอกเวลาให้บริการ คุณสามารถกลับไปเลือกซื้ออาหารจากร้านอื่นต่อได้ค่ะ'
                             : 'รายการสั่งซื้อนี้ถูกยกเลิกเรียบร้อยแล้ว หากคุณชำระเงินล่วงหน้าแล้ว กรุณาติดต่อฝ่ายบริการลูกค้าเพื่อขอคืนเงิน',
                         style: AppTypography.body2.copyWith(
@@ -203,7 +209,13 @@ class _LiveFoodTrackingScreenState
                       ),
                       const SizedBox(height: 12),
                       OutlinedButton(
-                        onPressed: () => context.go('/main?tab=1&status=canceled'),
+                        // The history API files FAILED_DISPATCH under
+                        // ongoing, not canceled: open the full list for it.
+                        onPressed: () => context.go(
+                          noDriver
+                              ? '/main?tab=1'
+                              : '/main?tab=1&status=canceled',
+                        ),
                         style: OutlinedButton.styleFrom(
                           side: const BorderSide(
                             color: AppColors.foundationGrayscale300,

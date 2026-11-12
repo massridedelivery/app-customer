@@ -40,6 +40,12 @@ class CoverageException extends FoodDeliveryException {
   CoverageException(super.message, [super.statusCode = 422]);
 }
 
+/// 409: the order is past the point where this is allowed (a cancel after
+/// the restaurant accepted, a review before delivery or a second review).
+class OrderConflictException extends FoodDeliveryException {
+  OrderConflictException(super.message, [super.statusCode = 409]);
+}
+
 class RateLimitException extends FoodDeliveryException {
   RateLimitException(super.message, [super.statusCode = 429]);
 }
@@ -52,12 +58,34 @@ class UnknownFoodDeliveryException extends FoodDeliveryException {
   UnknownFoodDeliveryException(super.message, [super.statusCode]);
 }
 
+/// Thai for the food-order refusals the backend words in English
+/// (`{"message": ...}`, 409/400): a cancel after the restaurant accepted, a
+/// review of an order not delivered or already reviewed, an item review for
+/// an item not in the order. Any other text is returned as it is.
+String foodOrderErrorText(String message) {
+  final m = message.toLowerCase();
+  if (m.contains('cannot cancel order after restaurant has accepted')) {
+    return 'ร้านอาหารรับคำสั่งซื้อแล้ว จึงยกเลิกไม่ได้';
+  }
+  if (m.contains('already been reviewed')) {
+    return 'คุณรีวิวคำสั่งซื้อนี้ไปแล้ว';
+  }
+  if (m.startsWith('cannot review order')) {
+    return 'รีวิวได้หลังจากได้รับอาหารแล้วเท่านั้น';
+  }
+  if (m.contains('item not found in order')) {
+    return 'มีเมนูที่ไม่อยู่ในคำสั่งซื้อนี้ กรุณาลองใหม่อีกครั้ง';
+  }
+  return message;
+}
+
 ServerException mapDioErrorToException(DioException e, String defaultMessage) {
   final statusCode = e.response?.statusCode;
   final data = e.response?.data;
-  final message = (data is Map)
+  final raw = (data is Map)
       ? (data['message'] ?? data['error'] ?? defaultMessage)
       : defaultMessage;
+  final message = foodOrderErrorText(raw.toString());
 
   if (statusCode == 400) {
     final lowerMessage = message.toString().toLowerCase();
@@ -77,6 +105,8 @@ ServerException mapDioErrorToException(DioException e, String defaultMessage) {
     return ForbiddenException(message.toString());
   } else if (statusCode == 404) {
     return NotFoundException(message.toString());
+  } else if (statusCode == 409) {
+    return OrderConflictException(message.toString());
   } else if (statusCode == 422) {
     // Out of zone: show the same localized notice as the area check.
     if (isServiceAreaMessage(message.toString())) {

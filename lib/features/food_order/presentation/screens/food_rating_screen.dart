@@ -65,7 +65,7 @@ class _FoodRatingScreenState extends ConsumerState<FoodRatingScreen> {
       }
     }
 
-    final success = await ref
+    final error = await ref
         .read(foodRatingControllerProvider(widget.orderId).notifier)
         .submitReview(
           rating: _restaurantStars,
@@ -73,13 +73,20 @@ class _FoodRatingScreenState extends ConsumerState<FoodRatingScreen> {
           isAnonymous: _isAnonymous,
           itemReviews: itemReviewsList,
         );
+    if (!mounted) return;
 
-    if (success && mounted) {
+    if (error != null) {
+      // The backend's reason (e.g. already reviewed, not delivered yet), as
+      // a normal message over the form, not the load-failure page.
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('ส่งรีวิวสำเร็จ ขอบคุณสำหรับความคิดเห็นครับ')),
+        SnackBar(content: Text(error)),
       );
-      context.go('/main');
+      return;
     }
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('ส่งรีวิวสำเร็จ ขอบคุณสำหรับความคิดเห็นครับ')),
+    );
+    context.go('/main');
   }
 
   @override

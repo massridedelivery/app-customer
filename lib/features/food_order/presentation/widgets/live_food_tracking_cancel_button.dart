@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
+import 'package:customer_app/core/error/food_delivery_exception.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/features/food_order/presentation/controllers/live_food_tracking_controller.dart';
 
@@ -33,7 +34,14 @@ class LiveFoodTrackingCancelButton extends ConsumerWidget {
         } catch (e) {
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('ไม่สามารถยกเลิกได้: $e')),
+              SnackBar(
+                content: Text(
+                  // A 409 already says why, in Thai.
+                  e is OrderConflictException
+                      ? '$e'
+                      : 'ไม่สามารถยกเลิกได้: $e',
+                ),
+              ),
             );
           }
         }

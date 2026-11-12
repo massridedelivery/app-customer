@@ -394,7 +394,23 @@ class PushNotificationService {
     }
     final raw = (data['deeplink'] ?? data['route']) as String?;
     if (raw == null || raw.isEmpty) return null;
-    return raw == '/' ? '/main' : raw;
+    if (raw == '/') return '/main';
+    return foodReceiptTarget(raw, data['type']) ?? raw;
+  }
+
+  /// `/order/receipt/{id}` is shared by food and messenger pushes. A food
+  /// one (delivered, or cancelled: no driver / out of stock — those carry no
+  /// `type`) opens that order's detail; a messenger one (`type`
+  /// `messenger_…`) keeps the router's history fallback. Null when [path]
+  /// isn't a food receipt link.
+  @visibleForTesting
+  static String? foodReceiptTarget(String path, Object? type) {
+    const prefix = '/order/receipt/';
+    if (!path.startsWith(prefix)) return null;
+    if (type is String && type.startsWith('messenger')) return null;
+    final id = path.substring(prefix.length);
+    if (id.isEmpty || id.contains('/')) return null;
+    return '/trip/$id?type=FOOD';
   }
 
   void _openDeeplink(String? deeplink) {

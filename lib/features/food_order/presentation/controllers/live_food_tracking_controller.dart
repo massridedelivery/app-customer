@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:customer_app/core/error/food_delivery_exception.dart';
 import 'package:customer_app/core/services/socket_service.dart';
 import 'package:customer_app/features/food_order/data/repositories/food_order_repository_impl.dart';
 import 'package:customer_app/features/food_order/domain/models/food_models.dart';
@@ -63,6 +64,9 @@ class LiveFoodTrackingController extends _$LiveFoodTrackingController {
     final s = status.toUpperCase();
     return s == 'CANCELLED' ||
         s == 'RESTAURANT_REJECTED' ||
+        // No driver took it in 30 minutes: the backend ends it with an
+        // `order_cancelled` frame and a push (promo uses and points returned).
+        s == 'FAILED_DISPATCH' ||
         s == 'COMPLETED' ||
         s == 'DELIVERED';
   }
@@ -247,6 +251,9 @@ class LiveFoodTrackingController extends _$LiveFoodTrackingController {
       _pollingTimer = null;
     } catch (e) {
       state = state.copyWith(error: e.toString());
+      // 409: the restaurant accepted first. Refetch so the screen moves on
+      // (and the cancel button, shown only while PLACED, goes away).
+      if (e is OrderConflictException) _loadOrderDetail(id);
       rethrow;
     }
   }

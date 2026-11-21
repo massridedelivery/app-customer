@@ -1,4 +1,5 @@
 import 'package:customer_app/features/live_ride/domain/models/driver_profile_model.dart';
+import 'package:customer_app/features/live_ride/domain/models/queued_next.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -47,5 +48,8 @@ abstract class LiveRideState with _$LiveRideState {
     String? jobStatus, // PENDING, ACCEPTED, PICKED_UP, COMPLETED, CANCELLED
     String? error,
     DriverProfileModel? driverProfile,
+    // Back-to-back: a driver finishing a trip nearby has queued this PENDING
+    // ride as their next one (job_queued / queued_next); null otherwise.
+    QueuedNext? queuedNext,
   }) = _LiveRideState;
 }

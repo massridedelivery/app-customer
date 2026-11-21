@@ -3226,6 +3226,33 @@ class AppLocalizationsEn extends AppLocalizations {
   String get referralFriendCancelled => 'Cancelled';
 
   @override
+  String get referralTiersTitle => 'Milestone coupons';
+
+  @override
+  String referralTiersNext(String count, String baht) {
+    return 'Invite $count more to get a ฿$baht coupon';
+  }
+
+  @override
+  String get referralTiersAllDone => 'You\'ve earned every milestone coupon';
+
+  @override
+  String referralTiersCounted(String count) {
+    return '$count friends have taken a first trip · coupons come on top of points';
+  }
+
+  @override
+  String referralTierFriends(String count) {
+    return '$count friends';
+  }
+
+  @override
+  String get referralTierEarned => 'Earned';
+
+  @override
+  String get referralTiersSeeVouchers => 'See my coupons';
+
+  @override
   String get referralNotOpen => 'The referral programme isn\'t open right now';
 
   @override

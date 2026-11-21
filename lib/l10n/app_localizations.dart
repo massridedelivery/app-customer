@@ -5929,6 +5929,48 @@ abstract class AppLocalizations {
   /// **'Cancelled'**
   String get referralFriendCancelled;
 
+  /// No description provided for @referralTiersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Milestone coupons'**
+  String get referralTiersTitle;
+
+  /// No description provided for @referralTiersNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite {count} more to get a ฿{baht} coupon'**
+  String referralTiersNext(String count, String baht);
+
+  /// No description provided for @referralTiersAllDone.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve earned every milestone coupon'**
+  String get referralTiersAllDone;
+
+  /// No description provided for @referralTiersCounted.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} friends have taken a first trip · coupons come on top of points'**
+  String referralTiersCounted(String count);
+
+  /// No description provided for @referralTierFriends.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} friends'**
+  String referralTierFriends(String count);
+
+  /// No description provided for @referralTierEarned.
+  ///
+  /// In en, this message translates to:
+  /// **'Earned'**
+  String get referralTierEarned;
+
+  /// No description provided for @referralTiersSeeVouchers.
+  ///
+  /// In en, this message translates to:
+  /// **'See my coupons'**
+  String get referralTiersSeeVouchers;
+
   /// No description provided for @referralNotOpen.
   ///
   /// In en, this message translates to:

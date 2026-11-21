@@ -5,6 +5,7 @@ import 'package:customer_app/features/profile/data/datasources/referral_remote_d
 import 'package:customer_app/features/profile/data/welcome_promo_store.dart';
 import 'package:customer_app/features/profile/domain/models/referral_info.dart';
 import 'package:customer_app/features/profile/presentation/widgets/loyalty_format.dart';
+import 'package:customer_app/features/profile/presentation/widgets/referral_tiers_track.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -255,6 +256,11 @@ class _ReferralBody extends StatelessWidget {
             ],
           ),
         ),
+        // Coupon milestones (hidden when the admin set none).
+        if (info.tiers.isNotEmpty) ...[
+          const SizedBox(height: 20),
+          _Card(child: ReferralTiersTrack(info: info)),
+        ],
         const SizedBox(height: 20),
         // How it works: share → friend's first ride → your points.
         _Card(

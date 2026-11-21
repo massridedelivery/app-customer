@@ -18,7 +18,32 @@ class ReferralInfo {
     this.referredByWelcomeValue = 0,
     this.shareMessage,
     this.friends = const [],
+    this.tiers = const [],
+    this.friendsCounted = 0,
   });
+
+  /// Coupon milestones (e.g. 1 friend → ฿20, 5 → ฿75), set by the admin;
+  /// empty when there are none. On top of the points per friend.
+  final List<ReferralTier> tiers;
+
+  /// Friends who completed a first order: what the [tiers] count.
+  final int friendsCounted;
+
+  /// The first milestone not reached yet; null when there are none left.
+  ReferralTier? get nextTier {
+    for (final t in tiers) {
+      if (!t.reached) return t;
+    }
+    return null;
+  }
+
+  /// Friends still to bring for [nextTier] (at least 1).
+  int get friendsToNextTier {
+    final next = nextTier;
+    if (next == null) return 0;
+    final left = next.friends - friendsCounted;
+    return left < 1 ? 1 : left;
+  }
 
   /// Ready-made share text from the backend ("ใช้โค้ด K7QM2X ลด ฿50 …").
   final String? shareMessage;
@@ -100,6 +125,14 @@ class ReferralInfo {
                 .toList()
           : const [],
       stats: ReferralStats.fromJson(map(json['stats'])),
+      tiers: json['tiers'] is List
+          ? (json['tiers'] as List)
+                .whereType<Map>()
+                .map((m) => ReferralTier.fromJson(map(m)))
+                .where((t) => t.friends > 0)
+                .toList()
+          : const [],
+      friendsCounted: asInt(json['friends_counted']),
       canApplyCode: json['can_apply_code'] == true,
       applyBefore: DateTime.tryParse('${json['apply_before'] ?? ''}'),
       referredByStatus: referredBy == null
@@ -168,4 +201,39 @@ class ReferralFriend {
     createdAt: DateTime.tryParse('${json['created_at'] ?? ''}'),
     rewardedAt: DateTime.tryParse('${json['rewarded_at'] ?? ''}'),
   );
+}
+
+/// One coupon milestone of `tiers` (backend referral TierProgress:
+/// friends, amount, reached, voucher_code).
+class ReferralTier {
+  const ReferralTier({
+    required this.friends,
+    required this.amount,
+    this.reached = false,
+    this.voucherCode,
+  });
+
+  /// Friends to bring for it.
+  final int friends;
+
+  /// The coupon, in baht.
+  final double amount;
+  final bool reached;
+
+  /// The coupon issued for it, once issued (in the customer's vouchers).
+  final String? voucherCode;
+
+  factory ReferralTier.fromJson(Map<String, dynamic> json) {
+    final code = json['voucher_code']?.toString().trim();
+    final amount = json['amount'];
+    final friends = json['friends'];
+    return ReferralTier(
+      friends: friends is num ? friends.toInt() : int.tryParse('$friends') ?? 0,
+      amount: amount is num
+          ? amount.toDouble()
+          : double.tryParse('$amount') ?? 0,
+      reached: json['reached'] == true,
+      voucherCode: code == null || code.isEmpty ? null : code,
+    );
+  }
 }

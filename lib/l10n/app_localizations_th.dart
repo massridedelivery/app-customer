@@ -3176,6 +3176,33 @@ class AppLocalizationsTh extends AppLocalizations {
   String get referralFriendCancelled => 'ยกเลิก';
 
   @override
+  String get referralTiersTitle => 'คูปองชวนเพื่อนครบเป้า';
+
+  @override
+  String referralTiersNext(String count, String baht) {
+    return 'ชวนอีก $count คน รับคูปอง ฿$baht';
+  }
+
+  @override
+  String get referralTiersAllDone => 'รับคูปองครบทุกขั้นแล้ว';
+
+  @override
+  String referralTiersCounted(String count) {
+    return 'เพื่อนที่ใช้บริการครั้งแรกแล้ว $count คน · คูปองได้เพิ่มจากคะแนน';
+  }
+
+  @override
+  String referralTierFriends(String count) {
+    return '$count คน';
+  }
+
+  @override
+  String get referralTierEarned => 'ได้แล้ว';
+
+  @override
+  String get referralTiersSeeVouchers => 'ดูคูปองของฉัน';
+
+  @override
   String get referralNotOpen => 'ขณะนี้ยังไม่เปิดโปรแกรมชวนเพื่อน';
 
   @override

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:customer_app/features/live_ride/domain/models/driver_profile_model.dart';
+import 'package:customer_app/features/live_ride/domain/models/queued_next.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:customer_app/core/services/socket_service.dart';
 import 'package:customer_app/features/live_ride/data/repositories/driver_profile_repository_impl.dart';
@@ -116,6 +117,13 @@ class LiveRideController extends _$LiveRideController {
     return null;
   }
 
+  /// A frame about the ride this screen follows (or one with no job_id).
+  bool _isOurJob(Map<String, dynamic> message, Map<String, dynamic>? data) {
+    final id = (message['job_id'] ?? data?['job_id'])?.toString();
+    final ours = state.jobId;
+    return id == null || ours == null || ours.isEmpty || id == ours;
+  }
+
   void _handleSocketMessage(Map<String, dynamic> message) {
     final type = (message['type'] as String?)?.toLowerCase();
     final data = _asMap(message['data']);
@@ -125,7 +133,22 @@ class LiveRideController extends _$LiveRideController {
 
     switch (type) {
       case 'job_accepted':
+        state = state.copyWith(queuedNext: null);
         getDriverProfile();
+        break;
+      // Back-to-back: a driver finishing a trip nearby queued this ride
+      // ({type, job_id, queued_next}); job_unqueued ({job_id, reason}) puts
+      // it back to searching. Cancelling stays free either way.
+      case 'job_queued':
+        if (!_isOurJob(message, data)) break;
+        final queued = QueuedNext.fromJson(
+          message['queued_next'] ?? data?['queued_next'],
+        );
+        if (queued != null) state = state.copyWith(queuedNext: queued);
+        break;
+      case 'job_unqueued':
+        if (!_isOurJob(message, data)) break;
+        state = state.copyWith(queuedNext: null);
         break;
       case 'job_status':
         // Handle top-level keys as per websocket_integration.md
@@ -232,6 +255,11 @@ class LiveRideController extends _$LiveRideController {
         estimatedCancelFee: liveState.estimatedCancelFee,
         etaArriveAt: resyncEta,
         driverProfile: DriverProfileModel.fromActiveJob(liveState),
+        // Only a PENDING ride is queued; after a reload this restores the
+        // queued driver card (and clears it once the ride moved on).
+        queuedNext: liveState.status.toUpperCase() == 'PENDING'
+            ? QueuedNext.fromJson(liveState.queuedNext)
+            : null,
       );
 
       // Pay-at-destination (dev14): a PROMPTPAY ride is charged when the trip

@@ -68,6 +68,9 @@ abstract class CustomerJobsActiveModel with _$CustomerJobsActiveModel {
     @Default(0)
     int waitingTimeStopsMin,
     @JsonKey(name: 'waiting_fee') @Default(0.0) double waitingFee,
+    // Back-to-back: set while a PENDING ride waits for a driver finishing a
+    // trip nearby (parsed by QueuedNext.fromJson).
+    @JsonKey(name: 'queued_next') Map<String, dynamic>? queuedNext,
   }) = _CustomerJobsActiveModel;
 
   factory CustomerJobsActiveModel.fromJson(Map<String, dynamic> json) =>

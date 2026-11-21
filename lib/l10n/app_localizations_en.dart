@@ -1444,6 +1444,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get liveFindingNearYou => 'Looking for drivers near you...';
 
   @override
+  String get liveQueuedTitle => 'A driver is coming next';
+
+  @override
+  String liveQueuedEta(String minutes) {
+    return 'Your driver is finishing a trip nearby, about $minutes min away';
+  }
+
+  @override
+  String get liveQueuedSoon =>
+      'Your driver is finishing a trip nearby and comes straight after';
+
+  @override
   String get liveDriverOnTheWay => 'Your driver is on the way';
 
   @override

@@ -66,6 +66,10 @@ class ActiveOrdersRepositoryImpl implements IActiveOrdersRepository {
           : active
                 .whereType<Map<String, dynamic>>()
                 .map(ActiveOrderItem.fromJson)
+                // A booking ahead with no driver isn't in progress (the
+                // backend still lists it here for now): keep it out of the
+                // banner and the /live resume. GET /jobs/scheduled has it.
+                .where((i) => !i.isUpcomingBooking)
                 .toList();
       _cache = result;
       _cachedAt = DateTime.now();

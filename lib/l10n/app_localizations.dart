@@ -7159,6 +7159,150 @@ abstract class AppLocalizations {
   /// **'Parcel'**
   String get supportServiceParcel;
 
+  /// No description provided for @scheduledRideTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ride booked ahead'**
+  String get scheduledRideTitle;
+
+  /// No description provided for @scheduledRidePickupAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Pickup {time}'**
+  String scheduledRidePickupAt(String time);
+
+  /// No description provided for @scheduledRideNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'This booking is no longer listed. It may have been cancelled or started.'**
+  String get scheduledRideNotFound;
+
+  /// No description provided for @scheduledRideDriverFound.
+  ///
+  /// In en, this message translates to:
+  /// **'A driver has taken it'**
+  String get scheduledRideDriverFound;
+
+  /// No description provided for @scheduledRideFindingDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for a driver'**
+  String get scheduledRideFindingDriver;
+
+  /// No description provided for @scheduledRideFare.
+  ///
+  /// In en, this message translates to:
+  /// **'Fare ฿{baht}'**
+  String scheduledRideFare(String baht);
+
+  /// No description provided for @scheduledRideFeeIncluded.
+  ///
+  /// In en, this message translates to:
+  /// **'Includes the ฿{baht} advance booking fee'**
+  String scheduledRideFeeIncluded(String baht);
+
+  /// No description provided for @scheduledRideFreeCancelUntil.
+  ///
+  /// In en, this message translates to:
+  /// **'Free to cancel until {time}'**
+  String scheduledRideFreeCancelUntil(String time);
+
+  /// No description provided for @scheduledRideLateFee.
+  ///
+  /// In en, this message translates to:
+  /// **'After that ฿{baht} if a driver has taken it'**
+  String scheduledRideLateFee(String baht);
+
+  /// No description provided for @scheduledRideWait.
+  ///
+  /// In en, this message translates to:
+  /// **'The driver waits up to {minutes} minutes'**
+  String scheduledRideWait(String minutes);
+
+  /// No description provided for @scheduledRideFlight.
+  ///
+  /// In en, this message translates to:
+  /// **'Flight {flight}'**
+  String scheduledRideFlight(String flight);
+
+  /// No description provided for @scheduledRideCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel booking'**
+  String get scheduledRideCancel;
+
+  /// No description provided for @scheduledRideCancelFree.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelling now is free'**
+  String get scheduledRideCancelFree;
+
+  /// No description provided for @scheduledRideCancelFee.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelling now costs ฿{baht}, added to your next ride'**
+  String scheduledRideCancelFee(String baht);
+
+  /// No description provided for @scheduledRideCancelConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel booking'**
+  String get scheduledRideCancelConfirm;
+
+  /// No description provided for @scheduledRideKeep.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep it'**
+  String get scheduledRideKeep;
+
+  /// No description provided for @scheduledRideCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking cancelled'**
+  String get scheduledRideCancelled;
+
+  /// No description provided for @scheduledRideCancelFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t cancel. Please try again.'**
+  String get scheduledRideCancelFailed;
+
+  /// No description provided for @advanceLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load this. Please try again.'**
+  String get advanceLoadFailed;
+
+  /// No description provided for @advanceSeriesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeating bookings'**
+  String get advanceSeriesTitle;
+
+  /// No description provided for @advanceSeriesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No repeating bookings yet'**
+  String get advanceSeriesEmpty;
+
+  /// No description provided for @advanceSeriesPaused.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused'**
+  String get advanceSeriesPaused;
+
+  /// No description provided for @advanceSeriesLastError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t book {date}'**
+  String advanceSeriesLastError(String date);
+
+  /// No description provided for @advanceSeriesBooked.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} days booked'**
+  String advanceSeriesBooked(String count);
+
   /// No description provided for @supportOrderLabel.
   ///
   /// In en, this message translates to:

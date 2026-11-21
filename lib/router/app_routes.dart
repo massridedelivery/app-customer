@@ -50,6 +50,8 @@ import 'package:customer_app/features/profile/presentation/screens/loyalty_scree
 import 'package:customer_app/features/profile/presentation/screens/loyalty_tiers_screen.dart';
 import 'package:customer_app/features/profile/presentation/screens/rewards_screen.dart';
 import 'package:customer_app/features/profile/presentation/screens/vouchers_screen.dart';
+import 'package:customer_app/features/advance_booking/presentation/advance_series_screen.dart';
+import 'package:customer_app/features/advance_booking/presentation/scheduled_ride_screen.dart';
 import 'package:customer_app/features/food_delivery/presentation/screens/saved_restaurants_screen.dart';
 import 'package:customer_app/features/payment/presentation/screens/credit_card_list_screen.dart';
 import 'package:customer_app/features/payment/presentation/screens/add_credit_card_screen.dart';
@@ -142,6 +144,7 @@ bool _requiresAuth(String path) {
     // '/promos' is public (guest can browse promos + detail via the public
     // endpoint); applying a code still happens at checkout, which needs auth.
     '/referral', '/sos', '/support', '/privacy', '/credit-cards',
+    '/scheduled', '/advance-series',
     '/messenger/', '/food-order',
   ];
   return protectedPrefixes.any((p) => path == p || path.startsWith(p));
@@ -490,6 +493,17 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/messenger-order/tracking/:id',
         redirect: (context, state) =>
             '/messenger/tracking/${state.pathParameters['id']}',
+      ),
+      // A ride booked ahead (the advance booking pushes; the backend's
+      // scheduled_ride deeplink is /scheduled/{job_id}).
+      GoRoute(
+        path: '/scheduled/:id',
+        builder: (context, state) =>
+            ScheduledRideScreen(jobId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: '/advance-series',
+        builder: (context, state) => const AdvanceSeriesScreen(),
       ),
       GoRoute(
         path: '/ride/receipt/:id',

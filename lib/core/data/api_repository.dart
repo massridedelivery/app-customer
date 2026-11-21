@@ -209,19 +209,32 @@ class ApiRepository {
     return res.data as Map<String, dynamic>;
   }
 
-  /// GET /api/customer/jobs/scheduled
-  Future<List<dynamic>> getScheduledJobs({String status = 'PENDING'}) async {
-    final res = await _dio.get(
-      '/api/customer/jobs/scheduled',
-      queryParameters: {'status': status},
-    );
-    return res.data as List<dynamic>;
+  /// GET /api/customer/jobs/scheduled: the rides booked ahead, soonest first
+  /// (the backend ignores a status filter).
+  Future<List<dynamic>> getScheduledJobs() async {
+    final res = await _dio.get('/api/customer/jobs/scheduled');
+    final data = res.data;
+    return data is List ? data : const [];
+  }
+
+  /// GET /api/customer/jobs/scheduled/{id}/cancel-quote: what cancelling now
+  /// costs ({is_free, cancellation_fee, reason}), shown before confirming.
+  Future<Map<String, dynamic>> getScheduledCancelQuote(String id) async {
+    final res = await _dio.get('/api/customer/jobs/scheduled/$id/cancel-quote');
+    return res.data as Map<String, dynamic>;
   }
 
   /// POST /api/customer/jobs/scheduled/{id}/cancel
   Future<Map<String, dynamic>> cancelScheduledJob(String id) async {
     final res = await _dio.post('/api/customer/jobs/scheduled/$id/cancel');
     return res.data as Map<String, dynamic>;
+  }
+
+  /// GET /api/customer/advance-series: the customer's repeating bookings.
+  Future<List<dynamic>> getAdvanceSeries() async {
+    final res = await _dio.get('/api/customer/advance-series');
+    final data = res.data;
+    return data is List ? data : const [];
   }
 
   // ─── FOOD ORDERS ──────────────────────────────────────────────────────────

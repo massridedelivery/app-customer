@@ -3899,6 +3899,9 @@ class AppLocalizationsTh extends AppLocalizations {
   String get supportCatAppIssue => 'ปัญหาการใช้งานแอป';
 
   @override
+  String get supportCatAdvanceBooking => 'งานจองล่วงหน้า';
+
+  @override
   String get supportCatOther => 'อื่นๆ';
 
   @override

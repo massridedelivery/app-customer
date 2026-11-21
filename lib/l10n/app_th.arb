@@ -1218,6 +1218,7 @@
   "supportCatItemIssue": "ของเสียหาย สูญหาย หรือไม่ครบ",
   "supportCatLostItem": "ลืมของไว้ในรถ",
   "supportCatAppIssue": "ปัญหาการใช้งานแอป",
+  "supportCatAdvanceBooking": "งานจองล่วงหน้า",
   "supportCatOther": "อื่นๆ",
   "supportDetailLabel": "รายละเอียด",
   "supportDetailHint": "เล่าสิ่งที่เกิดขึ้น เช่น เวลา สถานที่ และสิ่งที่อยากให้เราช่วย",

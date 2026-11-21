@@ -654,6 +654,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/sos', builder: (context, state) => const SOSScreen()),
       // "แจ้งปัญหา": /support/report?service=ride|food|parcel&ref=<order id>
       // &no=<short no>&source=trip_detail|tracking|profile&category=<api>
+      // &advance=1 (a ride booked ahead)
       GoRoute(
         path: '/support/report',
         builder: (context, state) {
@@ -671,6 +672,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             initialCategory: category == null
                 ? null
                 : SupportCategory.fromApi(category),
+            advanceBooking: q['advance'] == '1',
           );
         },
       ),

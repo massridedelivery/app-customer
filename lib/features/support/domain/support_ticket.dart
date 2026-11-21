@@ -10,6 +10,10 @@ enum SupportCategory {
   itemIssue('item_issue'),
   lostItem('lost_item'),
   appIssue('app_issue'),
+
+  /// A ride booked ahead (งานจองล่วงหน้า): offered only when the report is
+  /// opened from one — see [forService].
+  advanceBooking('advance_booking'),
   other('other');
 
   const SupportCategory(this.api);
@@ -20,7 +24,25 @@ enum SupportCategory {
       .firstWhere((c) => c.api == v, orElse: () => SupportCategory.other);
 
   /// The topics offered for [service] (null = a report not tied to an order).
-  static List<SupportCategory> forService(SupportService? service) =>
+  /// [advanceBooking]: the report is about a ride booked ahead, so
+  /// "งานจองล่วงหน้า" leads the ride topics.
+  static List<SupportCategory> forService(
+    SupportService? service, {
+    bool advanceBooking = false,
+  }) => switch (service) {
+    SupportService.ride when advanceBooking => const [
+      SupportCategory.advanceBooking,
+      driverBehavior,
+      safety,
+      farePayment,
+      lostItem,
+      appIssue,
+      other,
+    ],
+    _ => _forService(service),
+  };
+
+  static List<SupportCategory> _forService(SupportService? service) =>
       switch (service) {
         SupportService.ride => const [
           driverBehavior,

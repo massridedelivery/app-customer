@@ -38,6 +38,7 @@ class ReportIssueScreen extends ConsumerStatefulWidget {
     this.orderNo,
     this.source = SupportSource.profile,
     this.initialCategory,
+    this.advanceBooking = false,
   });
 
   final SupportService? service;
@@ -47,6 +48,9 @@ class ReportIssueScreen extends ConsumerStatefulWidget {
   final String? orderNo;
   final SupportSource source;
   final SupportCategory? initialCategory;
+
+  /// Opened from a ride booked ahead: offers "งานจองล่วงหน้า".
+  final bool advanceBooking;
 
   @override
   ConsumerState<ReportIssueScreen> createState() => _ReportIssueScreenState();
@@ -76,7 +80,10 @@ class _ReportIssueScreenState extends ConsumerState<ReportIssueScreen> {
   AppLocalizations get _l10n => AppLocalizations.of(context)!;
 
   List<SupportCategory> get _topics =>
-      SupportCategory.forService(widget.service);
+      SupportCategory.forService(
+        widget.service,
+        advanceBooking: widget.advanceBooking,
+      );
 
   @override
   void initState() {

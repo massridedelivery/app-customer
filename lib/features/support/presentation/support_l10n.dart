@@ -11,6 +11,7 @@ extension SupportCategoryText on SupportCategory {
     SupportCategory.itemIssue => l10n.supportCatItemIssue,
     SupportCategory.lostItem => l10n.supportCatLostItem,
     SupportCategory.appIssue => l10n.supportCatAppIssue,
+    SupportCategory.advanceBooking => l10n.supportCatAdvanceBooking,
     SupportCategory.other => l10n.supportCatOther,
   };
 
@@ -21,6 +22,7 @@ extension SupportCategoryText on SupportCategory {
     SupportCategory.itemIssue => Icons.inventory_2_outlined,
     SupportCategory.lostItem => Icons.backpack_outlined,
     SupportCategory.appIssue => Icons.phone_iphone_outlined,
+    SupportCategory.advanceBooking => Icons.event_outlined,
     SupportCategory.other => Icons.more_horiz_rounded,
   };
 }

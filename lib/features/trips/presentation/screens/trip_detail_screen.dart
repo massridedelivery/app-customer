@@ -100,6 +100,10 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen> {
           'service': service,
           'ref': widget.tripId,
           'source': 'trip_detail',
+          // A ride booked ahead: offer "งานจองล่วงหน้า".
+          if (ref.read(tripDetailControllerProvider).rideDetails?.isScheduled ==
+              true)
+            'advance': '1',
         },
       ).toString(),
     );

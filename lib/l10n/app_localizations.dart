@@ -7207,6 +7207,12 @@ abstract class AppLocalizations {
   /// **'Problem with the app'**
   String get supportCatAppIssue;
 
+  /// No description provided for @supportCatAdvanceBooking.
+  ///
+  /// In en, this message translates to:
+  /// **'Ride booked ahead'**
+  String get supportCatAdvanceBooking;
+
   /// No description provided for @supportCatOther.
   ///
   /// In en, this message translates to:

@@ -3900,6 +3900,99 @@ class AppLocalizationsTh extends AppLocalizations {
   String get supportServiceParcel => 'ส่งของ';
 
   @override
+  String get scheduledRideTitle => 'งานจองล่วงหน้า';
+
+  @override
+  String scheduledRidePickupAt(String time) {
+    return 'นัดรับ $time';
+  }
+
+  @override
+  String get scheduledRideNotFound =>
+      'ไม่พบงานจองนี้แล้ว อาจถูกยกเลิกหรือเริ่มเดินทางแล้ว';
+
+  @override
+  String get scheduledRideDriverFound => 'มีคนขับรับงานแล้ว';
+
+  @override
+  String get scheduledRideFindingDriver => 'รอคนขับรับงาน';
+
+  @override
+  String scheduledRideFare(String baht) {
+    return 'ค่าโดยสาร ฿$baht';
+  }
+
+  @override
+  String scheduledRideFeeIncluded(String baht) {
+    return 'รวมค่าบริการจองล่วงหน้า ฿$baht';
+  }
+
+  @override
+  String scheduledRideFreeCancelUntil(String time) {
+    return 'ยกเลิกฟรีถึง $time';
+  }
+
+  @override
+  String scheduledRideLateFee(String baht) {
+    return 'หลังจากนั้นเสีย ฿$baht ถ้ามีคนขับรับงานแล้ว';
+  }
+
+  @override
+  String scheduledRideWait(String minutes) {
+    return 'คนขับรอได้ $minutes นาที';
+  }
+
+  @override
+  String scheduledRideFlight(String flight) {
+    return 'เที่ยวบิน $flight';
+  }
+
+  @override
+  String get scheduledRideCancel => 'ยกเลิกการจอง';
+
+  @override
+  String get scheduledRideCancelFree => 'ยกเลิกตอนนี้ได้ฟรี';
+
+  @override
+  String scheduledRideCancelFee(String baht) {
+    return 'ยกเลิกตอนนี้มีค่าธรรมเนียม ฿$baht จะรวมในการเดินทางครั้งถัดไป';
+  }
+
+  @override
+  String get scheduledRideCancelConfirm => 'ยืนยันยกเลิก';
+
+  @override
+  String get scheduledRideKeep => 'ไม่ยกเลิก';
+
+  @override
+  String get scheduledRideCancelled => 'ยกเลิกการจองแล้ว';
+
+  @override
+  String get scheduledRideCancelFailed => 'ยกเลิกไม่สำเร็จ ลองใหม่อีกครั้ง';
+
+  @override
+  String get advanceLoadFailed => 'โหลดข้อมูลไม่สำเร็จ ลองใหม่อีกครั้ง';
+
+  @override
+  String get advanceSeriesTitle => 'การจองซ้ำ';
+
+  @override
+  String get advanceSeriesEmpty => 'ยังไม่มีการจองซ้ำ';
+
+  @override
+  String get advanceSeriesPaused => 'หยุดไว้';
+
+  @override
+  String advanceSeriesLastError(String date) {
+    return 'จองวันที่ $date ไม่สำเร็จ';
+  }
+
+  @override
+  String advanceSeriesBooked(String count) {
+    return 'จองไว้แล้ว $count วัน';
+  }
+
+  @override
   String supportOrderLabel(String service, String no) {
     return '$service · #$no';
   }

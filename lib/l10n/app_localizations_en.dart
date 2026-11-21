@@ -3952,6 +3952,99 @@ class AppLocalizationsEn extends AppLocalizations {
   String get supportServiceParcel => 'Parcel';
 
   @override
+  String get scheduledRideTitle => 'Ride booked ahead';
+
+  @override
+  String scheduledRidePickupAt(String time) {
+    return 'Pickup $time';
+  }
+
+  @override
+  String get scheduledRideNotFound =>
+      'This booking is no longer listed. It may have been cancelled or started.';
+
+  @override
+  String get scheduledRideDriverFound => 'A driver has taken it';
+
+  @override
+  String get scheduledRideFindingDriver => 'Waiting for a driver';
+
+  @override
+  String scheduledRideFare(String baht) {
+    return 'Fare ฿$baht';
+  }
+
+  @override
+  String scheduledRideFeeIncluded(String baht) {
+    return 'Includes the ฿$baht advance booking fee';
+  }
+
+  @override
+  String scheduledRideFreeCancelUntil(String time) {
+    return 'Free to cancel until $time';
+  }
+
+  @override
+  String scheduledRideLateFee(String baht) {
+    return 'After that ฿$baht if a driver has taken it';
+  }
+
+  @override
+  String scheduledRideWait(String minutes) {
+    return 'The driver waits up to $minutes minutes';
+  }
+
+  @override
+  String scheduledRideFlight(String flight) {
+    return 'Flight $flight';
+  }
+
+  @override
+  String get scheduledRideCancel => 'Cancel booking';
+
+  @override
+  String get scheduledRideCancelFree => 'Cancelling now is free';
+
+  @override
+  String scheduledRideCancelFee(String baht) {
+    return 'Cancelling now costs ฿$baht, added to your next ride';
+  }
+
+  @override
+  String get scheduledRideCancelConfirm => 'Cancel booking';
+
+  @override
+  String get scheduledRideKeep => 'Keep it';
+
+  @override
+  String get scheduledRideCancelled => 'Booking cancelled';
+
+  @override
+  String get scheduledRideCancelFailed => 'Couldn\'t cancel. Please try again.';
+
+  @override
+  String get advanceLoadFailed => 'Couldn\'t load this. Please try again.';
+
+  @override
+  String get advanceSeriesTitle => 'Repeating bookings';
+
+  @override
+  String get advanceSeriesEmpty => 'No repeating bookings yet';
+
+  @override
+  String get advanceSeriesPaused => 'Paused';
+
+  @override
+  String advanceSeriesLastError(String date) {
+    return 'Couldn\'t book $date';
+  }
+
+  @override
+  String advanceSeriesBooked(String count) {
+    return '$count days booked';
+  }
+
+  @override
   String supportOrderLabel(String service, String no) {
     return '$service · #$no';
   }

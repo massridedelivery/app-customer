@@ -16,6 +16,8 @@ abstract class ActiveOrderItem with _$ActiveOrderItem {
     @JsonKey(name: 'status') @Default('') String status,
     @JsonKey(name: 'driver_id') @Default('') String driverId,
     @JsonKey(name: 'created_at') @Default('') String createdAt,
+    // Set on a ride or parcel booked ahead (จองล่วงหน้า).
+    @JsonKey(name: 'scheduled_at') @Default('') String scheduledAt,
   }) = _ActiveOrderItem;
 
   factory ActiveOrderItem.fromJson(Map<String, dynamic> json) =>
@@ -25,5 +27,9 @@ abstract class ActiveOrderItem with _$ActiveOrderItem {
   bool get isFood => type.toUpperCase() == 'FOOD';
   bool get isMessenger => type.toUpperCase() == 'MESSENGER';
   bool get hasDriver => driverId.isNotEmpty;
+
+  /// Booked ahead and no driver has it yet: an upcoming booking, possibly
+  /// days away, not something in progress — no banner, no live screen.
+  bool get isUpcomingBooking => scheduledAt.isNotEmpty && !hasDriver;
 
 }

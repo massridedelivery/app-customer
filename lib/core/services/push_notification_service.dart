@@ -392,10 +392,46 @@ class PushNotificationService {
     if (data['type'] == 'chat_message' && room is String && room.isNotEmpty) {
       return chatRouteForRoom(room);
     }
+    final byType = advancePushTarget(data);
+    if (byType != null) return byType;
     final raw = (data['deeplink'] ?? data['route']) as String?;
     if (raw == null || raw.isEmpty) return null;
     if (raw == '/') return '/main';
     return foodReceiptTarget(raw, data['type']) ?? raw;
+  }
+
+  /// Where a ride-booked-ahead or back-to-back push opens, by `data.type`
+  /// (their deeplink is /live/{job_id} for all of them, which is wrong while
+  /// no driver has the ride). Null for any other push.
+  /// - booked / reminder / driver found / driver changed / card hold needed:
+  ///   the booking (`/scheduled/{job_id}`, the backend's scheduled_ride link);
+  /// - no driver / no-show: the ride's receipt (it has ended);
+  /// - a repeating booking's day failed: the series screen;
+  /// - job_queued (a driver finishing a trip nearby takes it): live ride.
+  @visibleForTesting
+  static String? advancePushTarget(Map<String, dynamic> data) {
+    final type = data['type'];
+    if (type is! String) return null;
+    final id = data['job_id'];
+    final jobId = id is String && id.isNotEmpty && !id.contains('/')
+        ? id
+        : null;
+    switch (type) {
+      case 'advance_booking_booked':
+      case 'advance_booking_reminder_60':
+      case 'advance_booking_driver_found':
+      case 'advance_driver_changed':
+      case 'advance_card_hold_needed':
+        return jobId == null ? null : '/scheduled/$jobId';
+      case 'advance_booking_no_driver':
+      case 'advance_no_show':
+        return jobId == null ? null : '/ride/receipt/$jobId';
+      case 'advance_series_failed':
+        return '/advance-series';
+      case 'job_queued':
+        return jobId == null ? null : '/live/$jobId';
+    }
+    return null;
   }
 
   /// `/order/receipt/{id}` is shared by food and messenger pushes. A food

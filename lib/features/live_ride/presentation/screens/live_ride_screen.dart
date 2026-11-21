@@ -5,6 +5,7 @@ import 'package:customer_app/features/profile/presentation/widgets/loyalty_forma
 import 'package:customer_app/core/utils/app_dates.dart';
 import 'package:customer_app/core/utils/ride_payable.dart';
 import 'package:customer_app/features/live_ride/domain/models/driver_profile_model.dart';
+import 'package:customer_app/features/live_ride/domain/models/queued_next.dart';
 import 'dart:async';
 
 import 'package:customer_app/core/constants/map_defaults.dart';
@@ -372,7 +373,11 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildHeaderTitle(uiState, liveState.jobStatus),
+                    _buildHeaderTitle(
+                      uiState,
+                      liveState.jobStatus,
+                      queued: liveState.queuedNext,
+                    ),
                     const SizedBox(height: 16),
                     _buildTimeline(uiState),
                     const SizedBox(height: 12),
@@ -657,7 +662,11 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
     );
   }
 
-  Widget _buildHeaderTitle(RideUIState state, String? status) {
+  Widget _buildHeaderTitle(
+    RideUIState state,
+    String? status, {
+    QueuedNext? queued,
+  }) {
     final l10n = AppLocalizations.of(context)!;
     String title = '';
     String subtitle = '';
@@ -668,6 +677,14 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
     } else {
       switch (state) {
         case RideUIState.finding:
+          // Back-to-back: a driver finishing a trip nearby comes next.
+          if (queued != null) {
+            title = l10n.liveQueuedTitle;
+            subtitle = queued.etaMin == null
+                ? l10n.liveQueuedSoon
+                : l10n.liveQueuedEta('${queued.etaMin}');
+            break;
+          }
           title = l10n.searchingDriver;
           subtitle = l10n.liveFindingNearYou;
           break;
@@ -792,9 +809,14 @@ class _LiveRideScreenState extends ConsumerState<LiveRideScreen> {
     dynamic bookingState,
     dynamic liveState,
   ) {
+    final queued = (liveState as LiveRideState?)?.queuedNext;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        if (queued != null) ...[
+          _QueuedDriverCard(queued: queued),
+          const SizedBox(height: 16),
+        ],
         _buildLocationDetailsSection(pickupAddress, dropoffAddress),
         const SizedBox(height: 16),
         _buildRideSummarySection(bookingState, liveState),
@@ -1657,6 +1679,79 @@ class _LiveRideMap extends ConsumerWidget {
           width: 4,
         ),
       },
+    );
+  }
+}
+
+/// Back-to-back (งานต่อเนื่อง): the driver who queued this ride after their
+/// current trip nearby — photo, name, car and plate. Shown on the searching
+/// screen until the ride is accepted or unqueued.
+class _QueuedDriverCard extends StatelessWidget {
+  const _QueuedDriverCard({required this.queued});
+
+  final QueuedNext queued;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final car = [
+      queued.vehicleColor,
+      queued.vehicleModel,
+    ].where((s) => s.isNotEmpty).join(' ');
+    final plate = [
+      queued.vehiclePlate,
+      queued.vehicleProvince,
+    ].where((s) => s.isNotEmpty).join(' ');
+    return Container(
+      key: const Key('liveQueuedDriver'),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: AppColors.foundationGrayscale200),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              DriverAvatar(url: queued.avatarUrl),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      queued.driverName,
+                      style: AppTypography.label1,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    if (car.isNotEmpty)
+                      Text(
+                        car,
+                        style: AppTypography.caption4.copyWith(
+                          color: AppColors.semanticGrayNeutralFgLowOnWhite,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              if (plate.isNotEmpty) Text(plate, style: AppTypography.label2),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            queued.etaMin == null
+                ? l10n.liveQueuedSoon
+                : l10n.liveQueuedEta('${queued.etaMin}'),
+            key: const Key('liveQueuedEta'),
+            style: AppTypography.caption4.copyWith(
+              color: AppColors.foundationGreen700,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

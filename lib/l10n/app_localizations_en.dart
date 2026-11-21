@@ -3951,6 +3951,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get supportCatAppIssue => 'Problem with the app';
 
   @override
+  String get supportCatAdvanceBooking => 'Ride booked ahead';
+
+  @override
   String get supportCatOther => 'Something else';
 
   @override

@@ -1355,6 +1355,7 @@
   "supportCatItemIssue": "Items damaged, missing or lost",
   "supportCatLostItem": "I left something in the vehicle",
   "supportCatAppIssue": "Problem with the app",
+  "supportCatAdvanceBooking": "Ride booked ahead",
   "supportCatOther": "Something else",
   "supportDetailLabel": "Details",
   "supportDetailHint": "Tell us what happened: when, where, and how we can help",

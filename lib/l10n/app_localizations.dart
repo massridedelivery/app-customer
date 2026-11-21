@@ -2707,6 +2707,24 @@ abstract class AppLocalizations {
   /// **'Looking for drivers near you...'**
   String get liveFindingNearYou;
 
+  /// No description provided for @liveQueuedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A driver is coming next'**
+  String get liveQueuedTitle;
+
+  /// No description provided for @liveQueuedEta.
+  ///
+  /// In en, this message translates to:
+  /// **'Your driver is finishing a trip nearby, about {minutes} min away'**
+  String liveQueuedEta(String minutes);
+
+  /// No description provided for @liveQueuedSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Your driver is finishing a trip nearby and comes straight after'**
+  String get liveQueuedSoon;
+
   /// No description provided for @liveDriverOnTheWay.
   ///
   /// In en, this message translates to:

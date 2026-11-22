@@ -18,11 +18,14 @@ void main() {
         'advance_booking_booked',
         'advance_booking_reminder_60',
         'advance_booking_driver_found',
-        'advance_driver_changed',
         'advance_card_hold_needed',
       ]) {
         expect(_target(t), '/scheduled/j1', reason: t);
       }
+      expect(
+        _target('advance_driver_changed'),
+        '/scheduled/j1?notice=driver_changed',
+      );
     });
 
     test('ended → the ride receipt', () {

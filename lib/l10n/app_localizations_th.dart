@@ -4345,4 +4345,108 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get advanceHomeCardSubDefault => 'นัดเวลารถล่วงหน้า';
+
+  @override
+  String get advanceTabTitle => 'จองล่วงหน้า';
+
+  @override
+  String get advanceStatusWaiting => 'รอคนขับ';
+
+  @override
+  String get advanceStatusDriver => 'มีคนขับแล้ว';
+
+  @override
+  String get advanceStatusSearching => 'กำลังหาคนขับ';
+
+  @override
+  String get advanceListEmpty => 'ยังไม่มีงานจองล่วงหน้า';
+
+  @override
+  String get advanceBookNew => 'จองล่วงหน้า';
+
+  @override
+  String get advanceDriverChangedBanner =>
+      'คนขับคนเดิมรับงานไม่ได้ กำลังหาคนขับใหม่ให้ · ยกเลิกได้ฟรี';
+
+  @override
+  String get advanceSearchingBanner => 'กำลังหาคนขับให้งานนี้';
+
+  @override
+  String get advanceReschedule => 'เลื่อนเวลา';
+
+  @override
+  String get advanceCancel => 'ยกเลิก';
+
+  @override
+  String get advanceRescheduleTitle => 'เลื่อนเวลารับ';
+
+  @override
+  String advanceReschedulesLeft(String count) {
+    return 'เลื่อนได้อีก $count ครั้ง';
+  }
+
+  @override
+  String advanceRescheduleButton(String when) {
+    return 'เลื่อนเป็น $when';
+  }
+
+  @override
+  String advanceRescheduleSamePrice(String baht) {
+    return 'ราคาเดิม ฿$baht · เวลายกเลิกฟรีเลื่อนตามเวลารับ';
+  }
+
+  @override
+  String get advanceRescheduled => 'เลื่อนเวลาแล้ว';
+
+  @override
+  String get advanceErrCannotReschedule =>
+      'งานนี้เลื่อนเวลาไม่ได้แล้ว เพราะมีคนขับหรือเริ่มหาคนขับแล้ว ยกเลิกแล้วจองใหม่ได้';
+
+  @override
+  String get advanceCancelAndRebook => 'ยกเลิกแล้วจองใหม่';
+
+  @override
+  String get advanceErrTooManyReschedules => 'เลื่อนเวลาครบจำนวนครั้งแล้ว';
+
+  @override
+  String get advanceErrRescheduleFailed =>
+      'เลื่อนเวลาไม่สำเร็จ ลองใหม่อีกครั้ง';
+
+  @override
+  String get advanceCancelSheetTitle => 'ยกเลิกงานจองนี้?';
+
+  @override
+  String get advanceCancelFree => 'ยกเลิกฟรี';
+
+  @override
+  String get advanceCancelReasonNoDriver => 'ยังไม่มีคนขับรับงาน';
+
+  @override
+  String get advanceCancelReasonBeforeFree => 'ยังอยู่ในช่วงยกเลิกฟรี';
+
+  @override
+  String get advanceCancelReasonDriverLate => 'คนขับมาช้ากว่าเวลา';
+
+  @override
+  String get advanceKeepBooking => 'เก็บงานจองไว้';
+
+  @override
+  String advanceCancelFeeTitle(String baht) {
+    return 'ยกเลิกตอนนี้เสีย ฿$baht';
+  }
+
+  @override
+  String get advanceCancelFeeBody =>
+      'เลยเวลายกเลิกฟรีและมีคนขับรับงานแล้ว ค่ายกเลิกจะรวมในเที่ยวถัดไปของคุณ';
+
+  @override
+  String advanceCancelWithFee(String baht) {
+    return 'ยกเลิกและเสีย ฿$baht';
+  }
+
+  @override
+  String get advanceReportProblem => 'แจ้งปัญหางานจองล่วงหน้า';
+
+  @override
+  String get advanceRideFareOnly => 'ค่าโดยสาร';
 }

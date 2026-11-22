@@ -4405,4 +4405,110 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get advanceHomeCardSubDefault => 'Schedule a ride';
+
+  @override
+  String get advanceTabTitle => 'Booked ahead';
+
+  @override
+  String get advanceStatusWaiting => 'Awaiting driver';
+
+  @override
+  String get advanceStatusDriver => 'Driver assigned';
+
+  @override
+  String get advanceStatusSearching => 'Finding a driver';
+
+  @override
+  String get advanceListEmpty => 'No rides booked ahead';
+
+  @override
+  String get advanceBookNew => 'Book ahead';
+
+  @override
+  String get advanceDriverChangedBanner =>
+      'The driver can\'t make it. We\'re finding a new one · free to cancel';
+
+  @override
+  String get advanceSearchingBanner => 'Finding a driver for this ride';
+
+  @override
+  String get advanceReschedule => 'Change time';
+
+  @override
+  String get advanceCancel => 'Cancel';
+
+  @override
+  String get advanceRescheduleTitle => 'Change the pickup time';
+
+  @override
+  String advanceReschedulesLeft(String count) {
+    return '$count changes left';
+  }
+
+  @override
+  String advanceRescheduleButton(String when) {
+    return 'Move to $when';
+  }
+
+  @override
+  String advanceRescheduleSamePrice(String baht) {
+    return 'Same price ฿$baht · the free-cancel time moves with the pickup';
+  }
+
+  @override
+  String get advanceRescheduled => 'Pickup time changed';
+
+  @override
+  String get advanceErrCannotReschedule =>
+      'This ride can\'t be moved now: a driver has it or the search has started. You can cancel and book again.';
+
+  @override
+  String get advanceCancelAndRebook => 'Cancel and book again';
+
+  @override
+  String get advanceErrTooManyReschedules =>
+      'This booking has been moved as many times as allowed';
+
+  @override
+  String get advanceErrRescheduleFailed =>
+      'Couldn\'t change the time. Please try again.';
+
+  @override
+  String get advanceCancelSheetTitle => 'Cancel this booking?';
+
+  @override
+  String get advanceCancelFree => 'Free to cancel';
+
+  @override
+  String get advanceCancelReasonNoDriver => 'no driver has it yet';
+
+  @override
+  String get advanceCancelReasonBeforeFree =>
+      'still within the free-cancel time';
+
+  @override
+  String get advanceCancelReasonDriverLate => 'the driver is late';
+
+  @override
+  String get advanceKeepBooking => 'Keep the booking';
+
+  @override
+  String advanceCancelFeeTitle(String baht) {
+    return 'Cancelling now costs ฿$baht';
+  }
+
+  @override
+  String get advanceCancelFeeBody =>
+      'It\'s past the free-cancel time and a driver has the ride. The fee is added to your next ride.';
+
+  @override
+  String advanceCancelWithFee(String baht) {
+    return 'Cancel and pay ฿$baht';
+  }
+
+  @override
+  String get advanceReportProblem => 'Report a problem with this booking';
+
+  @override
+  String get advanceRideFareOnly => 'Fare';
 }

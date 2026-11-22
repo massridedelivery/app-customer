@@ -502,8 +502,11 @@ final routerProvider = Provider<GoRouter>((ref) {
       // scheduled_ride deeplink is /scheduled/{job_id}).
       GoRoute(
         path: '/scheduled/:id',
-        builder: (context, state) =>
-            ScheduledRideScreen(jobId: state.pathParameters['id']!),
+        builder: (context, state) => ScheduledRideScreen(
+          jobId: state.pathParameters['id']!,
+          driverChanged:
+              state.uri.queryParameters['notice'] == 'driver_changed',
+        ),
       ),
       GoRoute(
         path: '/advance-series',

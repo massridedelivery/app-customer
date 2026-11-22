@@ -50,6 +50,8 @@ import 'package:customer_app/features/profile/presentation/screens/loyalty_scree
 import 'package:customer_app/features/profile/presentation/screens/loyalty_tiers_screen.dart';
 import 'package:customer_app/features/profile/presentation/screens/rewards_screen.dart';
 import 'package:customer_app/features/profile/presentation/screens/vouchers_screen.dart';
+import 'package:customer_app/features/advance_booking/presentation/advance_booking_screen.dart';
+import 'package:customer_app/features/advance_booking/presentation/advance_confirm_screen.dart';
 import 'package:customer_app/features/advance_booking/presentation/advance_series_screen.dart';
 import 'package:customer_app/features/advance_booking/presentation/scheduled_ride_screen.dart';
 import 'package:customer_app/features/food_delivery/presentation/screens/saved_restaurants_screen.dart';
@@ -144,7 +146,7 @@ bool _requiresAuth(String path) {
     // '/promos' is public (guest can browse promos + detail via the public
     // endpoint); applying a code still happens at checkout, which needs auth.
     '/referral', '/sos', '/support', '/privacy', '/credit-cards',
-    '/scheduled', '/advance-series',
+    '/scheduled', '/advance-series', '/advance-booking',
     '/messenger/', '/food-order',
   ];
   return protectedPrefixes.any((p) => path == p || path.startsWith(p));
@@ -399,6 +401,8 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/place-search',
         builder: (context, state) => PlaceSearchScreen(
           focusPickup: state.uri.queryParameters['focus'] == 'pickup',
+          // From the advance booking screen: come back there, not /booking.
+          advance: state.uri.queryParameters['advance'] == '1',
         ),
       ),
       GoRoute(
@@ -504,6 +508,15 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/advance-series',
         builder: (context, state) => const AdvanceSeriesScreen(),
+      ),
+      // Booking a ride ahead: route + time + vehicle, then confirm.
+      GoRoute(
+        path: '/advance-booking',
+        builder: (context, state) => const AdvanceBookingScreen(),
+      ),
+      GoRoute(
+        path: '/advance-booking/confirm',
+        builder: (context, state) => const AdvanceConfirmScreen(),
       ),
       GoRoute(
         path: '/ride/receipt/:id',

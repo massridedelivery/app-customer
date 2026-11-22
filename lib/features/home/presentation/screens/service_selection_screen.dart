@@ -22,6 +22,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:customer_app/core/widgets/app_network_image.dart';
 import 'package:customer_app/core/widgets/hero_header.dart';
+import 'package:customer_app/features/advance_booking/presentation/home_advance_card.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -591,6 +592,9 @@ class _ServiceSelectionScreenState
               },
             ),
           ),
+          // Rides booked ahead (จองล่วงหน้า): shown even while the admin has
+          // it off — the card then shows their closed dialog.
+          const HomeAdvanceBookingCard(),
         ],
       ),
     );

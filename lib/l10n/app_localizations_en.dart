@@ -4232,4 +4232,177 @@ class AppLocalizationsEn extends AppLocalizations {
   String authOtpRetryIn(String time) {
     return 'You can request a new code in $time';
   }
+
+  @override
+  String get advanceHomeCardTitle => 'Book ahead';
+
+  @override
+  String advanceHomeCardSub(String days) {
+    return 'Up to $days days ahead';
+  }
+
+  @override
+  String get advanceGotIt => 'OK';
+
+  @override
+  String get advanceScreenTitle => 'Book ahead';
+
+  @override
+  String get advancePickTime => 'Pick the pickup day and time';
+
+  @override
+  String get advanceToday => 'Today';
+
+  @override
+  String get advanceTomorrow => 'Tomorrow';
+
+  @override
+  String advanceRangeLine(String earliest, String latest, String minutes) {
+    return 'Earliest $earliest · latest $latest · every $minutes min';
+  }
+
+  @override
+  String advanceVehicleLeadNote(String vehicle, String lead, String time) {
+    return '$vehicle must be booked $lead ahead, from $time';
+  }
+
+  @override
+  String advanceLeadHours(String hours) {
+    return '$hours h';
+  }
+
+  @override
+  String advanceLeadMinutes(String minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String advanceBookAtButton(String when) {
+    return 'Book ahead · $when';
+  }
+
+  @override
+  String advanceTimeBar(String when) {
+    return 'Pickup $when · price locked';
+  }
+
+  @override
+  String advanceTooSoonFor(String lead) {
+    return 'Book at least $lead ahead';
+  }
+
+  @override
+  String advanceTooFarFor(String days) {
+    return 'Book at most $days days ahead';
+  }
+
+  @override
+  String advanceBookVehicle(String vehicle, String baht) {
+    return 'Book $vehicle · ฿$baht';
+  }
+
+  @override
+  String get advancePickupHint => 'Pickup';
+
+  @override
+  String get advanceDropoffHint => 'Where to?';
+
+  @override
+  String get advanceChooseRouteFirst =>
+      'Choose the pickup and destination first';
+
+  @override
+  String get advanceChooseTime => 'Choose a pickup time';
+
+  @override
+  String get advanceNoOptions =>
+      'No vehicle can be booked ahead for this trip yet';
+
+  @override
+  String get advanceConfirmTitle => 'Confirm your booking';
+
+  @override
+  String get advancePickupTimeLabel => 'Pickup time';
+
+  @override
+  String advanceRideFareLabel(String vehicle) {
+    return '$vehicle · fare';
+  }
+
+  @override
+  String get advanceFeeLabel => 'Advance booking fee';
+
+  @override
+  String get advanceTotalLabel => 'Total';
+
+  @override
+  String get advancePayWith => 'Pay with';
+
+  @override
+  String get advancePromoCode => 'Promo code';
+
+  @override
+  String get advancePromoAdd => 'Add';
+
+  @override
+  String get advancePromoNoFee =>
+      'A promo code doesn\'t discount the advance booking fee';
+
+  @override
+  String get advancePromoApply => 'Apply';
+
+  @override
+  String get advancePromoRemove => 'Remove';
+
+  @override
+  String get advanceFlightLabel => 'Flight (optional)';
+
+  @override
+  String get advanceFlightHint => 'e.g. TG103';
+
+  @override
+  String advanceFlightHelp(String minutes) {
+    return 'Set the time you\'ll be at the pickup, e.g. landing + $minutes min · flights aren\'t tracked';
+  }
+
+  @override
+  String get advanceFlightInvalid =>
+      'That flight number doesn\'t look right, e.g. TG103 or FD3015';
+
+  @override
+  String advanceConfirmButton(String baht) {
+    return 'Confirm booking · ฿$baht';
+  }
+
+  @override
+  String get advanceErrVehicleNotBookable =>
+      'This vehicle type can\'t be booked ahead. Pick another.';
+
+  @override
+  String get advanceErrTime =>
+      'That time can\'t be booked any more. Pick another.';
+
+  @override
+  String get advanceErrTooManyBookings =>
+      'You already have as many bookings as allowed';
+
+  @override
+  String get advanceErrCashNotAllowed =>
+      'Bookings ahead must be paid in the app. Pick another payment method.';
+
+  @override
+  String get advanceErrOutstandingFees =>
+      'You have unpaid cancellation fees, so cash can\'t be used. Pay in the app.';
+
+  @override
+  String get advanceErrArea => 'Not available in this area yet';
+
+  @override
+  String get advanceErrGeneric => 'Couldn\'t book. Please try again.';
+
+  @override
+  String get advanceBooked => 'Booked';
+
+  @override
+  String get advanceHomeCardSubDefault => 'Schedule a ride';
 }

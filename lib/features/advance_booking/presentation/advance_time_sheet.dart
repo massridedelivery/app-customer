@@ -325,7 +325,7 @@ class _AdvanceTimeSheetState extends State<AdvanceTimeSheet> {
                     fmt.when(vehicleEarliest, now: _now),
                   ),
                   style: AppTypography.caption3.copyWith(
-                    color: AppColors.semanticWarningFgHigh,
+                    color: AppColors.foundationOrange900,
                   ),
                 ),
               ),

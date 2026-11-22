@@ -1,3 +1,4 @@
+import 'package:customer_app/core/dev/advance_mock.dart';
 import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
@@ -89,6 +90,10 @@ class ApiService {
   Dio get dio => _dio;
 
   void _setupInterceptors() {
+    // UI walkthroughs only (--dart-define=ADVANCE_MOCK=true): the
+    // advance-booking API answered from memory. Compiled out otherwise.
+    if (kAdvanceMock) _dio.interceptors.add(AdvanceMockInterceptor());
+
     // The token refresh is a backend request too.
     _refreshDio.interceptors.add(
       InterceptorsWrapper(

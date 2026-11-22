@@ -158,7 +158,7 @@ class _BodyState extends ConsumerState<_Body> {
                     child: Text(
                       banner,
                       style: AppTypography.body2.copyWith(
-                        color: AppColors.semanticWarningFgHigh,
+                        color: AppColors.foundationOrange900,
                         height: 1.5,
                       ),
                     ),
@@ -291,13 +291,27 @@ class _BodyState extends ConsumerState<_Body> {
                     ),
                   ),
                 ],
+                // How many moves are left, once the backend has said.
+                if (_canReschedule && _reschedulesLeft != null) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    l10n.advanceReschedulesLeft('${_reschedulesLeft!}'),
+                    key: const Key('scheduledRideMovesLeft'),
+                    style: AppTypography.caption3.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 8),
                 Align(
                   alignment: Alignment.centerLeft,
                   child: TextButton(
                     key: const Key('scheduledRideReport'),
                     onPressed: _report,
-                    style: TextButton.styleFrom(padding: EdgeInsets.zero),
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      foregroundColor: AppColors.primary,
+                    ),
                     child: Text(l10n.advanceReportProblem),
                   ),
                 ),
@@ -631,12 +645,12 @@ class AdvanceStatusChip extends StatelessWidget {
         ? (
             l10n.advanceStatusSearching,
             AppColors.semanticWarningBgLowOnWhite,
-            AppColors.semanticWarningFgHigh,
+            AppColors.foundationOrange900,
           )
         : (
             l10n.advanceStatusWaiting,
             AppColors.semanticWarningBgLowOnWhite,
-            AppColors.semanticWarningFgHigh,
+            AppColors.foundationOrange900,
           );
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),

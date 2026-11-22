@@ -355,7 +355,15 @@ class _AdvanceConfirmScreenState extends ConsumerState<AdvanceConfirmScreen> {
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(14),
                           ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: const BorderSide(
+                              color: AppColors.primary,
+                              width: 2,
+                            ),
+                          ),
                         ),
+                        cursorColor: AppColors.primary,
                       ),
                       const SizedBox(height: 6),
                       Text(

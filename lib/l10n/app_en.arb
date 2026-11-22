@@ -1518,6 +1518,7 @@
   "advanceErrGeneric": "Couldn't book. Please try again.",
   "advanceBooked": "Booked",
   "advanceHomeCardSubDefault": "Schedule a ride",
+  "advanceHomeCardBadge": "New",
   "advanceTabTitle": "Booked ahead",
   "advanceStatusWaiting": "Awaiting driver",
   "advanceStatusDriver": "Driver assigned",

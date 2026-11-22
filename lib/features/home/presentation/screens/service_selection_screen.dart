@@ -15,6 +15,7 @@ import 'package:customer_app/features/home/presentation/states/home_state.dart';
 import 'package:customer_app/features/active_orders/presentation/controllers/active_orders_controller.dart';
 import 'package:customer_app/features/home/presentation/widgets/home_loyalty_widgets.dart';
 import 'package:customer_app/features/home/presentation/widgets/home_promo_banner.dart';
+import 'package:customer_app/features/home/presentation/widgets/home_service_card.dart';
 import 'package:customer_app/features/active_orders/presentation/widgets/active_orders_banner.dart';
 import 'package:app_settings/app_settings.dart';
 import 'package:flutter/foundation.dart';
@@ -592,9 +593,11 @@ class _ServiceSelectionScreenState
               },
             ),
           ),
-          // Rides booked ahead (จองล่วงหน้า): shown even while the admin has
-          // it off — the card then shows their closed dialog.
-          const HomeAdvanceBookingCard(),
+          // Rides booked ahead (จองล่วงหน้า): shown while the admin has it
+          // off (the card then shows their closed dialog), but not on a
+          // backend that has no advance booking yet (the config won't load).
+          if (ref.watch(homeAdvanceCardVisibleProvider))
+            const HomeAdvanceBookingCard(),
         ],
       ),
     );
@@ -655,79 +658,13 @@ class _ServiceSelectionScreenState
     String iconAsset, {
     VoidCallback? onTap,
   }) {
-    return InkWell(
+    return HomeServiceCard(
+      title: title,
+      subtitle: subtitle,
+      iconAsset: iconAsset,
+      badge: promo,
+      badgeColor: promoColor,
       onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.15),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: AppTypography.label1.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  subtitle,
-                  style: AppTypography.caption4.copyWith(
-                    color: Colors.grey.shade600,
-                  ),
-                ),
-                if (promo != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: (promoColor ?? Colors.red).withValues(
-                          alpha: 0.1,
-                        ),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        promo,
-                        style: AppTypography.caption5.copyWith(
-                          color: promoColor ?? Colors.red,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-            Positioned(
-              right: -4,
-              bottom: -6,
-              child: Image.asset(
-                iconAsset,
-                width: 62,
-                height: 62,
-                fit: BoxFit.contain,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 

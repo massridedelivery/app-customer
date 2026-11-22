@@ -8,6 +8,9 @@ import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/constants/layout.dart';
 import 'package:customer_app/core/widgets/app_filter_chip.dart';
 import 'package:customer_app/core/widgets/mass_loading_m.dart';
+import 'package:customer_app/features/advance_booking/presentation/advance_common.dart';
+import 'package:customer_app/features/advance_booking/presentation/scheduled_list.dart';
+import 'package:customer_app/features/advance_booking/presentation/scheduled_ride_screen.dart';
 import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:customer_app/features/messenger/domain/models/messenger_order.dart';
@@ -32,6 +35,9 @@ class _TripsScreenState extends ConsumerState<TripsScreen> {
   // All statuses are shown together (ongoing first); only the service type is
   // filtered via the chips.
   HistoryType? _selectedType;
+
+  /// The "จองล่วงหน้า" chip: rides booked ahead instead of the history.
+  bool _scheduled = false;
   late final ScrollController _scrollController;
   late final AppLifecycleListener _lifecycle;
 
@@ -67,6 +73,10 @@ class _TripsScreenState extends ConsumerState<TripsScreen> {
   }
 
   void _loadHistory({bool isRefresh = true}) {
+    if (_scheduled) {
+      if (isRefresh) ref.invalidate(scheduledRidesProvider);
+      return;
+    }
     // Messenger history has its own source (/api/messenger/customer/orders);
     // the trips /history feed is ride+food only.
     if (_selectedType == HistoryType.messenger) {
@@ -110,6 +120,11 @@ class _TripsScreenState extends ConsumerState<TripsScreen> {
     // ride fetched into an instance nobody held, which was dropped before the
     // reply came back, so the ride tab read "no trips" until "ทั้งหมด".
     ref.listen(tripsControllerProvider, (_, _) {});
+    // The "จองล่วงหน้า" chip shows while booking ahead is on, or while the
+    // customer still has bookings (the admin may have switched it off since).
+    final showScheduled =
+        ref.watch(advanceConfigProvider).value?.enabled == true ||
+        (ref.watch(scheduledRidesProvider).value?.isNotEmpty ?? false);
     return Scaffold(
       backgroundColor: AppColors.semanticGrayNeutralBgWhite,
       appBar: AppBar(
@@ -126,9 +141,16 @@ class _TripsScreenState extends ConsumerState<TripsScreen> {
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(60),
           child: _TripsFilterBar(
-            selectedType: _selectedType,
+            selectedType: _scheduled ? null : _selectedType,
+            scheduled: _scheduled,
+            showScheduled: showScheduled || _scheduled,
+            onScheduled: () {
+              setState(() => _scheduled = true);
+              ref.invalidate(scheduledRidesProvider);
+            },
             onTypeChanged: (type) {
               setState(() {
+                _scheduled = false;
                 _selectedType = type;
               });
               _loadHistory(isRefresh: true);
@@ -138,7 +160,9 @@ class _TripsScreenState extends ConsumerState<TripsScreen> {
       ),
       body: RefreshIndicator(
         onRefresh: () async => _loadHistory(isRefresh: true),
-        child: _selectedType == HistoryType.messenger
+        child: _scheduled
+            ? const ScheduledBookingsList()
+            : _selectedType == HistoryType.messenger
             ? _MessengerHistoryBody(
                 onRetry: () => _loadHistory(isRefresh: true),
               )
@@ -160,10 +184,16 @@ class _TripsScreenState extends ConsumerState<TripsScreen> {
 class _TripsFilterBar extends StatelessWidget implements PreferredSizeWidget {
   final HistoryType? selectedType;
   final ValueChanged<HistoryType?> onTypeChanged;
+  final bool scheduled;
+  final bool showScheduled;
+  final VoidCallback onScheduled;
 
   const _TripsFilterBar({
     required this.selectedType,
     required this.onTypeChanged,
+    required this.scheduled,
+    required this.showScheduled,
+    required this.onScheduled,
   });
 
   @override
@@ -189,11 +219,21 @@ class _TripsFilterBar extends StatelessWidget implements PreferredSizeWidget {
                 // "ทั้งหมด" = no type filter (null) → ride+food+messenger merged.
                 AppFilterChip(
                   label: l10n.tripFilterAll,
-                  selected: selectedType == null,
+                  selected: selectedType == null && !scheduled,
                   filled: true,
                   onTap: () => onTypeChanged(null),
                 ),
                 const SizedBox(width: 8),
+                if (showScheduled) ...[
+                  AppFilterChip(
+                    key: const Key('tripFilterScheduled'),
+                    label: l10n.advanceTabTitle,
+                    selected: scheduled,
+                    filled: true,
+                    onTap: onScheduled,
+                  ),
+                  const SizedBox(width: 8),
+                ],
                 _buildTypeChip(HistoryType.ride, l10n.tripFilterRide),
                 const SizedBox(width: 8),
                 _buildTypeChip(HistoryType.messenger, l10n.tripFilterMessenger),
@@ -209,7 +249,7 @@ class _TripsFilterBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   Widget _buildTypeChip(HistoryType type, String label) {
-    final isSelected = selectedType == type;
+    final isSelected = selectedType == type && !scheduled;
     return AppFilterChip(
       label: label,
       selected: isSelected,

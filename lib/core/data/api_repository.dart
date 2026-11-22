@@ -261,6 +261,21 @@ class ApiRepository {
     return res.data as Map<String, dynamic>;
   }
 
+  /// PATCH /api/customer/jobs/scheduled/{id}: move the pickup time. Returns
+  /// `{job, reschedules_left}`; 422 CANNOT_RESCHEDULE / TOO_MANY_RESCHEDULES /
+  /// TOO_SOON / TOO_FAR.
+  Future<Map<String, dynamic>> rescheduleScheduledJob(
+    String id,
+    DateTime scheduledAt,
+  ) async {
+    final res = await _dio.patch(
+      '/api/customer/jobs/scheduled/$id',
+      data: {'scheduled_at': scheduledAt.toUtc().toIso8601String()},
+    );
+    final data = res.data;
+    return data is Map<String, dynamic> ? data : const {};
+  }
+
   /// GET /api/customer/advance-series: the customer's repeating bookings.
   Future<List<dynamic>> getAdvanceSeries() async {
     final res = await _dio.get('/api/customer/advance-series');

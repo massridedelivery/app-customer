@@ -420,9 +420,13 @@ class PushNotificationService {
       case 'advance_booking_booked':
       case 'advance_booking_reminder_60':
       case 'advance_booking_driver_found':
-      case 'advance_driver_changed':
       case 'advance_card_hold_needed':
         return jobId == null ? null : '/scheduled/$jobId';
+      // The booking page shows a banner: a new driver is being found.
+      case 'advance_driver_changed':
+        return jobId == null
+            ? null
+            : '/scheduled/$jobId?notice=driver_changed';
       case 'advance_booking_no_driver':
       case 'advance_no_show':
         return jobId == null ? null : '/ride/receipt/$jobId';

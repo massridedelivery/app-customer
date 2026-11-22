@@ -18,6 +18,14 @@ class ScheduledRide {
     this.waitMinutes,
     this.flightNumber,
     this.freeCancelUntilFromApi,
+    this.reschedulesLeft,
+    this.minLeadMinutes,
+    this.paymentMethod = '',
+    this.vehicleTypeId,
+    this.driverName,
+    this.vehicleName,
+    this.vehiclePlate,
+    this.vehicleDescription,
   });
 
   final String id;
@@ -43,6 +51,40 @@ class ScheduledRide {
 
   /// free_cancel_until, once the backend sends it.
   final DateTime? freeCancelUntilFromApi;
+
+  /// How many more times it can be moved (0 once a driver has it or the
+  /// search started); null when the backend didn't say.
+  final int? reschedulesLeft;
+
+  /// The lead time the ride was booked under (advance_policy): a new time
+  /// must be at least this far ahead.
+  final int? minLeadMinutes;
+  final String paymentMethod;
+  final String? vehicleTypeId;
+
+  /// The driver (driver_info), once one has the ride.
+  final String? driverName;
+
+  /// The vehicle type's display name, when the backend sends it.
+  final String? vehicleName;
+  final String? vehiclePlate;
+
+  /// "Toyota Altis สีขาว".
+  final String? vehicleDescription;
+
+  /// The fare without the advance booking fee.
+  double get rideFare => (fare - advanceFee) < 0 ? fare : fare - advanceFee;
+
+  /// The search for a driver has started (DISPATCHING) or the ride is live.
+  bool get searchStarted =>
+      phase == 'DISPATCHING' || phase == 'LIVE' || status != 'PENDING';
+
+  /// "เลื่อนเวลา" is offered: no driver, the search not started, and moves
+  /// left (when known).
+  bool get canReschedule =>
+      !hasDriver &&
+      !searchStarted &&
+      (reschedulesLeft == null || reschedulesLeft! > 0);
 
   /// A driver has taken it (or is reserved for it).
   bool get hasDriver =>
@@ -71,6 +113,9 @@ class ScheduledRide {
     DateTime? time(Object? v) =>
         v == null ? null : DateTime.tryParse('$v')?.toUtc();
 
+    final driver = json['driver_info'] is Map
+        ? Map<String, dynamic>.from(json['driver_info'] as Map)
+        : const <String, dynamic>{};
     final policy = json['advance_policy'] is Map
         ? Map<String, dynamic>.from(json['advance_policy'] as Map)
         : const <String, dynamic>{};
@@ -90,6 +135,23 @@ class ScheduledRide {
       waitMinutes: intOrNull(policy['wait_minutes']),
       flightNumber: str(policy['flight_number']),
       freeCancelUntilFromApi: time(json['free_cancel_until']),
+      reschedulesLeft: json['reschedules_left'] == null
+          ? null
+          : intOrNull(json['reschedules_left']),
+      minLeadMinutes: intOrNull(policy['min_lead_minutes']),
+      paymentMethod: (str(json['payment_method']) ?? '').toUpperCase(),
+      vehicleTypeId: str(json['vehicle_type_id']),
+      driverName: str(driver['full_name']),
+      vehicleName:
+          str(driver['vehicle_type_display_name']) ??
+          str(json['vehicle_type_display_name']),
+      vehiclePlate: str(driver['vehicle_plate']),
+      vehicleDescription: str(
+        [
+          str(driver['vehicle_model']),
+          str(driver['vehicle_color']),
+        ].whereType<String>().join(' '),
+      ),
     );
   }
 }

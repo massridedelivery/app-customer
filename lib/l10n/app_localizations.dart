@@ -7950,6 +7950,186 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Schedule a ride'**
   String get advanceHomeCardSubDefault;
+
+  /// No description provided for @advanceTabTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Booked ahead'**
+  String get advanceTabTitle;
+
+  /// No description provided for @advanceStatusWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Awaiting driver'**
+  String get advanceStatusWaiting;
+
+  /// No description provided for @advanceStatusDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver assigned'**
+  String get advanceStatusDriver;
+
+  /// No description provided for @advanceStatusSearching.
+  ///
+  /// In en, this message translates to:
+  /// **'Finding a driver'**
+  String get advanceStatusSearching;
+
+  /// No description provided for @advanceListEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No rides booked ahead'**
+  String get advanceListEmpty;
+
+  /// No description provided for @advanceBookNew.
+  ///
+  /// In en, this message translates to:
+  /// **'Book ahead'**
+  String get advanceBookNew;
+
+  /// No description provided for @advanceDriverChangedBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'The driver can\'t make it. We\'re finding a new one · free to cancel'**
+  String get advanceDriverChangedBanner;
+
+  /// No description provided for @advanceSearchingBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Finding a driver for this ride'**
+  String get advanceSearchingBanner;
+
+  /// No description provided for @advanceReschedule.
+  ///
+  /// In en, this message translates to:
+  /// **'Change time'**
+  String get advanceReschedule;
+
+  /// No description provided for @advanceCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get advanceCancel;
+
+  /// No description provided for @advanceRescheduleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Change the pickup time'**
+  String get advanceRescheduleTitle;
+
+  /// No description provided for @advanceReschedulesLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} changes left'**
+  String advanceReschedulesLeft(String count);
+
+  /// No description provided for @advanceRescheduleButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to {when}'**
+  String advanceRescheduleButton(String when);
+
+  /// No description provided for @advanceRescheduleSamePrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Same price ฿{baht} · the free-cancel time moves with the pickup'**
+  String advanceRescheduleSamePrice(String baht);
+
+  /// No description provided for @advanceRescheduled.
+  ///
+  /// In en, this message translates to:
+  /// **'Pickup time changed'**
+  String get advanceRescheduled;
+
+  /// No description provided for @advanceErrCannotReschedule.
+  ///
+  /// In en, this message translates to:
+  /// **'This ride can\'t be moved now: a driver has it or the search has started. You can cancel and book again.'**
+  String get advanceErrCannotReschedule;
+
+  /// No description provided for @advanceCancelAndRebook.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel and book again'**
+  String get advanceCancelAndRebook;
+
+  /// No description provided for @advanceErrTooManyReschedules.
+  ///
+  /// In en, this message translates to:
+  /// **'This booking has been moved as many times as allowed'**
+  String get advanceErrTooManyReschedules;
+
+  /// No description provided for @advanceErrRescheduleFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t change the time. Please try again.'**
+  String get advanceErrRescheduleFailed;
+
+  /// No description provided for @advanceCancelSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel this booking?'**
+  String get advanceCancelSheetTitle;
+
+  /// No description provided for @advanceCancelFree.
+  ///
+  /// In en, this message translates to:
+  /// **'Free to cancel'**
+  String get advanceCancelFree;
+
+  /// No description provided for @advanceCancelReasonNoDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'no driver has it yet'**
+  String get advanceCancelReasonNoDriver;
+
+  /// No description provided for @advanceCancelReasonBeforeFree.
+  ///
+  /// In en, this message translates to:
+  /// **'still within the free-cancel time'**
+  String get advanceCancelReasonBeforeFree;
+
+  /// No description provided for @advanceCancelReasonDriverLate.
+  ///
+  /// In en, this message translates to:
+  /// **'the driver is late'**
+  String get advanceCancelReasonDriverLate;
+
+  /// No description provided for @advanceKeepBooking.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep the booking'**
+  String get advanceKeepBooking;
+
+  /// No description provided for @advanceCancelFeeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelling now costs ฿{baht}'**
+  String advanceCancelFeeTitle(String baht);
+
+  /// No description provided for @advanceCancelFeeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'It\'s past the free-cancel time and a driver has the ride. The fee is added to your next ride.'**
+  String get advanceCancelFeeBody;
+
+  /// No description provided for @advanceCancelWithFee.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel and pay ฿{baht}'**
+  String advanceCancelWithFee(String baht);
+
+  /// No description provided for @advanceReportProblem.
+  ///
+  /// In en, this message translates to:
+  /// **'Report a problem with this booking'**
+  String get advanceReportProblem;
+
+  /// No description provided for @advanceRideFareOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Fare'**
+  String get advanceRideFareOnly;
 }
 
 class _AppLocalizationsDelegate

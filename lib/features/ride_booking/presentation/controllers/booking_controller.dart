@@ -1,3 +1,4 @@
+import 'package:customer_app/features/ride_booking/presentation/vehicle_icon.dart';
 import 'package:customer_app/core/error/api_error.dart';
 import 'package:customer_app/features/profile/data/welcome_promo_store.dart';
 import 'package:customer_app/features/profile/presentation/controllers/loyalty_providers.dart';
@@ -365,32 +366,7 @@ class BookingController extends _$BookingController {
 
   // Mass-liveried 3/4 vehicle icons (AI-rendered originals, brand-red with the
   // Mass "M" door decal) under assets/images/icons/3d/.
-  String getVehicleIcon(String typeName) {
-    final n = typeName.toLowerCase();
-    if (n.contains('bike') || n.contains('motorcycle')) {
-      return 'assets/images/icons/3d/ic_car_scooter.png';
-    }
-    if (n.contains('luxury')) {
-      return 'assets/images/icons/3d/ic_car_luxury.png';
-    }
-    if (n.contains('premium')) {
-      return 'assets/images/icons/3d/ic_car_premium.png';
-    }
-    if (n.contains('xl') ||
-        n.contains('van') ||
-        n.contains('suv') ||
-        n.contains('6')) {
-      return 'assets/images/icons/3d/ic_car_xl.png';
-    }
-    if (n.contains('comfort')) {
-      return 'assets/images/icons/3d/ic_car_comfort.png';
-    }
-    if (n.contains('tuk')) {
-      return 'assets/images/icons/3d/ic_car_tuktuk.png';
-    }
-    // economy / saver / eco and anything else → the clean sedan.
-    return 'assets/images/icons/3d/ic_car_economy.png';
-  }
+  String getVehicleIcon(String typeName) => vehicleIconFor(typeName);
 
   void restoreFromActiveJob({
     required double? distanceKm,

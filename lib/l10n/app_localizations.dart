@@ -7674,6 +7674,282 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You can request a new code in {time}'**
   String authOtpRetryIn(String time);
+
+  /// No description provided for @advanceHomeCardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Book ahead'**
+  String get advanceHomeCardTitle;
+
+  /// No description provided for @advanceHomeCardSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Up to {days} days ahead'**
+  String advanceHomeCardSub(String days);
+
+  /// No description provided for @advanceGotIt.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get advanceGotIt;
+
+  /// No description provided for @advanceScreenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Book ahead'**
+  String get advanceScreenTitle;
+
+  /// No description provided for @advancePickTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick the pickup day and time'**
+  String get advancePickTime;
+
+  /// No description provided for @advanceToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get advanceToday;
+
+  /// No description provided for @advanceTomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Tomorrow'**
+  String get advanceTomorrow;
+
+  /// No description provided for @advanceRangeLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Earliest {earliest} · latest {latest} · every {minutes} min'**
+  String advanceRangeLine(String earliest, String latest, String minutes);
+
+  /// No description provided for @advanceVehicleLeadNote.
+  ///
+  /// In en, this message translates to:
+  /// **'{vehicle} must be booked {lead} ahead, from {time}'**
+  String advanceVehicleLeadNote(String vehicle, String lead, String time);
+
+  /// No description provided for @advanceLeadHours.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours} h'**
+  String advanceLeadHours(String hours);
+
+  /// No description provided for @advanceLeadMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min'**
+  String advanceLeadMinutes(String minutes);
+
+  /// No description provided for @advanceBookAtButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Book ahead · {when}'**
+  String advanceBookAtButton(String when);
+
+  /// No description provided for @advanceTimeBar.
+  ///
+  /// In en, this message translates to:
+  /// **'Pickup {when} · price locked'**
+  String advanceTimeBar(String when);
+
+  /// No description provided for @advanceTooSoonFor.
+  ///
+  /// In en, this message translates to:
+  /// **'Book at least {lead} ahead'**
+  String advanceTooSoonFor(String lead);
+
+  /// No description provided for @advanceTooFarFor.
+  ///
+  /// In en, this message translates to:
+  /// **'Book at most {days} days ahead'**
+  String advanceTooFarFor(String days);
+
+  /// No description provided for @advanceBookVehicle.
+  ///
+  /// In en, this message translates to:
+  /// **'Book {vehicle} · ฿{baht}'**
+  String advanceBookVehicle(String vehicle, String baht);
+
+  /// No description provided for @advancePickupHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Pickup'**
+  String get advancePickupHint;
+
+  /// No description provided for @advanceDropoffHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Where to?'**
+  String get advanceDropoffHint;
+
+  /// No description provided for @advanceChooseRouteFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the pickup and destination first'**
+  String get advanceChooseRouteFirst;
+
+  /// No description provided for @advanceChooseTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a pickup time'**
+  String get advanceChooseTime;
+
+  /// No description provided for @advanceNoOptions.
+  ///
+  /// In en, this message translates to:
+  /// **'No vehicle can be booked ahead for this trip yet'**
+  String get advanceNoOptions;
+
+  /// No description provided for @advanceConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm your booking'**
+  String get advanceConfirmTitle;
+
+  /// No description provided for @advancePickupTimeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Pickup time'**
+  String get advancePickupTimeLabel;
+
+  /// No description provided for @advanceRideFareLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{vehicle} · fare'**
+  String advanceRideFareLabel(String vehicle);
+
+  /// No description provided for @advanceFeeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Advance booking fee'**
+  String get advanceFeeLabel;
+
+  /// No description provided for @advanceTotalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get advanceTotalLabel;
+
+  /// No description provided for @advancePayWith.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay with'**
+  String get advancePayWith;
+
+  /// No description provided for @advancePromoCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Promo code'**
+  String get advancePromoCode;
+
+  /// No description provided for @advancePromoAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get advancePromoAdd;
+
+  /// No description provided for @advancePromoNoFee.
+  ///
+  /// In en, this message translates to:
+  /// **'A promo code doesn\'t discount the advance booking fee'**
+  String get advancePromoNoFee;
+
+  /// No description provided for @advancePromoApply.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get advancePromoApply;
+
+  /// No description provided for @advancePromoRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get advancePromoRemove;
+
+  /// No description provided for @advanceFlightLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Flight (optional)'**
+  String get advanceFlightLabel;
+
+  /// No description provided for @advanceFlightHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. TG103'**
+  String get advanceFlightHint;
+
+  /// No description provided for @advanceFlightHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Set the time you\'ll be at the pickup, e.g. landing + {minutes} min · flights aren\'t tracked'**
+  String advanceFlightHelp(String minutes);
+
+  /// No description provided for @advanceFlightInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'That flight number doesn\'t look right, e.g. TG103 or FD3015'**
+  String get advanceFlightInvalid;
+
+  /// No description provided for @advanceConfirmButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm booking · ฿{baht}'**
+  String advanceConfirmButton(String baht);
+
+  /// No description provided for @advanceErrVehicleNotBookable.
+  ///
+  /// In en, this message translates to:
+  /// **'This vehicle type can\'t be booked ahead. Pick another.'**
+  String get advanceErrVehicleNotBookable;
+
+  /// No description provided for @advanceErrTime.
+  ///
+  /// In en, this message translates to:
+  /// **'That time can\'t be booked any more. Pick another.'**
+  String get advanceErrTime;
+
+  /// No description provided for @advanceErrTooManyBookings.
+  ///
+  /// In en, this message translates to:
+  /// **'You already have as many bookings as allowed'**
+  String get advanceErrTooManyBookings;
+
+  /// No description provided for @advanceErrCashNotAllowed.
+  ///
+  /// In en, this message translates to:
+  /// **'Bookings ahead must be paid in the app. Pick another payment method.'**
+  String get advanceErrCashNotAllowed;
+
+  /// No description provided for @advanceErrOutstandingFees.
+  ///
+  /// In en, this message translates to:
+  /// **'You have unpaid cancellation fees, so cash can\'t be used. Pay in the app.'**
+  String get advanceErrOutstandingFees;
+
+  /// No description provided for @advanceErrArea.
+  ///
+  /// In en, this message translates to:
+  /// **'Not available in this area yet'**
+  String get advanceErrArea;
+
+  /// No description provided for @advanceErrGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t book. Please try again.'**
+  String get advanceErrGeneric;
+
+  /// No description provided for @advanceBooked.
+  ///
+  /// In en, this message translates to:
+  /// **'Booked'**
+  String get advanceBooked;
+
+  /// No description provided for @advanceHomeCardSubDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule a ride'**
+  String get advanceHomeCardSubDefault;
 }
 
 class _AppLocalizationsDelegate

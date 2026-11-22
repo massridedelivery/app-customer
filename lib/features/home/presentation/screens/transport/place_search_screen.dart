@@ -18,11 +18,20 @@ import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class PlaceSearchScreen extends ConsumerStatefulWidget {
-  const PlaceSearchScreen({super.key, this.focusPickup = false});
+  const PlaceSearchScreen({
+    super.key,
+    this.focusPickup = false,
+    this.advance = false,
+  });
 
   /// Open on the pickup field, emptied for a fresh search — used when the
   /// chosen pickup is outside the service area ("เลือกจุดรับ").
   final bool focusPickup;
+
+  /// Opened from the advance booking screen: once the route is complete, go
+  /// back there instead of on to /booking. Picking on the map (which carries
+  /// on to /booking) is not offered then.
+  final bool advance;
 
   @override
   ConsumerState<PlaceSearchScreen> createState() => _PlaceSearchScreenState();
@@ -126,6 +135,11 @@ class _PlaceSearchScreenState extends ConsumerState<PlaceSearchScreen>
       ref
           .read(homeControllerProvider.notifier)
           .setPickupLocation(location, name);
+      if (widget.advance &&
+          ref.read(homeControllerProvider).dropoffLocation != null) {
+        context.pop();
+        return;
+      }
       _dropoffFocusNode.requestFocus();
     } else {
       ref
@@ -133,6 +147,10 @@ class _PlaceSearchScreenState extends ConsumerState<PlaceSearchScreen>
           .setDropoffLocation(location, name);
       final currentState = ref.read(homeControllerProvider);
       if (currentState.pickupLocation != null) {
+        if (widget.advance) {
+          context.pop();
+          return;
+        }
         context.push('/booking');
       } else {
         // A dropoff without a pickup can't continue — tell the user instead of
@@ -199,7 +217,7 @@ class _PlaceSearchScreenState extends ConsumerState<PlaceSearchScreen>
               tabController: _tabController,
               onSelectPlace: _onSelectPlace,
             ),
-            _buildBottomAction(l10n),
+            if (!widget.advance) _buildBottomAction(l10n),
           ],
         ),
       ),
@@ -328,7 +346,8 @@ class _PlaceSearchScreenState extends ConsumerState<PlaceSearchScreen>
               );
             },
           ),
-          const SizedBox(width: 8),
+          if (!widget.advance) const SizedBox(width: 8),
+          if (!widget.advance)
           InkWell(
             borderRadius: BorderRadius.circular(20),
             onTap: () {

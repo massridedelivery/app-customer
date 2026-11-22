@@ -198,6 +198,37 @@ class ApiRepository {
     return res.data as Map<String, dynamic>;
   }
 
+  /// GET /api/customer/advance-booking/config: whether rides may be booked
+  /// ahead, the closed dialog, and the rules (lead time, slot, fees).
+  Future<Map<String, dynamic>> getAdvanceConfig() async {
+    final res = await _dio.get('/api/customer/advance-booking/config');
+    final data = res.data;
+    return data is Map<String, dynamic> ? data : const {};
+  }
+
+  /// GET /api/customer/advance-booking/options: each vehicle type's locked
+  /// price for the trip at [scheduledAt].
+  Future<Map<String, dynamic>> getAdvanceOptions({
+    required double pickupLat,
+    required double pickupLng,
+    required double dropoffLat,
+    required double dropoffLng,
+    required DateTime scheduledAt,
+  }) async {
+    final res = await _dio.get(
+      '/api/customer/advance-booking/options',
+      queryParameters: {
+        'pickup_lat': pickupLat,
+        'pickup_lng': pickupLng,
+        'dropoff_lat': dropoffLat,
+        'dropoff_lng': dropoffLng,
+        'scheduled_at': scheduledAt.toUtc().toIso8601String(),
+      },
+    );
+    final data = res.data;
+    return data is Map<String, dynamic> ? data : const {};
+  }
+
   /// POST /api/customer/jobs/schedule
   Future<Map<String, dynamic>> scheduleJob(Map<String, dynamic> body) async {
     final res = await _dio.post(

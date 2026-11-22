@@ -4177,4 +4177,172 @@ class AppLocalizationsTh extends AppLocalizations {
   String authOtpRetryIn(String time) {
     return 'ขอรหัสใหม่ได้ใน $time';
   }
+
+  @override
+  String get advanceHomeCardTitle => 'จองล่วงหน้า';
+
+  @override
+  String advanceHomeCardSub(String days) {
+    return 'นัดรถได้ถึง $days วัน';
+  }
+
+  @override
+  String get advanceGotIt => 'รับทราบ';
+
+  @override
+  String get advanceScreenTitle => 'จองล่วงหน้า';
+
+  @override
+  String get advancePickTime => 'เลือกวันและเวลารับ';
+
+  @override
+  String get advanceToday => 'วันนี้';
+
+  @override
+  String get advanceTomorrow => 'พรุ่งนี้';
+
+  @override
+  String advanceRangeLine(String earliest, String latest, String minutes) {
+    return 'เร็วสุด $earliest · ไกลสุด $latest · ทุก $minutes นาที';
+  }
+
+  @override
+  String advanceVehicleLeadNote(String vehicle, String lead, String time) {
+    return '$vehicle ต้องจองก่อน $lead จะเลือกได้ตั้งแต่ $time';
+  }
+
+  @override
+  String advanceLeadHours(String hours) {
+    return '$hours ชั่วโมง';
+  }
+
+  @override
+  String advanceLeadMinutes(String minutes) {
+    return '$minutes นาที';
+  }
+
+  @override
+  String advanceBookAtButton(String when) {
+    return 'จองล่วงหน้า · $when';
+  }
+
+  @override
+  String advanceTimeBar(String when) {
+    return 'รับ $when · ราคาล็อกแล้ว';
+  }
+
+  @override
+  String advanceTooSoonFor(String lead) {
+    return 'ต้องจองก่อนอย่างน้อย $lead';
+  }
+
+  @override
+  String advanceTooFarFor(String days) {
+    return 'จองล่วงหน้าได้ไม่เกิน $days วัน';
+  }
+
+  @override
+  String advanceBookVehicle(String vehicle, String baht) {
+    return 'จอง $vehicle · ฿$baht';
+  }
+
+  @override
+  String get advancePickupHint => 'จุดรับ';
+
+  @override
+  String get advanceDropoffHint => 'ไปไหนดี?';
+
+  @override
+  String get advanceChooseRouteFirst => 'เลือกจุดรับและปลายทางก่อน';
+
+  @override
+  String get advanceChooseTime => 'เลือกเวลารับ';
+
+  @override
+  String get advanceNoOptions => 'ยังไม่มีรถที่จองล่วงหน้าได้สำหรับเส้นทางนี้';
+
+  @override
+  String get advanceConfirmTitle => 'ยืนยันการจองล่วงหน้า';
+
+  @override
+  String get advancePickupTimeLabel => 'เวลารับ';
+
+  @override
+  String advanceRideFareLabel(String vehicle) {
+    return '$vehicle · ค่าโดยสาร';
+  }
+
+  @override
+  String get advanceFeeLabel => 'ค่าบริการจองล่วงหน้า';
+
+  @override
+  String get advanceTotalLabel => 'รวม';
+
+  @override
+  String get advancePayWith => 'ชำระด้วย';
+
+  @override
+  String get advancePromoCode => 'โค้ดส่วนลด';
+
+  @override
+  String get advancePromoAdd => 'ใส่โค้ด';
+
+  @override
+  String get advancePromoNoFee => 'โค้ดส่วนลดไม่ลดค่าบริการจองล่วงหน้า';
+
+  @override
+  String get advancePromoApply => 'ใช้โค้ด';
+
+  @override
+  String get advancePromoRemove => 'ไม่ใช้โค้ด';
+
+  @override
+  String get advanceFlightLabel => 'เที่ยวบิน (ไม่บังคับ)';
+
+  @override
+  String get advanceFlightHint => 'เช่น TG103';
+
+  @override
+  String advanceFlightHelp(String minutes) {
+    return 'ใส่เวลาที่ออกมาถึงจุดรับ เช่น เวลาเครื่องลง + $minutes นาที · ระบบไม่ได้ติดตามเที่ยวบิน';
+  }
+
+  @override
+  String get advanceFlightInvalid =>
+      'เลขเที่ยวบินไม่ถูกต้อง เช่น TG103 หรือ FD3015';
+
+  @override
+  String advanceConfirmButton(String baht) {
+    return 'ยืนยันการจอง · ฿$baht';
+  }
+
+  @override
+  String get advanceErrVehicleNotBookable =>
+      'รถประเภทนี้จองล่วงหน้าไม่ได้ เลือกประเภทอื่น';
+
+  @override
+  String get advanceErrTime => 'เวลานี้จองไม่ได้แล้ว เลือกเวลาใหม่';
+
+  @override
+  String get advanceErrTooManyBookings => 'คุณมีงานจองล่วงหน้าครบจำนวนแล้ว';
+
+  @override
+  String get advanceErrCashNotAllowed =>
+      'งานจองล่วงหน้าต้องชำระผ่านแอป เลือกวิธีชำระเงินใหม่';
+
+  @override
+  String get advanceErrOutstandingFees =>
+      'คุณมีค่ายกเลิกค้างชำระ จองด้วยเงินสดไม่ได้ เลือกชำระผ่านแอป';
+
+  @override
+  String get advanceErrArea => 'ยังไม่เปิดให้บริการในพื้นที่นี้';
+
+  @override
+  String get advanceErrGeneric => 'จองไม่สำเร็จ ลองใหม่อีกครั้ง';
+
+  @override
+  String get advanceBooked => 'จองล่วงหน้าเรียบร้อย';
+
+  @override
+  String get advanceHomeCardSubDefault => 'นัดเวลารถล่วงหน้า';
 }

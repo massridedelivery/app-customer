@@ -4407,6 +4407,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get advanceHomeCardSubDefault => 'Schedule a ride';
 
   @override
+  String get advanceHomeCardBadge => 'New';
+
+  @override
   String get advanceTabTitle => 'Booked ahead';
 
   @override

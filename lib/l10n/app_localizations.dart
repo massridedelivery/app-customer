@@ -7951,6 +7951,12 @@ abstract class AppLocalizations {
   /// **'Schedule a ride'**
   String get advanceHomeCardSubDefault;
 
+  /// No description provided for @advanceHomeCardBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'New'**
+  String get advanceHomeCardBadge;
+
   /// No description provided for @advanceTabTitle.
   ///
   /// In en, this message translates to:

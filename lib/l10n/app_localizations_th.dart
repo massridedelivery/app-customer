@@ -4344,7 +4344,10 @@ class AppLocalizationsTh extends AppLocalizations {
   String get advanceBooked => 'จองล่วงหน้าเรียบร้อย';
 
   @override
-  String get advanceHomeCardSubDefault => 'นัดเวลารถล่วงหน้า';
+  String get advanceHomeCardSubDefault => 'นัดรถล่วงหน้า';
+
+  @override
+  String get advanceHomeCardBadge => 'ใหม่';
 
   @override
   String get advanceTabTitle => 'จองล่วงหน้า';

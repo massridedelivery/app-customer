@@ -313,7 +313,7 @@ class AdvanceRouteSummary extends StatelessWidget {
             rest,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: AppTypography.caption3.copyWith(
+            style: AppTypography.caption4.copyWith(
               color: AppColors.textSecondary,
             ),
           ),
@@ -383,8 +383,8 @@ class AdvanceRouteSummary extends StatelessWidget {
           child: Text(
             footer!,
             key: const Key('advanceTripLine'),
-            style: AppTypography.caption3.copyWith(
-              color: AppColors.textPrimary,
+            style: AppTypography.caption4.copyWith(
+              color: AppColors.textSecondary,
             ),
           ),
         ),
@@ -409,10 +409,10 @@ class AdvancePolicyNotice extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (lines.isEmpty) return const SizedBox.shrink();
-    final text = AppTypography.caption3.copyWith(color: _ink, height: 1.5);
+    final text = AppTypography.body3.copyWith(color: _ink, height: 1.5);
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
       decoration: BoxDecoration(
         color: AppColors.foundationYellow100,
         borderRadius: BorderRadius.circular(16),
@@ -425,23 +425,23 @@ class AdvancePolicyNotice extends StatelessWidget {
             children: [
               const Icon(
                 Icons.warning_amber_rounded,
-                size: 18,
+                size: 16,
                 color: AppColors.foundationYellow700,
               ),
               const SizedBox(width: 6),
               Text(
                 title,
-                style: AppTypography.label2.copyWith(
+                style: AppTypography.label3.copyWith(
                   color: _ink,
                   fontWeight: FontWeight.bold,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 2),
           for (final line in lines)
             Padding(
-              padding: const EdgeInsets.only(left: 4, top: 2),
+              padding: const EdgeInsets.only(left: 2, top: 2),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

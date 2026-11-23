@@ -337,7 +337,11 @@ void main() {
         home: Scaffold(
           body: AdvanceWhenCard(
             label: 'เวลารับ',
-            when: 'อา. 22 พ.ย. · 06:30',
+            month: 'พ.ย.',
+            day: 24,
+            weekday: 'อังคาร',
+            time: '11:15 น.',
+            fullDate: 'วันอังคารที่ 24 พฤศจิกายน 2569',
             changeLabel: 'เปลี่ยน',
             onChange: () => changed++,
           ),
@@ -345,7 +349,9 @@ void main() {
       ),
     );
     expect(find.text('เวลารับ'), findsOneWidget);
-    expect(find.text('อา. 22 พ.ย. · 06:30'), findsOneWidget);
+    expect(find.text('11:15 น.'), findsOneWidget);
+    expect(find.text('วันอังคารที่ 24 พฤศจิกายน 2569'), findsOneWidget);
+    expect(find.text('24'), findsOneWidget);
     await tester.tap(find.byKey(const Key('advanceConfirmChangeTime')));
     expect(changed, 1);
   });
@@ -421,5 +427,19 @@ void main() {
       expect(find.text('ก่อนจอง โปรดทราบ'), findsOneWidget);
       expect(find.text('ยกเลิกฟรีถึง อ. 24 พ.ย. 10:15'), findsOneWidget);
     });
+  });
+
+  test('full date is Thai with the Buddhist year', () {
+    // Tue 24 Nov 2026, 11:15 Bangkok.
+    final at = DateTime.utc(2026, 11, 24, 4, 15);
+    const th = AdvanceFormat('th');
+    expect(th.fullDate(at), 'วันอังคารที่ 24 พฤศจิกายน 2569');
+    expect(th.clockLong(at), '11:15 น.');
+    expect(th.monthShort(at), 'พ.ย.');
+    expect(th.weekdayName(at), 'อังคาร');
+    expect(th.dayOfMonth(at), 24);
+    const en = AdvanceFormat('en');
+    expect(en.fullDate(at), 'Tuesday 24 November 2026');
+    expect(en.clockLong(at), '11:15');
   });
 }

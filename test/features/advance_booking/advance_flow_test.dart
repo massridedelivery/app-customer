@@ -370,6 +370,8 @@ void main() {
         '338, ซ. สุขุมวิท 21, คลองเตย',
       );
       expect(advanceShortPlace('12/3-4, ถ. พระราม 9'), '12/3-4, ถ. พระราม 9');
+      expect(advanceShortPlace('338,'), '338');
+      expect(advanceShortPlace('338, '), '338');
     });
 
     test('trip distance and time come from the options body', () {

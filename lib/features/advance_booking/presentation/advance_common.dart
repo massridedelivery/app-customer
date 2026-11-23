@@ -252,10 +252,12 @@ List<String> advancePolicyParts(
 }
 
 /// The place name for a one-line route; the whole address when its first
-/// part is only a house number ("338, ซ. สุขุมวิท 21, …").
+/// part is only a house number ("338, ซ. สุขุมวิท 21, …"). A trailing comma
+/// left by the geocoder ("338,") is dropped.
 String advanceShortPlace(String address) {
   final name = advanceSplitPlace(address).$1;
-  return RegExp(r'^[0-9/\-\s]+$').hasMatch(name) ? address : name;
+  final picked = RegExp(r'^[0-9/\-\s]+$').hasMatch(name) ? address : name;
+  return picked.replaceFirst(RegExp(r'[,\s]+$'), '');
 }
 
 /// "32.4 กม. · ประมาณ 35 นาที"; null when neither is known.

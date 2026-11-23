@@ -4330,6 +4330,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get advanceFeeLabel => 'Advance booking fee';
 
   @override
+  String advanceDiscountLabel(String code) {
+    return 'Discount $code';
+  }
+
+  @override
   String get advanceTotalLabel => 'Total';
 
   @override

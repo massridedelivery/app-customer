@@ -22,7 +22,12 @@ class RideCouponScreen extends ConsumerStatefulWidget {
     this.subtotal,
     this.appliedCode,
     this.note,
+    this.onValidated,
   });
+
+  /// With [subtotal]: told the discount of a code that checked out, just
+  /// before the screen pops with it.
+  final void Function(double discount)? onValidated;
 
   /// Set by a flow that isn't the instant ride booking (a ride booked ahead):
   /// codes are checked against this fare instead of the booking estimate,
@@ -89,7 +94,11 @@ class _RideCouponScreenState extends ConsumerState<RideCouponScreen> {
       final bool isValid;
       if (widget._standalone) {
         // Throws on a code that can't be used, like validatePromo.
-        await ref.read(validatePromoUseCaseProvider)(code, widget.subtotal!);
+        final discount = await ref.read(validatePromoUseCaseProvider)(
+          code,
+          widget.subtotal!,
+        );
+        widget.onValidated?.call(discount);
         isValid = true;
       } else {
         isValid = await ref

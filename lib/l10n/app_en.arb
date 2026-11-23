@@ -1494,6 +1494,8 @@
   "advanceRideFareLabel": "{vehicle} · fare",
   "@advanceRideFareLabel": {"placeholders": {"vehicle": {"type": "String"}}},
   "advanceFeeLabel": "Advance booking fee",
+  "advanceDiscountLabel": "Discount {code}",
+  "@advanceDiscountLabel": {"placeholders": {"code": {"type": "String"}}},
   "advanceTotalLabel": "Total",
   "advancePayWith": "Pay with",
   "advancePromoCode": "Promo code",

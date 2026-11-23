@@ -2,6 +2,7 @@ import 'package:customer_app/features/advance_booking/domain/advance_config.dart
 import 'package:customer_app/features/advance_booking/domain/advance_format.dart';
 import 'package:customer_app/features/advance_booking/domain/advance_refusal.dart';
 import 'package:customer_app/features/advance_booking/domain/advance_slots.dart';
+import 'package:customer_app/features/advance_booking/presentation/advance_booking_controller.dart';
 import 'package:customer_app/features/advance_booking/presentation/advance_common.dart';
 import 'package:customer_app/features/advance_booking/presentation/advance_confirm_screen.dart';
 import 'package:customer_app/features/advance_booking/presentation/advance_time_sheet.dart';
@@ -441,5 +442,36 @@ void main() {
     const en = AdvanceFormat('en');
     expect(en.fullDate(at), 'Tuesday 24 November 2026');
     expect(en.clockLong(at), '11:15');
+  });
+
+  test('promo discount counts only for the fare it was checked against', () {
+    const economy = AdvanceOption(
+      type: AdvanceVehicleType(vehicleTypeId: 'eco', displayName: 'Economy'),
+      fare: 185,
+      rideFare: 145,
+      bookable: true,
+    );
+    const none = AdvanceBookingState();
+    expect(none.discountFor(economy), 0);
+    const checked = AdvanceBookingState(
+      promoCode: 'AGAIN',
+      promoDiscount: 58,
+      promoBase: 145,
+    );
+    expect(checked.discountFor(economy), 58);
+    // Checked against another vehicle's fare: not shown until re-checked.
+    const stale = AdvanceBookingState(
+      promoCode: 'AGAIN',
+      promoDiscount: 58,
+      promoBase: 190,
+    );
+    expect(stale.discountFor(economy), 0);
+    // Never more than the ride fare (the advance fee isn't discounted).
+    const big = AdvanceBookingState(
+      promoCode: 'BIG',
+      promoDiscount: 500,
+      promoBase: 145,
+    );
+    expect(big.discountFor(economy), 145);
   });
 }

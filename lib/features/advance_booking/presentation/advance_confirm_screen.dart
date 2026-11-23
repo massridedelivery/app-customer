@@ -164,7 +164,7 @@ class _AdvanceConfirmScreenState extends ConsumerState<AdvanceConfirmScreen> {
             const SizedBox(height: 8),
             Text(
               l10n.advancePromoNoFee,
-              style: AppTypography.caption3.copyWith(
+              style: AppTypography.body3.copyWith(
                 color: AppColors.textSecondary,
               ),
             ),
@@ -295,14 +295,14 @@ class _AdvanceConfirmScreenState extends ConsumerState<AdvanceConfirmScreen> {
                             children: [
                               const Icon(
                                 Icons.lock_outline_rounded,
-                                size: 14,
+                                size: 13,
                                 color: AppColors.textSecondary,
                               ),
                               const SizedBox(width: 6),
                               Expanded(
                                 child: Text(
                                   l10n.advancePriceLocked,
-                                  style: AppTypography.caption3.copyWith(
+                                  style: AppTypography.body3.copyWith(
                                     color: AppColors.textSecondary,
                                   ),
                                 ),
@@ -406,7 +406,7 @@ class _AdvanceConfirmScreenState extends ConsumerState<AdvanceConfirmScreen> {
                             children: [
                               const Icon(
                                 Icons.schedule_rounded,
-                                size: 15,
+                                size: 14,
                                 color: AppColors.foundationGreen800,
                               ),
                               const SizedBox(width: 6),
@@ -416,7 +416,7 @@ class _AdvanceConfirmScreenState extends ConsumerState<AdvanceConfirmScreen> {
                                     '${config.airportWaitMinutes}',
                                     '${config.waitMinutes}',
                                   ),
-                                  style: AppTypography.caption3.copyWith(
+                                  style: AppTypography.body3.copyWith(
                                     color: AppColors.foundationGreen800,
                                   ),
                                 ),

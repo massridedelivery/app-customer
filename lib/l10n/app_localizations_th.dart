@@ -4256,6 +4256,17 @@ class AppLocalizationsTh extends AppLocalizations {
   String get advanceChooseTime => 'เลือกเวลารับ';
 
   @override
+  String get advanceHeroSubtitle => 'นัดเวลาไว้ก่อน รถมาตรงเวลา';
+
+  @override
+  String get advanceChooseVehicle => 'เลือกรถ';
+
+  @override
+  String advanceFeeNote(String baht) {
+    return 'ราคารวมค่าบริการจองล่วงหน้า ฿$baht แล้ว · ราคาล็อกตามเวลาที่เลือก';
+  }
+
+  @override
   String get advanceNoOptions => 'ยังไม่มีรถที่จองล่วงหน้าได้สำหรับเส้นทางนี้';
 
   @override

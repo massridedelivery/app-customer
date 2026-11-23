@@ -4312,6 +4312,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get advanceChooseTime => 'Choose a pickup time';
 
   @override
+  String get advanceHeroSubtitle => 'Book the time now, the car comes on time';
+
+  @override
+  String get advanceChooseVehicle => 'Choose a vehicle';
+
+  @override
+  String advanceFeeNote(String baht) {
+    return 'Includes the ฿$baht advance booking fee · price locked for this time';
+  }
+
+  @override
   String get advanceNoOptions =>
       'No vehicle can be booked ahead for this trip yet';
 

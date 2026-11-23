@@ -7819,6 +7819,12 @@ abstract class AppLocalizations {
   /// **'Advance booking fee'**
   String get advanceFeeLabel;
 
+  /// No description provided for @advanceDiscountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Discount {code}'**
+  String advanceDiscountLabel(String code);
+
   /// No description provided for @advanceTotalLabel.
   ///
   /// In en, this message translates to:

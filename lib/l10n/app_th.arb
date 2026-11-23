@@ -1327,6 +1327,8 @@
   "advancePickupTimeLabel": "เวลารับ",
   "advanceRideFareLabel": "{vehicle} · ค่าโดยสาร",
   "advanceFeeLabel": "ค่าบริการจองล่วงหน้า",
+  "advanceDiscountLabel": "ส่วนลด {code}",
+  "@advanceDiscountLabel": {"placeholders": {"code": {"type": "String"}}},
   "advanceTotalLabel": "รวม",
   "advancePayWith": "ชำระด้วย",
   "advancePromoCode": "โค้ดส่วนลด",

@@ -2,6 +2,7 @@ import 'package:customer_app/core/managers/providers.dart';
 import 'package:customer_app/features/advance_booking/domain/advance_config.dart';
 import 'package:customer_app/features/advance_booking/domain/advance_refusal.dart';
 import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
+import 'package:customer_app/features/ride_booking/domain/usecases/validate_promo_usecase_impl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// One advance booking being put together: the pickup time, the priced
@@ -18,6 +19,8 @@ class AdvanceBookingState {
     this.submitting = false,
     this.distanceKm,
     this.durationMin,
+    this.promoDiscount,
+    this.promoBase,
   });
 
   /// The pickup time (UTC); null until the customer picks one.
@@ -33,6 +36,21 @@ class AdvanceBookingState {
   final double? distanceKm;
   final double? durationMin;
 
+  /// What [promoCode] takes off, as /promos/validate answered for a ride fare
+  /// of [promoBase]; null when not known.
+  final double? promoDiscount;
+  final double? promoBase;
+
+  /// The code's discount on [option]'s ride fare (never the advance fee),
+  /// or 0 when it wasn't checked against this fare.
+  double discountFor(AdvanceOption option) {
+    final d = promoDiscount;
+    if (promoCode == null || d == null || promoBase != option.rideFare) {
+      return 0;
+    }
+    return d.clamp(0, option.rideFare).toDouble();
+  }
+
   AdvanceOption? get selected => options.value
       ?.where((o) => o.type.vehicleTypeId == selectedTypeId)
       .firstOrNull;
@@ -47,6 +65,8 @@ class AdvanceBookingState {
     bool? submitting,
     double? Function()? distanceKm,
     double? Function()? durationMin,
+    double? Function()? promoDiscount,
+    double? Function()? promoBase,
   }) => AdvanceBookingState(
     scheduledAt: scheduledAt ?? this.scheduledAt,
     options: options ?? this.options,
@@ -59,6 +79,10 @@ class AdvanceBookingState {
     submitting: submitting ?? this.submitting,
     distanceKm: distanceKm != null ? distanceKm() : this.distanceKm,
     durationMin: durationMin != null ? durationMin() : this.durationMin,
+    promoDiscount: promoDiscount != null
+        ? promoDiscount()
+        : this.promoDiscount,
+    promoBase: promoBase != null ? promoBase() : this.promoBase,
   );
 }
 
@@ -123,11 +147,32 @@ class AdvanceBookingController extends Notifier<AdvanceBookingState> {
   void setPaymentMethod(String method) =>
       state = state.copyWith(paymentMethod: method);
 
-  void setPromoCode(String? code) {
+  /// A promo code (empty or null removes it) and, when known, what it takes
+  /// off a ride fare of [base].
+  void setPromoCode(String? code, {double? discount, double? base}) {
     final c = code?.trim().toUpperCase();
+    final none = c == null || c.isEmpty;
     state = state.copyWith(
-      promoCode: () => (c == null || c.isEmpty) ? null : c,
+      promoCode: () => none ? null : c,
+      promoDiscount: () => none ? null : discount,
+      promoBase: () => none ? null : base,
     );
+  }
+
+  /// Checks the promo code again for a ride fare of [base] (another vehicle
+  /// or time), keeping the code; the discount is unknown if it fails.
+  Future<void> revalidatePromo(double base) async {
+    final code = state.promoCode;
+    if (code == null || state.promoBase == base) return;
+    state = state.copyWith(promoBase: () => base, promoDiscount: () => null);
+    try {
+      final d = await ref.read(validatePromoUseCaseProvider)(code, base);
+      if (state.promoCode == code && state.promoBase == base) {
+        state = state.copyWith(promoDiscount: () => d);
+      }
+    } catch (_) {
+      // Left unknown: the server still applies what it can at booking.
+    }
   }
 
   void setFlightNumber(String flight) =>

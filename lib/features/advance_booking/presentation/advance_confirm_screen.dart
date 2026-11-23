@@ -149,17 +149,21 @@ class _AdvanceConfirmScreenState extends ConsumerState<AdvanceConfirmScreen> {
   /// discounted). Back with a code to apply, '' to remove, null to keep.
   Future<void> _editPromo(String? current, double rideFare) async {
     final l10n = AppLocalizations.of(context)!;
+    double? discount;
     final code = await Navigator.of(context).push<String>(
       MaterialPageRoute(
         builder: (_) => RideCouponScreen(
           subtotal: rideFare,
           appliedCode: current,
           note: l10n.advancePromoNoFee,
+          onValidated: (d) => discount = d,
         ),
       ),
     );
     if (code != null && mounted) {
-      ref.read(advanceBookingControllerProvider.notifier).setPromoCode(code);
+      ref
+          .read(advanceBookingControllerProvider.notifier)
+          .setPromoCode(code, discount: discount, base: rideFare);
     }
   }
 
@@ -211,6 +215,17 @@ class _AdvanceConfirmScreenState extends ConsumerState<AdvanceConfirmScreen> {
           final label = AppTypography.body2.copyWith(
             color: AppColors.textSecondary,
           );
+          // A code checked against another vehicle's fare: check it again.
+          if (state.promoCode != null && state.promoBase != option.rideFare) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (!mounted) return;
+              ref
+                  .read(advanceBookingControllerProvider.notifier)
+                  .revalidatePromo(option.rideFare);
+            });
+          }
+          final discount = state.discountFor(option);
+          final total = option.fare - discount;
           return Column(
             children: [
               // Pinned so the time stays in view while the keyboard is up
@@ -252,6 +267,17 @@ class _AdvanceConfirmScreenState extends ConsumerState<AdvanceConfirmScreen> {
                             option.rideFare,
                             style: label,
                           ),
+                          if (discount > 0) ...[
+                            const SizedBox(height: 8),
+                            _MoneyRow(
+                              l10n.advanceDiscountLabel(state.promoCode ?? ''),
+                              -discount,
+                              key: const Key('advanceDiscountRow'),
+                              style: label.copyWith(
+                                color: AppColors.foundationGreen800,
+                              ),
+                            ),
+                          ],
                           const SizedBox(height: 8),
                           _MoneyRow(
                             l10n.advanceFeeLabel,
@@ -264,7 +290,7 @@ class _AdvanceConfirmScreenState extends ConsumerState<AdvanceConfirmScreen> {
                           ),
                           _MoneyRow(
                             l10n.advanceTotalLabel,
-                            option.fare,
+                            total,
                             style: AppTypography.heading5.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
@@ -410,7 +436,7 @@ class _AdvanceConfirmScreenState extends ConsumerState<AdvanceConfirmScreen> {
                   padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
                   child: AdvancePrimaryButton(
                     key: const Key('advanceConfirmButton'),
-                    label: l10n.advanceConfirmButton(fmtBaht(option.fare)),
+                    label: l10n.advanceConfirmButton(fmtBaht(total)),
                     loading: state.submitting,
                     onPressed: () {
                       if (payment != state.paymentMethod) {
@@ -432,7 +458,7 @@ class _AdvanceConfirmScreenState extends ConsumerState<AdvanceConfirmScreen> {
 }
 
 class _MoneyRow extends StatelessWidget {
-  const _MoneyRow(this.label, this.amount, {required this.style});
+  const _MoneyRow(this.label, this.amount, {super.key, required this.style});
 
   final String label;
   final double amount;
@@ -442,7 +468,10 @@ class _MoneyRow extends StatelessWidget {
   Widget build(BuildContext context) => Row(
     children: [
       Expanded(child: Text(label, style: style)),
-      Text('฿${fmtBaht(amount)}', style: style),
+      Text(
+        amount < 0 ? '−฿${fmtBaht(-amount)}' : '฿${fmtBaht(amount)}',
+        style: style,
+      ),
     ],
   );
 }

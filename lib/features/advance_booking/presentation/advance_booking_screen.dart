@@ -446,6 +446,8 @@ class _ShortRoute extends StatelessWidget {
   final void Function(bool pickup) onEdit;
 
   static const _pin = 20.0;
+  static const _lineHeight = 44.0;
+  static const _gap = 8.0;
 
   Widget _line({
     required Key key,
@@ -454,13 +456,13 @@ class _ShortRoute extends StatelessWidget {
     required Color pinColor,
     required VoidCallback onTap,
   }) {
-    final name = address == null ? hint : advanceSplitPlace(address).$1;
+    final name = address == null ? hint : advanceShortPlace(address);
     return InkWell(
       key: key,
       onTap: onTap,
       borderRadius: BorderRadius.circular(10),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 6),
+      child: SizedBox(
+        height: _lineHeight,
         child: Row(
           children: [
             AppIcons.asset(
@@ -496,41 +498,47 @@ class _ShortRoute extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => AdvanceCard(
-    padding: const EdgeInsets.fromLTRB(14, 6, 10, 6),
-    child: Column(
+    padding: const EdgeInsets.fromLTRB(14, 4, 10, 4),
+    child: Stack(
       children: [
-        _line(
-          key: const Key('advancePickup'),
-          address: pickup,
-          hint: pickupHint,
-          pinColor: AppColors.foundationGreen500,
-          onTap: () => onEdit(true),
-        ),
-        Row(
+        Column(
           children: [
-            SizedBox(
-              width: _pin,
-              height: 10,
-              child: Center(
-                child: SizedBox(
-                  width: 4,
-                  height: 10,
-                  child: CustomPaint(
-                    painter: RouteDotsPainter(
-                      color: AppColors.foundationGrayscale400,
-                    ),
+            _line(
+              key: const Key('advancePickup'),
+              address: pickup,
+              hint: pickupHint,
+              pinColor: AppColors.foundationGreen500,
+              onTap: () => onEdit(true),
+            ),
+            const SizedBox(height: _gap),
+            _line(
+              key: const Key('advanceDropoff'),
+              address: dropoff,
+              hint: dropoffHint,
+              pinColor: AppColors.foundationRed700,
+              onTap: () => onEdit(false),
+            ),
+          ],
+        ),
+        // Dotted connector from under the pickup pin to over the dropoff pin.
+        Positioned(
+          left: 0,
+          width: _pin,
+          top: _lineHeight / 2 + _pin / 2 + 2,
+          height: _lineHeight + _gap - _pin - 4,
+          child: IgnorePointer(
+            child: Center(
+              child: SizedBox(
+                width: 4,
+                height: double.infinity,
+                child: CustomPaint(
+                  painter: RouteDotsPainter(
+                    color: AppColors.foundationGrayscale400,
                   ),
                 ),
               ),
             ),
-          ],
-        ),
-        _line(
-          key: const Key('advanceDropoff'),
-          address: dropoff,
-          hint: dropoffHint,
-          pinColor: AppColors.foundationRed700,
-          onTap: () => onEdit(false),
+          ),
         ),
       ],
     ),
@@ -598,6 +606,7 @@ class _VehicleStrip extends StatelessWidget {
         key: const Key('advanceVehicleStrip'),
         scrollDirection: Axis.horizontal,
         clipBehavior: Clip.none,
+        padding: const EdgeInsets.only(top: 6, bottom: 14),
         child: IntrinsicHeight(
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -639,76 +648,74 @@ class _VehicleCard extends StatelessWidget {
         : (option.seats != null ? l10n.rideSeats(option.seats!) : null);
     return Opacity(
       opacity: disabled ? 0.5 : 1,
-      child: Material(
-        color: Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: BorderSide(
-            color: selected
-                ? AppColors.primary
-                : AppColors.foundationGrayscale300,
-            width: selected ? 2 : 1,
+      child: GestureDetector(
+        key: Key('advanceOption_${t.vehicleTypeId}'),
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        // Lifts with a soft shadow when picked, as the messenger vehicle cards.
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOut,
+          transform: Matrix4.translationValues(0, selected ? -4 : 0, 0),
+          padding: const EdgeInsets.fromLTRB(10, 12, 10, 10),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: selected
+                  ? AppColors.primary
+                  : AppColors.foundationGrayscale300,
+              width: selected ? 1.5 : 1,
+            ),
+            boxShadow: selected
+                ? [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.18),
+                      blurRadius: 16,
+                      offset: const Offset(0, 8),
+                    ),
+                  ]
+                : null,
           ),
-        ),
-        child: InkWell(
-          key: Key('advanceOption_${t.vehicleTypeId}'),
-          borderRadius: BorderRadius.circular(16),
-          onTap: onTap,
-          child: Stack(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(10, 12, 10, 10),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Center(
-                      child: Image.asset(
-                        vehicleIconFor('${t.vehicleKind} ${t.displayName}'),
-                        width: 80,
-                        height: 50,
-                        fit: BoxFit.contain,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      t.displayName,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTypography.label2.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(
-                      '฿${fmtBaht(option.fare)}',
-                      style: AppTypography.heading5.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: disabled
-                            ? AppColors.textSecondary
-                            : AppColors.primary,
-                      ),
-                    ),
-                    if (note != null)
-                      Text(
-                        note,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppTypography.support1.copyWith(
-                          color: disabled
-                              ? AppColors.foundationOrange700
-                              : AppColors.textSecondary,
-                        ),
-                      ),
-                  ],
+              Center(
+                child: Image.asset(
+                  vehicleIconFor('${t.vehicleKind} ${t.displayName}'),
+                  width: 80,
+                  height: 50,
+                  fit: BoxFit.contain,
                 ),
               ),
-              if (selected)
-                const Positioned(
-                  top: 8,
-                  right: 8,
-                  child: CircleAvatar(
-                    radius: 9,
-                    backgroundColor: AppColors.primary,
-                    child: Icon(Icons.check, size: 12, color: Colors.white),
+              const SizedBox(height: 6),
+              Text(
+                t.displayName,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppTypography.label2.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: selected
+                      ? AppColors.foundationRed700
+                      : AppColors.textPrimary,
+                ),
+              ),
+              Text(
+                '฿${fmtBaht(option.fare)}',
+                style: AppTypography.heading5.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: disabled ? AppColors.textSecondary : AppColors.primary,
+                ),
+              ),
+              if (note != null)
+                Text(
+                  note,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypography.support1.copyWith(
+                    color: disabled
+                        ? AppColors.foundationOrange700
+                        : AppColors.textSecondary,
                   ),
                 ),
             ],

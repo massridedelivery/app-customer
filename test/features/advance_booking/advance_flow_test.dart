@@ -360,6 +360,18 @@ void main() {
   group('confirm redesign', () {
     final l10n = lookupAppLocalizations(const Locale('th'));
 
+    test('short place keeps the whole address after a bare house number', () {
+      expect(
+        advanceShortPlace('ท่าอากาศยานสุวรรณภูมิ, 999 หนองปรือ'),
+        'ท่าอากาศยานสุวรรณภูมิ',
+      );
+      expect(
+        advanceShortPlace('338, ซ. สุขุมวิท 21, คลองเตย'),
+        '338, ซ. สุขุมวิท 21, คลองเตย',
+      );
+      expect(advanceShortPlace('12/3-4, ถ. พระราม 9'), '12/3-4, ถ. พระราม 9');
+    });
+
     test('trip distance and time come from the options body', () {
       final t = AdvanceOption.tripFrom({
         'distance_km': 32.4,

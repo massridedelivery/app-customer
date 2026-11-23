@@ -325,42 +325,38 @@ class _AdvanceConfirmScreenState extends ConsumerState<AdvanceConfirmScreen> {
                       ),
                     ],
                     const SizedBox(height: 12),
-                    AdvanceCard(
-                      padding: EdgeInsets.zero,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(18),
-                        child: Column(
-                          children: [
-                            _IconRow(
-                              key: const Key('advancePaymentRow'),
-                              icon: payment == 'CASH'
-                                  ? Icons.payments_outlined
-                                  : Icons.qr_code_2_rounded,
-                              iconColor: payment == 'CASH'
-                                  ? AppColors.foundationGreen700
-                                  : AppColors.foundationBlue700,
-                              text: payment == 'CASH'
-                                  ? l10n.cashLabel
-                                  : l10n.promptPay,
-                              onTap: () => _pickPayment(config, payment),
-                            ),
-                            const Divider(
-                              height: 1,
-                              color: AppColors.foundationGrayscale300,
-                            ),
-                            _IconRow(
-                              key: const Key('advancePromoRow'),
-                              icon: Icons.local_offer_outlined,
-                              iconColor: AppColors.primary,
-                              text:
-                                  state.promoCode ??
-                                  l10n.advancePromoPlaceholder,
-                              muted: state.promoCode == null,
-                              onTap: () => _editPromo(state.promoCode),
-                            ),
-                          ],
+                    // Payment and promo code side by side (Confirm 5C).
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _PayChip(
+                            key: const Key('advancePaymentRow'),
+                            icon: payment == 'CASH'
+                                ? Icons.payments_outlined
+                                : Icons.qr_code_2_rounded,
+                            iconColor: payment == 'CASH'
+                                ? AppColors.foundationGreen700
+                                : AppColors.foundationBlue700,
+                            text: payment == 'CASH'
+                                ? l10n.cashLabel
+                                : l10n.promptPay,
+                            trailing: Icons.keyboard_arrow_down_rounded,
+                            onTap: () => _pickPayment(config, payment),
+                          ),
                         ),
-                      ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: _PayChip(
+                            key: const Key('advancePromoRow'),
+                            icon: Icons.local_offer_outlined,
+                            iconColor: AppColors.primary,
+                            text: state.promoCode ?? l10n.advancePromoAdd,
+                            textColor: AppColors.primary,
+                            dashed: state.promoCode == null,
+                            onTap: () => _editPromo(state.promoCode),
+                          ),
+                        ),
+                      ],
                     ),
                     if (airport) ...[
                       const SizedBox(height: 16),
@@ -476,48 +472,109 @@ class _MoneyRow extends StatelessWidget {
   );
 }
 
-class _IconRow extends StatelessWidget {
-  const _IconRow({
+/// One of the two chips under the price: how to pay, and the promo code.
+/// [dashed] draws a dashed brand-red outline (nothing entered yet).
+class _PayChip extends StatelessWidget {
+  const _PayChip({
     super.key,
     required this.icon,
     required this.iconColor,
     required this.text,
     required this.onTap,
-    this.muted = false,
+    this.textColor = AppColors.textPrimary,
+    this.trailing,
+    this.dashed = false,
   });
 
   final IconData icon;
   final Color iconColor;
   final String text;
+  final Color textColor;
+  final IconData? trailing;
+  final bool dashed;
   final VoidCallback onTap;
-  final bool muted;
+
+  static const _radius = 14.0;
 
   @override
-  Widget build(BuildContext context) => InkWell(
-    onTap: onTap,
-    child: Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+  Widget build(BuildContext context) {
+    final content = Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       child: Row(
         children: [
-          Icon(icon, size: 22, color: iconColor),
-          const SizedBox(width: 12),
+          Icon(icon, size: 20, color: iconColor),
+          const SizedBox(width: 8),
           Expanded(
             child: Text(
               text,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: AppTypography.body2.copyWith(
-                color: muted ? AppColors.textSecondary : AppColors.textPrimary,
-                fontWeight: muted ? FontWeight.normal : FontWeight.w600,
+                color: textColor,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),
-          const Icon(
-            Icons.chevron_right_rounded,
-            color: AppColors.textSecondary,
-          ),
+          if (trailing != null)
+            Icon(trailing, size: 20, color: AppColors.textSecondary),
         ],
       ),
-    ),
-  );
+    );
+    return Material(
+      color: Colors.white,
+      shape: dashed
+          ? const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(_radius)),
+            )
+          : RoundedRectangleBorder(
+              borderRadius: const BorderRadius.all(Radius.circular(_radius)),
+              side: const BorderSide(color: AppColors.foundationGrayscale300),
+            ),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: dashed
+            ? CustomPaint(
+                painter: _DashedRRectPainter(
+                  color: AppColors.primary,
+                  radius: _radius,
+                ),
+                child: content,
+              )
+            : content,
+      ),
+    );
+  }
+}
+
+/// A dashed rounded-rectangle outline.
+class _DashedRRectPainter extends CustomPainter {
+  const _DashedRRectPainter({required this.color, required this.radius});
+
+  final Color color;
+  final double radius;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5;
+    final rect = (Offset.zero & size).deflate(0.75);
+    final path = Path()
+      ..addRRect(RRect.fromRectAndRadius(rect, Radius.circular(radius)));
+    for (final metric in path.computeMetrics()) {
+      var d = 0.0;
+      while (d < metric.length) {
+        canvas.drawPath(metric.extractPath(d, d + 5), paint);
+        d += 9;
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _DashedRRectPainter old) =>
+      old.color != color || old.radius != radius;
 }
 
 /// A receipt's dashed rule.

@@ -7789,6 +7789,24 @@ abstract class AppLocalizations {
   /// **'Choose a pickup time'**
   String get advanceChooseTime;
 
+  /// No description provided for @advanceHeroSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Book the time now, the car comes on time'**
+  String get advanceHeroSubtitle;
+
+  /// No description provided for @advanceChooseVehicle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a vehicle'**
+  String get advanceChooseVehicle;
+
+  /// No description provided for @advanceFeeNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Includes the ฿{baht} advance booking fee · price locked for this time'**
+  String advanceFeeNote(String baht);
+
   /// No description provided for @advanceNoOptions.
   ///
   /// In en, this message translates to:

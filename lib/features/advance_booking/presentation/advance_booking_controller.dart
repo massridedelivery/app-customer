@@ -16,6 +16,8 @@ class AdvanceBookingState {
     this.promoCode,
     this.flightNumber = '',
     this.submitting = false,
+    this.distanceKm,
+    this.durationMin,
   });
 
   /// The pickup time (UTC); null until the customer picks one.
@@ -26,6 +28,10 @@ class AdvanceBookingState {
   final String? promoCode;
   final String flightNumber;
   final bool submitting;
+
+  /// The trip the options were priced for; null when the server didn't say.
+  final double? distanceKm;
+  final double? durationMin;
 
   AdvanceOption? get selected => options.value
       ?.where((o) => o.type.vehicleTypeId == selectedTypeId)
@@ -39,6 +45,8 @@ class AdvanceBookingState {
     String? Function()? promoCode,
     String? flightNumber,
     bool? submitting,
+    double? Function()? distanceKm,
+    double? Function()? durationMin,
   }) => AdvanceBookingState(
     scheduledAt: scheduledAt ?? this.scheduledAt,
     options: options ?? this.options,
@@ -49,6 +57,8 @@ class AdvanceBookingState {
     promoCode: promoCode != null ? promoCode() : this.promoCode,
     flightNumber: flightNumber ?? this.flightNumber,
     submitting: submitting ?? this.submitting,
+    distanceKm: distanceKm != null ? distanceKm() : this.distanceKm,
+    durationMin: durationMin != null ? durationMin() : this.durationMin,
   );
 }
 
@@ -94,8 +104,11 @@ class AdvanceBookingController extends Notifier<AdvanceBookingState> {
           )
           .firstOrNull;
       final first = options.where((o) => o.bookable).firstOrNull;
+      final trip = AdvanceOption.tripFrom(body);
       state = state.copyWith(
         options: AsyncData(options),
+        distanceKm: () => trip.distanceKm,
+        durationMin: () => trip.durationMin,
         selectedTypeId: () => (keep ?? first)?.type.vehicleTypeId,
       );
     } catch (e, st) {

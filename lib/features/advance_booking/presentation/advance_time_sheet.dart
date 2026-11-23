@@ -210,35 +210,15 @@ class _AdvanceTimeSheetState extends State<AdvanceTimeSheet> {
               const SizedBox(height: 8),
               widget.header!,
             ],
-            const SizedBox(height: 12),
-            Container(
-              key: const Key('advanceRangeLine'),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              decoration: BoxDecoration(
-                color: AppColors.foundationGrayscale200,
-                borderRadius: BorderRadius.circular(12),
+            const SizedBox(height: 4),
+            Text(
+              l10n.advanceRangeLine(
+                fmt.when(_slots.earliest, now: _now),
+                fmt.relativeDay(_slots.latest, now: _now),
               ),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.schedule_rounded,
-                    size: 16,
-                    color: AppColors.textSecondary,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      l10n.advanceRangeLine(
-                        fmt.when(_slots.earliest, now: _now),
-                        fmt.relativeDay(_slots.latest, now: _now),
-                        '${_slots.slotMinutes}',
-                      ),
-                      style: AppTypography.caption3.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ),
-                ],
+              key: const Key('advanceRangeLine'),
+              style: AppTypography.caption3.copyWith(
+                color: AppColors.textSecondary,
               ),
             ),
             const SizedBox(height: 8),

@@ -190,6 +190,21 @@ class AdvanceOption {
     );
   }
 
+  /// The trip of a `GET …/options` body: `distance_km` and `duration_min`,
+  /// each null when missing or not positive.
+  static ({double? distanceKm, double? durationMin}) tripFrom(Object? body) {
+    double? pos(Object? v) {
+      final d = v is num ? v.toDouble() : double.tryParse('${v ?? ''}');
+      return d != null && d > 0 ? d : null;
+    }
+
+    if (body is! Map) return (distanceKm: null, durationMin: null);
+    return (
+      distanceKm: pos(body['distance_km']),
+      durationMin: pos(body['duration_min']),
+    );
+  }
+
   /// The options of a `GET …/options` body (`{options: [...]}`).
   static List<AdvanceOption> listFrom(Object? body) {
     final list = body is Map ? body['options'] : null;

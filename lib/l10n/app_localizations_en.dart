@@ -4254,11 +4254,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get advanceToday => 'Today';
 
   @override
-  String get advanceTomorrow => 'Tomorrow';
-
-  @override
-  String advanceRangeLine(String earliest, String latest, String minutes) {
-    return 'Earliest $earliest · latest $latest · every $minutes min';
+  String advanceRangeLine(String earliest, String latest) {
+    return 'Book from $earliest to $latest';
   }
 
   @override
@@ -4361,13 +4358,32 @@ class AppLocalizationsEn extends AppLocalizations {
   String get advanceFlightHint => 'e.g. TG103';
 
   @override
-  String advanceFlightHelp(String minutes) {
-    return 'Set the time you\'ll be at the pickup, e.g. landing + $minutes min · flights aren\'t tracked';
+  String get advanceFlightInvalid =>
+      'That flight number doesn\'t look right, e.g. TG103 or FD3015';
+
+  @override
+  String advanceFlightWaitNote(String minutes, String usual) {
+    return 'With a flight number the driver waits up to $minutes min (usually $usual)';
   }
 
   @override
-  String get advanceFlightInvalid =>
-      'That flight number doesn\'t look right, e.g. TG103 or FD3015';
+  String get advancePriceLocked => 'This price won\'t change at peak times';
+
+  @override
+  String get advanceBeforeYouBook => 'Before you book';
+
+  @override
+  String get advancePromoPlaceholder => 'Add a promo code';
+
+  @override
+  String advanceTripKm(String km) {
+    return '$km km';
+  }
+
+  @override
+  String advanceTripMinutes(String minutes) {
+    return 'About $minutes min';
+  }
 
   @override
   String advanceConfirmButton(String baht) {

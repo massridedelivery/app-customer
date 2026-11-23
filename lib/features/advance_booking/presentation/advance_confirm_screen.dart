@@ -371,6 +371,8 @@ class _AdvanceConfirmScreenState extends ConsumerState<AdvanceConfirmScreen> {
                         key: const Key('advanceFlightField'),
                         controller: _flight,
                         textCapitalization: TextCapitalization.characters,
+                        // Keep the wait note under the field in view too.
+                        scrollPadding: const EdgeInsets.only(bottom: 80),
                         onChanged: (_) => setState(() => _flightError = null),
                         decoration: InputDecoration(
                           hintText: l10n.advanceFlightHint,

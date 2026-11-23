@@ -244,7 +244,11 @@ class _AdvanceConfirmScreenState extends ConsumerState<AdvanceConfirmScreen> {
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
                 child: AdvanceWhenCard(
                   label: l10n.advancePickupTimeLabel,
-                  when: fmt.when(at, now: now),
+                  month: fmt.monthShort(at),
+                  day: fmt.dayOfMonth(at),
+                  weekday: fmt.weekdayName(at),
+                  time: fmt.clockLong(at),
+                  fullDate: fmt.fullDate(at),
                   changeLabel: l10n.rideChange,
                   onChange: state.submitting
                       ? null
@@ -548,58 +552,135 @@ class _DashPainter extends CustomPainter {
   bool shouldRepaint(covariant _DashPainter oldDelegate) => false;
 }
 
-/// The pickup time on top of the confirm screen, with a way back to the wheel.
+/// The pickup time on top of the confirm screen (Confirm B-1): a tear-off
+/// calendar day, the time large and the full date under it, and a pen to go
+/// back to the time wheel.
 class AdvanceWhenCard extends StatelessWidget {
   const AdvanceWhenCard({
     super.key,
     required this.label,
-    required this.when,
+    required this.month,
+    required this.day,
+    required this.weekday,
+    required this.time,
+    required this.fullDate,
     required this.changeLabel,
     required this.onChange,
   });
 
   final String label;
-  final String when;
+  final String month;
+  final int day;
+  final String weekday;
+  final String time;
+  final String fullDate;
   final String changeLabel;
   final VoidCallback? onChange;
 
   @override
   Widget build(BuildContext context) => AdvanceCard(
-    color: AppColors.softRedBg,
-    borderColor: AppColors.softRedBg,
-    padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
+    padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
     child: Row(
       children: [
-        const Icon(Icons.event_rounded, color: AppColors.primary, size: 28),
-        const SizedBox(width: 12),
+        _CalendarTile(month: month, day: day, weekday: weekday),
+        const SizedBox(width: 14),
         Expanded(
           child: Column(
+            key: const Key('advanceConfirmWhen'),
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 label,
-                style: AppTypography.label2.copyWith(
-                  color: AppColors.secondaryRed,
-                  fontWeight: FontWeight.w600,
+                style: AppTypography.body3.copyWith(
+                  color: AppColors.textSecondary,
                 ),
               ),
               Text(
-                when,
-                key: const Key('advanceConfirmWhen'),
-                style: AppTypography.heading3,
+                time,
+                style: AppTypography.heading2.copyWith(height: 1.2),
+              ),
+              Text(
+                fullDate,
+                style: AppTypography.body3.copyWith(
+                  color: AppColors.textSecondary,
+                ),
               ),
             ],
           ),
         ),
-        TextButton(
-          key: const Key('advanceConfirmChangeTime'),
-          onPressed: onChange,
-          style: TextButton.styleFrom(foregroundColor: AppColors.primary),
+        Material(
+          color: AppColors.foundationGrayscale100,
+          shape: const CircleBorder(),
+          child: IconButton(
+            key: const Key('advanceConfirmChangeTime'),
+            tooltip: changeLabel,
+            onPressed: onChange,
+            icon: const Icon(
+              Icons.edit_outlined,
+              size: 18,
+              color: AppColors.textPrimary,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+/// A tear-off calendar page: red month strip, the day, the weekday.
+class _CalendarTile extends StatelessWidget {
+  const _CalendarTile({
+    required this.month,
+    required this.day,
+    required this.weekday,
+  });
+
+  final String month;
+  final int day;
+  final String weekday;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: 60,
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(12),
+      boxShadow: const [
+        BoxShadow(color: Color(0x24000000), blurRadius: 4, offset: Offset(0, 1)),
+      ],
+    ),
+    clipBehavior: Clip.antiAlias,
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: double.infinity,
+          color: AppColors.primary,
+          padding: const EdgeInsets.symmetric(vertical: 2),
           child: Text(
-            changeLabel,
-            style: AppTypography.label2.copyWith(
-              color: AppColors.primary,
+            month,
+            textAlign: TextAlign.center,
+            style: AppTypography.label3.copyWith(
+              color: Colors.white,
               fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        Text(
+          '$day',
+          style: AppTypography.heading3.copyWith(
+            fontWeight: FontWeight.bold,
+            height: 1.25,
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 4),
+          child: Text(
+            weekday,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: AppTypography.support1.copyWith(
+              color: AppColors.textSecondary,
             ),
           ),
         ),

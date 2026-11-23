@@ -251,6 +251,13 @@ List<String> advancePolicyParts(
   return (address.substring(0, i), address.substring(i + 2));
 }
 
+/// The place name for a one-line route; the whole address when its first
+/// part is only a house number ("338, ซ. สุขุมวิท 21, …").
+String advanceShortPlace(String address) {
+  final name = advanceSplitPlace(address).$1;
+  return RegExp(r'^[0-9/\-\s]+$').hasMatch(name) ? address : name;
+}
+
 /// "32.4 กม. · ประมาณ 35 นาที"; null when neither is known.
 String? advanceTripLine(
   AppLocalizations l10n, {

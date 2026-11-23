@@ -3,6 +3,7 @@ import 'package:customer_app/features/advance_booking/domain/advance_format.dart
 import 'package:customer_app/features/advance_booking/domain/advance_refusal.dart';
 import 'package:customer_app/features/advance_booking/domain/advance_slots.dart';
 import 'package:customer_app/features/advance_booking/presentation/advance_common.dart';
+import 'package:customer_app/features/advance_booking/presentation/advance_confirm_screen.dart';
 import 'package:customer_app/features/advance_booking/presentation/advance_time_sheet.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:dio/dio.dart';
@@ -321,5 +322,27 @@ void main() {
       'ยกเลิกฟรีถึง 05:30 · หลังจากนั้นเสีย ฿60 ถ้ามีคนขับรับงานแล้ว · คนขับรอได้ 10 นาที',
     );
     expect(advancePolicyLine(l10n, waitMinutes: 0), '');
+  });
+
+  testWidgets('confirm time card shows the time and goes back to change it', (
+    tester,
+  ) async {
+    var changed = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: AdvanceWhenCard(
+            label: 'เวลารับ',
+            when: 'อา. 22 พ.ย. · 06:30',
+            changeLabel: 'เปลี่ยน',
+            onChange: () => changed++,
+          ),
+        ),
+      ),
+    );
+    expect(find.text('เวลารับ'), findsOneWidget);
+    expect(find.text('อา. 22 พ.ย. · 06:30'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('advanceConfirmChangeTime')));
+    expect(changed, 1);
   });
 }

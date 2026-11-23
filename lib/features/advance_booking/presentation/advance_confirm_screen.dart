@@ -238,32 +238,23 @@ class _AdvanceConfirmScreenState extends ConsumerState<AdvanceConfirmScreen> {
           );
           return Column(
             children: [
+              // Pinned so the time stays in view while the keyboard is up
+              // for the flight number.
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
+                child: AdvanceWhenCard(
+                  label: l10n.advancePickupTimeLabel,
+                  when: fmt.when(at, now: now),
+                  changeLabel: l10n.rideChange,
+                  onChange: state.submitting
+                      ? null
+                      : () => context.pop(advanceRetimeResult),
+                ),
+              ),
               Expanded(
                 child: ListView(
                   padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
                   children: [
-                    AdvanceCard(
-                      color: AppColors.softRedBg,
-                      borderColor: AppColors.softRedBg,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            l10n.advancePickupTimeLabel,
-                            style: AppTypography.label2.copyWith(
-                              color: AppColors.secondaryRed,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          Text(
-                            fmt.when(at, now: now),
-                            key: const Key('advanceConfirmWhen'),
-                            style: AppTypography.heading2,
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 12),
                     AdvanceCard(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 14,
@@ -456,6 +447,65 @@ class _TapRow extends StatelessWidget {
           ],
         ),
       ),
+    ),
+  );
+}
+
+/// The pickup time on top of the confirm screen, with a way back to the wheel.
+class AdvanceWhenCard extends StatelessWidget {
+  const AdvanceWhenCard({
+    required this.label,
+    required this.when,
+    required this.changeLabel,
+    required this.onChange,
+  });
+
+  final String label;
+  final String when;
+  final String changeLabel;
+  final VoidCallback? onChange;
+
+  @override
+  Widget build(BuildContext context) => AdvanceCard(
+    color: AppColors.softRedBg,
+    borderColor: AppColors.softRedBg,
+    padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
+    child: Row(
+      children: [
+        const Icon(Icons.event_rounded, color: AppColors.primary, size: 28),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: AppTypography.label2.copyWith(
+                  color: AppColors.secondaryRed,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              Text(
+                when,
+                key: const Key('advanceConfirmWhen'),
+                style: AppTypography.heading3,
+              ),
+            ],
+          ),
+        ),
+        TextButton(
+          key: const Key('advanceConfirmChangeTime'),
+          onPressed: onChange,
+          style: TextButton.styleFrom(foregroundColor: AppColors.primary),
+          child: Text(
+            changeLabel,
+            style: AppTypography.label2.copyWith(
+              color: AppColors.primary,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ],
     ),
   );
 }

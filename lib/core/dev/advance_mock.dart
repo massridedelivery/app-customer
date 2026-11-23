@@ -262,6 +262,8 @@ class AdvanceMockInterceptor extends Interceptor {
     final lead = at.difference(DateTime.now().toUtc()).inMinutes;
     return {
       'scheduled_at': at.toIso8601String(),
+      'distance_km': 32.4,
+      'duration_min': 35,
       'options': [
         for (final t in _types)
           {

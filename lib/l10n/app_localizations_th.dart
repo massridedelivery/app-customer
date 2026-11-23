@@ -4199,11 +4199,8 @@ class AppLocalizationsTh extends AppLocalizations {
   String get advanceToday => 'วันนี้';
 
   @override
-  String get advanceTomorrow => 'พรุ่งนี้';
-
-  @override
-  String advanceRangeLine(String earliest, String latest, String minutes) {
-    return 'เร็วสุด $earliest · ไกลสุด $latest · ทุก $minutes นาที';
+  String advanceRangeLine(String earliest, String latest) {
+    return 'จองได้ตั้งแต่ $earliest ถึง $latest';
   }
 
   @override
@@ -4303,13 +4300,32 @@ class AppLocalizationsTh extends AppLocalizations {
   String get advanceFlightHint => 'เช่น TG103';
 
   @override
-  String advanceFlightHelp(String minutes) {
-    return 'ใส่เวลาที่ออกมาถึงจุดรับ เช่น เวลาเครื่องลง + $minutes นาที · ระบบไม่ได้ติดตามเที่ยวบิน';
+  String get advanceFlightInvalid =>
+      'เลขเที่ยวบินไม่ถูกต้อง เช่น TG103 หรือ FD3015';
+
+  @override
+  String advanceFlightWaitNote(String minutes, String usual) {
+    return 'ใส่เที่ยวบิน คนขับรอได้ $minutes นาที (ปกติ $usual)';
   }
 
   @override
-  String get advanceFlightInvalid =>
-      'เลขเที่ยวบินไม่ถูกต้อง เช่น TG103 หรือ FD3015';
+  String get advancePriceLocked => 'ราคานี้ไม่เปลี่ยนตามช่วงเวลาเร่งด่วน';
+
+  @override
+  String get advanceBeforeYouBook => 'ก่อนจอง โปรดทราบ';
+
+  @override
+  String get advancePromoPlaceholder => 'ใส่โค้ดส่วนลด';
+
+  @override
+  String advanceTripKm(String km) {
+    return '$km กม.';
+  }
+
+  @override
+  String advanceTripMinutes(String minutes) {
+    return 'ประมาณ $minutes นาที';
+  }
 
   @override
   String advanceConfirmButton(String baht) {

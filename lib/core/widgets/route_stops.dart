@@ -61,7 +61,7 @@ class RouteStops extends StatelessWidget {
                       child: SizedBox(
                         width: 4,
                         child: CustomPaint(
-                          painter: _DottedLinePainter(
+                          painter: RouteDotsPainter(
                             color: AppColors.foundationGrayscale400,
                           ),
                         ),
@@ -125,8 +125,8 @@ class RouteStops extends StatelessWidget {
 
 /// Vertical connector drawn as round dots (not dashes) — matches the messenger
 /// booking card: a 3px dot with ~4px gaps above/below (≈11px pitch).
-class _DottedLinePainter extends CustomPainter {
-  _DottedLinePainter({required this.color});
+class RouteDotsPainter extends CustomPainter {
+  RouteDotsPainter({required this.color});
 
   final Color color;
 
@@ -150,5 +150,5 @@ class _DottedLinePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _DottedLinePainter old) => old.color != color;
+  bool shouldRepaint(covariant RouteDotsPainter old) => old.color != color;
 }

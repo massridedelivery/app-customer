@@ -221,7 +221,7 @@ class _AdvanceConfirmScreenState extends ConsumerState<AdvanceConfirmScreen> {
               : state.paymentMethod;
           final airport = looksLikeAirport(home.pickupAddress);
           final freeUntil = option.freeCancelUntil;
-          final policy = advancePolicyLine(
+          final policy = advancePolicyParts(
             l10n,
             freeCancelUntil: freeUntil == null
                 ? null
@@ -255,22 +255,13 @@ class _AdvanceConfirmScreenState extends ConsumerState<AdvanceConfirmScreen> {
                 child: ListView(
                   padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
                   children: [
-                    AdvanceCard(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 10,
-                      ),
-                      child: Column(
-                        children: [
-                          AdvanceRouteLine(
-                            text: home.pickupAddress ?? '',
-                            isPickup: true,
-                          ),
-                          AdvanceRouteLine(
-                            text: home.dropoffAddress ?? '',
-                            isPickup: false,
-                          ),
-                        ],
+                    AdvanceRouteSummary(
+                      pickup: home.pickupAddress ?? '',
+                      dropoff: home.dropoffAddress ?? '',
+                      footer: advanceTripLine(
+                        l10n,
+                        distanceKm: state.distanceKm,
+                        durationMin: state.durationMin,
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -288,7 +279,10 @@ class _AdvanceConfirmScreenState extends ConsumerState<AdvanceConfirmScreen> {
                             option.type.fee,
                             style: label,
                           ),
-                          const Divider(height: 20),
+                          const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 12),
+                            child: _DashedLine(),
+                          ),
                           _MoneyRow(
                             l10n.advanceTotalLabel,
                             option.fare,
@@ -296,35 +290,73 @@ class _AdvanceConfirmScreenState extends ConsumerState<AdvanceConfirmScreen> {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.lock_outline_rounded,
+                                size: 14,
+                                color: AppColors.textSecondary,
+                              ),
+                              const SizedBox(width: 6),
+                              Expanded(
+                                child: Text(
+                                  l10n.advancePriceLocked,
+                                  style: AppTypography.caption3.copyWith(
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ],
                       ),
                     ),
                     if (policy.isNotEmpty) ...[
-                      const SizedBox(height: 10),
-                      Text(
-                        policy,
+                      const SizedBox(height: 12),
+                      AdvancePolicyNotice(
                         key: const Key('advancePolicyLine'),
-                        style: AppTypography.caption3.copyWith(
-                          color: AppColors.textSecondary,
-                          height: 1.6,
-                        ),
+                        title: l10n.advanceBeforeYouBook,
+                        lines: policy,
                       ),
                     ],
                     const SizedBox(height: 12),
-                    _TapRow(
-                      key: const Key('advancePaymentRow'),
-                      title: l10n.advancePayWith,
-                      value: payment == 'CASH'
-                          ? l10n.cashLabel
-                          : l10n.promptPay,
-                      onTap: () => _pickPayment(config, payment),
-                    ),
-                    const SizedBox(height: 8),
-                    _TapRow(
-                      key: const Key('advancePromoRow'),
-                      title: l10n.advancePromoCode,
-                      value: state.promoCode ?? l10n.advancePromoAdd,
-                      onTap: () => _editPromo(state.promoCode),
+                    AdvanceCard(
+                      padding: EdgeInsets.zero,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(18),
+                        child: Column(
+                          children: [
+                            _IconRow(
+                              key: const Key('advancePaymentRow'),
+                              icon: payment == 'CASH'
+                                  ? Icons.payments_outlined
+                                  : Icons.qr_code_2_rounded,
+                              iconColor: payment == 'CASH'
+                                  ? AppColors.foundationGreen700
+                                  : AppColors.foundationBlue700,
+                              text: payment == 'CASH'
+                                  ? l10n.cashLabel
+                                  : l10n.promptPay,
+                              onTap: () => _pickPayment(config, payment),
+                            ),
+                            const Divider(
+                              height: 1,
+                              color: AppColors.foundationGrayscale300,
+                            ),
+                            _IconRow(
+                              key: const Key('advancePromoRow'),
+                              icon: Icons.local_offer_outlined,
+                              iconColor: AppColors.primary,
+                              text:
+                                  state.promoCode ??
+                                  l10n.advancePromoPlaceholder,
+                              muted: state.promoCode == null,
+                              onTap: () => _editPromo(state.promoCode),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                     if (airport) ...[
                       const SizedBox(height: 16),
@@ -356,14 +388,41 @@ class _AdvanceConfirmScreenState extends ConsumerState<AdvanceConfirmScreen> {
                         ),
                         cursorColor: AppColors.primary,
                       ),
-                      const SizedBox(height: 6),
-                      Text(
-                        l10n.advanceFlightHelp('${config.airportWaitMinutes}'),
-                        style: AppTypography.caption3.copyWith(
-                          color: AppColors.textSecondary,
-                          height: 1.5,
+                      if (config.airportWaitMinutes > config.waitMinutes) ...[
+                        const SizedBox(height: 8),
+                        Container(
+                          key: const Key('advanceFlightWaitNote'),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.foundationGreen100,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.schedule_rounded,
+                                size: 15,
+                                color: AppColors.foundationGreen800,
+                              ),
+                              const SizedBox(width: 6),
+                              Expanded(
+                                child: Text(
+                                  l10n.advanceFlightWaitNote(
+                                    '${config.airportWaitMinutes}',
+                                    '${config.waitMinutes}',
+                                  ),
+                                  style: AppTypography.caption3.copyWith(
+                                    color: AppColors.foundationGreen800,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
+                      ],
                     ],
                   ],
                 ),
@@ -411,49 +470,86 @@ class _MoneyRow extends StatelessWidget {
   );
 }
 
-class _TapRow extends StatelessWidget {
-  const _TapRow({
+class _IconRow extends StatelessWidget {
+  const _IconRow({
     super.key,
-    required this.title,
-    required this.value,
+    required this.icon,
+    required this.iconColor,
+    required this.text,
     required this.onTap,
+    this.muted = false,
   });
 
-  final String title;
-  final String value;
+  final IconData icon;
+  final Color iconColor;
+  final String text;
   final VoidCallback onTap;
+  final bool muted;
 
   @override
-  Widget build(BuildContext context) => Material(
-    color: AppColors.foundationGrayscale200,
-    borderRadius: BorderRadius.circular(14),
-    child: InkWell(
-      borderRadius: BorderRadius.circular(14),
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-        child: Row(
-          children: [
-            Expanded(child: Text(title, style: AppTypography.body2)),
-            Text(
-              value,
-              style: AppTypography.label2.copyWith(fontWeight: FontWeight.w600),
+  Widget build(BuildContext context) => InkWell(
+    onTap: onTap,
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      child: Row(
+        children: [
+          Icon(icon, size: 22, color: iconColor),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              text,
+              style: AppTypography.body2.copyWith(
+                color: muted ? AppColors.textSecondary : AppColors.textPrimary,
+                fontWeight: muted ? FontWeight.normal : FontWeight.w600,
+              ),
             ),
-            const SizedBox(width: 4),
-            const Icon(
-              Icons.chevron_right_rounded,
-              color: AppColors.textSecondary,
-            ),
-          ],
-        ),
+          ),
+          const Icon(
+            Icons.chevron_right_rounded,
+            color: AppColors.textSecondary,
+          ),
+        ],
       ),
     ),
   );
 }
 
+/// A receipt's dashed rule.
+class _DashedLine extends StatelessWidget {
+  const _DashedLine();
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+    height: 2,
+    width: double.infinity,
+    child: CustomPaint(painter: _DashPainter()),
+  );
+}
+
+class _DashPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = AppColors.foundationGrayscale300
+      ..strokeWidth = size.height;
+    const dash = 6.0, gap = 4.0;
+    for (var x = 0.0; x < size.width; x += dash + gap) {
+      canvas.drawLine(
+        Offset(x, size.height / 2),
+        Offset((x + dash).clamp(0, size.width), size.height / 2),
+        paint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _DashPainter oldDelegate) => false;
+}
+
 /// The pickup time on top of the confirm screen, with a way back to the wheel.
 class AdvanceWhenCard extends StatelessWidget {
   const AdvanceWhenCard({
+    super.key,
     required this.label,
     required this.when,
     required this.changeLabel,

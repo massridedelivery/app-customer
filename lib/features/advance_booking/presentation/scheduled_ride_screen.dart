@@ -189,13 +189,10 @@ class _BodyState extends ConsumerState<_Body> {
                           style: AppTypography.heading3,
                         ),
                       const Divider(height: 20),
-                      AdvanceRouteLine(
-                        text: ride.pickupAddress,
-                        isPickup: true,
-                      ),
-                      AdvanceRouteLine(
-                        text: ride.dropoffAddress,
-                        isPickup: false,
+                      AdvanceRouteSummary(
+                        pickup: ride.pickupAddress,
+                        dropoff: ride.dropoffAddress,
+                        boxed: false,
                       ),
                       if (ride.flightNumber != null) ...[
                         const SizedBox(height: 6),

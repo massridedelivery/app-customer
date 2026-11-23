@@ -113,10 +113,14 @@ void main() {
       );
       // 23:30 UTC on the 21st is 06:30 on Sunday the 22nd in Bangkok.
       final tomorrow = DateTime.utc(2026, 11, 21, 23, 30);
-      expect(fmt.relativeDay(tomorrow, now: now), 'พรุ่งนี้');
+      expect(fmt.relativeDay(tomorrow, now: now), 'อา. 22 พ.ย.');
       expect(fmt.clock(tomorrow), '06:30');
       expect(fmt.day(DateTime.utc(2026, 11, 22)), 'อา. 22 พ.ย.');
-      expect(fmt.dayHeading(tomorrow, now: now), 'พรุ่งนี้ · อา. 22 พ.ย.');
+      expect(fmt.dayHeading(tomorrow, now: now), 'อา. 22 พ.ย.');
+      expect(
+        fmt.dayHeading(DateTime.utc(2026, 11, 21, 10), now: now),
+        'วันนี้ · ส. 21 พ.ย.',
+      );
       expect(
         fmt.when(DateTime.utc(2026, 11, 23, 1), now: now),
         'จ. 23 พ.ย. 08:00',
@@ -295,7 +299,7 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(
-      find.text('เร็วสุด วันนี้ 13:35 · ไกลสุด ส. 28 พ.ย. · ทุก 5 นาที'),
+      find.text('จองได้ตั้งแต่ วันนี้ 13:35 ถึง ส. 28 พ.ย.'),
       findsOneWidget,
     );
     expect(find.byKey(const Key('advanceVehicleLeadNote')), findsOneWidget);
@@ -344,5 +348,78 @@ void main() {
     expect(find.text('อา. 22 พ.ย. · 06:30'), findsOneWidget);
     await tester.tap(find.byKey(const Key('advanceConfirmChangeTime')));
     expect(changed, 1);
+  });
+
+  group('confirm redesign', () {
+    final l10n = lookupAppLocalizations(const Locale('th'));
+
+    test('trip distance and time come from the options body', () {
+      final t = AdvanceOption.tripFrom({
+        'distance_km': 32.4,
+        'duration_min': 35,
+      });
+      expect(t.distanceKm, 32.4);
+      expect(t.durationMin, 35);
+      final none = AdvanceOption.tripFrom({'distance_km': 0});
+      expect(none.distanceKm, isNull);
+      expect(none.durationMin, isNull);
+      expect(
+        advanceTripLine(l10n, distanceKm: 32.4, durationMin: 35),
+        '32 กม. · ประมาณ 35 นาที',
+      );
+      expect(advanceTripLine(l10n, distanceKm: 4.5), '4.5 กม.');
+      expect(advanceTripLine(l10n), isNull);
+    });
+
+    test('an address splits into the place name and the rest', () {
+      expect(advanceSplitPlace('Asok BTS Station, 348 ถ. สุขุมวิท'), (
+        'Asok BTS Station',
+        '348 ถ. สุขุมวิท',
+      ));
+      expect(advanceSplitPlace('338,'), ('338,', ''));
+    });
+
+    test('policy parts are one per rule', () {
+      expect(
+        advancePolicyParts(
+          l10n,
+          freeCancelUntil: 'อ. 24 พ.ย. 10:15',
+          lateCancelFee: '60',
+          waitMinutes: 10,
+        ),
+        [
+          'ยกเลิกฟรีถึง อ. 24 พ.ย. 10:15',
+          'หลังจากนั้นเสีย ฿60 ถ้ามีคนขับรับงานแล้ว',
+          'คนขับรอได้ 10 นาที',
+        ],
+      );
+    });
+
+    testWidgets('route summary and policy notice render', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Column(
+              children: [
+                AdvanceRouteSummary(
+                  pickup: 'ท่าอากาศยานสุวรรณภูมิ, 999 หนองปรือ',
+                  dropoff: 'Asok BTS Station, 348 ถ. สุขุมวิท',
+                  footer: '32 กม. · ประมาณ 35 นาที',
+                ),
+                const AdvancePolicyNotice(
+                  title: 'ก่อนจอง โปรดทราบ',
+                  lines: ['ยกเลิกฟรีถึง อ. 24 พ.ย. 10:15'],
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      expect(find.text('ท่าอากาศยานสุวรรณภูมิ'), findsOneWidget);
+      expect(find.text('999 หนองปรือ'), findsOneWidget);
+      expect(find.byKey(const Key('advanceTripLine')), findsOneWidget);
+      expect(find.text('ก่อนจอง โปรดทราบ'), findsOneWidget);
+      expect(find.text('ยกเลิกฟรีถึง อ. 24 พ.ย. 10:15'), findsOneWidget);
+    });
   });
 }

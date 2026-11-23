@@ -7711,17 +7711,11 @@ abstract class AppLocalizations {
   /// **'Today'**
   String get advanceToday;
 
-  /// No description provided for @advanceTomorrow.
-  ///
-  /// In en, this message translates to:
-  /// **'Tomorrow'**
-  String get advanceTomorrow;
-
   /// No description provided for @advanceRangeLine.
   ///
   /// In en, this message translates to:
-  /// **'Earliest {earliest} · latest {latest} · every {minutes} min'**
-  String advanceRangeLine(String earliest, String latest, String minutes);
+  /// **'Book from {earliest} to {latest}'**
+  String advanceRangeLine(String earliest, String latest);
 
   /// No description provided for @advanceVehicleLeadNote.
   ///
@@ -7879,17 +7873,47 @@ abstract class AppLocalizations {
   /// **'e.g. TG103'**
   String get advanceFlightHint;
 
-  /// No description provided for @advanceFlightHelp.
-  ///
-  /// In en, this message translates to:
-  /// **'Set the time you\'ll be at the pickup, e.g. landing + {minutes} min · flights aren\'t tracked'**
-  String advanceFlightHelp(String minutes);
-
   /// No description provided for @advanceFlightInvalid.
   ///
   /// In en, this message translates to:
   /// **'That flight number doesn\'t look right, e.g. TG103 or FD3015'**
   String get advanceFlightInvalid;
+
+  /// No description provided for @advanceFlightWaitNote.
+  ///
+  /// In en, this message translates to:
+  /// **'With a flight number the driver waits up to {minutes} min (usually {usual})'**
+  String advanceFlightWaitNote(String minutes, String usual);
+
+  /// No description provided for @advancePriceLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'This price won\'t change at peak times'**
+  String get advancePriceLocked;
+
+  /// No description provided for @advanceBeforeYouBook.
+  ///
+  /// In en, this message translates to:
+  /// **'Before you book'**
+  String get advanceBeforeYouBook;
+
+  /// No description provided for @advancePromoPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a promo code'**
+  String get advancePromoPlaceholder;
+
+  /// No description provided for @advanceTripKm.
+  ///
+  /// In en, this message translates to:
+  /// **'{km} km'**
+  String advanceTripKm(String km);
+
+  /// No description provided for @advanceTripMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'About {minutes} min'**
+  String advanceTripMinutes(String minutes);
 
   /// No description provided for @advanceConfirmButton.
   ///

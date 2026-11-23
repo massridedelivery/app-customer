@@ -1,6 +1,9 @@
+import 'package:customer_app/core/constants/app_assets.dart';
 import 'package:customer_app/core/constants/app_colors.dart';
+import 'package:customer_app/core/constants/app_icons.dart';
 import 'package:customer_app/core/constants/app_typography.dart';
 import 'package:customer_app/core/managers/providers.dart';
+import 'package:customer_app/core/widgets/route_stops.dart';
 import 'package:customer_app/features/advance_booking/domain/advance_config.dart';
 import 'package:customer_app/features/advance_booking/domain/advance_format.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
@@ -22,7 +25,6 @@ AdvanceFormat advanceFormatOf(BuildContext context) {
   return AdvanceFormat(
     Localizations.localeOf(context).languageCode,
     today: l10n.advanceToday,
-    tomorrow: l10n.advanceTomorrow,
   );
 }
 
@@ -221,12 +223,235 @@ String advancePolicyLine(
   String? freeCancelUntil,
   String? lateCancelFee,
   int? waitMinutes,
+}) => advancePolicyParts(
+  l10n,
+  freeCancelUntil: freeCancelUntil,
+  lateCancelFee: lateCancelFee,
+  waitMinutes: waitMinutes,
+).join(' · ');
+
+/// The parts of [advancePolicyLine], one per line.
+List<String> advancePolicyParts(
+  AppLocalizations l10n, {
+  String? freeCancelUntil,
+  String? lateCancelFee,
+  int? waitMinutes,
+}) => [
+  if (freeCancelUntil != null)
+    l10n.scheduledRideFreeCancelUntil(freeCancelUntil),
+  if (lateCancelFee != null) l10n.scheduledRideLateFee(lateCancelFee),
+  if (waitMinutes != null && waitMinutes > 0)
+    l10n.scheduledRideWait('$waitMinutes'),
+];
+
+/// "ท่าอากาศยานสุวรรณภูมิ, 999 หนองปรือ …" → the place name and the rest.
+(String, String) advanceSplitPlace(String address) {
+  final i = address.indexOf(', ');
+  if (i <= 0) return (address, '');
+  return (address.substring(0, i), address.substring(i + 2));
+}
+
+/// "32.4 กม. · ประมาณ 35 นาที"; null when neither is known.
+String? advanceTripLine(
+  AppLocalizations l10n, {
+  double? distanceKm,
+  double? durationMin,
 }) {
-  return [
-    if (freeCancelUntil != null)
-      l10n.scheduledRideFreeCancelUntil(freeCancelUntil),
-    if (lateCancelFee != null) l10n.scheduledRideLateFee(lateCancelFee),
-    if (waitMinutes != null && waitMinutes > 0)
-      l10n.scheduledRideWait('$waitMinutes'),
-  ].join(' · ');
+  String km(double v) {
+    final s = v >= 10 ? v.round().toString() : v.toStringAsFixed(1);
+    return s.endsWith('.0') ? s.substring(0, s.length - 2) : s;
+  }
+
+  final parts = [
+    if (distanceKm != null) l10n.advanceTripKm(km(distanceKm)),
+    if (durationMin != null) l10n.advanceTripMinutes('${durationMin.round()}'),
+  ];
+  return parts.isEmpty ? null : parts.join(' · ');
+}
+
+/// Pickup → dropoff with the app's map pins and dotted connector (as
+/// [RouteStops]): the place name in bold and the rest of the address on one
+/// line, with an optional [footer] (distance · time) under a divider.
+class AdvanceRouteSummary extends StatelessWidget {
+  const AdvanceRouteSummary({
+    super.key,
+    required this.pickup,
+    required this.dropoff,
+    this.footer,
+    this.boxed = true,
+  });
+
+  final String pickup;
+  final String dropoff;
+  final String? footer;
+
+  /// False inside another card: just the stops, no border of its own.
+  final bool boxed;
+
+  static const _pin = 20.0;
+
+  Widget _icon(Color color) => AppIcons.asset(
+    AppAssets.icLocationFill,
+    color: color,
+    width: _pin,
+    height: _pin,
+  );
+
+  Widget _stop(String address) {
+    final (name, rest) = advanceSplitPlace(address);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          name,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: AppTypography.label1.copyWith(fontWeight: FontWeight.w600),
+        ),
+        if (rest.isNotEmpty)
+          Text(
+            rest,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: AppTypography.caption3.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final stops = _stops();
+    if (!boxed) return stops;
+    return AdvanceCard(
+      padding: EdgeInsets.fromLTRB(16, 14, 16, footer == null ? 14 : 0),
+      child: stops,
+    );
+  }
+
+  Widget _stops() => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SizedBox(
+              width: _pin,
+              child: Column(
+                children: [
+                  _icon(AppColors.foundationGreen500),
+                  const SizedBox(height: 2),
+                  Expanded(
+                    child: SizedBox(
+                      width: 4,
+                      child: CustomPaint(
+                        painter: RouteDotsPainter(
+                          color: AppColors.foundationGrayscale400,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 14),
+                child: _stop(pickup),
+              ),
+            ),
+          ],
+        ),
+      ),
+      Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _icon(AppColors.foundationRed700),
+          const SizedBox(width: 12),
+          Expanded(child: _stop(dropoff)),
+        ],
+      ),
+      if (footer != null) ...[
+        const SizedBox(height: 12),
+        const Divider(height: 1, color: AppColors.foundationGrayscale300),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          child: Text(
+            footer!,
+            key: const Key('advanceTripLine'),
+            style: AppTypography.caption3.copyWith(
+              color: AppColors.textPrimary,
+            ),
+          ),
+        ),
+      ],
+    ],
+  );
+}
+
+/// The yellow "before you book" box: a title and one line per rule.
+class AdvancePolicyNotice extends StatelessWidget {
+  const AdvancePolicyNotice({
+    super.key,
+    required this.title,
+    required this.lines,
+  });
+
+  final String title;
+  final List<String> lines;
+
+  static const _ink = AppColors.foundationYellow1100;
+
+  @override
+  Widget build(BuildContext context) {
+    if (lines.isEmpty) return const SizedBox.shrink();
+    final text = AppTypography.caption3.copyWith(color: _ink, height: 1.5);
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+      decoration: BoxDecoration(
+        color: AppColors.foundationYellow100,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.foundationYellow300),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.warning_amber_rounded,
+                size: 18,
+                color: AppColors.foundationYellow700,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                title,
+                style: AppTypography.label2.copyWith(
+                  color: _ink,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          for (final line in lines)
+            Padding(
+              padding: const EdgeInsets.only(left: 4, top: 2),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('•  ', style: text),
+                  Expanded(child: Text(line, style: text)),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
 }

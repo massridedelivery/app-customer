@@ -3,17 +3,13 @@ import 'package:customer_app/features/advance_booking/domain/advance_slots.dart'
 /// Pickup times for advance booking, always in Bangkok time:
 /// `อา. 22 พ.ย.`, `06:30`, `วันนี้`.
 class AdvanceFormat {
-  const AdvanceFormat(
-    this.languageCode, {
-    this.today = 'วันนี้',
-    this.tomorrow = 'พรุ่งนี้',
-  });
+  const AdvanceFormat(this.languageCode, {this.today = 'วันนี้'});
 
   final String languageCode;
 
-  /// The words for today / tomorrow in the current language.
+  /// The word for today in the current language. Any other day is a date,
+  /// so "tomorrow" never hides which day it is.
   final String today;
-  final String tomorrow;
 
   bool get _th => languageCode == 'th';
 
@@ -37,7 +33,7 @@ class AdvanceFormat {
     return '$wd ${day.day} $m';
   }
 
-  /// `วันนี้`, `พรุ่งนี้` or `อา. 22 พ.ย.` for the Bangkok day of [utc].
+  /// `วันนี้` or `อา. 22 พ.ย.` for the Bangkok day of [utc].
   String relativeDay(DateTime utc, {required DateTime now}) {
     final d = AdvanceSlots.toBangkok(utc);
     final n = AdvanceSlots.toBangkok(now);
@@ -47,7 +43,6 @@ class AdvanceFormat {
       d.day,
     ).difference(DateTime.utc(n.year, n.month, n.day)).inDays;
     if (diff == 0) return today;
-    if (diff == 1) return tomorrow;
     return day(d);
   }
 
@@ -61,7 +56,7 @@ class AdvanceFormat {
   String when(DateTime utc, {required DateTime now}) =>
       '${relativeDay(utc, now: now)} ${clock(utc)}';
 
-  /// `พรุ่งนี้ · อา. 22 พ.ย.` — a list's day heading (no time).
+  /// `วันนี้ · อา. 22 พ.ย.` or `อา. 22 พ.ย.` — a list's day heading (no time).
   String dayHeading(DateTime utc, {required DateTime now}) {
     final rel = relativeDay(utc, now: now);
     final full = day(AdvanceSlots.toBangkok(utc));

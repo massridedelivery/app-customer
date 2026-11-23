@@ -7,6 +7,7 @@ import 'package:customer_app/features/advance_booking/presentation/advance_booki
 import 'package:customer_app/features/advance_booking/presentation/advance_common.dart';
 import 'package:customer_app/features/advance_booking/presentation/scheduled_ride_screen.dart';
 import 'package:customer_app/features/home/presentation/controllers/home_controller.dart';
+import 'package:customer_app/features/ride_booking/presentation/screens/ride_coupon_screen.dart';
 import 'package:customer_app/features/profile/presentation/widgets/loyalty_format.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -143,47 +144,21 @@ class _AdvanceConfirmScreenState extends ConsumerState<AdvanceConfirmScreen> {
     }
   }
 
-  Future<void> _editPromo(String? current) async {
+  /// The ride coupon screen everyone knows (code field + promo list), with
+  /// codes checked against this ride's fare (the advance fee isn't
+  /// discounted). Back with a code to apply, '' to remove, null to keep.
+  Future<void> _editPromo(String? current, double rideFare) async {
     final l10n = AppLocalizations.of(context)!;
-    final input = TextEditingController(text: current ?? '');
-    final code = await showDialog<String>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: Colors.white,
-        title: Text(l10n.advancePromoCode, style: AppTypography.heading5),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextField(
-              key: const Key('advancePromoField'),
-              controller: input,
-              autofocus: true,
-              textCapitalization: TextCapitalization.characters,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              l10n.advancePromoNoFee,
-              style: AppTypography.body3.copyWith(
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ],
+    final code = await Navigator.of(context).push<String>(
+      MaterialPageRoute(
+        builder: (_) => RideCouponScreen(
+          subtotal: rideFare,
+          appliedCode: current,
+          note: l10n.advancePromoNoFee,
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(''),
-            child: Text(l10n.advancePromoRemove),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(input.text),
-            child: Text(l10n.advancePromoApply),
-          ),
-        ],
       ),
     );
-    input.dispose();
-    if (code != null) {
+    if (code != null && mounted) {
       ref.read(advanceBookingControllerProvider.notifier).setPromoCode(code);
     }
   }
@@ -353,7 +328,7 @@ class _AdvanceConfirmScreenState extends ConsumerState<AdvanceConfirmScreen> {
                             text: state.promoCode ?? l10n.advancePromoAdd,
                             textColor: AppColors.primary,
                             dashed: state.promoCode == null,
-                            onTap: () => _editPromo(state.promoCode),
+                            onTap: () => _editPromo(state.promoCode, option.rideFare),
                           ),
                         ),
                       ],

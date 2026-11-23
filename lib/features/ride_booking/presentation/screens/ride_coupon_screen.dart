@@ -9,6 +9,7 @@ import 'package:customer_app/core/widgets/coupon_card.dart';
 import 'package:customer_app/core/widgets/mass_loading_m.dart';
 import 'package:customer_app/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:customer_app/features/profile/presentation/screens/promo_list_screen.dart';
+import 'package:customer_app/features/ride_booking/domain/usecases/validate_promo_usecase_impl.dart';
 import 'package:customer_app/features/ride_booking/presentation/controllers/booking_controller.dart';
 import 'package:customer_app/features/ride_booking/presentation/providers/discover_promos_provider.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
@@ -16,7 +17,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class RideCouponScreen extends ConsumerStatefulWidget {
-  const RideCouponScreen({super.key});
+  const RideCouponScreen({
+    super.key,
+    this.subtotal,
+    this.appliedCode,
+    this.note,
+  });
+
+  /// Set by a flow that isn't the instant ride booking (a ride booked ahead):
+  /// codes are checked against this fare instead of the booking estimate,
+  /// and the booking controller is left alone.
+  final double? subtotal;
+
+  /// The code already applied in that flow (shown as in use).
+  final String? appliedCode;
+
+  /// A line shown above the code field, e.g. what the code doesn't cover.
+  final String? note;
+
+  bool get _standalone => subtotal != null;
 
   @override
   ConsumerState<RideCouponScreen> createState() => _RideCouponScreenState();
@@ -55,7 +74,8 @@ class _RideCouponScreenState extends ConsumerState<RideCouponScreen> {
     // A code is checked against the fare; with no estimate yet the subtotal
     // would be 0 and the backend answers a bare "invalid request".
     final booking = ref.read(bookingControllerProvider).value;
-    if (booking == null || booking.estimations.isEmpty) {
+    if (!widget._standalone &&
+        (booking == null || booking.estimations.isEmpty)) {
       setState(() => _errorMessage = _l10n.rideCouponNeedRoute);
       return;
     }
@@ -66,9 +86,16 @@ class _RideCouponScreenState extends ConsumerState<RideCouponScreen> {
     });
 
     try {
-      final isValid = await ref
-          .read(bookingControllerProvider.notifier)
-          .validatePromo(code);
+      final bool isValid;
+      if (widget._standalone) {
+        // Throws on a code that can't be used, like validatePromo.
+        await ref.read(validatePromoUseCaseProvider)(code, widget.subtotal!);
+        isValid = true;
+      } else {
+        isValid = await ref
+            .read(bookingControllerProvider.notifier)
+            .validatePromo(code);
+      }
 
       if (isValid) {
         // Pop and return the validated promo code to the booking screen.
@@ -115,8 +142,9 @@ class _RideCouponScreenState extends ConsumerState<RideCouponScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final bookingState = ref.watch(bookingControllerProvider).value;
-    final appliedPromoCode = bookingState?.appliedPromoCode;
+    final appliedPromoCode = widget._standalone
+        ? widget.appliedCode
+        : ref.watch(bookingControllerProvider).value?.appliedPromoCode;
     // `promos/context` is token-scoped: as a guest it answered 401 "missing
     // authorization header" (shown raw) — so guests browse the public promo
     // list instead, narrowed to what applies to a ride.
@@ -150,6 +178,16 @@ class _RideCouponScreenState extends ConsumerState<RideCouponScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+                if (widget.note != null)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                    child: Text(
+                      widget.note!,
+                      style: AppTypography.body3.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ),
                 // SECTION 1: Manual promo code input (shared widget)
                 CouponManualEntry(
                   controller: _manualController,

@@ -4341,6 +4341,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get advanceFeeLabel => 'Advance booking fee';
 
   @override
+  String get advancePriceLockedShort => 'Price locked';
+
+  @override
   String advanceDiscountLabel(String code) {
     return 'Discount $code';
   }

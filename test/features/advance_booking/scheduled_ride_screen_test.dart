@@ -127,7 +127,9 @@ void main() {
     expect(find.text('ค่าบริการจองล่วงหน้า'), findsOneWidget);
     expect(find.text('฿200'), findsOneWidget); // ride fare = 240 − 40
     expect(find.text('฿240'), findsOneWidget);
-    expect(find.text('รวม · พร้อมเพย์'), findsOneWidget);
+    expect(find.text('ค่าโดยสาร'), findsOneWidget);
+    expect(find.text('พร้อมเพย์'), findsOneWidget);
+    expect(find.text('ราคาล็อกแล้ว'), findsOneWidget);
     expect(
       find.textContaining('หลังจากนั้นเสีย ฿60 ถ้ามีคนขับรับงานแล้ว'),
       findsOneWidget,
@@ -136,6 +138,12 @@ void main() {
     expect(find.text('รอคนขับ'), findsOneWidget);
     expect(find.byKey(const Key('scheduledRideReschedule')), findsOneWidget);
     expect(find.byKey(const Key('scheduledRideCancel')), findsOneWidget);
+    // The report link sits below the fold on the test screen.
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('scheduledRideReport')),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(find.byKey(const Key('scheduledRideReport')), findsOneWidget);
     expect(find.byKey(const Key('scheduledRideBanner')), findsNothing);
   });
@@ -181,7 +189,13 @@ void main() {
     expect(find.text('สมชาย'), findsOneWidget);
     expect(find.text('Toyota Altis สีขาว · กข 1234'), findsOneWidget);
     expect(find.text('มีคนขับแล้ว'), findsOneWidget);
-    expect(find.text('Comfort · ค่าโดยสาร'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('scheduledRideFare')),
+        matching: find.text('Comfort'),
+      ),
+      findsOneWidget,
+    );
     expect(find.byKey(const Key('scheduledRideReschedule')), findsNothing);
   });
 

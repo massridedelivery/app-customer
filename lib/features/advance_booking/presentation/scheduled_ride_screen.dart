@@ -178,13 +178,14 @@ class _BodyState extends ConsumerState<_Body> {
                   ),
                   top: Stack(
                     children: [
+                      // Faint, tucked in the bottom corner below the chip.
                       Positioned(
-                        right: -8,
-                        top: -6,
+                        right: -6,
+                        bottom: -24,
                         child: Icon(
                           Icons.calendar_today_rounded,
-                          size: 108,
-                          color: Colors.white.withValues(alpha: 0.12),
+                          size: 96,
+                          color: Colors.white.withValues(alpha: 0.07),
                         ),
                       ),
                       Padding(

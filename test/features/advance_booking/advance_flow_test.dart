@@ -397,7 +397,8 @@ void main() {
         'Asok BTS Station',
         '348 ถ. สุขุมวิท',
       ));
-      expect(advanceSplitPlace('338,'), ('338,', ''));
+      expect(advanceSplitPlace('338,'), ('338', ''));
+      expect(advanceSplitPlace('338, '), ('338', ''));
     });
 
     test('policy parts are one per rule', () {

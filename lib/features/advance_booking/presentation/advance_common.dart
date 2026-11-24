@@ -245,7 +245,9 @@ List<String> advancePolicyParts(
 ];
 
 /// "ท่าอากาศยานสุวรรณภูมิ, 999 หนองปรือ …" → the place name and the rest.
+/// A trailing comma left by the geocoder ("338, ") is dropped first.
 (String, String) advanceSplitPlace(String address) {
+  address = address.replaceFirst(RegExp(r'[,\s]+$'), '');
   final i = address.indexOf(', ');
   if (i <= 0) return (address, '');
   return (address.substring(0, i), address.substring(i + 2));

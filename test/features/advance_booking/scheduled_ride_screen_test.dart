@@ -120,6 +120,9 @@ void main() {
   ) async {
     await _pump(tester, const ScheduledRideScreen(jobId: 'j1'), jobs: [_job()]);
     expect(find.textContaining('07:30'), findsWidgets);
+    expect(find.byKey(const Key('scheduledRideTicket')), findsOneWidget);
+    expect(find.text('07:30 น.'), findsOneWidget);
+    expect(find.text('วันอาทิตย์ที่ 22 พฤศจิกายน 2569'), findsOneWidget);
     expect(find.text('ค่าบริการจองล่วงหน้า'), findsOneWidget);
     expect(find.text('฿200'), findsOneWidget); // ride fare = 240 − 40
     expect(find.text('฿240'), findsOneWidget);

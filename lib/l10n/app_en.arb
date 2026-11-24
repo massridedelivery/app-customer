@@ -1498,6 +1498,7 @@
   "advanceRideFareLabel": "{vehicle} · fare",
   "@advanceRideFareLabel": {"placeholders": {"vehicle": {"type": "String"}}},
   "advanceFeeLabel": "Advance booking fee",
+  "advancePriceLockedShort": "Price locked",
   "advanceDiscountLabel": "Discount {code}",
   "@advanceDiscountLabel": {"placeholders": {"code": {"type": "String"}}},
   "advanceTotalLabel": "Total",

@@ -7837,6 +7837,12 @@ abstract class AppLocalizations {
   /// **'Advance booking fee'**
   String get advanceFeeLabel;
 
+  /// No description provided for @advancePriceLockedShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Price locked'**
+  String get advancePriceLockedShort;
+
   /// No description provided for @advanceDiscountLabel.
   ///
   /// In en, this message translates to:

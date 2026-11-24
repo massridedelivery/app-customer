@@ -4284,6 +4284,9 @@ class AppLocalizationsTh extends AppLocalizations {
   String get advanceFeeLabel => 'ค่าบริการจองล่วงหน้า';
 
   @override
+  String get advancePriceLockedShort => 'ราคาล็อกแล้ว';
+
+  @override
   String advanceDiscountLabel(String code) {
     return 'ส่วนลด $code';
   }

@@ -10,6 +10,7 @@ import 'package:customer_app/features/advance_booking/presentation/advance_commo
 import 'package:customer_app/features/advance_booking/presentation/advance_ticket.dart';
 import 'package:customer_app/features/advance_booking/presentation/advance_time_sheet.dart';
 import 'package:customer_app/features/profile/presentation/widgets/loyalty_format.dart';
+import 'package:customer_app/features/ride_booking/presentation/vehicle_icon.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -306,39 +307,9 @@ class _BodyState extends ConsumerState<_Body> {
                   ),
                 ],
                 const SizedBox(height: 12),
-                AdvanceCard(
-                  child: Column(
-                    children: [
-                      _Money(
-                        ride.vehicleName != null
-                            ? l10n.advanceRideFareLabel(ride.vehicleName!)
-                            : l10n.advanceRideFareOnly,
-                        ride.rideFare,
-                        secondary,
-                      ),
-                      if (ride.advanceFee > 0) ...[
-                        const SizedBox(height: 6),
-                        _Money(
-                          l10n.advanceFeeLabel,
-                          ride.advanceFee,
-                          secondary,
-                        ),
-                      ],
-                      const Divider(height: 18),
-                      _Money(
-                        payment == null
-                            ? l10n.advanceTotalLabel
-                            : '${l10n.advanceTotalLabel} · $payment',
-                        ride.fare,
-                        AppTypography.label1.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                _FareCard(ride: ride, payment: payment),
                 if (freeNow || policyRest.isNotEmpty) ...[
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 10),
                   _PolicyBox(
                     free: freeNow
                         ? l10n.scheduledRideFreeCancelUntil(
@@ -738,12 +709,12 @@ class _PolicyBox extends StatelessWidget {
     return Container(
       key: const Key('scheduledRidePolicy'),
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+      padding: const EdgeInsets.fromLTRB(12, 9, 12, 9),
       decoration: BoxDecoration(
         color: isFree
             ? AppColors.semanticSuccessBgLow
             : AppColors.foundationGrayscale100,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -751,9 +722,9 @@ class _PolicyBox extends StatelessWidget {
           Icon(
             isFree ? Icons.verified_user_outlined : Icons.info_outline_rounded,
             color: fg,
-            size: 22,
+            size: 16,
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 8),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -762,25 +733,159 @@ class _PolicyBox extends StatelessWidget {
                   Text(
                     free!,
                     key: const Key('scheduledRideFreeCancel'),
-                    style: AppTypography.label1.copyWith(
+                    style: AppTypography.caption4.copyWith(
                       color: fg,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 if (rest.isNotEmpty)
                   Padding(
-                    padding: EdgeInsets.only(top: isFree ? 2 : 0),
+                    padding: EdgeInsets.only(top: isFree ? 1 : 0),
                     child: Text(
                       rest,
-                      style: AppTypography.caption3.copyWith(
-                        color: isFree ? AppColors.textPrimary : fg,
-                        height: 1.6,
+                      style: AppTypography.caption5.copyWith(
+                        color: AppColors.textSecondary,
+                        height: 1.5,
                       ),
                     ),
                   ),
               ],
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Fare variant F5: the booked vehicle with the total, the fare and the
+/// advance fee in a grey box, then how it is paid.
+class _FareCard extends StatelessWidget {
+  const _FareCard({required this.ride, required this.payment});
+
+  final ScheduledRide ride;
+
+  /// "พร้อมเพย์" / "เงินสด"; null when the job doesn't say.
+  final String? payment;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final small = AppTypography.caption4.copyWith(
+      color: AppColors.textSecondary,
+    );
+    final cash = ride.paymentMethod == 'CASH';
+    return AdvanceCard(
+      key: const Key('scheduledRideFare'),
+      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 64,
+                height: 44,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: AppColors.foundationGrayscale100,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Image.asset(
+                  vehicleIconFor(ride.vehicleName ?? ''),
+                  width: 56,
+                  height: 36,
+                  fit: BoxFit.contain,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      ride.vehicleName ?? l10n.advanceTotalLabel,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.label1.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.lock_outline_rounded,
+                          size: 12,
+                          color: AppColors.textSecondary,
+                        ),
+                        const SizedBox(width: 3),
+                        Text(l10n.advancePriceLockedShort, style: small),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              Text(
+                '฿${fmtBaht(ride.fare)}',
+                key: const Key('scheduledRideTotal'),
+                style: AppTypography.heading4.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+            decoration: BoxDecoration(
+              color: AppColors.foundationGrayscale100,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              children: [
+                _Money(l10n.advanceRideFareOnly, ride.rideFare, small),
+                if (ride.advanceFee > 0) ...[
+                  const SizedBox(height: 4),
+                  _Money(l10n.advanceFeeLabel, ride.advanceFee, small),
+                ],
+              ],
+            ),
+          ),
+          if (payment != null) ...[
+            const SizedBox(height: 10),
+            Row(
+              key: const Key('scheduledRidePayment'),
+              children: [
+                Container(
+                  width: 28,
+                  height: 28,
+                  decoration: BoxDecoration(
+                    color:
+                        (cash
+                                ? AppColors.foundationGreen700
+                                : AppColors.foundationBlue700)
+                            .withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    cash ? Icons.payments_outlined : Icons.qr_code_2_rounded,
+                    size: 16,
+                    color: cash
+                        ? AppColors.foundationGreen700
+                        : AppColors.foundationBlue700,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  payment!,
+                  style: AppTypography.label2.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );

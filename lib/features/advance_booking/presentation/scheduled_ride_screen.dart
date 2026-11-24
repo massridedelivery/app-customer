@@ -7,6 +7,7 @@ import 'package:customer_app/features/advance_booking/domain/advance_config.dart
 import 'package:customer_app/features/advance_booking/domain/advance_refusal.dart';
 import 'package:customer_app/features/advance_booking/domain/scheduled_ride.dart';
 import 'package:customer_app/features/advance_booking/presentation/advance_common.dart';
+import 'package:customer_app/features/advance_booking/presentation/advance_ticket.dart';
 import 'package:customer_app/features/advance_booking/presentation/advance_time_sheet.dart';
 import 'package:customer_app/features/profile/presentation/widgets/loyalty_format.dart';
 import 'package:customer_app/l10n/app_localizations.dart';
@@ -165,43 +166,91 @@ class _BodyState extends ConsumerState<_Body> {
                   ),
                   const SizedBox(height: 12),
                 ],
-                AdvanceCard(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              l10n.advancePickupTimeLabel,
-                              style: AppTypography.caption3.copyWith(
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                          ),
-                          AdvanceStatusChip(ride: ride),
-                        ],
-                      ),
-                      if (at != null)
-                        Text(
-                          '${fmt.dayHeading(at, now: now)} ${fmt.clock(at)}',
-                          key: const Key('scheduledRidePickupAt'),
-                          style: AppTypography.heading3,
-                        ),
-                      const Divider(height: 20),
-                      AdvanceRouteSummary(
-                        pickup: ride.pickupAddress,
-                        dropoff: ride.dropoffAddress,
-                        boxed: false,
-                      ),
-                      if (ride.flightNumber != null) ...[
-                        const SizedBox(height: 6),
-                        Text(
-                          l10n.scheduledRideFlight(ride.flightNumber!),
-                          style: secondary,
-                        ),
-                      ],
+                AdvanceTicket(
+                  key: const Key('scheduledRideTicket'),
+                  topGradient: const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      AppColors.foundationRed700,
+                      AppColors.foundationRed900,
                     ],
+                  ),
+                  top: Stack(
+                    children: [
+                      Positioned(
+                        right: -8,
+                        top: -6,
+                        child: Icon(
+                          Icons.calendar_today_rounded,
+                          size: 108,
+                          color: Colors.white.withValues(alpha: 0.12),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(18, 14, 18, 18),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    l10n.advancePickupTimeLabel,
+                                    style: AppTypography.caption3.copyWith(
+                                      color: Colors.white.withValues(
+                                        alpha: 0.85,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                AdvanceStatusChip(ride: ride, onDark: true),
+                              ],
+                            ),
+                            if (at != null) ...[
+                              Text(
+                                fmt.clockLong(at),
+                                key: const Key('scheduledRidePickupAt'),
+                                style: AppTypography.heading1.copyWith(
+                                  color: Colors.white,
+                                  fontSize: 34,
+                                  fontWeight: FontWeight.w800,
+                                  height: 1.2,
+                                ),
+                              ),
+                              Text(
+                                fmt.fullDate(at),
+                                key: const Key('scheduledRidePickupDate'),
+                                style: AppTypography.label2.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  bottom: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 18, 16, 14),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        AdvanceRouteSummary(
+                          pickup: ride.pickupAddress,
+                          dropoff: ride.dropoffAddress,
+                          boxed: false,
+                        ),
+                        if (ride.flightNumber != null) ...[
+                          const SizedBox(height: 6),
+                          Text(
+                            l10n.scheduledRideFlight(ride.flightNumber!),
+                            style: secondary,
+                          ),
+                        ],
+                      ],
+                    ),
                   ),
                 ),
                 if (ride.hasDriver && ride.driverName != null) ...[
@@ -625,9 +674,12 @@ class _BodyState extends ConsumerState<_Body> {
 
 /// "รอคนขับ" (amber) / "กำลังหาคนขับ" / "มีคนขับแล้ว" (green).
 class AdvanceStatusChip extends StatelessWidget {
-  const AdvanceStatusChip({super.key, required this.ride});
+  const AdvanceStatusChip({super.key, required this.ride, this.onDark = false});
 
   final ScheduledRide ride;
+
+  /// On the red ticket stub: a see-through white chip with white text.
+  final bool onDark;
 
   @override
   Widget build(BuildContext context) {
@@ -652,13 +704,13 @@ class AdvanceStatusChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
-        color: bg,
+        color: onDark ? Colors.white.withValues(alpha: 0.18) : bg,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
         text,
         style: AppTypography.caption4.copyWith(
-          color: fg,
+          color: onDark ? Colors.white : fg,
           fontWeight: FontWeight.w600,
         ),
       ),

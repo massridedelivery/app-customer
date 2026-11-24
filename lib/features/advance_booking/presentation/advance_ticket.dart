@@ -1,8 +1,8 @@
 import 'package:customer_app/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 
-/// A ticket: a [top] stub and a [bottom] part, torn apart by a row of
-/// perforation dots with a real half-round bite cut out of each side.
+/// A ticket: a [top] stub and a [bottom] part, with a real half-round bite
+/// cut out of each side where they meet.
 /// The bites are cut from the shape itself, so no edge line runs across them.
 class AdvanceTicket extends StatelessWidget {
   const AdvanceTicket({
@@ -55,10 +55,7 @@ class AdvanceTicket extends StatelessWidget {
           ),
           child: ClipPath(
             clipper: const ShapeBorderClipper(shape: bottomShape),
-            child: CustomPaint(
-              foregroundPainter: const _Perforation(),
-              child: bottom,
-            ),
+            child: bottom,
           ),
         ),
       ],
@@ -146,23 +143,4 @@ class _TicketHalf extends ShapeBorder {
 
   @override
   ShapeBorder scale(double t) => this;
-}
-
-/// The row of perforation dots along the tear line.
-class _Perforation extends CustomPainter {
-  const _Perforation();
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final dot = Paint()..color = AppColors.foundationGrayscale300;
-    const gap = 10.0;
-    const start = AdvanceTicket.notch + 8;
-    final end = size.width - start;
-    for (var x = start; x <= end; x += gap) {
-      canvas.drawCircle(Offset(x, 3), 1.7, dot);
-    }
-  }
-
-  @override
-  bool shouldRepaint(_Perforation oldDelegate) => false;
 }

@@ -121,14 +121,24 @@ class _BodyState extends ConsumerState<_Body> {
         : (ride.phase == 'DISPATCHING' && !ride.hasDriver
               ? l10n.advanceSearchingBanner
               : null);
-    final policy = advancePolicyLine(
-      l10n,
-      freeCancelUntil: freeUntil == null ? null : fmt.when(freeUntil, now: now),
-      lateCancelFee: ride.lateCancelFee > 0
-          ? fmtBaht(ride.lateCancelFee)
-          : null,
-      waitMinutes: ride.waitMinutes,
-    );
+    // Still free to cancel: the free-until time leads in green, the rest
+    // follows. Otherwise every rule is one grey line.
+    final freeNow = freeUntil != null && freeUntil.isAfter(now.toUtc());
+    final policyRest = [
+      ...advancePolicyParts(
+        l10n,
+        freeCancelUntil: freeUntil == null || freeNow
+            ? null
+            : fmt.when(freeUntil, now: now),
+        lateCancelFee: ride.lateCancelFee > 0
+            ? fmtBaht(ride.lateCancelFee)
+            : null,
+        waitMinutes: ride.waitMinutes,
+      ),
+      // How many moves are left, once the backend has said.
+      if (_canReschedule && _reschedulesLeft != null)
+        l10n.advanceReschedulesLeft('${_reschedulesLeft!}'),
+    ].join(' · ');
     final payment = switch (ride.paymentMethod) {
       'CASH' => l10n.cashLabel,
       'PROMPTPAY' => l10n.promptPay,
@@ -327,26 +337,15 @@ class _BodyState extends ConsumerState<_Body> {
                     ],
                   ),
                 ),
-                if (policy.isNotEmpty) ...[
-                  const SizedBox(height: 10),
-                  Text(
-                    policy,
-                    key: const Key('scheduledRidePolicy'),
-                    style: AppTypography.caption3.copyWith(
-                      color: AppColors.textSecondary,
-                      height: 1.6,
-                    ),
-                  ),
-                ],
-                // How many moves are left, once the backend has said.
-                if (_canReschedule && _reschedulesLeft != null) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    l10n.advanceReschedulesLeft('${_reschedulesLeft!}'),
-                    key: const Key('scheduledRideMovesLeft'),
-                    style: AppTypography.caption3.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
+                if (freeNow || policyRest.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  _PolicyBox(
+                    free: freeNow
+                        ? l10n.scheduledRideFreeCancelUntil(
+                            fmt.when(freeUntil, now: now),
+                          )
+                        : null,
+                    rest: policyRest,
                   ),
                 ],
                 const SizedBox(height: 8),
@@ -714,6 +713,75 @@ class AdvanceStatusChip extends StatelessWidget {
           color: onDark ? Colors.white : fg,
           fontWeight: FontWeight.w600,
         ),
+      ),
+    );
+  }
+}
+
+/// The cancel rules. While cancelling is still free: a green box led by
+/// "ยกเลิกฟรีถึง …"; after that, a plain grey box with the rules.
+class _PolicyBox extends StatelessWidget {
+  const _PolicyBox({required this.free, required this.rest});
+
+  /// "ยกเลิกฟรีถึง …" while that time is still ahead.
+  final String? free;
+
+  /// The other rules on one line.
+  final String rest;
+
+  @override
+  Widget build(BuildContext context) {
+    final isFree = free != null;
+    final fg = isFree
+        ? AppColors.semanticSuccessFgHigh
+        : AppColors.textSecondary;
+    return Container(
+      key: const Key('scheduledRidePolicy'),
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+      decoration: BoxDecoration(
+        color: isFree
+            ? AppColors.semanticSuccessBgLow
+            : AppColors.foundationGrayscale100,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            isFree ? Icons.verified_user_outlined : Icons.info_outline_rounded,
+            color: fg,
+            size: 22,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (isFree)
+                  Text(
+                    free!,
+                    key: const Key('scheduledRideFreeCancel'),
+                    style: AppTypography.label1.copyWith(
+                      color: fg,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                if (rest.isNotEmpty)
+                  Padding(
+                    padding: EdgeInsets.only(top: isFree ? 2 : 0),
+                    child: Text(
+                      rest,
+                      style: AppTypography.caption3.copyWith(
+                        color: isFree ? AppColors.textPrimary : fg,
+                        height: 1.6,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

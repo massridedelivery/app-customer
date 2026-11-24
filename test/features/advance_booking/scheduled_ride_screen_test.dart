@@ -48,11 +48,12 @@ Map<String, dynamic> _job({
   String? driverId,
   String? phase,
   int? reschedulesLeft,
+  String scheduledAt = '2026-11-22T00:30:00Z',
 }) => {
   'id': id,
   'status': 'PENDING',
   // 07:30 in Bangkok on Sunday 22 Nov.
-  'scheduled_at': '2026-11-22T00:30:00Z',
+  'scheduled_at': scheduledAt,
   'pickup_address': 'บ้าน',
   'dropoff_address': 'สนามบินสุวรรณภูมิ',
   'fare': 240,
@@ -137,6 +138,26 @@ void main() {
     expect(find.byKey(const Key('scheduledRideCancel')), findsOneWidget);
     expect(find.byKey(const Key('scheduledRideReport')), findsOneWidget);
     expect(find.byKey(const Key('scheduledRideBanner')), findsNothing);
+  });
+
+  testWidgets('still free to cancel: the green box leads with it', (
+    tester,
+  ) async {
+    final at = DateTime.now().toUtc().add(const Duration(days: 2));
+    await _pump(
+      tester,
+      const ScheduledRideScreen(jobId: 'j1'),
+      jobs: [_job(scheduledAt: at.toIso8601String(), reschedulesLeft: 3)],
+    );
+    expect(find.byKey(const Key('scheduledRideFreeCancel')), findsOneWidget);
+    expect(find.textContaining('ยกเลิกฟรีถึง'), findsOneWidget);
+    expect(
+      find.text(
+        'หลังจากนั้นเสีย ฿60 ถ้ามีคนขับรับงานแล้ว · คนขับรอได้ 10 นาที · '
+        'เลื่อนได้อีก 3 ครั้ง',
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('driver changed push: the banner', (tester) async {
